@@ -9,7 +9,6 @@ Table of contents
   * [Installation](#installation)
   * [Hardware](#hardware)
   * [Features](#features)
-  * [Files](#files)
  
   
 Overview
@@ -50,7 +49,7 @@ Installation
 ------------------------------
 
 0. Install the C libraries of bcm2835, see: http://www.airspayce.com/mikem/bcm2835/ 
-1. git clone https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
+1. curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.0.tar.gz | tar xz
 2. cd ER_OLEDM1_CH1115_RPI
 3. Make 
 4. sudo ./bin/test
@@ -62,18 +61,20 @@ Hardware
 
 CH1115 is a single-chip CMOS OLED driver with controller for organic light emitting diode dot-matrix graphic display system. CH1115 consists of 128 segments, 64 commons that can support a maximum display resolution of 128 X 64. It is designed for Common Cathode type OLED panel. ER-OLEDM1.09-1W-SPI is a White 1.09" OLED Display Panel with Breakout Board. This module is a combination of the two.(controller and OLED)
 
-| pin no| GPIO | pin name | pin desc | 
-|---|---|---| ---|
+For SWSPI pick any GPIO you want for 5 control lines
+
+| pin no| GPIO HWSPI | pin name | pin desc | 
+|---|---|---| ---| 
 | 1 | n/a |Gnd | Ground |
 | 2 | n/a |VCC | voltage supply |
-| 3 |  |SCL | Serial clock input |
-| 4 | SDA | Serial data input |
-| 5 | RES | This pin is reset signal input. When the pin is low, initialization of the chip is executed. |
-| 6 | DC | This pin is Data or Command control pin. |
-| 7 | CS | This pin is the chip select input. The chip is enabled for MCU comms only when CS is pulled low. |
+| 3 | SPISCLK GPIO 11 |SCL | Serial clock input |
+| 4 | SPIMOSI GPIO 10 |SDA | Serial data input |
+| 5 | Any you want | RES | This pin is reset signal input.  |
+| 6 | Any you want | DC | This pin is Data or Command control pin. |
+| 7 | SPICEO GPIO 8 |  CS | This pin is the chip select input.  |
 
 
-#![ wiring ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/blob/main/extras/image/wiring.png)
+![ wiring ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/blob/main/extras/image/wiring.png)
 
 Features
 -------------------------
@@ -83,12 +84,7 @@ Features
 Hardware and software SPI. Two different class constructors. 
 User can pick the relevant constructor, see examples files. 
 Hardware SPI is recommended, far faster and more reliable 
-but Software SPI allows for more flexible GPIO selection 
-and easier to port to other MCU's. 
-When running Software SPI it may be necessary 
-to change the ERMCH1115_HIGHFREQ_DELAY define
-It is a microsecond delay by default it is at 0. 
-
+but Software SPI allows for more flexible GPIO selection.
 
 *buffers*
 
