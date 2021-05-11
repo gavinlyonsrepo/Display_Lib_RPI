@@ -1,6 +1,6 @@
 // Example file name : main.cpp
 // Description:
-// Test file for ER_OLEDM1_CH1115 library, showing use of TEXT  mode .
+// Test file for ER_OLEDM1_CH1115 library, showing use of TEXT mode & graphics.
 // URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 // *****************************
 // NOTES :
@@ -33,6 +33,7 @@ void myLoop(void);
 void DisplayText(MultiBuffer* );
 void DisplayGraphics(MultiBuffer* );
 
+
 // ======================= Main ===================
 int main(int argc, char **argv)
 {
@@ -52,14 +53,16 @@ int main(int argc, char **argv)
 }
 // ======================= End of main  ===================
 
+
 // ===================== Function Space =====================
+
 void setup() {
 	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
 	myOLED.OLEDFillScreen(0x8F, 0); //splash screen bars
 	bcm2835_delay(3000);
 }
 
-// ************** MAIN LOOP ***********
+// ************** myLoop ***********
 void myLoop()
 {
 
@@ -76,7 +79,7 @@ void myLoop()
 	DisplayText(&window);
 	DisplayGraphics(&window);
 }
-// ************** END OF MAIN ***********
+
 
 // A series of tests to display the text mode
 // Test 1 Font size 3 float
@@ -85,7 +88,6 @@ void myLoop()
 // Test 4 draw a single character font size 4
 // Test 5 print ASCII  font 0-127
 // Test 6 print ASCII font 128-255,
-
 void DisplayText(MultiBuffer* targetBuffer)
 {
 

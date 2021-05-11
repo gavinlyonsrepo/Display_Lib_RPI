@@ -1,8 +1,9 @@
 
 // Example file name : main.cpp
 // Description:
-// Test file for ER_OLEDM1_CH1115 library, showing use of mulitple buffers.  In this case: two, divided vertically.
-// The user can also divide horizontally and create as many buffers as they want.
+// Test file for ER_OLEDM1_CH1115 library, showing use of mulitple buffers.  
+// In this case: two, divided horizontally.
+// The user can also divide vertically. and create as many buffers as they want.
 // URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 // *****************************
 // NOTES :
@@ -63,7 +64,6 @@ int main(int argc, char **argv)
 // ======================= End of main  ===================
 
 
-// ************* SETUP ***************
 void setup()
 {
 	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
@@ -71,7 +71,6 @@ void setup()
 	bcm2835_delay(2400);
 }
 
-// *********** MAIN LOOP ******************
 void myLoop() {
 	
 
@@ -107,7 +106,7 @@ void myLoop() {
 	}
 
 }
-// *********** END OF MAIN ***********
+
 
 // Function to display left hand side buffer
 void display_Left(MultiBuffer* targetbuffer, long currentFramerate, int count)

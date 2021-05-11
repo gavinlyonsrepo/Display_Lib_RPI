@@ -1,9 +1,8 @@
 
 // Example file name : main.cpp
 // Description:
-// Test file for ER_OLEDM1_CH1115 library, showing use of mulitple buffers.  
-// In this case: two, divided vertically.
-// The user can also divide horizontally and create as many buffers as they want.
+// Test file for ER_OLEDM1_CH1115 library, showing use of mulitple buffers. 
+// in SOFTWARE SPI 
 // URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 // *****************************
 // NOTES :
@@ -63,7 +62,7 @@ int main(int argc, char **argv)
 	myOLED.OLEDSPIoff();
 	myOLED.OLEDPowerDown();
 
-	bcm2835_close(); // Close the library, deallocating any allocated memory and closing /dev/mem
+	bcm2835_close(); // Close library,deallocating any allocated mem
 	printf("OLED End\r\n");
 	return 0;
 }
@@ -78,7 +77,7 @@ void setup()
 	bcm2835_delay(2400);
 }
 
-// *********** MAIN LOOP ******************
+// *********** myLoop ******************
 void myLoop() {
 	
 
@@ -114,7 +113,7 @@ void myLoop() {
 	}
 
 }
-// *********** END OF MAIN ***********
+
 
 // Function to display left hand side buffer
 void display_Left(MultiBuffer* targetbuffer, long currentFramerate, int count)
@@ -178,3 +177,5 @@ static uint64_t counter( void )
   clock_gettime( CLOCK_MONOTONIC, &now );
   return  ((uint64_t)now.tv_sec * 1000000000U) + (uint64_t)now.tv_nsec; 
 }
+
+// *********** EOF ***********

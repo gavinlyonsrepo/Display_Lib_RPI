@@ -67,7 +67,7 @@ void setup()
   bcm2835_delay(1500);
 }
 
-// *********** MAIN LOOP ******************
+// *********** myLoop ******************
 void myLoop()
 {
   // Define a full screen buffer and struct
@@ -187,4 +187,4 @@ void myLoop()
   bcm2835_delay(3000);
 }
 
-// *********** END OF MAIN ***********
+// *********** EOF ***********

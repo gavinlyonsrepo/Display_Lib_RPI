@@ -5,11 +5,10 @@
 // URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 // *****************************
 // NOTES :
-// (1) In the <ER_OLEDM1_CH1115.h> USER BUFFER OPTION SECTION, setting will change depending on which method you use,
-//test 2 3 & 4 are commented out currently, see  USER OPTION SELECTION below.
-// test (1) OLED bitmap method, ANY setting on , buffer must BE in PROGMEM
-// test (2) OLED buffer method , MULTI_BUFFER or SINGLE_BUFFER setting on , buffer must NOT be in PROGMEM
-// test (3)  multibuffer method , MULTI_BUFFER setting on.  buffer must NOT be in PROGMEM
+// (1) In the <ER_OLEDM1_CH1115.h> USER BUFFER OPTION SECTION make appropriate change.
+// test (1) OLED bitmap method, ANY setting on , 
+// test (2) OLED buffer method , MULTI_BUFFER or SINGLE_BUFFER setting on , 
+// test (3)  multibuffer method , MULTI_BUFFER setting on.  
 // ******************************
 
 #include <bcm2835.h>
@@ -53,9 +52,8 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-// 'myimage', 128x64px "g lyons" + shapes , SW used to make https://javl.github.io/image2cpp/ vertical addressing
-// OG image at project URL, used in test file to test image function can be removed/modded in an actual program
-
+// ' 128x64px "g lyons" + shapes , 
+// SW used to make https://javl.github.io/image2cpp/ vertical addressing
 //const uint8_t fullscreenBitmap[] = {
 const uint8_t  fullscreenBitmap[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0,
@@ -149,8 +147,8 @@ void myLoop()
 
 void Test1(void)
 {
-  // Method (1) OLED bitmap method, Any buffer  setting on 
-  //  x ,y,w,h, bitmap
+	// Method (1) OLED bitmap method, Any buffer  setting on 
+	//  x ,y,w,h, bitmap
   	myOLED.OLEDBitmap(0, 0 , myOLEDwidth, myOLEDheight, fullscreenBitmap);
 	bcm2835_delay(5000);
 	myOLED.OLEDFillScreen(0x00, 0); 

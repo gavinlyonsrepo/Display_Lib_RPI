@@ -3,7 +3,7 @@
 // Description:
 // Test file for ER_OLEDM1_CH1115 library, showing use of "No buffer" mode .
 // in this mode the OLED can be used as a relatively light weight character OLED
-// 8 rows and 216 characters, 7by8 ,font size (164/7 * 64/8 ),
+// 8 rows and 144 characters, 7by8 ,font size (128/7 * 64/8 ),
 // you can also write bitmaps directly to screen in this mode.
 // URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 // *****************************
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     bcm2835_delay(2000);
   	myOLED.OLEDSPIoff();
 	myOLED.OLEDPowerDown();
-	bcm2835_close(); // Close the library, deallocating any allocated memory and closing /dev/mem
+	bcm2835_close(); // Close the library
 	printf("OLED End\r\n");
 	return 0;
 }
@@ -61,16 +61,12 @@ int main(int argc, char **argv)
 
 // ============ Function space ==============
 
-// ************* SETUP ***************
 void setup()
 {
   myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
   myOLED.OLEDFillScreen(0x33, 0); // Fill screen with effect
   bcm2835_delay(2000);
 }
-
-
-// ************** END OF MAIN ***********
 
 //Function to run a group of tests
 // Test 0 clear screen
@@ -120,7 +116,6 @@ void Tests()
   myOLED.OLEDFillScreen(0x00, 0); // Clear the screen
 
   // Test 4 print entire font with character function
-  // NOTE For characters 32-127 for charcters comment in UC_FONT_MOD_ONE  n font file ER_OLEDM1_CH1115_font.h.
   myOLED.OLEDNoBufferGotoXY(0, 0);
   uint8_t row = 1;
   char offset = 0;
@@ -134,9 +129,6 @@ void Tests()
   myOLED.OLEDFillScreen(0x00, 0); // Clear the screen
 
   // TEST 5 print ASCII font 128-255 with character function
-  // For characters after 'z{|}' in ASCII table user can comment in UC_FONT_MOD_TWO in font file
-  // (NOTE: this will increase program size)
-
   myOLED.OLEDNoBufferGotoXY(0, 0);
   row = 1;
   for (unsigned char k = 128; k < 255 ; k++)
