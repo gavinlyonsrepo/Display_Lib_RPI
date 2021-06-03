@@ -58,42 +58,43 @@ Installation
 
 1. Make sure SPI bus is enabled on your raspberry PI
 
-2. Install the bcm2835 Library (at time of writing latest version is 1.68.)
+2. Install the dependency bcm2835 Library if not installed (at time of writing latest version is 1.68.)
 	* The bcm2835 library is a dependency and provides SPI bus, delays and GPIO control.
 	* Install the C libraries of bcm2835, [Installation instructions here](http://www.airspayce.com/mikem/bcm2835/)
 
 3. Download the ER_OLEDM1_CH1115_RPI library 
 	* Open a Terminal in a folder where you want to download,build & test library
-	* Run following commands to download from github.
+	* Run following command to download from github.
     
 ```sh
 curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.1.tar.gz | tar xz
-cd ER_OLEDM1_CH1115_RPI_1.1/src
 ```
 
 4. Run "make" to run the makefile in "src" folder to install library, it will be 
     installed to usr/lib and usr/include
     
 ```sh
+cd ER_OLEDM1_CH1115_RPI-1.1/src
 sudo make
 ```
 
-5. Wire up your OLED. Next enter the examples folder and run the makefile in that folder, 
+5. Next step is to test OLED and installed library with an example.
+Wire up your OLED. Next enter the examples folder and run the makefile in THAT folder, 
 This makefile builds the examples file using the just installed library.
-and creates a test filein "bin". Be sure to use "sudo" as the bcm2835 requires root permissions by default [ see here for more details](http://www.airspayce.com/mikem/bcm2835/) 
-The default example file is "hello world" you should see hello world on your OLED
+and creates a test exe file in "bin". Be sure to use "sudo" as the bcm2835 requires root permissions by default [ see here for more details on that](http://www.airspayce.com/mikem/bcm2835/) 
+The default example file is "hello world",  user should see hello world on the OLED
 by end of this step.
 
 ```sh
 cd ../examples/
 make
-sudo .bin/test
+sudo bin/test
 ```
 
 6. There are six examples files to try out. 
-To switch between them simply edit "SRC" variable at top of the makefile in examples folder.
+To decide which one the makefile builds simply edit "SRC" variable at top of the makefile in examples folder.
 in the "User SRC directory Option Section". Pick an example "SRC" directory path and ONE ONLY.
-Comment out rest and repeat: make and run.
+Comment out the rest and repeat: make and run bin/test.
 
 
 Hardware
