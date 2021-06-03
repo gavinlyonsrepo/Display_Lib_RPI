@@ -20,14 +20,19 @@ Overview
    driven by the CH1115 controller for the Raspberry PI.
 1. Raspberry Pi C++ library.      
 2. Inverse colour, vertical rotate, sleep, fade effect, horizontal scroll and contrast control. 
-3. Extended ASCII, scalable font. 
+3. 5 fonts included 
 4. Graphics class included.
-5. 3 different modes: Multi-buffer , single buffer , no buffer.
+5. Multi-buffer mode.
 6. Bitmaps supported.
 7. Hardware and Software SPI 
 
+* Developed on 
+	1. Raspberry PI 3 model b, 
+	2. C++ complier g++ (Raspbian 6.3.0-18)
+	3. Raspbian 9.13 stretch OS
+	4. bcm2835 Library 1.68 (Dependency)
+    
 * Author: Gavin Lyons
-* Tested on Raspberry PI 3 model b, C++ ,Raspbian 9.13 stretch
 * Port of my Arduino [library](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115)
  
 
@@ -37,23 +42,58 @@ Output
 Output Screenshots, From left to right, top to bottom.
 
 1. Full screen bitmap displayed 
-2. Multi buffer mode screen divided into two horizontal buffers
-3. Multi buffer mode screen divided into vertical buffers.
-4. Different size and type of fonts 
+2. Multi buffer mode screen divided into buffers
+3. Multi buffer mode screen divided into buffers.
+4. Different size and inverted text.
 5. Available ASCII font printed out 0-127
 6. Extended ASCII font printed out 128-255  
+7. Font 1-4 
+8. Font 5 
 
 ![ output ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/output.jpg)
+![ output ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/blob/main/extras/image/fontpic.jpg)
 
 Installation
 ------------------------------
 
-0. Install the C libraries of bcm2835, see: http://www.airspayce.com/mikem/bcm2835/ 
-1. curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.0.tar.gz | tar xz
-2. cd ER_OLEDM1_CH1115_RPI
-3. Make 
-4. sudo ./bin/test
-5. There are 8 different main.cpp in the examples folder copy the one to run into src folder
+1. Make sure SPI bus is enabled on your raspberry PI
+
+2. Install the bcm2835 Library (at time of writing latest version is 1.68.)
+	* The bcm2835 library is a dependency and provides SPI bus, delays and GPIO control.
+	* Install the C libraries of bcm2835, [Installation instructions here](http://www.airspayce.com/mikem/bcm2835/)
+
+3. Download the ER_OLEDM1_CH1115_RPI library 
+	* Open a Terminal in a folder where you want to download,build & test library
+	* Run following commands to download from github.
+    
+```sh
+curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.1.tar.gz | tar xz
+cd ER_OLEDM1_CH1115_RPI_1.1/src
+```
+
+4. Run "make" to run the makefile in "src" folder to install library, it will be 
+    installed to usr/lib and usr/include
+    
+```sh
+sudo make
+```
+
+5. Wire up your OLED. Next enter the examples folder and run the makefile in that folder, 
+This makefile builds the examples file using the just installed library.
+and creates a test filein "bin". Be sure to use "sudo" as the bcm2835 requires root permissions by default [ see here for more details](http://www.airspayce.com/mikem/bcm2835/) 
+The default example file is "hello world" you should see hello world on your OLED
+by end of this step.
+
+```sh
+cd ../examples/
+make
+sudo .bin/test
+```
+
+6. There are six examples files to try out. 
+To switch between them simply edit "SRC" variable at top of the makefile in examples folder.
+in the "User SRC directory Option Section". Pick an example "SRC" directory path and ONE ONLY.
+Comment out rest and repeat: make and run.
 
 
 Hardware
@@ -61,7 +101,7 @@ Hardware
 
 CH1115 is a single-chip CMOS OLED driver with controller for organic light emitting diode dot-matrix graphic display system. CH1115 consists of 128 segments, 64 commons that can support a maximum display resolution of 128 X 64. It is designed for Common Cathode type OLED panel. ER-OLEDM1.09-1W-SPI is a White 1.09" OLED Display Panel with Breakout Board. This module is a combination of the two.(controller and OLED)
 
-For SWSPI pick any GPIO you want for 5 control lines
+For SWSPI pick any GPIO you want for the 5 control lines.
 
 | pin no| GPIO HWSPI | pin name | pin desc | 
 |---|---|---| ---| 
@@ -85,25 +125,39 @@ Hardware and software SPI. Two different class constructors.
 User can pick the relevant constructor, see examples files. 
 Hardware SPI is recommended, far faster and more reliable 
 but Software SPI allows for more flexible GPIO selection.
+The SPI switches on and off after each data transfer to allow
+other devices with different SPI settings to use bus.
+The SPI settings are in OLEDSPIon function.
+Speed is currently at BCM2835_SPI_CLOCK_DIVIDER_64. 
+6.25MHz on RPI3. This can be adjusted.
 
 *buffers*
 
-3 buffer modes 
-
-1. MULTI_BUFFER (default)
-2. SINGLE_BUFFER 
-3. NO_BUFFER , Text only,  light weight. 
-
-To switch between modes, user must make a change to the USER BUFFER OPTION SECTION  at top of ER_OLEDM1_CH1115.h file.  Pick ONE option and one option ONLY. The example files at top, say which option to pick. If wrong option is picked, example files will not work or maybe even compile. Bitmaps can still be written directly to screen in NO_BUFFER mode but no graphics possible.
+User can create as many buffers as they want by creating a named "MultiBuffer" struct
+of any size or offset and setting the "activebuffer" to that struct. Thus dividing up 
+the screen into as many buffers as they want. 
 
 *fonts*
 
-The ASCII font(in the ER_OLEDM1_CH1115_font.h file) 
-The scale-able font is a standard 5 by 7 ASCII font with two  columns  of padding added. So 7 by 8 in effect. In standard text size and "no buffer" mode, this means: 128/7 * 64/8 = 27 * 8 = 144 characters. 
+There are five fonts.
+A print class is available to print out most passed data types.
+The fonts 1-4 are byte high(at text size 1) scale-able fonts, columns of padding added by SW.
+Font 5 is special large font but it is numbers only and cannot
+use the print class or be scaled(just one size).  
+
+Five fonts available : 
+
+| Font num | Font name | Font size xbyy |  Note |
+| ------ | ------ | ------ | ------ |  
+| 1 | Default | 5x8 | Full Extended ASCII 0 - 0xFF |
+| 2 | Thick   | 7x8 | no lowercase letters , ASCII  0x20 - 0x5A |
+| 3 | Seven segment | 4x8 | ASCII  0x20 - 0x7A |
+| 4 | Wide | 8x8 | no lowercase letters, ASCII 0x20 - 0x5A |
+| 5 | Big Nums | 16x32 | ASCII 0x30-0x3A ,Numbers + : only |
 
 *bitmaps*
 
-Bitmaps are written directly to screen not buffer, Updating the buffer will overwrite them(unless bitmap set to buffer) so to share screen with text and graphics best to divide screen into buffers using multi buffer mode,  See examples files. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) use vertical addressing draw mode. 
+Bitmaps are written directly to screen not buffer, Updating the buffer will overwrite them(unless bitmap set to buffer) so to share screen with text and graphics divide screen into buffers using multi buffers. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) use vertical addressing draw mode. 
 
 *User adjustments*
 
@@ -117,6 +171,3 @@ default is 0x81.
 There is a  Horizontal scroll effect. Whose parameters(TimeInterval , direction , mode)
 can be adjusted by passing data to function see "OLEDscrollSetup" function header in .cpp and datasheet for details. defaults are in header file are 6 frames , right , continuous mode.
 
-*Functions*
-
-Functions: Detailed information on the functions can be found in comment headers in the ER_OLEDM1_CH1115.cpp  file and a list of them in keywords.txt. The graphic functions can be found in the ER_OLEDM1_CH1115_graphic.h file. 

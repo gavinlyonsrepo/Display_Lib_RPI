@@ -24,9 +24,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "Print.h"
+#include "ER_OLEDM1_CH1115_Print.h"
 
-// Public Methods //////////////////////////////////////////////////////////////
+// Public Methods 
 
 /* default implementation: may be overridden */
 size_t Print::write(const uint8_t *buffer, size_t size)
@@ -39,26 +39,6 @@ size_t Print::write(const uint8_t *buffer, size_t size)
   return n;
 }
 
-/*
-size_t Print::print(const __FlashStringHelper *ifsh)
-{
-  PGM_P p = reinterpret_cast<PGM_P>(ifsh);
-  size_t n = 0;
-  while (1) {
-    //unsigned char c = pgm_read_byte(p++);
-	unsigned char c = *p++;
-    if (c == 0) break;
-    if (write(c)) n++;
-    else break;
-  }
-  return n;
-}
-
-size_t Print::print(const String &s)
-{
-  return write(s.c_str(), s.length());
-}
-*/
 
 size_t Print::print(const char str[])
 {
@@ -70,12 +50,7 @@ size_t Print::print(char c)
   return write(c);
 }
 
-/*
-size_t Print::print(unsigned char b, int base)
-{
-  return print((unsigned long) b, base);
-}
-*/
+
 
 size_t Print::print(int n, int base)
 {
@@ -113,33 +88,13 @@ size_t Print::print(double n, int digits)
 {
   return printFloat(n, digits);
 }
-/*
-size_t Print::println(const __FlashStringHelper *ifsh)
-{
-  size_t n = print(ifsh);
-  n += println();
-  return n;
-}
-*/
 
-size_t Print::print(const Printable& x)
-{
-  return x.printTo(*this);
-}
 
 size_t Print::println(void)
 {
   return write("\r\n");
 }
 
-/*
-size_t Print::println(const String &s)
-{
-  size_t n = print(s);
-  n += println();
-  return n;
-}
-*/
 
 size_t Print::println(const char c[])
 {
@@ -155,14 +110,6 @@ size_t Print::println(char c)
   return n;
 }
 
-/*
-size_t Print::println(unsigned char b, int base)
-{
-  size_t n = print(b, base);
-  n += println();
-  return n;
-}
-*/
 
 size_t Print::println(int num, int base)
 {
@@ -199,14 +146,8 @@ size_t Print::println(double num, int digits)
   return n;
 }
 
-size_t Print::println(const Printable& x)
-{
-  size_t n = print(x);
-  n += println();
-  return n;
-}
 
-// Private Methods /////////////////////////////////////////////////////////////
+// Private Methods 
 
 size_t Print::printNumber(unsigned long n, uint8_t base)
 {

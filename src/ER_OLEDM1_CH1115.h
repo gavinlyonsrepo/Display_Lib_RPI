@@ -9,14 +9,6 @@
 #ifndef _ER_OLEDM1_CH1115_H_
 #define _ER_OLEDM1_CH1115_H_
 
-//***********************************************
-// ** USER BUFFER OPTION SECTION **********
-// Pick 1 buffer option and ONE option ONLY NB.
-#define MULTI_BUFFER // (1) Note default
-//#define SINGLE_BUFFER // (2) 
-//#define NO_BUFFER   // (3) No graphics, text + bitmap only
-// **********************************************
-// **********************************************
 
 // ** INCLUDES **
 #include <bcm2835.h>
@@ -24,28 +16,24 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "ER_OLEDM1_CH1115_graphics.h"
 
-#ifdef NO_BUFFER
-   #include "ER_OLEDM1_CH1115_font.h"
-#else
-   #include "ER_OLEDM1_CH1115_graphics.h"
-#endif
 
 // ** DEFINES **
 
 // Fonts setup
-#define ERMCH1115_FONTPADDING  send_data(0x00)
-#define ERMCH1115_FONTWIDTH 5
 #define ERMCH1115_ASCII_OFFSET 0x00
+#define ERMCH1115_ASCII_OFFSET_SP 0x20 // Starts at Space
+#define ERMCH1115_ASCII_OFFSET_NUM 0x30 // Starts at number 0
 
-// Display Pixel colours  definition
-#define FOREGROUND  0
+// Display Pixel colours definition
+#define FOREGROUND 0
 #define BACKGROUND 1
 #define INVERSE 2
 
 /* CH1115 Command Set*/
 // Fundamental Commands
-#define ERMCH1115_ENTIRE_DISPLAY_ON 0xA4 //Forcibly turns the entire display on regardless of the contents of the display data RAM
+#define ERMCH1115_ENTIRE_DISPLAY_ON 0xA4 //Forcibly turns the entire display 
 #define ERMCH1115_ENTIRE_DISPLAY_OFF 0xA5 
 #define ERMCH1115_DISPLAY_ON 0xAF
 #define ERMCH1115_DISPLAY_OFF 0xAE
@@ -117,14 +105,7 @@
 #define ERMCH1115_RST_DELAY1 10 // mS
 #define ERMCH1115_RST_DELAY2 100 // mS
 
-// SPI- not used v 1.0.0
-#define SPI_TRANSACTION_START OLEDSPIon();
-#define SPI_TRANSACTION_END OLEDSPIoff();
 
-
-// ** GLOBALS **
-
-#ifdef MULTI_BUFFER
 struct MultiBuffer
 {
   uint8_t* screenbitmap; // pointer to buffer
@@ -133,14 +114,11 @@ struct MultiBuffer
   int16_t xoffset = 0; // x offset
   int16_t yoffset = 0; // y offset
 };
-#endif
+
 
 // ** CLASS SECTION **
-#ifdef NO_BUFFER
-class ERMCH1115 {
-#else
 class ERMCH1115 : public ERMCH1115_graphics  {
-#endif
+
   public:
 	
 	 // Contructor 1 Software SPI with explicit SCLK and SDIN and DC/cd
@@ -150,34 +128,21 @@ class ERMCH1115 : public ERMCH1115_graphics  {
 	
 	~ERMCH1115(){};
 
-#ifdef MULTI_BUFFER
    MultiBuffer* ActiveBuffer;
-#endif
 
-#ifdef SINGLE_BUFFER
-	uint8_t* buffer;
-	uint8_t bufferWidth = OLED_WIDTH;
-	uint8_t bufferHeight = OLED_HEIGHT;
-#endif
-
-#ifndef NO_BUFFER // Functions NOT needed for no_buffer mode 
-	virtual void drawPixel(int16_t x, int16_t y, uint16_t colour) override;
+	virtual void drawPixel(int16_t x, int16_t y, uint8_t colour) override;
 	void OLEDupdate(void);
 	void OLEDclearBuffer(void);
 	void OLEDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data);
-#else  // Functions only needed for no buffer mode
-	 void OLEDNoBufferGotoXY(uint8_t column , uint8_t page);
-	 void OLEDNoBufferChar(unsigned char character);
-	 void OLEDNoBufferString(const unsigned char *characters);
-#endif
+	
+	// No buffer functions 
+	void OLEDFillScreen(uint8_t pixel);
+	void OLEDFillPage(uint8_t page_num, uint8_t pixels);
+	void OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data);
 	
 	void OLEDbegin(uint8_t OLEDcontrast = ERMCH115_CONTRAST_DATA_DEFAULT);
 	void OLEDinit(void);
 	void OLEDReset(void);
-	
-	void OLEDFillScreen(uint8_t pixel, uint8_t mircodelay);
-	void OLEDFillPage(uint8_t page_num, uint8_t pixels,uint8_t delay);
-	void OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data);
 	
 	void OLEDEnable(uint8_t on);
 	void OLEDInvert(uint8_t on);
