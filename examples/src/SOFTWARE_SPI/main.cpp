@@ -1,26 +1,34 @@
 
 // Example file name : main.cpp
 // Description:
-// Test file for ER_OLEDM1_CH1115 library, showing use of mulitple buffers.  
-// In this case: two, divided horizontally.
-// The user can also divide vertically. and create as many buffers as they want.
+// Test file for ER_OLEDM1_CH1115 library, showing use SOFTWARE SPI
 // URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 // *****************************
+// NOTES :
+// (1) Speed test results measured frame rate 93 fps 1:49 to  10000
+// (2) This is SOFTWARE SPI
+// ******************************
+// 
 
 #include <bcm2835.h>
 #include "ER_OLEDM1_CH1115.h"
 #include <time.h>
 #include <stdio.h>
 
-#define OLEDcontrast 0x80 //Constrast 00 to FF , user adjust
+#define OLEDcontrast 0x80 // Constrast 00 to FF 
 #define myOLEDwidth  128
 #define myOLEDheight 64
 
 // GPIO
 #define RES 25 // GPIO pin number pick any you want
 #define DC 24 // GPIO pin number pick any you want
+#define DIN 5 // GPIO pin number pick any you want
+#define SCLK 6 // GPIO pin number pick any you want
+#define CS 8 // GPIO pin number pick any you want
 
-ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight , RES, DC); // instantiate  an object
+
+// software SPI
+ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight , RES, DC, CS, SCLK,DIN) ; 
 
 // vars for the test
 uint16_t count  = 0;
@@ -29,7 +37,7 @@ uint64_t  previousCounter =0;
 
 // =============== Function prototype ================
 void setup(void);
-void myTest(void);
+void myLoop(void);
 void display_Left(MultiBuffer* , long , int );
 void display_Right(MultiBuffer* );
 static uint64_t counter( void );
@@ -43,27 +51,28 @@ int main(int argc, char **argv)
 	}
 
 	setup();
-	myTest();
+	myLoop();
 
 	myOLED.OLEDPowerDown();
-	bcm2835_close(); // Close the library, 
+	bcm2835_close(); // Close library,deallocating any allocated mem
 	printf("OLED End\r\n");
 	return 0;
 }
 // ======================= End of main  ===================
 
 
+// ************* SETUP ***************
 void setup()
 {
 	bcm2835_delay(50);
 	printf("OLED Begin\r\n");
 	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
-	myOLED.OLEDFillScreen(0x03);
-	bcm2835_delay(2400);
+	myOLED.OLEDFillScreen(0x01);
+	bcm2835_delay(2000);
 }
 
-void myTest() {
-	
+// *********** myLoop ******************
+void myLoop() {
 
 	myOLED.setTextColor(FOREGROUND);
 	myOLED.setTextSize(1);
@@ -132,7 +141,7 @@ void display_Left(MultiBuffer* targetbuffer, long currentFramerate, int count)
 	myOLED.print(fps);
 	myOLED.print(" fps");
 	myOLED.setCursor(0, 50);
-	myOLED.print("V 1.1");
+	myOLED.print("V 1.2");
 	myOLED.drawFastVLine(92, 0, 63, FOREGROUND);
 	myOLED.OLEDupdate();
 }
@@ -148,7 +157,7 @@ void display_Right(MultiBuffer* targetbuffer)
 	myOLED.fillRect(0, 10, 20, 20, colour);
 	myOLED.fillCircle(40, 20, 10, !colour);
 	myOLED.drawRoundRect(10, 40, 40, 20, 10, FOREGROUND);
-	myOLED.drawPixel(60, 60, FOREGROUND);
+
 	myOLED.OLEDupdate();
 }
 
@@ -161,3 +170,5 @@ static uint64_t counter( void )
   clock_gettime( CLOCK_MONOTONIC, &now );
   return  ((uint64_t)now.tv_sec * 1000000000U) + (uint64_t)now.tv_nsec; 
 }
+
+// *********** EOF ***********

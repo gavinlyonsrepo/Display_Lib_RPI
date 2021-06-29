@@ -14,6 +14,8 @@
 // Test 7 fill page + fill screen functions
 // Test 8 font 1-4
 // Test 9 font 5 "bignumers"
+// Test 9b font 6 "mednums"
+// Test 9c Font 5 & font 6 test print function 
 // Test 10 simple graphic display 
 
 #include <bcm2835.h>
@@ -196,11 +198,36 @@ void DisplayText(MultiBuffer* targetBuffer)
 	// Test 9 Font 5
 	char mytest[] = "1234567812::5678";
 	myOLED.SetFontNum(5);
-	//myOLED.drawCharBigNum(0, 0, '1', FOREGROUND, BACKGROUND); // single character
-	myOLED.drawTextBigNum(0, 0, mytest, FOREGROUND, BACKGROUND);
+	//myOLED.drawCharNumFont(0, 0, '1', FOREGROUND, BACKGROUND); // single character
+	myOLED.drawTextNumFont(0, 0, mytest, FOREGROUND, BACKGROUND);
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
+	myOLED.OLEDFillScreen(0x00); // Clear the screen
+	myOLED.OLEDclearBuffer();
 	
+	//Test 9b Font 6 
+	myOLED.SetFontNum(6);
+	myOLED.drawCharNumFont(0, 40, '9', FOREGROUND, BACKGROUND); // single character
+	myOLED.drawTextNumFont(0, 0, mytest, FOREGROUND, BACKGROUND);
+	myOLED.OLEDupdate();
+	bcm2835_delay(3000);
+	myOLED.OLEDFillScreen(0x00); // Clear the screen
+	myOLED.OLEDclearBuffer();
+	
+	// Test 9c test print float function font 5 & 6 
+	myOLED.setTextColor(FOREGROUND, BACKGROUND);
+	myOLED.SetFontNum(5);
+	myOLED.setCursor(0, 0);
+	myOLED.print(87.39);
+	
+	myOLED.SetFontNum(6);
+	myOLED.setCursor(0, 40);
+	myOLED.print(3.94);
+	myOLED.print(194);
+	myOLED.OLEDupdate();
+	bcm2835_delay(DisplayDelay1);
+	myOLED.OLEDFillScreen(0x00); // Clear the screen
+	myOLED.OLEDclearBuffer();
 } // end of test texts
 
 // Function to display Graphics.

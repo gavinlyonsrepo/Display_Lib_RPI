@@ -18,13 +18,13 @@ ERMCH1115_graphics::ERMCH1115_graphics(int16_t w, int16_t h):
   _height   = HEIGHT;
   cursor_y  = cursor_x    = 0;
   textsize  = 1;
-  textcolor = textbgcolor = 0xFFFF;
+  textcolor = textbgcolor = 0xFF;
   wrap      = true;
 }
 
 // Draw a circle outline
 void ERMCH1115_graphics::drawCircle(int16_t x0, int16_t y0, int16_t r,
-	uint16_t color) {
+	uint8_t color) {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
   int16_t ddF_y = -2 * r;
@@ -58,7 +58,7 @@ void ERMCH1115_graphics::drawCircle(int16_t x0, int16_t y0, int16_t r,
 }
 
 void ERMCH1115_graphics::drawCircleHelper( int16_t x0, int16_t y0,
-			   int16_t r, uint8_t cornername, uint16_t color) {
+			   int16_t r, uint8_t cornername, uint8_t color) {
   int16_t f     = 1 - r;
   int16_t ddF_x = 1;
   int16_t ddF_y = -2 * r;
@@ -94,14 +94,14 @@ void ERMCH1115_graphics::drawCircleHelper( int16_t x0, int16_t y0,
 }
 
 void ERMCH1115_graphics::fillCircle(int16_t x0, int16_t y0, int16_t r,
-				  uint16_t color) {
+				  uint8_t color) {
   drawFastVLine(x0, y0-r, 2*r+1, color);
   fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
 // Used to do circles and roundrects
 void ERMCH1115_graphics::fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
-	uint8_t cornername, int16_t delta, uint16_t color) {
+	uint8_t cornername, int16_t delta, uint8_t color) {
 
   int16_t f     = 1 - r;
   int16_t ddF_x = 1;
@@ -133,7 +133,7 @@ void ERMCH1115_graphics::fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
 
 void ERMCH1115_graphics::drawLine(int16_t x0, int16_t y0,
 				int16_t x1, int16_t y1,
-				uint16_t color) {
+				uint8_t color) {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep) {
 	swap(x0, y0);
@@ -175,7 +175,7 @@ void ERMCH1115_graphics::drawLine(int16_t x0, int16_t y0,
 // Draw a rectangle
 void ERMCH1115_graphics::drawRect(int16_t x, int16_t y,
 				int16_t w, int16_t h,
-				uint16_t color) {
+				uint8_t color) {
   drawFastHLine(x, y, w, color);
   drawFastHLine(x, y+h-1, w, color);
   drawFastVLine(x, y, h, color);
@@ -183,29 +183,29 @@ void ERMCH1115_graphics::drawRect(int16_t x, int16_t y,
 }
 
 void ERMCH1115_graphics::drawFastVLine(int16_t x, int16_t y,
-				 int16_t h, uint16_t color) {
+				 int16_t h, uint8_t color) {
   drawLine(x, y, x, y+h-1, color);
 }
 
 void ERMCH1115_graphics::drawFastHLine(int16_t x, int16_t y,
-				 int16_t w, uint16_t color) {
+				 int16_t w, uint8_t color) {
   drawLine(x, y, x+w-1, y, color);
 }
 
 void ERMCH1115_graphics::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
-				uint16_t color) {
+				uint8_t color) {
   for (int16_t i=x; i<x+w; i++) {
 	drawFastVLine(i, y, h, color);
   }
 }
 
-void ERMCH1115_graphics::fillScreen(uint16_t color) {
+void ERMCH1115_graphics::fillScreen(uint8_t color) {
   fillRect(0, 0, _width, _height, color);
 }
 
 // Draw a rounded rectangle
 void ERMCH1115_graphics::drawRoundRect(int16_t x, int16_t y, int16_t w,
-  int16_t h, int16_t r, uint16_t color) {
+  int16_t h, int16_t r, uint8_t color) {
   drawFastHLine(x+r  , y    , w-2*r, color); // Top
   drawFastHLine(x+r  , y+h-1, w-2*r, color); // Bottom
   drawFastVLine(x    , y+r  , h-2*r, color); // Left
@@ -219,7 +219,7 @@ void ERMCH1115_graphics::drawRoundRect(int16_t x, int16_t y, int16_t w,
 
 // Fill a rounded rectangle
 void ERMCH1115_graphics::fillRoundRect(int16_t x, int16_t y, int16_t w,
-				 int16_t h, int16_t r, uint16_t color) {
+				 int16_t h, int16_t r, uint8_t color) {
   // smarter version
   fillRect(x+r, y, w-2*r, h, color);
 
@@ -231,7 +231,7 @@ void ERMCH1115_graphics::fillRoundRect(int16_t x, int16_t y, int16_t w,
 // Draw a triangle
 void ERMCH1115_graphics::drawTriangle(int16_t x0, int16_t y0,
 				int16_t x1, int16_t y1,
-				int16_t x2, int16_t y2, uint16_t color) {
+				int16_t x2, int16_t y2, uint8_t color) {
   drawLine(x0, y0, x1, y1, color);
   drawLine(x1, y1, x2, y2, color);
   drawLine(x2, y2, x0, y0, color);
@@ -240,11 +240,10 @@ void ERMCH1115_graphics::drawTriangle(int16_t x0, int16_t y0,
 // Fill a triangle
 void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 				  int16_t x1, int16_t y1,
-				  int16_t x2, int16_t y2, uint16_t color) {
+				  int16_t x2, int16_t y2, uint8_t color) {
 
   int16_t a, b, y, last;
 
-  // Sort coordinates by Y order (y2 >= y1 >= y0)
   if (y0 > y1) {
 	swap(y0, y1); swap(x0, x1);
   }
@@ -276,12 +275,6 @@ void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 	sa   = 0,
 	sb   = 0;
 
-  // For upper part of triangle, find scanline crossings for segments
-  // 0-1 and 0-2.  If y1=y2 (flat-bottomed triangle), the scanline y1
-  // is included here (and second loop will be skipped, avoiding a /0
-  // error there), otherwise scanline y1 is skipped here and handled
-  // in the second loop...which also avoids a /0 error here if y0=y1
-  // (flat-topped triangle).
   if(y1 == y2) last = y1;   // Include y1 scanline
   else         last = y1-1; // Skip it
 
@@ -290,16 +283,10 @@ void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 	b   = x0 + sb / dy02;
 	sa += dx01;
 	sb += dx02;
-	/* longhand:
-	a = x0 + (x1 - x0) * (y - y0) / (y1 - y0);
-	b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
-	*/
 	if(a > b) swap(a,b);
 	drawFastHLine(a, y, b-a+1, color);
   }
 
-  // For lower part of triangle, find scanline crossings for segments
-  // 0-2 and 1-2.  This loop is skipped if y1=y2.
   sa = dx12 * (y - y1);
   sb = dx02 * (y - y0);
   for(; y<=y2; y++) {
@@ -307,10 +294,7 @@ void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 	b   = x0 + sb / dy02;
 	sa += dx12;
 	sb += dx02;
-	/* longhand:
-	a = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
-	b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
-	*/
+	
 	if(a > b) swap(a,b);
 	drawFastHLine(a, y, b-a+1, color);
   }
@@ -318,25 +302,62 @@ void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 
 size_t ERMCH1115_graphics::write(uint8_t c) 
 {
-  if (c == '\n') {
-	cursor_y += textsize*_CurrentFontheight;
-	cursor_x  = 0;
-  } else if (c == '\r') {
-	// skip em
-  } else {
-	drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
-	cursor_x += textsize*(_CurrentFontWidth+1);
-	if (wrap && (cursor_x > (_width - textsize*(_CurrentFontWidth+1)))) {
-	  cursor_y += textsize*_CurrentFontheight;
-	  cursor_x = 0;
+	if (_FontNumber < 5)
+	{
+		if (c == '\n') {
+		cursor_y += textsize*_CurrentFontheight;
+		cursor_x  = 0;
+		} else if (c == '\r') {
+		// skip 
+		} else {
+		drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
+		cursor_x += textsize*(_CurrentFontWidth+1);
+			if (wrap && (cursor_x > (_width - textsize*(_CurrentFontWidth+1)))) {
+			  cursor_y += textsize*_CurrentFontheight;
+			  cursor_x = 0;
+			}
+		}
+	}else if (_FontNumber == 5 || _FontNumber == 6)
+	{
+		uint8_t radius = 3;
+		if (_FontNumber == 6) radius = 2;
+		
+		if (c == '\n') 
+		{
+			cursor_y += _CurrentFontheight;
+			cursor_x  = 0;
+		} else if (c == '\r') 
+		{
+			// Skip
+		} else if (c == '.')
+		{
+			// draw a circle for decimal & point skip a space.
+			
+			fillCircle(cursor_x+(_CurrentFontWidth/2), cursor_y + (_CurrentFontheight-6), radius, textcolor);
+			cursor_x += (_CurrentFontWidth+1);
+			if (wrap && (cursor_x  > (_width - (_CurrentFontWidth+1)))) 
+			{
+				cursor_y += _CurrentFontheight;
+				cursor_x = 0;
+			}
+		}else 
+		{
+			drawCharNumFont(cursor_x, cursor_y, c, textcolor, textbgcolor);
+			cursor_x += (_CurrentFontWidth+1);
+			if (wrap && (cursor_x > (_width - (_CurrentFontWidth+1)))) 
+			{
+				cursor_y += _CurrentFontheight;
+				cursor_x = 0;
+			}
+		}
+
 	}
-  }
   return 1;
 }
 
 // Draw a character
 void ERMCH1115_graphics::drawChar(int16_t x, int16_t y, unsigned char c,
-				uint16_t color, uint16_t bg, uint8_t size) {
+				uint8_t color, uint8_t bg, uint8_t size) {
 
   if((x >= _width)            || // Clip right
 	 (y >= _height)           || // Clip bottom
@@ -392,13 +413,11 @@ void ERMCH1115_graphics::setTextSize(uint8_t s) {
   textsize = (s > 0) ? s : 1;
 }
 
-void ERMCH1115_graphics::setTextColor(uint16_t c) {
-  // For 'transparent' background, we'll set the bg 
-  // to the same as fg instead of using a flag
+void ERMCH1115_graphics::setTextColor(uint8_t c) {
   textcolor = textbgcolor = c;
 }
 
-void ERMCH1115_graphics::setTextColor(uint16_t c, uint16_t b) {
+void ERMCH1115_graphics::setTextColor(uint8_t c, uint8_t b) {
   textcolor   = c;
   textbgcolor = b; 
 }
@@ -417,8 +436,8 @@ int16_t ERMCH1115_graphics::height(void) const {
 }
 
 // Desc :  Set the font number
-// Param1: fontnumber 1-5
-// 1=default 2=thick 3=seven segment 4=wide 5=bignums
+// Param1: fontnumber 1-6
+// 1=default 2=thick 3=seven segment 4=wide 5=bignums 6=,mednums
 
 void ERMCH1115_graphics::SetFontNum(uint8_t FontNumber) 
 {
@@ -436,7 +455,7 @@ void ERMCH1115_graphics::SetFontNum(uint8_t FontNumber)
 	
 	enum OLED_Font_height
 	{
-		FONT_H_8 = 8, FONT_H_32 = 32
+		FONT_H_8 = 8, FONT_H_16 = 16, FONT_H_32 = 32
 	}; // width of the font in bits
 	
 	enum OLED_Font_width setfontwidth;
@@ -444,34 +463,43 @@ void ERMCH1115_graphics::SetFontNum(uint8_t FontNumber)
 	enum OLED_Font_height setfontheight;
 	
 	switch (_FontNumber) {
-		case 1:  // Norm default 5 by 8
-			_CurrentFontWidth = (setfontwidth = FONT_W_FIVE);
-			_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
-			_CurrentFontheight = (setfontheight=FONT_H_8);
-		break; 
-		case 2: // Thick 7 by 8 (NO LOWERCASE LETTERS)
-			_CurrentFontWidth = (setfontwidth = FONT_W_SEVEN);
-			_CurrentFontoffset =  (setoffset = FONT_O_SP);
-			_CurrentFontheight = (setfontheight=FONT_H_8);
-		break; 
-		case 3:  // Seven segment 4 by 8
-			_CurrentFontWidth = (setfontwidth = FONT_W_FOUR);
-			_CurrentFontoffset =  (setoffset = FONT_O_SP);
-			_CurrentFontheight = (setfontheight=FONT_H_8);
-		break;
-		case 4: // Wide  8 by 8 (NO LOWERCASE LETTERS)
-			_CurrentFontWidth = (setfontwidth = FONT_W_EIGHT);
-			_CurrentFontoffset =  (setoffset = FONT_O_SP);
-			_CurrentFontheight = (setfontheight=FONT_H_8);
-		break; 
-		case 5: // big nums 16 by 32 (NUMBERS + : only)
-			_CurrentFontWidth = (setfontwidth = FONT_W_16);
-			_CurrentFontoffset =  (setoffset = FONT_N_SP);
-			_CurrentFontheight = (setfontheight=FONT_H_32);
-		break; 
-		default:
-			printf("Error: Wrong font number ,must be 1-5\n");
-		break;
+	case 1:  // Norm default 5 by 8
+		_CurrentFontWidth = (setfontwidth = FONT_W_FIVE);
+		_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
+		_CurrentFontheight = (setfontheight=FONT_H_8);
+	break; 
+	case 2: // Thick 7 by 8 (NO LOWERCASE LETTERS)
+		_CurrentFontWidth = (setfontwidth = FONT_W_SEVEN);
+		_CurrentFontoffset =  (setoffset = FONT_O_SP);
+		_CurrentFontheight = (setfontheight=FONT_H_8);
+	break; 
+	case 3:  // Seven segment 4 by 8
+		_CurrentFontWidth = (setfontwidth = FONT_W_FOUR);
+		_CurrentFontoffset =  (setoffset = FONT_O_SP);
+		_CurrentFontheight = (setfontheight=FONT_H_8);
+	break;
+	case 4: // Wide  8 by 8 (NO LOWERCASE LETTERS)
+		_CurrentFontWidth = (setfontwidth = FONT_W_EIGHT);
+		_CurrentFontoffset =  (setoffset = FONT_O_SP);
+		_CurrentFontheight = (setfontheight=FONT_H_8);
+	break; 
+	case 5: // big nums 16 by 32 (NUMBERS + : . only)
+		_CurrentFontWidth = (setfontwidth = FONT_W_16);
+		_CurrentFontoffset =  (setoffset = FONT_N_SP);
+		_CurrentFontheight = (setfontheight=FONT_H_32);
+	break;
+	case 6: // med nums 16 by 16 (NUMBERS + : . only)
+		_CurrentFontWidth = (setfontwidth = FONT_W_16);
+		_CurrentFontoffset =  (setoffset = FONT_N_SP);
+		_CurrentFontheight = (setfontheight=FONT_H_16);
+	break;  
+	default:
+		printf("Error: Wrong font number ,must be 1-6\n");
+		_CurrentFontWidth = (setfontwidth = FONT_W_FIVE);
+		_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
+		_CurrentFontheight = (setfontheight=FONT_H_8);
+		_FontNumber = 1;
+	break;
 	}
 }
 
@@ -479,35 +507,43 @@ void ERMCH1115_graphics::SetFontNum(uint8_t FontNumber)
 // Desc: writes a char (c) on the TFT
 // Param 1 , 2 : coordinates (x, y).
 // Param 3: The ASCII character
-// Param 4: color 565 16-bit
+// Param 4: color 
 // Param 5: background color
-// Notes for font 5 bignums only
+// Notes for font 5 6 only
 
-void ERMCH1115_graphics::drawCharBigNum(uint8_t x, uint8_t y, uint8_t c, uint8_t color , uint8_t bg) 
+void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_t color , uint8_t bg) 
 {
-	if (_FontNumber != 5)
+	if (_FontNumber < 5)
 	{
-	printf("Error: Wrong font selected, must be 5\n");
-	return;
+		printf("Error: Wrong font selected, must be 5 or 6 \n");
+		return;
 	}
 	uint8_t i, j;
 	uint8_t ctemp = 0, y0 = y; 
 
-	for (i = 0; i < 64; i++) {
-		ctemp = Font_Five[c - _CurrentFontoffset][i];
+	for (i = 0; i < (_CurrentFontheight*2); i++) 
+	{
+		if (_FontNumber == 5){
+			ctemp = Font_Five[c - _CurrentFontoffset][i];
+		}
+		else if (_FontNumber == 6){
+			ctemp = Font_Six[c - _CurrentFontoffset][i];
+
+		}
+
 		for (j = 0; j < 8; j++) {
 			if (ctemp & 0x80) {
-				drawPixel(x, y, color);
+			drawPixel(x, y, color);
 			} else {
-				drawPixel(x, y, bg);
+			drawPixel(x, y, bg);
 			}
 
 			ctemp <<= 1;
 			y++;
 			if ((y - y0) == _CurrentFontheight) {
-				y = y0;
-				x++;
-				break;
+			y = y0;
+			x++;
+			break;
 			}
 		}
 	}
@@ -518,32 +554,31 @@ void ERMCH1115_graphics::drawCharBigNum(uint8_t x, uint8_t y, uint8_t c, uint8_t
 // Param 3: pointer to string 
 // Param 4: color 
 // Param 5: background color
-// Notes for font 5 only "bignums" 
+// Notes for font 5 & 6 only  
 
-void ERMCH1115_graphics::drawTextBigNum(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg) 
+void ERMCH1115_graphics::drawTextNumFont(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg) 
 {
-	
-	if (_FontNumber != 5)
+	if (_FontNumber < 5)
 	{
-	printf("Error: Wrong font selected, must be 5\n");
-	return;
+		printf("Error: Wrong font selected, must be 5 or 6 \n");
+		return;
 	}
 	
 	while (*pText != '\0') 
 	{
-		if (x > (_width - _CurrentFontWidth )) 
+	if (x > (_width - _CurrentFontWidth )) 
+	{
+		x = 0;
+		y += _CurrentFontheight ;
+		if (y > (_height - _CurrentFontheight)) 
 		{
-			x = 0;
-			y += _CurrentFontheight ;
-			if (y > (_height - _CurrentFontheight)) 
-			{
-				y = x = 0;
-			}
+			y = x = 0;
 		}
-		
-		drawCharBigNum(x, y, *pText, color, bg);
-		x += _CurrentFontWidth ;
-		pText++;
+	}
+	
+	drawCharNumFont(x, y, *pText, color, bg);
+	x += _CurrentFontWidth ;
+	pText++;
 	}
 }
 

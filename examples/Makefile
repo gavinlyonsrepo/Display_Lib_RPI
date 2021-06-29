@@ -2,16 +2,16 @@
 # URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 
 # ************************************************
-# User SRC directory Option Section
+# *** User SRC directory Option Section **********
 # pick on example "SRC" dir and ONE ONLY.
 # Comment out the other 5. #
 
-SRC=HELLO_WORLD
-#SRC=BITMAP
-#SRC=MULTI_BUFFER
-#SRC=OLED_FUNCTIONS
-#SRC=SOFTWARE_SPI
-#SRC=TEXT_GRAPHICS
+SRC=src/HELLO_WORLD
+#SRC=src/BITMAP
+#SRC=src/MULTI_BUFFER
+#SRC=src/OLED_FUNCTIONS
+#SRC=src/SOFTWARE_SPI
+#SRC=src/TEXT_GRAPHICS
 # ************************************************
 
 CC=g++

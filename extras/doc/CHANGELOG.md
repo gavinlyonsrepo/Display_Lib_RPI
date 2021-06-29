@@ -10,3 +10,6 @@
 	* Modified SPI so it start and stops on data transfer only.
 	thus freeing up SPI module for other devices with different settings. 
 
+* version 1.2 July 2021
+	* added font 6
+	* added Print class support for all Fonts

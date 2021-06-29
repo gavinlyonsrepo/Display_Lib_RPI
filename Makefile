@@ -16,11 +16,16 @@ LIBDIR=$(PREFIX)/lib
 LIB=libER_OLEDM1_CH1115_RPI
 # shared library name
 LIBNAME=$(LIB).so.1.0
-SRCS = $(wildcard *.cpp)
-OBJS = $(patsubst %.cpp,  %.o, $(SRCS))
+
+MD=mkdir
+SRC=src
+OBJ=obj
+SRCS = $(wildcard $(SRC)/*.cpp)
+OBJS = $(patsubst $(SRC)%.cpp,  $(OBJ)/%.o, $(SRCS))
 
 CXX=g++
-CCFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -lbcm2835 
+CCFLAGS= -Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -Iinclude/
+LDFLAGS= -lbcm2835
 
 # make all
 # reinstall the library after each recompilation
@@ -31,14 +36,15 @@ pre-build:
 	@echo "*****************"
 	@echo "[START!]"
 	@echo
+	$(MD) -vp $(OBJ)
 	
 # Make the library
 ER_OLEDM1_CH1115_RPI: $(OBJS)
 	$(CXX) -shared -Wl,-soname,$(LIB).so.1 $(CCFLAGS) $(LDFLAGS)  -o ${LIBNAME} $^ 
 
 # Library parts 
-$(OBJS): 
-	$(CXX) -Wall -fPIC $(CCFLAGS) -c $(SRCS)
+$(OBJ)/%.o: $(SRC)/%.cpp
+	$(CXX) -Wall -fPIC -c $(CCFLAGS) $< -o $@
 
 # Install the library to LIBPATH
 install: 
@@ -55,9 +61,9 @@ install:
 	@echo
 	@echo "[INSTALL HEADERS]"
 	@if ( test ! -d $(PREFIX)/include ) ; then mkdir -p $(PREFIX)/include ; fi
-	@cp -vf  ER_OLEDM1_CH1115.h $(PREFIX)/include
-	@cp -vf  ER_OLEDM1_CH1115_graphics.h $(PREFIX)/include
-	@cp -vf  ER_OLEDM1_CH1115_Print.h $(PREFIX)/include
+	@cp -vf  include/ER_OLEDM1_CH1115.h $(PREFIX)/include
+	@cp -vf  include/ER_OLEDM1_CH1115_graphics.h $(PREFIX)/include
+	@cp -vf  include/ER_OLEDM1_CH1115_Print.h $(PREFIX)/include
 	@echo "[DONE!]"
 
 # Uninstall the library 
@@ -76,5 +82,5 @@ uninstall:
 clean:
 	@echo "******************"
 	@echo "[CLEAN OBJECT FILES]"
-	rm -rvf *.o ${LIB}.*
+	rm -rvf $(OBJ)/*.o ${LIB}.*
 	@echo "[DONE!]" 

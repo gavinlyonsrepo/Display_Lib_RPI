@@ -1,7 +1,8 @@
 /*
 * Project Name: ER_OLEDM1_CH1115
 * File: ER_OLEDM1_CH1115_graphics.h
-* Description: ER_OLEDM1 OLED driven by CH1115controller header file for the custom graphics functions based on Adafruit graphics library
+* Description: ER_OLEDM1 OLED driven by CH1115 controller header file 
+* for the graphics functions based on Adafruit graphics library
 * Author: Gavin Lyons.
 * URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 */
@@ -12,6 +13,7 @@
 #include "ER_OLEDM1_CH1115_Print.h"
 #include <stdio.h>
 #include <stdint.h>
+
 #define swap(a, b) { int16_t t = a; a = b; b = t; }
 
 class ERMCH1115_graphics : public Print{
@@ -24,52 +26,54 @@ class ERMCH1115_graphics : public Print{
 	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) = 0;
 
 	virtual void
-	drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color),
-	drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
-	drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
-	drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color),
-	fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color),
-	fillScreen(uint16_t color);
+	drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color),
+	drawFastVLine(int16_t x, int16_t y, int16_t h, uint8_t color),
+	drawFastHLine(int16_t x, int16_t y, int16_t w, uint8_t color),
+	drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color),
+	fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color),
+	fillScreen(uint8_t color);
 
 	void
-	drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
+	drawCircle(int16_t x0, int16_t y0, int16_t r, uint8_t color),
 	drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,
-		uint16_t color),
-	fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
+		uint8_t color),
+	fillCircle(int16_t x0, int16_t y0, int16_t r, uint8_t color),
 	fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,
-		int16_t delta, uint16_t color),
+		int16_t delta, uint8_t color),
 	drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
-		int16_t x2, int16_t y2, uint16_t color),
+		int16_t x2, int16_t y2, uint8_t color),
 	fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
-		int16_t x2, int16_t y2, uint16_t color),
+		int16_t x2, int16_t y2, uint8_t color),
 	drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,
-		int16_t radius, uint16_t color),
+		int16_t radius, uint8_t color),
 	fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,
-		int16_t radius, uint16_t color),
-	drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color,
-		uint16_t bg, uint8_t size),
+		int16_t radius, uint8_t color),
+	drawChar(int16_t x, int16_t y, unsigned char c, uint8_t color,
+		uint8_t bg, uint8_t size),
 	setCursor(int16_t x, int16_t y),
-	setTextColor(uint16_t c),
-	setTextColor(uint16_t c, uint16_t bg),
+	setTextColor(uint8_t c),
+	setTextColor(uint8_t c, uint8_t bg),
 	setTextSize(uint8_t s),
 	setTextWrap(bool w);
 
 	virtual size_t write(uint8_t);
 
 	void SetFontNum(uint8_t FontNumber);
-	void drawCharBigNum(uint8_t x, uint8_t y, uint8_t c, uint8_t color , uint8_t bg);
-	void drawTextBigNum(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg);
+	void drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_t color , uint8_t bg);
+	void drawTextNumFont(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg);
 	int16_t height(void) const;
 	int16_t width(void) const;
 
  protected:
-	const int16_t
-	WIDTH, HEIGHT;
-	int16_t
-	_width, _height,
-	cursor_x, cursor_y;
-	uint16_t
-	textcolor, textbgcolor;
+	const int16_t WIDTH;
+	const int16_t HEIGHT;
+	int16_t _width; 
+	int16_t  _height;
+	int16_t cursor_x; 
+	int16_t cursor_y;
+	
+	uint8_t textcolor;
+	uint8_t textbgcolor;
 	uint8_t textsize;
 
 	bool wrap; // If set, 'wrap' text at right edge of display

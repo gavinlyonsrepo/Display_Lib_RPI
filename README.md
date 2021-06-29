@@ -20,7 +20,7 @@ Overview
    driven by the CH1115 controller for the Raspberry PI.
 1. Raspberry Pi C++ library.      
 2. Inverse colour, vertical rotate, sleep, fade effect, horizontal scroll and contrast control. 
-3. 5 fonts included 
+3. 6 fonts included 
 4. Graphics class included.
 5. Multi-buffer mode.
 6. Bitmaps supported.
@@ -67,14 +67,14 @@ Installation
 	* Run following command to download from github.
     
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.1.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.2.tar.gz | tar xz
 ```
 
-4. Run "make" to run the makefile in "src" folder to install library, it will be 
+4. Run "make" to run the makefile at repo root folder to install library, it will be 
     installed to usr/lib and usr/include
     
 ```sh
-cd ER_OLEDM1_CH1115_RPI-1.1/src
+cd ER_OLEDM1_CH1115_RPI-1.2
 sudo make
 ```
 
@@ -94,7 +94,7 @@ sudo bin/test
 6. There are six examples files to try out. 
 To decide which one the makefile builds simply edit "SRC" variable at top of the makefile in examples folder.
 in the "User SRC directory Option Section". Pick an example "SRC" directory path and ONE ONLY.
-Comment out the rest and repeat: make and run bin/test.
+Comment out the rest and repeat step 5.
 
 
 Hardware
@@ -120,6 +120,11 @@ For SWSPI pick any GPIO you want for the 5 control lines.
 Features
 -------------------------
 
+There are two makefiles
+
+    1. Makefile at root directory builds and installs library at a system level.
+    2. Makefile in example directory build chosen example file to an executable.
+
 *SPI*
 
 Hardware and software SPI. Two different class constructors. 
@@ -130,7 +135,7 @@ The SPI switches on and off after each data transfer to allow
 other devices with different SPI settings to use bus.
 The SPI settings are in OLEDSPIon function.
 Speed is currently at BCM2835_SPI_CLOCK_DIVIDER_64. 
-6.25MHz on RPI3. This can be adjusted.
+6.25MHz on RPI3. This can be adjusted in code.
 
 *buffers*
 
@@ -140,21 +145,21 @@ the screen into as many buffers as they want.
 
 *fonts*
 
-There are five fonts.
+There are six fonts.
 A print class is available to print out most passed data types.
 The fonts 1-4 are byte high(at text size 1) scale-able fonts, columns of padding added by SW.
-Font 5 is special large font but it is numbers only and cannot
-use the print class or be scaled(just one size).  
+Font 5 & 6 are special fixed size large font but it is numbers only + ':' &'.' only
 
-Five fonts available : 
+Six fonts available : 
 
 | Font num | Font name | Font size xbyy |  Note |
 | ------ | ------ | ------ | ------ |  
-| 1 | Default | 5x8 | Full Extended ASCII 0 - 0xFF |
+| 1 | Default | 5x8 | Full Extended ASCII 0x00 - 0xFF |
 | 2 | Thick   | 7x8 | no lowercase letters , ASCII  0x20 - 0x5A |
 | 3 | Seven segment | 4x8 | ASCII  0x20 - 0x7A |
 | 4 | Wide | 8x8 | no lowercase letters, ASCII 0x20 - 0x5A |
-| 5 | Big Nums | 16x32 | ASCII 0x30-0x3A ,Numbers + : only |
+| 5 | Big Nums | 16x32 | ASCII 0x30-0x3A ,Numbers + : . only |
+| 5 | Med Nums | 16x16 | ASCII 0x30-0x3A ,Numbers + : . only |
 
 *bitmaps*
 
