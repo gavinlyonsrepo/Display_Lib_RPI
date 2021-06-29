@@ -86,7 +86,7 @@ The default example file is "hello world",  user should see hello world on the O
 by end of this step.
 
 ```sh
-cd ../examples/
+cd examples/
 make
 sudo bin/test
 ```
@@ -159,7 +159,7 @@ Six fonts available :
 | 3 | Seven segment | 4x8 | ASCII  0x20 - 0x7A |
 | 4 | Wide | 8x8 | no lowercase letters, ASCII 0x20 - 0x5A |
 | 5 | Big Nums | 16x32 | ASCII 0x30-0x3A ,Numbers + : . only |
-| 5 | Med Nums | 16x16 | ASCII 0x30-0x3A ,Numbers + : . only |
+| 6 | Med Nums | 16x16 | ASCII 0x30-0x3A ,Numbers + : . only |
 
 *bitmaps*
 
