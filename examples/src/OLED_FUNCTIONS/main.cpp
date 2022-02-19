@@ -67,12 +67,9 @@ void myLoop()
 	uint8_t  screenBuffer[myOLEDwidth * (myOLEDheight / 8) ];
 
 	MultiBuffer whole_screen;
-	whole_screen.screenbitmap = (uint8_t*) &screenBuffer;
-	whole_screen.width = myOLEDwidth;
-	whole_screen.height = myOLEDheight;
-	whole_screen.xoffset = 0;
-	whole_screen.yoffset = 0;
-
+	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
+	myOLED.OLEDinitBufferStruct(&whole_screen, screenBuffer, myOLEDwidth, myOLEDheight, 0, 0);
+	
 	myOLED.ActiveBuffer =  &whole_screen; // set buffer object
 	myOLED.OLEDclearBuffer(); // clear the buffer
 

@@ -21,11 +21,6 @@
 
 // ** DEFINES **
 
-// Fonts setup
-#define ERMCH1115_ASCII_OFFSET 0x00
-#define ERMCH1115_ASCII_OFFSET_SP 0x20 // Starts at Space
-#define ERMCH1115_ASCII_OFFSET_NUM 0x30 // Starts at number 0
-
 // Display Pixel colours definition
 #define FOREGROUND 0
 #define BACKGROUND 1
@@ -134,6 +129,8 @@ class ERMCH1115 : public ERMCH1115_graphics  {
 	void OLEDupdate(void);
 	void OLEDclearBuffer(void);
 	void OLEDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data);
+	void OLEDinitBufferStruct(MultiBuffer *p, uint8_t* mybuffer, 
+								uint8_t w, uint8_t h, int16_t x, int16_t y); 
 	
 	// No buffer functions 
 	void OLEDFillScreen(uint8_t pixel);

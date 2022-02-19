@@ -67,14 +67,14 @@ Installation
 	* Run following command to download from github.
     
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.2.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/archive/1.3.tar.gz | tar xz
 ```
 
 4. Run "make" to run the makefile at repo root folder to install library, it will be 
     installed to usr/lib and usr/include
     
 ```sh
-cd ER_OLEDM1_CH1115_RPI-1.2
+cd ER_OLEDM1_CH1115_RPI-1.3
 sudo make
 ```
 
@@ -163,7 +163,18 @@ Six fonts available :
 
 *bitmaps*
 
-Bitmaps are written directly to screen not buffer, Updating the buffer will overwrite them(unless bitmap set to buffer) so to share screen with text and graphics divide screen into buffers using multi buffers. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) use vertical addressing draw mode. 
+
+There is a few different ways of displaying bitmaps, 
+
+| Num | Method | Buffer mode |   Data addressing | Note |
+| ------ | ------ | ------ | ------ |  ------ |  
+| 1 | OLEDBitmap() | any  | Vertical |  Writes directly to screen , no buffer used. | 
+| 2 | OLEDBuffer() | Multi or Single |  Vertical  |  For internal use mostly | 
+| 3 | Multi buffer init  | Multibuffer | Vertical  |  Can be used when initialising a MB | 
+| 4 | drawBitmap() | Multi or Single | Vertical | default,  setDrawBitmapAddr(true) | 
+| 5 | drawBitmap() | Multi or Single |  Horizontal | setDrawBitmapAddr(false) |
+
+See the bitmap example file for more details on each method. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) , Bitmaps should be defined as const  buffers non-const, for methods 3 buffer can be initialised with bitmap data.
 
 *User adjustments*
 

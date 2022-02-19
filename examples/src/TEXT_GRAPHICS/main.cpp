@@ -13,7 +13,7 @@
 // Test 6 print ASCII font 128-255,
 // Test 7 fill page + fill screen functions
 // Test 8 font 1-4
-// Test 9 font 5 "bignumers"
+// Test 9 font 5 "bignums"
 // Test 9b font 6 "mednums"
 // Test 9c Font 5 & font 6 test print function 
 // Test 10 simple graphic display 
@@ -72,7 +72,7 @@ void setup() {
 	printf("OLED Begin\r\n");
 	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
 	myOLED.OLEDFillScreen(0x8F); //splash screen bars
-	myOLED.SetFontNum(1);
+	myOLED.setFontNum(CH1115Font_Default);
 	bcm2835_delay(2000);
 }
 
@@ -83,11 +83,9 @@ void myTests()
 	// Define a full screen buffer
 	uint8_t  textBuffer[(myOLEDwidth * (myOLEDheight / 8)) + 1];
 	MultiBuffer window;
-	window.screenbitmap = (uint8_t*) &textBuffer;
-	window.width = myOLEDwidth;
-	window.height = myOLEDheight;
-	window.xoffset = 0;
-	window.yoffset = 0;
+	
+	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
+	myOLED.OLEDinitBufferStruct(&window, textBuffer, myOLEDwidth, myOLEDheight, 0, 0);
 	
 	DisplayText(&window); // text tests
 	DisplayGraphics(&window); //graphic tests
@@ -181,13 +179,13 @@ void DisplayText(MultiBuffer* targetBuffer)
 	// Test 8 Fonts 1-4
 	myOLED.setCursor(0, 0);
 	myOLED.print("Default font");
-	myOLED.SetFontNum(2);
+	myOLED.setFontNum(CH1115Font_Thick);
 	myOLED.setCursor(0, 9);
 	myOLED.print("THICK FONT");
-	myOLED.SetFontNum(3);
+	myOLED.setFontNum(CH1115Font_Seven_Seg);
 	myOLED.setCursor(0, 18);
 	myOLED.print("Seven seg font");
-	myOLED.SetFontNum(4);
+	myOLED.setFontNum(CH1115Font_Wide);
 	myOLED.setCursor(0, 30);
 	myOLED.print("WIDE FONT");
 	myOLED.OLEDupdate();
@@ -197,7 +195,7 @@ void DisplayText(MultiBuffer* targetBuffer)
 	
 	// Test 9 Font 5
 	char mytest[] = "1234567812::5678";
-	myOLED.SetFontNum(5);
+	myOLED.setFontNum(CH1115Font_Bignum);
 	//myOLED.drawCharNumFont(0, 0, '1', FOREGROUND, BACKGROUND); // single character
 	myOLED.drawTextNumFont(0, 0, mytest, FOREGROUND, BACKGROUND);
 	myOLED.OLEDupdate();
@@ -206,7 +204,7 @@ void DisplayText(MultiBuffer* targetBuffer)
 	myOLED.OLEDclearBuffer();
 	
 	//Test 9b Font 6 
-	myOLED.SetFontNum(6);
+	myOLED.setFontNum(CH1115Font_Mednum);
 	myOLED.drawCharNumFont(0, 40, '9', FOREGROUND, BACKGROUND); // single character
 	myOLED.drawTextNumFont(0, 0, mytest, FOREGROUND, BACKGROUND);
 	myOLED.OLEDupdate();
@@ -216,11 +214,11 @@ void DisplayText(MultiBuffer* targetBuffer)
 	
 	// Test 9c test print float function font 5 & 6 
 	myOLED.setTextColor(FOREGROUND, BACKGROUND);
-	myOLED.SetFontNum(5);
+	myOLED.setFontNum(CH1115Font_Bignum);
 	myOLED.setCursor(0, 0);
 	myOLED.print(87.39);
 	
-	myOLED.SetFontNum(6);
+	myOLED.setFontNum(CH1115Font_Mednum);
 	myOLED.setCursor(0, 40);
 	myOLED.print(3.94);
 	myOLED.print(194);

@@ -70,19 +70,12 @@ void myTest() {
 	uint8_t  screenBuffer[(myOLEDwidth * (myOLEDheight / 8)) / 2]; //(128 * 8)/2 = 512 bytes
 
 	MultiBuffer left_side;
-	left_side.screenbitmap = (uint8_t*) &screenBuffer;
-	left_side.width = (myOLEDwidth / 2) ;
-	left_side.height = myOLEDheight;
-	left_side.xoffset = 0;
-	left_side.yoffset = 0;
-
-
+	// Intialise  struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
+	myOLED.OLEDinitBufferStruct(&left_side, screenBuffer, myOLEDwidth/2, myOLEDheight, 0, 0);
+	
 	MultiBuffer right_side;
-	right_side.screenbitmap = (uint8_t*) &screenBuffer;
-	right_side.width = (myOLEDwidth / 2);
-	right_side.height = myOLEDheight;
-	right_side.xoffset = (myOLEDwidth / 2);
-	right_side.yoffset = 0;
+	// Intialise struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
+	myOLED.OLEDinitBufferStruct(&right_side, screenBuffer, myOLEDwidth/2, myOLEDheight, myOLEDwidth/2, 0);
 
 	while (count < 10000)
 	{
@@ -132,7 +125,7 @@ void display_Left(MultiBuffer* targetbuffer, long currentFramerate, int count)
 	myOLED.print(fps);
 	myOLED.print(" fps");
 	myOLED.setCursor(0, 50);
-	myOLED.print("V 1.2");
+	myOLED.print("V 1.3");
 	myOLED.drawFastVLine(92, 0, 63, FOREGROUND);
 	myOLED.OLEDupdate();
 }

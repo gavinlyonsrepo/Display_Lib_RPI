@@ -3,7 +3,7 @@
 
 # ************************************************
 # *** User SRC directory Option Section **********
-# pick on example "SRC" dir and ONE ONLY.
+# Pick one example "SRC" dir path and ONE ONLY.
 # Comment out the other 5. #
 
 SRC=src/HELLO_WORLD

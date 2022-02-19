@@ -61,20 +61,13 @@ void myTest() {
 	uint8_t  screenBuffer[myOLEDwidth * (myOLEDheight/8)]; // 1024 bytes = 128 * 64/8
 
 	// Declare a buffer struct
-	MultiBuffer mybuffer;
-
-	// Intialise struct 
-	mybuffer.screenbitmap = (uint8_t*) &screenBuffer; // point it to the buffer
-	mybuffer.width = myOLEDwidth ;
-	mybuffer.height = myOLEDheight;
-	mybuffer.xoffset = 0;
-	mybuffer.yoffset = 0;
-
+	MultiBuffer myStruct;
+	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
+	myOLED.OLEDinitBufferStruct(&myStruct, screenBuffer, myOLEDwidth, myOLEDheight, 0, 0);
 	// Assign address of struct to be the active buffer pointer 
-	myOLED.ActiveBuffer = &mybuffer;
+	myOLED.ActiveBuffer = &myStruct;
 
 	myOLED.OLEDclearBuffer();   // Clear active buffer 
-
 	myOLED.setTextColor(FOREGROUND);
 	myOLED.setCursor(20, 20);
 	myOLED.print("Hello world");

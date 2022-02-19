@@ -20,6 +20,7 @@ ERMCH1115_graphics::ERMCH1115_graphics(int16_t w, int16_t h):
   textsize  = 1;
   textcolor = textbgcolor = 0xFF;
   wrap      = true;
+  drawBitmapAddr = true; // True = vertical , false = horizontal
 }
 
 // Draw a circle outline
@@ -302,7 +303,7 @@ void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 
 size_t ERMCH1115_graphics::write(uint8_t c) 
 {
-	if (_FontNumber < 5)
+	if (_FontNumber < CH1115Font_Bignum)
 	{
 		if (c == '\n') {
 		cursor_y += textsize*_CurrentFontheight;
@@ -317,10 +318,10 @@ size_t ERMCH1115_graphics::write(uint8_t c)
 			  cursor_x = 0;
 			}
 		}
-	}else if (_FontNumber == 5 || _FontNumber == 6)
+	}else if (_FontNumber == CH1115Font_Bignum || _FontNumber == CH1115Font_Mednum)
 	{
 		uint8_t radius = 3;
-		if (_FontNumber == 6) radius = 2;
+		if (_FontNumber == CH1115Font_Mednum) radius = 2;
 		
 		if (c == '\n') 
 		{
@@ -375,10 +376,10 @@ void ERMCH1115_graphics::drawChar(int16_t x, int16_t y, unsigned char c,
 	{
 	switch (_FontNumber) 
 		{
-		case 1: line = Font_One[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
-		case 2: line = Font_Two[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
-		case 3: line = Font_Three[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
-		case 4: line = Font_Four[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
+		case CH1115Font_Default: line = Font_One[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
+		case CH1115Font_Thick: line = Font_Two[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
+		case CH1115Font_Seven_Seg: line = Font_Three[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
+		case CH1115Font_Wide: line = Font_Four[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
 		default:
 			printf("Error: Wrong font number ,must be 1-4\n");
 			return;
@@ -436,71 +437,56 @@ int16_t ERMCH1115_graphics::height(void) const {
 }
 
 // Desc :  Set the font number
-// Param1: fontnumber 1-6
-// 1=default 2=thick 3=seven segment 4=wide 5=bignums 6=,mednums
+// Param1: fontnumber 1-6 enum OLED_FONT_TYPE_e 
+// 1=default 2=thick 3=seven segment 4=wide 5=bignums  6=mednums
 
-void ERMCH1115_graphics::SetFontNum(uint8_t FontNumber) 
+void ERMCH1115_graphics::setFontNum(OLED_FONT_TYPE_e FontNumber) 
 {
-	_FontNumber = FontNumber;
-	
-	enum OLED_Font_width
-	{
-		FONT_W_FIVE = 5, FONT_W_SEVEN = 7, FONT_W_FOUR = 4, FONT_W_EIGHT = 8,FONT_W_16= 16
-	}; // width of the font in bytes cols.
-	
-	enum OLED_Font_offset
-	{
-		FONT_O_EXTEND = ERMCH1115_ASCII_OFFSET, FONT_O_SP = ERMCH1115_ASCII_OFFSET_SP, FONT_N_SP = ERMCH1115_ASCII_OFFSET_NUM
-	}; // font offset in the ASCII table
-	
-	enum OLED_Font_height
-	{
-		FONT_H_8 = 8, FONT_H_16 = 16, FONT_H_32 = 32
-	}; // width of the font in bits
-	
-	enum OLED_Font_width setfontwidth;
-	enum OLED_Font_offset setoffset;
-	enum OLED_Font_height setfontheight;
-	
-	switch (_FontNumber) {
-	case 1:  // Norm default 5 by 8
-		_CurrentFontWidth = (setfontwidth = FONT_W_FIVE);
+    _FontNumber = FontNumber;
+	    
+    OLED_Font_width_e setfontwidth;
+    OLED_Font_offset_e setoffset;
+    OLED_Font_height_e setfontheight;
+    
+    switch (_FontNumber) {
+	case CH1115Font_Default:  // Norm default 5 by 8
+		_CurrentFontWidth = (setfontwidth = FONT_W_5);
 		_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
 		_CurrentFontheight = (setfontheight=FONT_H_8);
 	break; 
-	case 2: // Thick 7 by 8 (NO LOWERCASE LETTERS)
-		_CurrentFontWidth = (setfontwidth = FONT_W_SEVEN);
+	case CH1115Font_Thick: // Thick 7 by 8 (NO LOWERCASE LETTERS)
+		_CurrentFontWidth = (setfontwidth = FONT_W_7);
 		_CurrentFontoffset =  (setoffset = FONT_O_SP);
 		_CurrentFontheight = (setfontheight=FONT_H_8);
 	break; 
-	case 3:  // Seven segment 4 by 8
-		_CurrentFontWidth = (setfontwidth = FONT_W_FOUR);
+	case CH1115Font_Seven_Seg:  // Seven segment 4 by 8
+		_CurrentFontWidth = (setfontwidth = FONT_W_4);
 		_CurrentFontoffset =  (setoffset = FONT_O_SP);
 		_CurrentFontheight = (setfontheight=FONT_H_8);
 	break;
-	case 4: // Wide  8 by 8 (NO LOWERCASE LETTERS)
-		_CurrentFontWidth = (setfontwidth = FONT_W_EIGHT);
+	case CH1115Font_Wide : // Wide  8 by 8 (NO LOWERCASE LETTERS)
+		_CurrentFontWidth = (setfontwidth = FONT_W_8);
 		_CurrentFontoffset =  (setoffset = FONT_O_SP);
 		_CurrentFontheight = (setfontheight=FONT_H_8);
 	break; 
-	case 5: // big nums 16 by 32 (NUMBERS + : . only)
+	case CH1115Font_Bignum : // big nums 16 by 32 (NUMBERS + : only)
 		_CurrentFontWidth = (setfontwidth = FONT_W_16);
-		_CurrentFontoffset =  (setoffset = FONT_N_SP);
+		_CurrentFontoffset =  (setoffset = FONT_O_NUM);
 		_CurrentFontheight = (setfontheight=FONT_H_32);
 	break;
-	case 6: // med nums 16 by 16 (NUMBERS + : . only)
+	case CH1115Font_Mednum : // big nums 16 by 16(NUMBERS + : only)
 		_CurrentFontWidth = (setfontwidth = FONT_W_16);
-		_CurrentFontoffset =  (setoffset = FONT_N_SP);
+		_CurrentFontoffset =  (setoffset = FONT_O_NUM);
 		_CurrentFontheight = (setfontheight=FONT_H_16);
 	break;  
-	default:
-		printf("Error: Wrong font number ,must be 1-6\n");
-		_CurrentFontWidth = (setfontwidth = FONT_W_FIVE);
+	default: // if wrong font num passed in,  set to default
+		_CurrentFontWidth = (setfontwidth = FONT_W_5);
 		_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
 		_CurrentFontheight = (setfontheight=FONT_H_8);
-		_FontNumber = 1;
+		_FontNumber = CH1115Font_Default;
 	break;
-	}
+    }
+	
 }
 
 
@@ -513,7 +499,7 @@ void ERMCH1115_graphics::SetFontNum(uint8_t FontNumber)
 
 void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_t color , uint8_t bg) 
 {
-	if (_FontNumber < 5)
+	if (_FontNumber < CH1115Font_Bignum)
 	{
 		printf("Error: Wrong font selected, must be 5 or 6 \n");
 		return;
@@ -523,10 +509,10 @@ void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_
 
 	for (i = 0; i < (_CurrentFontheight*2); i++) 
 	{
-		if (_FontNumber == 5){
+		if (_FontNumber == CH1115Font_Bignum){
 			ctemp = Font_Five[c - _CurrentFontoffset][i];
 		}
-		else if (_FontNumber == 6){
+		else if (_FontNumber == CH1115Font_Mednum){
 			ctemp = Font_Six[c - _CurrentFontoffset][i];
 
 		}
@@ -558,7 +544,7 @@ void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_
 
 void ERMCH1115_graphics::drawTextNumFont(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg) 
 {
-	if (_FontNumber < 5)
+	if (_FontNumber < CH1115Font_Bignum)
 	{
 		printf("Error: Wrong font selected, must be 5 or 6 \n");
 		return;
@@ -580,6 +566,69 @@ void ERMCH1115_graphics::drawTextNumFont(uint8_t x, uint8_t y, char *pText, uint
 	x += _CurrentFontWidth ;
 	pText++;
 	}
+}
+
+// Draw a 1-bit color bitmap at the specified x, y position from the
+// provided bitmap buffer using colour as the
+// foreground colour and bg as the background colour.
+// Note: Variable drawBitmapAddr controls data addressing
+// drawBitmapAddr  = true Vertical  data addressing
+// drawBitmapAddr  = false Horizontal data addressing
+void ERMCH1115_graphics::drawBitmap(int16_t x, int16_t y,
+						const uint8_t *bitmap, int16_t w, int16_t h,
+						uint8_t color, uint8_t bg) {
+							
+if (drawBitmapAddr== true)
+{
+// Vertical byte bitmaps mode 
+	uint8_t vline;
+	int16_t i, j, r = 0, yin = y;
+	
+	for (i=0; i<(w+1); i++ ) {
+		if (r == (h+7)/8 * w) break;
+		vline = bitmap [ r] ;
+		r++;
+		if (i == w) {
+			y = y+8;
+			i = 0;
+		}
+		
+		for (j=0; j<8; j++ ) {
+			if (y+j-yin == h) break;
+			if (vline & 0x1) {
+				drawPixel(x+i, y+j, color);
+			}
+			else {
+				drawPixel(x+i, y+j, bg);
+			}	
+			vline >>= 1;
+		}
+	}
+} else if (drawBitmapAddr == false) {
+// Horizontal byte bitmaps mode 
+	int16_t byteWidth = (w + 7) / 8;
+	uint8_t byte = 0;
+	for (int16_t j = 0; j < h; j++, y++) 
+	{
+		for (int16_t i = 0; i < w; i++) 
+		{
+			if (i & 7)
+				byte <<= 1;
+			else
+				byte = bitmap[j * byteWidth + i / 8];
+			drawPixel(x+i, y, (byte & 0x80) ? color : bg);
+		}
+	}
+
+} // end of elseif
+} // end of function
+
+//Func Desc : sets the data addressing mode in drawBitmap function.
+//Param 1 boolean mode  , true default
+// True =  bitmap data vertically addressed 
+// False = bitmap data horizontally addressed 
+void ERMCH1115_graphics::setDrawBitmapAddr(bool mode) {
+	drawBitmapAddr = mode;
 }
 
 //******************** EOF *******************
