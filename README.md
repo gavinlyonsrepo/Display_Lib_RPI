@@ -7,6 +7,7 @@ Table of contents
   * [Overview](#overview)
   * [Output](#output)
   * [Installation](#installation)
+  * [Test](#test)
   * [Hardware](#hardware)
   * [Features](#features)
  
@@ -78,7 +79,10 @@ cd ER_OLEDM1_CH1115_RPI-1.3
 sudo make
 ```
 
-5. Next step is to test OLED and installed library with an example.
+Test
+----------------------------------
+
+1. Next step is to test OLED and installed library with an example.
 Wire up your OLED. Next enter the examples folder and run the makefile in THAT folder, 
 This makefile builds the examples file using the just installed library.
 and creates a test exe file in "bin". Be sure to use "sudo" as the bcm2835 requires root permissions by default [ see here for more details on that](http://www.airspayce.com/mikem/bcm2835/) 
@@ -91,10 +95,10 @@ make
 sudo bin/test
 ```
 
-6. There are six examples files to try out. 
+2. There are six examples files to try out. 
 To decide which one the makefile builds simply edit "SRC" variable at top of the makefile in examples folder.
 in the "User SRC directory Option Section". Pick an example "SRC" directory path and ONE ONLY.
-Comment out the rest and repeat step 5.
+Comment out the rest and repeat 1.
 
 
 Hardware
