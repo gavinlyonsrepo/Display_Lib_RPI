@@ -170,15 +170,14 @@ Six fonts available :
 
 There is a few different ways of displaying bitmaps, 
 
-| Num | Method | Buffer mode |   Data addressing | Note |
-| ------ | ------ | ------ | ------ |  ------ |  
-| 1 | OLEDBitmap() | any  | Vertical |  Writes directly to screen , no buffer used. | 
-| 2 | OLEDBuffer() | Multi or Single |  Vertical  |  For internal use mostly | 
-| 3 | Multi buffer init  | Multibuffer | Vertical  |  Can be used when initialising a MB | 
-| 4 | drawBitmap() | Multi or Single | Vertical | default,  setDrawBitmapAddr(true) | 
-| 5 | drawBitmap() | Multi or Single |  Horizontal | setDrawBitmapAddr(false) |
+| Num | Method |  Data addressing | Note |
+| ------ | ------  | ------ |  ------ |  
+| 1 | OLEDBitmap() |  Vertical |  Writes directly to screen , no buffer used. | 
+| 2 | OLEDBuffer() |  Vertical  |  For internal use mostly | 
+| 3 | drawBitmap() |  Vertical | default,  setDrawBitmapAddr(true) | 
+| 4 | drawBitmap() |  Horizontal | setDrawBitmapAddr(false) |
 
-See the bitmap example file for more details on each method. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) , Bitmaps should be defined as const  buffers non-const, for methods 3 buffer can be initialised with bitmap data.
+See the bitmap example file for more details on each method. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) , Bitmaps should be defined as const  buffers non-const, for method 2 buffer can be initialised with bitmap data.
 
 *User adjustments*
 
