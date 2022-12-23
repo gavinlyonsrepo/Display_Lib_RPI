@@ -6,9 +6,9 @@
 * URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
 */
 
-#include "ER_OLEDM1_CH1115_graphics.h"
-#include "ER_OLEDM1_CH1115_font.cpp"
-#include "ER_OLEDM1_CH1115.h"
+#include "ER_OLEDM1_CH1115_graphics.hpp"
+#include "ER_OLEDM1_CH1115_font.hpp"
+#include "ER_OLEDM1_CH1115.hpp"
 
 
 ERMCH1115_graphics::ERMCH1115_graphics(int16_t w, int16_t h):
@@ -303,7 +303,7 @@ void ERMCH1115_graphics::fillTriangle ( int16_t x0, int16_t y0,
 
 size_t ERMCH1115_graphics::write(uint8_t c) 
 {
-	if (_FontNumber < CH1115Font_Bignum)
+	if (_FontNumber < OLEDFontType_Bignum)
 	{
 		if (c == '\n') {
 		cursor_y += textsize*_CurrentFontheight;
@@ -318,10 +318,10 @@ size_t ERMCH1115_graphics::write(uint8_t c)
 			  cursor_x = 0;
 			}
 		}
-	}else if (_FontNumber == CH1115Font_Bignum || _FontNumber == CH1115Font_Mednum)
+	}else if (_FontNumber == OLEDFontType_Bignum || _FontNumber == OLEDFontType_Mednum)
 	{
 		uint8_t radius = 3;
-		if (_FontNumber == CH1115Font_Mednum) radius = 2;
+		if (_FontNumber == OLEDFontType_Mednum) radius = 2;
 		
 		if (c == '\n') 
 		{
@@ -356,7 +356,7 @@ size_t ERMCH1115_graphics::write(uint8_t c)
   return 1;
 }
 
-// Draw a character
+// Draw a character , font 1-6
 void ERMCH1115_graphics::drawChar(int16_t x, int16_t y, unsigned char c,
 				uint8_t color, uint8_t bg, uint8_t size) {
 
@@ -376,12 +376,14 @@ void ERMCH1115_graphics::drawChar(int16_t x, int16_t y, unsigned char c,
 	{
 	switch (_FontNumber) 
 		{
-		case CH1115Font_Default: line = Font_One[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
-		case CH1115Font_Thick: line = Font_Two[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
-		case CH1115Font_Seven_Seg: line = Font_Three[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
-		case CH1115Font_Wide: line = Font_Four[(c - _CurrentFontoffset) * _CurrentFontWidth + i]; break;
+		case OLEDFontType_Default : line = pFontDefaultptr[((c - _CurrentFontoffset) * _CurrentFontWidth) + i]; break;
+		case OLEDFontType_Thick : line = pFontThickptr[((c - _CurrentFontoffset) * _CurrentFontWidth) + i]; break;
+		case OLEDFontType_SevenSeg: line = pFontSevenSegptr[((c - _CurrentFontoffset) * _CurrentFontWidth) + i]; break;
+		case OLEDFontType_Wide : line = pFontWideptr[((c - _CurrentFontoffset) * _CurrentFontWidth) + i]; break;
+		case OLEDFontType_Tiny : line = pFontTinyptr[((c - _CurrentFontoffset) * _CurrentFontWidth) + i]; break;
+		case OLEDFontType_Homespun : line = pFontHomeSpunptr[((c - _CurrentFontoffset) * _CurrentFontWidth) + i]; break;
 		default:
-			printf("Error: Wrong font number ,must be 1-4\n");
+			printf("Error: Wrong font number ,must be 1-6\n");
 			return;
 		break;
 		}
@@ -437,56 +439,62 @@ int16_t ERMCH1115_graphics::height(void) const {
 }
 
 // Desc :  Set the font number
-// Param1: fontnumber 1-6 enum OLED_FONT_TYPE_e 
-// 1=default 2=thick 3=seven segment 4=wide 5=bignums  6=mednums
+// Param1: OLEDFontType_e  enum , fontnumber 1-8 
+// 1=default 2=thick 3=seven segment 4=wide 5=tiny 6=homespun
+// 7= bignum 8=mednum
 
-void ERMCH1115_graphics::setFontNum(OLED_FONT_TYPE_e FontNumber) 
+void ERMCH1115_graphics::setFontNum(OLEDFontType_e FontNumber) 
 {
-    _FontNumber = FontNumber;
-	    
-    OLED_Font_width_e setfontwidth;
-    OLED_Font_offset_e setoffset;
-    OLED_Font_height_e setfontheight;
-    
-    switch (_FontNumber) {
-	case CH1115Font_Default:  // Norm default 5 by 8
-		_CurrentFontWidth = (setfontwidth = FONT_W_5);
-		_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
-		_CurrentFontheight = (setfontheight=FONT_H_8);
+	_FontNumber = FontNumber;
+
+	switch (_FontNumber) {
+	case OLEDFontType_Default:  // Norm default 5 by 8
+		_CurrentFontWidth = OLEDFontWidth_5;
+		_CurrentFontoffset =  OLEDFontOffset_Extend;
+		_CurrentFontheight = OLEDFontHeight_8;
 	break; 
-	case CH1115Font_Thick: // Thick 7 by 8 (NO LOWERCASE LETTERS)
-		_CurrentFontWidth = (setfontwidth = FONT_W_7);
-		_CurrentFontoffset =  (setoffset = FONT_O_SP);
-		_CurrentFontheight = (setfontheight=FONT_H_8);
+	case OLEDFontType_Thick: // Thick 7 by 8 (NO LOWERCASE LETTERS)
+		_CurrentFontWidth = OLEDFontWidth_7;
+		_CurrentFontoffset = OLEDFontOffset_Space;
+		_CurrentFontheight = OLEDFontHeight_8;
 	break; 
-	case CH1115Font_Seven_Seg:  // Seven segment 4 by 8
-		_CurrentFontWidth = (setfontwidth = FONT_W_4);
-		_CurrentFontoffset =  (setoffset = FONT_O_SP);
-		_CurrentFontheight = (setfontheight=FONT_H_8);
+	case OLEDFontType_SevenSeg:  // Seven segment 4 by 8
+		_CurrentFontWidth = OLEDFontWidth_4;
+		_CurrentFontoffset = OLEDFontOffset_Space;
+		_CurrentFontheight = OLEDFontHeight_8;
 	break;
-	case CH1115Font_Wide : // Wide  8 by 8 (NO LOWERCASE LETTERS)
-		_CurrentFontWidth = (setfontwidth = FONT_W_8);
-		_CurrentFontoffset =  (setoffset = FONT_O_SP);
-		_CurrentFontheight = (setfontheight=FONT_H_8);
+	case OLEDFontType_Wide : // Wide  8 by 8 (NO LOWERCASE LETTERS)
+		_CurrentFontWidth = OLEDFontWidth_8;
+		_CurrentFontoffset = OLEDFontOffset_Space;
+		_CurrentFontheight = OLEDFontHeight_8;
 	break; 
-	case CH1115Font_Bignum : // big nums 16 by 32 (NUMBERS + : only)
-		_CurrentFontWidth = (setfontwidth = FONT_W_16);
-		_CurrentFontoffset =  (setoffset = FONT_O_NUM);
-		_CurrentFontheight = (setfontheight=FONT_H_32);
+	case OLEDFontType_Tiny:  // tiny 3 by 8
+		_CurrentFontWidth = OLEDFontWidth_3;
+		_CurrentFontoffset =  OLEDFontOffset_Space;
+		_CurrentFontheight = OLEDFontHeight_8;
 	break;
-	case CH1115Font_Mednum : // big nums 16 by 16(NUMBERS + : only)
-		_CurrentFontWidth = (setfontwidth = FONT_W_16);
-		_CurrentFontoffset =  (setoffset = FONT_O_NUM);
-		_CurrentFontheight = (setfontheight=FONT_H_16);
-	break;  
+	case OLEDFontType_Homespun: // homespun 7 by 8 
+		_CurrentFontWidth = OLEDFontWidth_7;
+		_CurrentFontoffset = OLEDFontOffset_Space;
+		_CurrentFontheight = OLEDFontHeight_8;
+	break;
+	case OLEDFontType_Bignum : // big nums 16 by 32 (NUMBERS + : only)
+		_CurrentFontWidth = OLEDFontWidth_16;
+		_CurrentFontoffset = OLEDFontOffset_Number;
+		_CurrentFontheight = OLEDFontHeight_32;
+	break; 
+	case OLEDFontType_Mednum: // med nums 16 by 16 (NUMBERS + : only)
+		_CurrentFontWidth = OLEDFontWidth_16;
+		_CurrentFontoffset =  OLEDFontOffset_Number;
+		_CurrentFontheight = OLEDFontHeight_16;
+	break;
 	default: // if wrong font num passed in,  set to default
-		_CurrentFontWidth = (setfontwidth = FONT_W_5);
-		_CurrentFontoffset =  (setoffset = FONT_O_EXTEND);
-		_CurrentFontheight = (setfontheight=FONT_H_8);
-		_FontNumber = CH1115Font_Default;
+		_CurrentFontWidth = OLEDFontWidth_5;
+		_CurrentFontoffset =  OLEDFontOffset_Extend;
+		_CurrentFontheight = OLEDFontHeight_8;
+		_FontNumber = OLEDFontType_Default;
 	break;
     }
-	
 }
 
 
@@ -495,13 +503,13 @@ void ERMCH1115_graphics::setFontNum(OLED_FONT_TYPE_e FontNumber)
 // Param 3: The ASCII character
 // Param 4: color 
 // Param 5: background color
-// Notes for font 5 6 only
+// Notes for font 7-8 only
 
 void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_t color , uint8_t bg) 
 {
-	if (_FontNumber < CH1115Font_Bignum)
+	if (_FontNumber < OLEDFontType_Bignum)
 	{
-		printf("Error: Wrong font selected, must be 5 or 6 \n");
+		printf("Error: Wrong font selected, must be 7 or 8 \n");
 		return;
 	}
 	uint8_t i, j;
@@ -509,11 +517,11 @@ void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_
 
 	for (i = 0; i < (_CurrentFontheight*2); i++) 
 	{
-		if (_FontNumber == CH1115Font_Bignum){
-			ctemp = Font_Five[c - _CurrentFontoffset][i];
+		if (_FontNumber == OLEDFontType_Bignum){
+			ctemp = pFontBigNumptr[c - _CurrentFontoffset][i];
 		}
-		else if (_FontNumber == CH1115Font_Mednum){
-			ctemp = Font_Six[c - _CurrentFontoffset][i];
+		else if (_FontNumber == OLEDFontType_Mednum){
+			ctemp = pFontMedNumptr[c - _CurrentFontoffset][i];
 
 		}
 
@@ -540,13 +548,13 @@ void ERMCH1115_graphics::drawCharNumFont(uint8_t x, uint8_t y, uint8_t c, uint8_
 // Param 3: pointer to string 
 // Param 4: color 
 // Param 5: background color
-// Notes for font 5 & 6 only  
+// Notes for font 7 -8  only  
 
 void ERMCH1115_graphics::drawTextNumFont(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg) 
 {
-	if (_FontNumber < CH1115Font_Bignum)
+	if (_FontNumber < OLEDFontType_Bignum)
 	{
-		printf("Error: Wrong font selected, must be 5 or 6 \n");
+		printf("Error: Wrong font selected, must be 7 or 8 \n");
 		return;
 	}
 	
@@ -575,9 +583,10 @@ void ERMCH1115_graphics::drawTextNumFont(uint8_t x, uint8_t y, char *pText, uint
 // drawBitmapAddr  = true Vertical  data addressing
 // drawBitmapAddr  = false Horizontal data addressing
 void ERMCH1115_graphics::drawBitmap(int16_t x, int16_t y,
-						const uint8_t *bitmap, int16_t w, int16_t h,
-						uint8_t color, uint8_t bg) {
-							
+				const uint8_t *bitmap, int16_t w, int16_t h,
+				uint8_t color, uint8_t bg) 
+{
+
 if (drawBitmapAddr== true)
 {
 // Vertical byte bitmaps mode 
@@ -631,4 +640,32 @@ void ERMCH1115_graphics::setDrawBitmapAddr(bool mode) {
 	drawBitmapAddr = mode;
 }
 
+// Desc: Writes text string (*ptext) on the OLED
+// Param 1 , 2 : coordinates (x, y).
+// Param 3: pointer to string 
+// Param 4: color 
+// Param 5: background color
+// Notes for font 1- 6 only
+void ERMCH1115_graphics::drawText(uint8_t x, uint8_t y, char *pText, uint8_t color, uint8_t bg, uint8_t size) {
+     if (_FontNumber >= OLEDFontType_Bignum){return;}
+    uint8_t cursor_x, cursor_y;
+    cursor_x = x, cursor_y = y;
+      while (*pText != '\0') 
+      {
+        if (wrap && ((cursor_x + size * _CurrentFontWidth) > _width)) 
+        {
+            cursor_x = 0;
+            cursor_y = cursor_y + size * 7 + 3;
+            if (cursor_y > _height) cursor_y = _height;
+        }
+        drawChar(cursor_x, cursor_y, *pText, color, bg, size);
+        cursor_x = cursor_x + size * (_CurrentFontWidth + 1);
+        if (cursor_x > _width) cursor_x = _width;
+        pText++;
+      }
+}
+
+void ERMCH1115_graphics::drawPixel(int16_t x, int16_t y, uint8_t color)
+{// This defined by the subclass:
+}
 //******************** EOF *******************

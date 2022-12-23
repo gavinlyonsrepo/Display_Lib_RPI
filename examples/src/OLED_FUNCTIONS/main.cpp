@@ -14,18 +14,19 @@
 // *****************************
 
 #include <bcm2835.h>
-#include "ER_OLEDM1_CH1115.h"
 #include <time.h>
 #include <stdio.h>
+#include "ER_OLEDM1_CH1115.hpp"
 
-#define OLEDcontrast 0x80 //Constrast 00 to FF , 0x80 is default. user adjust
-#define myOLEDwidth  128
-#define myOLEDheight 64
+// ==== Globals ====
+const uint8_t RES = 25; // GPIO pin number pick any you want
+const uint8_t DC = 24; // GPIO pin number pick any you want 
+const uint8_t myOLEDwidth  = 128;
+const uint8_t myOLEDheight = 64;
 
-
-// GPIO
-#define RES 25 // GPIO pin number pick any you want
-#define DC 24 // GPIO pin number pick any you want
+const uint32_t SPICLK_FREQ = 64; // Spi clock divider  bcm2835SPIClockDivider enum bcm2835
+const uint8_t SPI_CE_PIN = 0; // which HW SPI chip enable pin to use,  0 or 1
+const uint8_t OLEDcontrast = 0x80; //Constrast 00 to FF , 0x80 is default.
 
 ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight , RES, DC ) ;
 
@@ -38,6 +39,7 @@ int main(int argc, char **argv)
 {
 	if(!bcm2835_init())
 	{
+		printf("OLED :: ERROR failed to init bcm2835 library.\r\n");
 		return -1;
 	}
 
@@ -56,22 +58,18 @@ void setup()
 {
 	bcm2835_delay(50);
 	printf("OLED Begin\r\n");
-	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
+	myOLED.OLEDbegin(OLEDcontrast, SPICLK_FREQ , SPI_CE_PIN); // initialize the OLED
 	myOLED.OLEDFillScreen(0x11); // Clears screen with pattern 0x11
 	bcm2835_delay(1500);
 }
 
 void myLoop()
 {
-	// Define a full screen buffer and struct
-	uint8_t  screenBuffer[myOLEDwidth * (myOLEDheight / 8) ];
 
-	MultiBuffer whole_screen;
-	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
-	myOLED.OLEDinitBufferStruct(&whole_screen, screenBuffer, myOLEDwidth, myOLEDheight, 0, 0);
-	
-	myOLED.ActiveBuffer =  &whole_screen; // set buffer object
-	myOLED.OLEDclearBuffer(); // clear the buffer
+	// Buffer setup, Define a buffer to cover whole screen
+	uint8_t screenBuffer[(myOLEDwidth * (myOLEDheight / 8))+1]; // 1024 bytes = 128 * 64/8
+	myOLED.OLEDbuffer = (uint8_t*) &screenBuffer;  // Assign the pointer to the buffer
+	myOLED.OLEDclearBuffer(); // Clear buffer
 
 	// Set text parameters
 	myOLED.setTextColor(FOREGROUND);

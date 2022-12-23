@@ -1,6 +1,6 @@
 /*
 * Project Name: ERMCH1115
-* File: ERMCH1115.h
+* File: ERMCH1115.hpp
 * Description: ER_OLEDM1 OLED driven by CH1115 controller header file
 * Author: Gavin Lyons.
 * URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "ER_OLEDM1_CH1115_graphics.h"
+#include "ER_OLEDM1_CH1115_graphics.hpp"
 
 
 // ** DEFINES **
@@ -101,16 +101,6 @@
 #define ERMCH1115_RST_DELAY2 100 // mS
 
 
-struct MultiBuffer
-{
-  uint8_t* screenbitmap; // pointer to buffer
-  uint8_t width=0;  // bitmap x size
-  uint8_t height=0 ; // bitmap y size
-  int16_t xoffset = 0; // x offset
-  int16_t yoffset = 0; // y offset
-};
-
-
 // ** CLASS SECTION **
 class ERMCH1115 : public ERMCH1115_graphics  {
 
@@ -123,21 +113,19 @@ class ERMCH1115 : public ERMCH1115_graphics  {
 	
 	~ERMCH1115(){};
 
-   MultiBuffer* ActiveBuffer;
-
+	uint8_t* OLEDbuffer = nullptr;
+	
 	virtual void drawPixel(int16_t x, int16_t y, uint8_t colour) override;
 	void OLEDupdate(void);
 	void OLEDclearBuffer(void);
 	void OLEDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data);
-	void OLEDinitBufferStruct(MultiBuffer *p, uint8_t* mybuffer, 
-								uint8_t w, uint8_t h, int16_t x, int16_t y); 
 	
 	// No buffer functions 
 	void OLEDFillScreen(uint8_t pixel);
 	void OLEDFillPage(uint8_t page_num, uint8_t pixels);
 	void OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data);
 	
-	void OLEDbegin(uint8_t OLEDcontrast = ERMCH115_CONTRAST_DATA_DEFAULT);
+	void OLEDbegin(uint8_t OLEDcontrast = ERMCH115_CONTRAST_DATA_DEFAULT, uint32_t _OLED_SPICLK_DIVIDER  = 0, uint8_t SPICE_Pin = 0 );
 	void OLEDinit(void);
 	void OLEDReset(void);
 	
@@ -166,13 +154,17 @@ class ERMCH1115 : public ERMCH1115_graphics  {
 	int8_t _OLED_SCLK; // Software SPI only
 	int8_t _OLED_DIN;  // Software SPI only
 	
-	bool _sleep = true; // False awake/ON , true sleep/OFF
-	uint8_t _OLEDcontrast; // Contrast default 0x80 datasheet 00-FF
-	
-	int16_t _OLED_WIDTH =128;
-	int16_t _OLED_HEIGHT=64;
-	int8_t _OLED_PAGE_NUM = (_OLED_HEIGHT/8);
+	bool _sleep = true; // False awake , true sleep
+	uint8_t _OLEDcontrast; // Contrast , default 0x80 ,datasheet 00-FF
 	int8_t _OLED_mode = 2; // 2 = HW SPI 3 = SW SPI , future numbers reserved for future use
+	
+	uint32_t _OLED_SPICLK_DIVIDER ; //Spi clock divider , bcm2835SPIClockDivider enum bcm2835
+	uint8_t _OLED_SPICE_PIN = 0; // which SPI_CE pin to use , 0 or 1
+	
+	// Display  Size
+	uint8_t _OLED_WIDTH = 128;
+	uint8_t _OLED_HEIGHT = 64;
+	uint8_t _OLED_PAGE_NUM = (_OLED_HEIGHT/8);
 	
 }; // end of class
 

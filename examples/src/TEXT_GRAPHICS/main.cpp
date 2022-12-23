@@ -12,27 +12,32 @@
 // Test 5 print ASCII  font 0-127
 // Test 6 print ASCII font 128-255,
 // Test 7 fill page + fill screen functions
-// Test 8 font 1-4
-// Test 9 font 5 "bignums"
-// Test 9b font 6 "mednums"
-// Test 9c Font 5 & font 6 test print function 
-// Test 10 simple graphic display 
+// Test 8 font 1-6
+// Test 9 font 7 "bignums"
+// Test 9b font 8 "mednums"
+// Test 9c Font 7 & font 8 test print function 
+// Test 10 print function
+// Test 11 drawtext function
+// Test 12 simple graphic display 
 
 #include <bcm2835.h>
 #include <stdio.h>
-#include "ER_OLEDM1_CH1115.h"
+#include "ER_OLEDM1_CH1115.hpp"
 
-// Just for tests
+// ===== Test data Defines ====
 #define DisplayDelay1 5000
 #define DisplayDelay2 0
 #define PI 3.14
 
-#define OLEDcontrast 0x80 //00 to FF , 0x80 is default. user adjust
-#define myOLEDwidth  128
-#define myOLEDheight 64
-// GPIO
-#define RES 25 // GPIO pin number pick any you want
-#define DC 24 // GPIO pin number pick any you want
+// ==== Globals ====
+const uint8_t RES = 25; // GPIO pin number pick any you want
+const uint8_t DC = 24; // GPIO pin number pick any you want 
+const uint8_t myOLEDwidth  = 128;
+const uint8_t myOLEDheight = 64;
+
+const uint32_t SPICLK_FREQ = 64; // Spi clock divid bcm2835SPIClockDivider enum bcm2835
+const uint8_t SPI_CE_PIN = 0; // which HW SPI chip enable pin to use,  0 or 1
+const uint8_t OLEDcontrast = 0x80; //Constrast 00 to FF , 0x80 is default.
 
 ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight , RES, DC) ; // instantiate  an object
 
@@ -40,14 +45,15 @@ ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight , RES, DC) ; // instantiate  an objec
 void setup(void);
 void myTests(void);
 void EndTest(void);
-void DisplayText(MultiBuffer* );
-void DisplayGraphics(MultiBuffer* );
+void DisplayText(void);
+void DisplayGraphics(void);
 
 // ======================= Main ===================
 int main(int argc, char **argv)
 {
 	if(!bcm2835_init())
 	{
+		printf("OLED :: ERROR failed to init bcm2835 library.\r\n");
 		return -1;
 	}
 	setup();
@@ -70,9 +76,9 @@ void EndTest()
 void setup() {
 	bcm2835_delay(50);
 	printf("OLED Begin\r\n");
-	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
+	myOLED.OLEDbegin(OLEDcontrast, SPICLK_FREQ , SPI_CE_PIN); // initialize the OLED
 	myOLED.OLEDFillScreen(0x8F); //splash screen bars
-	myOLED.setFontNum(CH1115Font_Default);
+	myOLED.setFontNum(OLEDFontType_Default);
 	bcm2835_delay(2000);
 }
 
@@ -80,22 +86,19 @@ void setup() {
 void myTests()
 {
 
-	// Define a full screen buffer
-	uint8_t  textBuffer[(myOLEDwidth * (myOLEDheight / 8)) + 1];
-	MultiBuffer window;
+	// Buffer setup, Define a buffer to cover whole screen
+	uint8_t screenBuffer[(myOLEDwidth * (myOLEDheight / 8))+1]; // 1024 bytes = 128 * 64/8
+	myOLED.OLEDbuffer = (uint8_t*) &screenBuffer;  // Assign the pointer to the buffer
+	myOLED.OLEDclearBuffer(); // Clear buffer
 	
-	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
-	myOLED.OLEDinitBufferStruct(&window, textBuffer, myOLEDwidth, myOLEDheight, 0, 0);
-	
-	DisplayText(&window); // text tests
-	DisplayGraphics(&window); //graphic tests
+	DisplayText(); // text tests
+	DisplayGraphics(); //graphic tests
 }
 
-void DisplayText(MultiBuffer* targetBuffer)
+void DisplayText()
 {
 
 	myOLED.setTextWrap(true);
-	myOLED.ActiveBuffer =  targetBuffer;
 	myOLED.OLEDclearBuffer(); // Clear the buffer
 	// Test 1
 	myOLED.setTextColor(FOREGROUND);
@@ -176,60 +179,93 @@ void DisplayText(MultiBuffer* targetBuffer)
 	bcm2835_delay(2000);
 	myOLED.OLEDFillScreen(0x00); // Clear the screen
 
-	// Test 8 Fonts 1-4
+	// Test 8 Fonts 1-6
 	myOLED.setCursor(0, 0);
 	myOLED.print("Default font");
-	myOLED.setFontNum(CH1115Font_Thick);
+	myOLED.setFontNum(OLEDFontType_Thick);
 	myOLED.setCursor(0, 9);
 	myOLED.print("THICK FONT");
-	myOLED.setFontNum(CH1115Font_Seven_Seg);
+	myOLED.setFontNum(OLEDFontType_SevenSeg);
 	myOLED.setCursor(0, 18);
 	myOLED.print("Seven seg font");
-	myOLED.setFontNum(CH1115Font_Wide);
+	myOLED.setFontNum(OLEDFontType_Wide);
 	myOLED.setCursor(0, 30);
 	myOLED.print("WIDE FONT");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
-	myOLED.OLEDFillScreen(0x00); // Clear the screen
-	myOLED.OLEDclearBuffer();
-	
-	// Test 9 Font 5
-	char mytest[] = "1234567812::5678";
-	myOLED.setFontNum(CH1115Font_Bignum);
-	//myOLED.drawCharNumFont(0, 0, '1', FOREGROUND, BACKGROUND); // single character
-	myOLED.drawTextNumFont(0, 0, mytest, FOREGROUND, BACKGROUND);
+	myOLED.setFontNum(OLEDFontType_Tiny);
+	myOLED.setCursor(0, 41);
+	myOLED.print("tiny FONT");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	myOLED.setFontNum(OLEDFontType_Homespun);
+	myOLED.setCursor(0, 52);
+	myOLED.print("Homespun FONT");
+	myOLED.OLEDupdate();
+	bcm2835_delay(5000);
 	myOLED.OLEDFillScreen(0x00); // Clear the screen
 	myOLED.OLEDclearBuffer();
 	
-	//Test 9b Font 6 
-	myOLED.setFontNum(CH1115Font_Mednum);
+	// Test 9 Font 7
+	char mytest[] = "234567812::5678";
+	myOLED.setFontNum(OLEDFontType_Bignum);
+	myOLED.drawCharNumFont(0, 0, '1', FOREGROUND, BACKGROUND); // single character
+	myOLED.drawTextNumFont(16, 0, mytest, FOREGROUND, BACKGROUND);
+	myOLED.OLEDupdate();
+	bcm2835_delay(4000);
+	myOLED.OLEDFillScreen(0x00); // Clear the screen
+	myOLED.OLEDclearBuffer();
+	
+	//Test 9b Font 8 
+	myOLED.setFontNum(OLEDFontType_Mednum);
 	myOLED.drawCharNumFont(0, 40, '9', FOREGROUND, BACKGROUND); // single character
-	myOLED.drawTextNumFont(0, 0, mytest, FOREGROUND, BACKGROUND);
+	myOLED.drawTextNumFont(0, 0, mytest, BACKGROUND, FOREGROUND);
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	bcm2835_delay(4000);
 	myOLED.OLEDFillScreen(0x00); // Clear the screen
 	myOLED.OLEDclearBuffer();
 	
-	// Test 9c test print float function font 5 & 6 
+	// Test 9c test print float function font 7 & 8 
 	myOLED.setTextColor(FOREGROUND, BACKGROUND);
-	myOLED.setFontNum(CH1115Font_Bignum);
+	myOLED.setFontNum(OLEDFontType_Bignum);
 	myOLED.setCursor(0, 0);
 	myOLED.print(87.39);
 	
-	myOLED.setFontNum(CH1115Font_Mednum);
+	myOLED.setFontNum(OLEDFontType_Mednum);
 	myOLED.setCursor(0, 40);
-	myOLED.print(3.94);
-	myOLED.print(194);
+	myOLED.print(3.947, 2); // prints 3.95
 	myOLED.OLEDupdate();
 	bcm2835_delay(DisplayDelay1);
 	myOLED.OLEDFillScreen(0x00); // Clear the screen
 	myOLED.OLEDclearBuffer();
-} // end of test texts
+	
+	// Test 10 print function
+	myOLED.setTextColor(FOREGROUND, BACKGROUND);
+	myOLED.setFontNum(OLEDFontType_Default);
+	myOLED.setCursor(0, 0);
+	myOLED.print(47 , DEC);
+	myOLED.setCursor(0, 16);
+	myOLED.print(47 , HEX); 
+	myOLED.setCursor(0, 32);
+	myOLED.print(47, BIN);
+	myOLED.setCursor(0, 48);
+	myOLED.print(47 , OCT);
+	myOLED.OLEDupdate();  // Write to the buffer
+	bcm2835_delay(DisplayDelay1);
+	myOLED.OLEDclearBuffer();
+	
+	// Test 11 drawtext function
+	char myString1[9] = {'1', '2', ':', '1', '3', ':', '2', '9'};
+	myOLED.setFontNum(OLEDFontType_Tiny);
+	myOLED.drawText(0,0, myString1, FOREGROUND, BACKGROUND,1);
+	myOLED.setFontNum(OLEDFontType_Wide);
+	myOLED.drawText(0,32, myString1, FOREGROUND, BACKGROUND,2);
+	myOLED.OLEDupdate();  
+	bcm2835_delay(5000);
+	myOLED.OLEDclearBuffer();
+	
+	} // end of test texts
 
-// Function to display Graphics.
-void  DisplayGraphics(MultiBuffer* targetBuffer)
+// Function to display Graphics test. 12
+void  DisplayGraphics()
 {
 	//Q1 ||  Q2
 	//---------
@@ -237,7 +273,6 @@ void  DisplayGraphics(MultiBuffer* targetBuffer)
 	//
 	bool colour = 1;
 	uint8_t count = 0;
-	myOLED.ActiveBuffer =  targetBuffer;   // Set the buffer struct object
 	myOLED.OLEDclearBuffer(); // Clear the buffer
 	while (count < 15)
 	{

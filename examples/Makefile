@@ -8,7 +8,7 @@
 
 SRC=src/HELLO_WORLD
 #SRC=src/BITMAP
-#SRC=src/MULTI_BUFFER
+#SRC=src/FPS_TEST
 #SRC=src/OLED_FUNCTIONS
 #SRC=src/SOFTWARE_SPI
 #SRC=src/TEXT_GRAPHICS
@@ -26,6 +26,9 @@ TARGET=$(BIN)/test
 
 all: clean pre-build $(TARGET) 
 
+run:
+	sudo $(TARGET) 
+
 pre-build:
 	@echo '*******'
 	@echo '[START!]'
@@ -37,6 +40,7 @@ $(TARGET): $(OBJS) $(OBJ)
 	@echo '[MAKE EXE FILE!]'
 	$(CC)  $(OBJS) -o $@ $(LDFLAGS)
 	@echo '[DONE!]'
+	@echo '*******'
 
 $(OBJ)/%.o :  $(SRC)/%.cpp   $(OBJ) 
 	@echo '[MAKE OBJECT FILE!]'

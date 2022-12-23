@@ -23,3 +23,10 @@
 	Simply replace font numbers  with the relevant enum text labels to get rid of warnings. 
 	* A new function added for initialising a multibuffer struct , OLEDinitBufferStruct(),
 	backward compatible with old manual workflow. 
+	
+* Version 1.3.2 Dec 2022
+	* Added Fonts, tiny and homespun.
+	* Added Drawtext method.
+	* Changed from multibuffer to single buffer
+	* Allowed User to pick SPI bus baudrate and Chip enable pin.
+

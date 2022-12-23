@@ -6,20 +6,22 @@
 // *****************************
 
 #include <bcm2835.h>
-#include "ER_OLEDM1_CH1115.h"
 #include <stdio.h>
+#include "ER_OLEDM1_CH1115.hpp"
 
-#define OLEDcontrast 0x80 //Constrast 00 to FF , 0x80 is default.
-#define myOLEDwidth  128
-#define myOLEDheight 64
-#define mode 2
+//GPIO
+const uint8_t RES = 25; // GPIO pin number pick any you want
+const uint8_t DC = 24; // GPIO pin number pick any you want 
+const uint8_t myOLEDwidth  = 128;
+const uint8_t myOLEDheight = 64;
 
-// GPIO 
-#define RES 25 // GPIO pin number pick any you want
-#define DC 24 // GPIO pin number pick any you want 
+const uint32_t SPICLK_FREQ = 64; // Spi clock divider see bcm2835SPIClockDivider enum bcm2835
+const uint8_t SPI_CE_PIN = 0; // which HW SPI chip enable pin to use,  0 or 1
+const uint8_t OLEDcontrast = 0x80; //Constrast 00 to FF , 0x80 is default.
 
-ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight, RES, DC ); // instantiate an object 
+ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight, RES, DC); // instantiate an object 
 
+	
 // =============== Function prototype ================
 void setup(void);
 void myTest(void);
@@ -30,6 +32,7 @@ int main(int argc, char **argv)
 {
 	if(!bcm2835_init())
 	{
+		printf("OLED :: ERROR failed to init bcm2835 library.\r\n");
 		return -1;
 	}
 	setup();
@@ -40,10 +43,11 @@ int main(int argc, char **argv)
 // ======================= End of main  ===================
 
 // ===================== Function Space =====================
-void setup() {
+void setup() 
+{
 	bcm2835_delay(50);
 	printf("OLED Begin\r\n");
-	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
+	myOLED.OLEDbegin(OLEDcontrast, SPICLK_FREQ , SPI_CE_PIN); // initialize the OLED
 	myOLED.OLEDFillScreen(0x0F); //splash screen bars
 	bcm2835_delay(3000);
 }
@@ -56,23 +60,18 @@ void EndTest(void)
 }
 
 void myTest() {
-
-	// define a buffer to cover whole screen 
-	uint8_t  screenBuffer[myOLEDwidth * (myOLEDheight/8)]; // 1024 bytes = 128 * 64/8
-
-	// Declare a buffer struct
-	MultiBuffer myStruct;
-	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
-	myOLED.OLEDinitBufferStruct(&myStruct, screenBuffer, myOLEDwidth, myOLEDheight, 0, 0);
-	// Assign address of struct to be the active buffer pointer 
-	myOLED.ActiveBuffer = &myStruct;
-
-	myOLED.OLEDclearBuffer();   // Clear active buffer 
+	
+	// Buffer setup, Define a buffer to cover whole screen
+	uint8_t screenBuffer[(myOLEDwidth * (myOLEDheight / 8))+1]; // 1024 bytes = 128 * 64/8
+	myOLED.OLEDbuffer = (uint8_t*) &screenBuffer;  // Assign the pointer to the buffer
+	myOLED.OLEDclearBuffer(); // Clear buffer
+	
 	myOLED.setTextColor(FOREGROUND);
+	myOLED.setFontNum(OLEDFontType_Default);
 	myOLED.setCursor(20, 20);
 	myOLED.print("Hello world");
 	myOLED.OLEDupdate();  //write to active buffer
-	delay(7000);
+	bcm2835_delay(7000);
 }
 
 // ============== EOF =========

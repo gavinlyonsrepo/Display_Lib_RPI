@@ -6,17 +6,19 @@
 // *****************************
 
 #include <bcm2835.h>
-#include "ER_OLEDM1_CH1115.h"
 #include <time.h>
 #include <stdio.h>
+#include "ER_OLEDM1_CH1115.hpp"
 
-#define OLEDcontrast 0x80 //Constrast 00 to FF , 0x80 is default. 
-#define myOLEDwidth  128
-#define myOLEDheight 64
+// ==== Globals ====
+const uint8_t RES = 25; // GPIO pin number pick any you want
+const uint8_t DC = 24; // GPIO pin number pick any you want 
+const uint8_t myOLEDwidth  = 128;
+const uint8_t myOLEDheight = 64;
 
-// GPIO 
-#define RES 25 // GPIO pin number pick any you want
-#define DC 24 // GPIO pin number pick any you want 
+const uint32_t SCLK_FREQ = 64; // // Spi clock divider : bcm2835SPIClockDivider bcm2835
+const uint8_t SPI_CE_PIN = 0; // which HW SPI chip enable pin to use,  0 or 1
+const uint8_t OLEDcontrast = 0x80; //Constrast 00 to FF , 0x80 is default.
 
 ERMCH1115 myOLED(myOLEDwidth ,myOLEDheight, RES, DC); // instantiate an object 
 
@@ -26,7 +28,6 @@ void myLoop(void);
 void Test1(void);
 void Test2(void);
 void Test3(void);
-void Test4(void);
 void EndTest(void);
 
 // ======================= Main ===================
@@ -34,6 +35,7 @@ int main(int argc, char **argv)
 {
 	if(!bcm2835_init())
 	{
+		printf("OLED :: ERROR failed to init bcm2835 library.\r\n");
 		return -1;
 	}
 
@@ -43,7 +45,9 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-// ' 128x64px "g lyons" + shapes , 
+// === Bitmap Data for tests ===
+
+// ' 128x64px "g lyons" + shapes ,  Test2 the buffer will be assigned this data at init
 // SW used to make https://javl.github.io/image2cpp/ vertical addressing
 uint8_t  fullScreenBuffer[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0,
@@ -112,32 +116,18 @@ uint8_t  fullScreenBuffer[] = {
 	0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c, 0x1f, 0x1f, 0x1f, 0x1f, 0x00
 };
 
-// 'small image', 20x20px vertical addressing
-uint8_t smallImage  [] = {
-	0xff, 0x3f, 0x0f, 0x07, 0x03, 0x13, 0x33, 0x39, 0x39, 0x79, 0xf9, 0xf9, 0xfb, 0xf3, 0xf7, 0xe3,
-	0x87, 0x0f, 0x1f, 0xff, 0xf9, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x0f,
-	0x1d, 0x19, 0x10, 0x19, 0x0f, 0x00, 0xc0, 0xf0, 0x0f, 0x0f, 0x0f, 0x0e, 0x0c, 0x0c, 0x08, 0x08,
-	0x08, 0x00, 0x00, 0x08, 0x08, 0x08, 0x0c, 0x0c, 0x0e, 0x0f, 0x0f, 0x0f
+// Mobile icon  16x8px Vertical addressed test 1&3
+const uint8_t  SignalIconVa[16] = {
+	0x03, 0x05, 0x09, 0xff, 0x09, 0x05, 0xf3, 0x00, 0xf8, 0x00, 0xfc, 0x00, 0xfe, 0x00, 0xff, 0x00
 };
 
- // 'small Bitmap', 20x20px bitmap bi-colour Vertical addressed Test 3
-const uint8_t  smallBitmap [60] = {
-	0xff, 0x3f, 0x0f, 0x07, 0x03, 0x13, 0x33, 0x39, 0x39, 0x79, 0xf9, 0xf9, 
-	0xfb, 0xf3, 0xf7, 0xe3, 0x87, 0x0f, 0x1f, 0xff, 0xf9, 0xc0, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x0f, 0x1d, 0x19, 0x10, 0x19, 
-	0x0f, 0x00, 0xc0, 0xf0, 0x0f, 0x0f, 0x0f, 0x0e, 0x0c, 0x0c, 0x08, 0x08,
-	0x08, 0x00, 0x00, 0x08, 0x08, 0x08, 0x0c, 0x0c, 0x0e, 0x0f, 0x0f, 0x0f
+// Mobile icon  16x8px horizontal addressed test 3
+const uint8_t  SignalIconHa[16] = {
+	0xfe, 0x02, 0x92, 0x0a, 0x54, 0x2a, 0x38, 0xaa, 0x12, 0xaa, 0x12, 0xaa, 0x12, 0xaa, 0x12, 0xaa
 };
 
- // 'small BitmapHA', 20x20px bitmap bi-colour horizontal addressed Test 4
-const uint8_t smallBitmapHa[60] = {
-	0xff, 0xff, 0xf0, 0xfe, 0x0f, 0xf0, 0xf0, 0x02, 0xf0, 0xe1, 0xf8, 0x70,
-	0xc7, 0xfe, 0x30, 0xc3, 0xff, 0x10, 0x80, 0x7f, 0x10, 0x80, 0x3f, 0x90,
-	0x80, 0x3d, 0x80, 0x00, 0x30, 0x80, 0x00, 0x18, 0x80, 0x80, 0x1d, 0x80,
-	0x80, 0x0f, 0x10, 0x80, 0x00, 0x10, 0xc0, 0x00, 0x30, 0xc0, 0x00, 0x30,
-	0xe0, 0x00, 0x70, 0xf0, 0x00, 0xf0, 0xfc, 0x03, 0xf0, 0xff, 0x9f, 0xf0
-};
 
+// === Function Space ===
 void EndTest(void)
 {
 	myOLED.OLEDPowerDown();
@@ -150,25 +140,24 @@ void setup()
 {
 	printf("OLED Begin\r\n");
 	bcm2835_delay(50);
-	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
-	myOLED.OLEDFillScreen(0xFF); // Clears screen
+	myOLED.OLEDbegin(OLEDcontrast, SCLK_FREQ , SPI_CE_PIN); // initialize the OLED
+	myOLED.OLEDFillScreen(0xEE); // Clears screen fill pattern
 	bcm2835_delay(2000);
 	myOLED.OLEDFillScreen(0x00); 
 }
 
 void myLoop()
 {
-	Test1(); // Method (1) OLED bitmap method, writes to screen directly
+	Test1(); // Method (1) OLED bitmap method, writes to screen directly(no buffer)
 	Test2(); // Method (2) Assign bitmap to a buffer at init
-	Test3(); // Method (3) Drawbitmap to buffer method, vertical addressing
-	Test4(); // Method (4) Drawbitmap to buffer method, horizontal addressing
+	Test3(); // Method (3) Drawbitmap to buffer method, vertical or horizontal addressing 
 }
 
 
 void Test1(void)
 {
 	// Method (1) OLED bitmap method, write bitmap directly to screen
-	myOLED.OLEDBitmap(5, 5 , 20, 20, smallImage );
+	myOLED.OLEDBitmap(5, 5 , 16, 8, SignalIconVa);
 	bcm2835_delay(5000);
 	myOLED.OLEDFillScreen(0x00); 
 }
@@ -177,47 +166,30 @@ void Test1(void)
 void Test2(void)
 {
 	// Method (2) assign bitmap to a buffer at init
-	MultiBuffer Whole_screen;
-	// Intialise that struct with buffer details (&struct,  buffer, w, h, x-offset,y-offset)
-	myOLED.OLEDinitBufferStruct(&Whole_screen, fullScreenBuffer, myOLEDwidth, myOLEDheight, 0, 0);
-	
-	myOLED.ActiveBuffer = &Whole_screen;
-	
+	myOLED.OLEDbuffer = (uint8_t*) &fullScreenBuffer;
 	myOLED.OLEDupdate();
 	bcm2835_delay(5000);
 	myOLED.OLEDFillScreen(0x00); 
+	myOLED.OLEDclearBuffer();
 }
 
 
 void Test3(void)
 {
-	MultiBuffer MyStruct;
-	// Intialise that struct (&struct,buffer,w,h,x,y)
-	myOLED.OLEDinitBufferStruct(&MyStruct, fullScreenBuffer, 128, 64, 0, 0);  
-	myOLED.ActiveBuffer = &MyStruct;
-	myOLED.OLEDclearBuffer();   // Clear active buffer
-
 	myOLED.setDrawBitmapAddr(true); // for Bitmap Data Vertical  addressed
-	myOLED.drawBitmap(0, 0, smallBitmap, 20, 20, FOREGROUND, BACKGROUND);
-	myOLED.drawBitmap(30, 20, smallBitmap, 20, 20, BACKGROUND, FOREGROUND);
-
+	myOLED.drawBitmap(0, 0, SignalIconVa, 16, 8, FOREGROUND, BACKGROUND);
+	myOLED.drawBitmap(30, 20, SignalIconVa, 16, 8, BACKGROUND, FOREGROUND);
 	myOLED.OLEDupdate();
 	bcm2835_delay(5000);
-}
-
-void Test4(void)
- {
-	MultiBuffer MyStruct;
-	// Intialise that struct (&struct,buffer,w,h,x,y)
-	myOLED.ActiveBuffer = &MyStruct;
-	myOLED.OLEDinitBufferStruct(&MyStruct, fullScreenBuffer, 128, 64, 0, 0);  // Intialise that struct (&struct,buffer,w,h,x,y)
-	myOLED.ActiveBuffer = &MyStruct;
-	myOLED.OLEDclearBuffer();   // Clear active buffer
-
+	myOLED.OLEDclearBuffer();
+	
 	myOLED.setDrawBitmapAddr(false); // for Bitmap Data Horziontal addressed
-	myOLED.drawBitmap(10, 25, smallBitmapHa, 20, 20, FOREGROUND, BACKGROUND);
-	myOLED.drawBitmap(100, 20, smallBitmapHa, 20, 20, BACKGROUND, FOREGROUND);
-	myOLED.drawBitmap(60, 20, smallBitmapHa, 20, 20, BACKGROUND, FOREGROUND);
+	myOLED.drawBitmap(10, 25, SignalIconHa, 16, 8, FOREGROUND, BACKGROUND);
+	myOLED.drawBitmap(100, 20, SignalIconHa, 16, 8, FOREGROUND, BACKGROUND);
+	myOLED.drawBitmap(60, 20, SignalIconHa, 16, 8, BACKGROUND, FOREGROUND);
 	myOLED.OLEDupdate();
 	bcm2835_delay(5000);
+	myOLED.OLEDFillScreen(0x00); 
+	myOLED.OLEDclearBuffer();
 }
+

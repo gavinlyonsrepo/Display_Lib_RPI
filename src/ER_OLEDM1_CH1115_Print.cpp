@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "ER_OLEDM1_CH1115_Print.h"
+#include "ER_OLEDM1_CH1115_Print.hpp"
 
 // Public Methods 
 
