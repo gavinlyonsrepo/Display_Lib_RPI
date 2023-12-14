@@ -1,19 +1,24 @@
 
 ![ OLED ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)
 
-Table of contents
----------------------------
+# ER_OLEDM1_CH1115_RPI
+
+## Table of contents
 
   * [Overview](#overview)
   * [Output](#output)
   * [Installation](#installation)
   * [Test](#test)
   * [Hardware](#hardware)
-  * [Features](#features)
- 
+  * [Software](#software)
+ 	* [SPI](#spi)
+	* [Buffer](#buffer)
+	* [Fonts](#fonts)
+	* [Bitmaps](#bitmaps)
+	* [User adjustments](#user-adjustments)
   
-Overview
---------------------
+## Overview
+
 * Name : ER_OLEDM1_CH1115_RPI
 * Description : 
 
@@ -34,11 +39,10 @@ Overview
 	4. bcm2835 Library 1.71 (Dependency)
     
 * Author: Gavin Lyons
-* Port of my Arduino [library](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115)
- 
+* Port of my Arduino [library link](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115).
+	There is an API for the arduino library which is very similar to this port. 
 
-Output
------------------------------
+## Output
 
 Output Screenshots, From left to right, top to bottom.
 
@@ -54,8 +58,7 @@ Output Screenshots, From left to right, top to bottom.
 ![ output ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/output.jpg)
 ![ output ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/blob/main/extras/image/fontpic.jpg)
 
-Installation
-------------------------------
+## Installation
 
 1. Make sure SPI bus is enabled on your raspberry PI
 
@@ -79,8 +82,7 @@ cd ER_OLEDM1_CH1115_RPI-1.3.2
 sudo make
 ```
 
-Test
-----------------------------------
+## Test
 
 1. Next step is to test OLED and installed library with an example.
 Wire up your OLED. Next enter the examples folder and run the makefile in THAT folder, 
@@ -109,8 +111,7 @@ Comment out the rest and repeat 1.
 | SOFTWARE_SPI | Shows setup for software SPI | 
 | TEXT_GRAPHICS | Fonts + graphics test | 
 
-Hardware
-----------------------------
+## Hardware
 
 CH1115 is a single-chip CMOS OLED driver with controller for organic light emitting diode dot-matrix graphic display system. CH1115 consists of 128 segments, 64 commons that can support a maximum display resolution of 128 X 64. It is designed for Common Cathode type OLED panel. ER-OLEDM1.09-1W-SPI is a White 1.09" OLED Display Panel with Breakout Board. This module is a combination of the two.(controller and OLED)
 
@@ -129,15 +130,14 @@ For SWSPI pick any GPIO you want for the 5 control lines.
 
 ![ wiring ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI/blob/main/extras/image/wiring.png)
 
-Features
--------------------------
+## Software
 
 There are two makefiles
 
     1. Makefile at root directory builds and installs library at a system level.
     2. Makefile in example directory build chosen example file to an executable.
 
-*SPI*
+### SPI
 
 Hardware and software SPI. Two different class constructors. 
 User can pick the relevant constructor, see examples files. 
@@ -155,7 +155,7 @@ defined by enum bcm2835SPIClockDivider. For full list see
 User can also adjust which SPI chip enable pin the use.
 
 
-*fonts*
+### Fonts
 
 There are 8 fonts.
 A print class is available to print out most passed data types.
@@ -176,7 +176,7 @@ Font data table:
 | 7 | OLEDFontType_Bignum | 16x32 | ASCII 0x30-0x3A ,Numbers + : . only | 704 |
 | 8 | OLEDFontType_Mednum | 16x16 | ASCII 0x30-0x3A , Numbers + : . only | 352 |
 
-*bitmaps*
+### Bitmaps
 
 There is a few different ways of displaying bitmaps, 
 
@@ -189,7 +189,7 @@ There is a few different ways of displaying bitmaps,
 
 See the bitmap example file for more details on each method. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) , Bitmaps should be defined as const  buffers non-const, for method 2 buffer can be initialised with bitmap data.
 
-*User adjustments*
+### User adjustments
 
 When the user calls OLEDbegin() to start OLED they can specify a contrast setting from 0x00 to 0xFF. Datasheet says 0x80 is default. User can also change contrast on the fly.
 Screen can be disabled to enter a sleep type mode where OLED draws 500uA.
