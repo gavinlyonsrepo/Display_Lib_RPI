@@ -16,6 +16,8 @@
 	* [Fonts](#fonts)
 	* [Bitmaps](#bitmaps)
 	* [User adjustments](#user-adjustments)
+  * [Notes and Issues](#notes-and-issues)
+	* [Compilation problems](#compilation-problems)
   
 ## Overview
 
@@ -32,10 +34,10 @@
 6. Bitmaps supported.
 7. Hardware and Software SPI 
 
-* Developed on 
+* Development Tool Chain
 	1. Raspberry PI 3 model b, 
 	2. C++ complier g++ (Raspbian 8.3.0-6)
-	3. Raspbian 10 buster  OS
+	3. Raspbian 10 buster  OS, 32 bit. 
 	4. bcm2835 Library 1.71 (Dependency)
     
 * Author: Gavin Lyons
@@ -201,3 +203,12 @@ default is 0x81.
 There is a  Horizontal scroll effect. Whose parameters(TimeInterval , direction , mode)
 can be adjusted by passing data to function see "OLEDscrollSetup" function header in .cpp and datasheet for details. defaults are in header file are 6 frames , right , continuous mode.
 
+## Notes and Issues
+
+### Compilation problems
+
+Note the toolchain used in overview section, If you have trouble compiling on other 
+platforms or OS. For example 64-bit OS, user may need to remove or edit
+some of the CCFLAGS in root directory Makefile to allow for Compilation, if you see them throwing errors
+See [pull request on SSD1306 project](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/pull/2) for details.
+Will upgrade in future release.
