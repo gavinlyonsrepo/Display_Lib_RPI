@@ -7,20 +7,28 @@
 # Comment out the other 5. #
 
 SRC=src/HELLO_WORLD
+#SRC=src/GRAPHICS
+#SRC=src/TEXT_FONTS
+#SRC=src/OLED_FUNCTIONS
 #SRC=src/BITMAP
 #SRC=src/FPS_TEST
-#SRC=src/OLED_FUNCTIONS
-#SRC=src/SOFTWARE_SPI
-#SRC=src/TEXT_GRAPHICS
+#SRC=src/FPS_TEST_SW_SPI
+
 # ************************************************
 
-CC=g++
-LDFLAGS= -lbcm2835 -lrt -lER_OLEDM1_CH1115_RPI 
-CFLAGS = -Iinclude/ -c -Wall 
+# Make directory command
 MD=mkdir
+# C plus plus 
+CC=g++
+# Linker flags , note -lrt only needed fro FPS examples
+LDFLAGS= -lbcm2835 -lrt -lER_OLEDM1_CH1115_RPI 
+# Complier flags
+CFLAGS = -Iinclude/ -c -Wall 
+# Object and source File locations
 OBJ=obj
 SRCS = $(wildcard $(SRC)/*.cpp)
 OBJS = $(patsubst $(SRC)/%.cpp,  $(OBJ)/%.o, $(SRCS))
+# Executable file location. 
 BIN=./bin
 TARGET=$(BIN)/test
 

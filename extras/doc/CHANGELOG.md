@@ -30,3 +30,13 @@
 	* Changed from multibuffer to single buffer
 	* Allowed User to pick SPI bus baudrate and Chip enable pin.
 
+* Version 1.3.3. Jan 2024
+	* Changed root Makefile CCFLAGS so project complies for 64-bit OS without error.
+	* Added Arial fonts 9 & 10
+	* Updated Fonts 7 & 8 to 14 characters from 11
+	* Added Software SPI comm delay class member.
+	* Changed HW SPI settings function so it can be called outside of Init.
+	* Added return value to begin, bitmap and most text write functions.
+	* Improved Error handling , including check for ASCII character out of fonts range.
+
+

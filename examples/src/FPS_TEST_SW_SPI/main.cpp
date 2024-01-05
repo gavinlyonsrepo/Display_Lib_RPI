@@ -1,18 +1,17 @@
-
-// Example file name : main.cpp
-// Description:
-// Test file for ER_OLEDM1_CH1115 library, showing use SOFTWARE SPI
-// URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
-// *****************************
-// NOTES :
-// (1) Speed test results measured frame rate 93 fps, 1:49s to count 10000
-// (2) This is SOFTWARE SPI
-// ******************************
-// 
+/*!
+	@file examples/src/FPS_TEST_SW_SPI/main.cpp
+	@brief Example file for ER_OLEDM1_CH1115_RPI library, measuring Frame rate per second)FPS, SW SPI
+		Speed test results measured frame rate 93 fps, 1:49s to count 10000
+	@note
+		URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
+	@test
+		-# Test 202 FPS SW SPI
+*/
+ 
 
 #include <bcm2835.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdio>
 #include "ER_OLEDM1_CH1115.hpp"
 
 
@@ -21,6 +20,7 @@
 const uint8_t myOLEDwidth  = 128;
 const uint8_t myOLEDheight = 64;
 const uint8_t OLEDcontrast = 0x80; //Constrast 00 to FF , 0x80 is default.
+#define myScreenSize (myOLEDwidth * (myOLEDheight/8))
 
 // GPIO
 const uint8_t RES = 25; // GPIO pin number pick any you want
@@ -39,50 +39,61 @@ bool colour = 1;
 uint64_t  previousCounter =0;
 
 // =============== Function prototype ================
-void setup(void);
-void myLoop(void);
-void display(long, int );
+bool Setup(void);
+void myTest(void);
+void EndTest(void);
+void display(long , int );
 static uint64_t counter( void );
 
 // ======================= Main ===================
 int main(int argc, char **argv)
 {
-	if(!bcm2835_init())
-	{
-		printf("OLED :: ERROR failed to init bcm2835 library.\r\n");
-		return -1;
-	}
-
-	setup();
-	myLoop();
-
-	myOLED.OLEDPowerDown();
-	bcm2835_close(); // Close library,deallocating any allocated mem
-	printf("OLED End\r\n");
+	if(!Setup()) return -1;
+	myTest();
+	EndTest();
 	return 0;
 }
 // ======================= End of main  ===================
 
 
-// ************* SETUP ***************
-void setup()
+bool Setup(void)
 {
-	bcm2835_delay(50);
 	printf("OLED Begin\r\n");
-	myOLED.OLEDbegin(OLEDcontrast); // initialize the OLED
-	myOLED.OLEDFillScreen(0x01);
-	bcm2835_delay(2000);
+	if(!bcm2835_init())
+	{
+		printf("Error 1201 : Setup : Problem with init bcm2835 library\r\n");
+		return false;
+	}else{
+		printf("bcm2835 library version : %u\r\n", bcm2835_version());
+	}
+	bcm2835_delay(50);
+	
+	myOLED.OLEDbegin(OLEDcontrast);// initialize the OLED
+	printf("CH1115 OLED library version : %u\r\n", myOLED.OLEDLibVerNumGet());
+	printf("Software SPI OLED GPIO delay : %u uS\r\n", myOLED.OLEDHighFreqDelayGet());
+	bcm2835_delay(50);
+	myOLED.OLEDFillScreen(0x77); //splash screen bars
+	bcm2835_delay(1000);
+	return true;
 }
 
-// *********** myLoop ******************
-void myLoop() {
+void EndTest(void)
+{
+	myOLED.OLEDPowerDown();
+	bcm2835_close(); //Close lib & /dev/mem, deallocating mem
+	printf("OLED End\r\n");
+}
 
+void myTest() {
 	myOLED.setTextColor(FOREGROUND);
 	myOLED.setTextSize(1);
-	
+
 	// Buffer setup, Define a buffer to cover whole screen
-	uint8_t screenBuffer[(myOLEDwidth * (myOLEDheight / 8))+1]; // 1024 bytes = 128 * 64/8
-	myOLED.OLEDbuffer = (uint8_t*) &screenBuffer;  // Assign the pointer to the buffer
+	uint8_t screenBuffer[myScreenSize ]; // 1024 bytes = 128 * 64/8
+
+	if (!myOLED.OLEDSetBufferPtr(myOLEDwidth, myOLEDheight, screenBuffer, sizeof(screenBuffer)/sizeof(uint8_t)))
+		return;
+
 	myOLED.OLEDclearBuffer(); // Clear buffer
 
 	while (count < 10000)
@@ -101,13 +112,14 @@ void myLoop() {
 void display(long currentFramerate, int count)
 {
 	myOLED.OLEDclearBuffer();
-	
+
 	myOLED.setCursor(0, 10);
 	myOLED.print("1024 bytes");
 	myOLED.setCursor(0, 20);
 	myOLED.print("G Lyons");
 	myOLED.setCursor(0, 30);
 	myOLED.print(count);
+
 	// Values to count frame rate per second
 	static long lastFramerate = 0;
 	static uint16_t fps;
@@ -125,25 +137,23 @@ void display(long currentFramerate, int count)
 	myOLED.print(fps);
 	myOLED.print(" fps");
 	myOLED.setCursor(0, 50);
-	myOLED.print("V 1.3.2");
-	
+	myOLED.print(myOLED.OLEDLibVerNumGet());
+
 	myOLED.drawFastVLine(64, 0, 63, FOREGROUND);
 	myOLED.fillRect(70, 10, 20, 20, colour);
 	myOLED.fillCircle(110, 20, 10, !colour);
 	myOLED.drawRoundRect(80, 40, 40, 20, 10, FOREGROUND);
-	
+	myOLED.drawPixel(65, 60, FOREGROUND);
+
 	myOLED.OLEDupdate();
 }
 
-
-//This returns nano-seconds as a 64-bit unsigned number, monotonically increasing, 
+//This returns nano-seconds as a 64-bit unsigned number, monotonically increasing,
 //probably since system boot.
 //The actual resolution looks like microseconds. returns nanoseconds
 static uint64_t counter( void )
 {
   struct timespec now;
   clock_gettime( CLOCK_MONOTONIC, &now );
-  return  ((uint64_t)now.tv_sec * 1000000000U) + (uint64_t)now.tv_nsec; 
+  return  ((uint64_t)now.tv_sec * 1000000000U) + (uint64_t)now.tv_nsec;
 }
-
-// *********** EOF ***********

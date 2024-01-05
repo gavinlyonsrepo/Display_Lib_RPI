@@ -1,32 +1,44 @@
-/*
-* Project Name: ERMCH1115
-* File: ERMCH1115.h
-* Description: ER_OLEDM1 OLED driven by CH1115 controller source file
-* Author: Gavin Lyons.
-* URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
+ /*!
+	@file ER_OLEDM1_CH1115.cpp
+	@brief ER_OLEDM1 OLED driven by CH1115 controller Source file
+		Project Name: ER_OLEDM1_CH1115_RPI , URL: https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_RPI
+	@author  Gavin Lyons
 */
 
-
 #include "ER_OLEDM1_CH1115.hpp"
-#include <stdbool.h>
 
-// Class Constructors 2 off:
-// HWSPI 
-// SWSPI 
+// Class Constructors 2 off( overloaded): Hardware or software SPI.
 
-// Hardware SPI , mode 2
+/*!
+	@brief init the OLED class object
+	@param oledwidth width of oled in pixels
+	@param oledheight height of oled in pixels
+	@param rst GPIO reset
+	@param cd GPIO data or command
+	@note Hardware SPI version,  mode 2
+ */
 ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight ,int8_t rst, int8_t cd) :ERMCH1115_graphics(oledwidth, oledheight)
 {
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
-	
+
 	_OLED_CD = cd;
 	_OLED_RST= rst;
-	
+
 	_OLED_mode = 2;
 }
 
-// software SPI , mode 3
+/*!
+	@brief init the OLED class object
+	@param oledwidth width of oled in pixels
+	@param oledheight height of oled in pixels
+	@param rst GPIO reset
+	@param cd GPIO data or command
+	@param cs GPIO Chip select
+	@param sclk GPIO SPI Clock
+	@param din GPIO MOSI
+	@note software SPI version, mode 3
+ */
 ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8_t cd, int8_t cs, int8_t sclk, int8_t din) :ERMCH1115_graphics(oledwidth, oledheight)
 {
   	_OLED_HEIGHT = oledheight;
@@ -35,24 +47,30 @@ ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8
 	_OLED_CD = cd;
 	_OLED_RST= rst;
 	_OLED_CS = cs;
-	_OLED_DIN = din;  
+	_OLED_DIN = din;
 	_OLED_SCLK = sclk;
-	
+
 	_OLED_mode = 3;
 }
 
+// Class Functions
 
-// Desc: begin Method initialise OLED
-// Sets pinmodes and SPI setup
-// Param1: OLEDcontrast default = 0x80 , range 0x00 to 0xFE
-// Param2: OLED_spi_divider default = 64 ,see bcm2835SPIClockDivider enum , bcm2835
-// Param3: SPICE_Pin default = 0 , which SPI_CE pin to use , 0 or 1
-void ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, uint32_t OLED_spi_divider, uint8_t SPICE_Pin)
+/*!
+	@brief begin Method initialise OLED Sets pinmodes and SPI setup
+	@param OLEDcontrast Contrast of the OLED display default = 0x80 , range 0x00 to 0xFE
+	@param OLED_spi_divider default = 64 ,see bcm2835SPIClockDivider enum , bcm2835
+	@param SPICE_Pin default = 0 , which SPI_CE pin to use , 0 or 1
+	@return Success is true , HW SPI failure (bcm2835_spi_begin) is false
+	@details
+		If HW SPI: Start SPI operations. Forces RPi SPI0 pins P1-19 (MOSI), P1-21 (MISO),
+		P1-23 (CLK), P1-24 (CE0) and P1-26 (CE1) to alternate function ALT0, which enables those pins for SPI interface.
+ */
+bool ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, uint32_t OLED_spi_divider, uint8_t SPICE_Pin)
 {
 	_OLEDcontrast  = OLEDcontrast ;
 	_OLED_SPICLK_DIVIDER  = OLED_spi_divider;
 	_OLED_SPICE_PIN = SPICE_Pin;
-	
+
 	bcm2835_gpio_fsel(_OLED_RST, BCM2835_GPIO_FSEL_OUTP);
 	bcm2835_gpio_fsel(_OLED_CD, BCM2835_GPIO_FSEL_OUTP);
 	if(GetCommMode() == 3)
@@ -60,26 +78,58 @@ void ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, uint32_t OLED_spi_divider, uint
 		bcm2835_gpio_fsel( _OLED_CS, BCM2835_GPIO_FSEL_OUTP);
 		bcm2835_gpio_fsel(_OLED_SCLK, BCM2835_GPIO_FSEL_OUTP);
 		bcm2835_gpio_fsel(_OLED_DIN, BCM2835_GPIO_FSEL_OUTP);
+	}else{
+		if(!bcm2835_spi_begin())
+			return false;
 	}
-		
+
 	OLEDinit();
+	return true;
 }
 
-
-// Desc: Start SPI operations. Forces RPi SPI0 pins P1-19 (MOSI), P1-21 (MISO), 
-// P1-23 (CLK), P1-24 (CE0) and P1-26 (CE1) 
-// to alternate function ALT0, which enables those pins for SPI interface.
-void ERMCH1115::OLEDSPIon(void)
+/*!
+	@brief sets the buffer pointer to the users screen data buffer
+	@param width width of buffer in pixels
+	@param height height of buffer in pixels
+	@param pBuffer the buffer array which decays to pointer
+	@param sizeOfBuffer size of buffer
+	@return Will return true for success false for failures : ,
+		Buffer size calculations are incorrect BufferSize = w * (h/8),
+		or not a valid pointer object.
+*/
+bool ERMCH1115::OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
 {
-	bcm2835_spi_begin();
+	if(sizeOfBuffer !=  width * (height/8))
+	{
+		printf("Error OLEDSetBufferPtr 1: buffer size does not equal : width * (height/8))\n");
+		return false;
+	}
+	OLEDbuffer = pBuffer;
+	if(OLEDbuffer ==  nullptr)
+	{
+		printf("Error OLEDSetBufferPtr 2: Problem assigning buffer pointer\r\n");
+		return false;
+	}
+	return true;
+}
+
+/*!
+	@brief Sets HW SPI settings
+	@details sets bitmode bitorder, bus speed and CEX pin(1 or 0)
+	usually just called at initialization internally but If multiple devices on SPI bus with different SPI settings
+	can be called by user again before a tranche of OLED commands.
+	@note Sets SPI mode 0 , MSBFIRST ,  BCM2835_SPI_CLOCK_DIVIDER_64  and CE0 by default.
+*/
+void ERMCH1115::OLEDSPIHWSettings(void)
+{
 	bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
 	bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
-	
+
 	if (_OLED_SPICLK_DIVIDER > 0)
 		bcm2835_spi_setClockDivider(_OLED_SPICLK_DIVIDER);
 	else // default BCM2835_SPI_CLOCK_DIVIDER_64 3.90MHz Rpi2, 6.250MHz RPI3
-		bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64); 
-	
+		bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
+
 	if (_OLED_SPICE_PIN == 0)
 	{
 		bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
@@ -91,16 +141,21 @@ void ERMCH1115::OLEDSPIon(void)
 	}
 }
 
-// Desc: stop  Spi
-// End SPI operations. SPI0 pins P1-19 (MOSI), P1-21 (MISO), P1-23 (CLK), 
-// P1-24 (CE0) and P1-26 (CE1) 
-// are returned to their default INPUT behaviour.
+/*!
+	@brief stops HW spi operations
+	@details End SPI operations. SPI0 pins P1-19 (MOSI), P1-21 (MISO), P1-23 (CLK),
+		P1-24 (CE0) and P1-26 (CE1) are returned to their default INPUT behaviour.
+*/
 void ERMCH1115::OLEDSPIoff(void)
 {
-   bcm2835_spi_end();
+	if (GetCommMode() == 3) bcm2835_spi_end();
 }
 
-// Call when powering down
+/*! 
+	@brief Power down function
+	@details Disables screen and sets all independent GPIO low.
+		call when powering down before end of operations 
+*/
 void ERMCH1115::OLEDPowerDown(void)
 {
 	OLEDEnable(0);
@@ -115,40 +170,41 @@ void ERMCH1115::OLEDPowerDown(void)
 	_sleep= true;
 }
 
+/*!
+	@brief Checks if software SPI is on
+	@return _OLED_mode 2 if hardware SPi on ,  3 for software spi
+*/
+int8_t  ERMCH1115::GetCommMode(){return (_OLED_mode);}
 
-// Desc: Checks if software SPI is on
-// Returns: true 2 if hardware SPi on ,  3 for software spi
-int8_t  ERMCH1115::GetCommMode() 
-{
-  return (_OLED_mode);
-}
-
-// Desc: used in software SPI mode to shift out data
-// Param1: bit order LSB or MSB set to MSBFIRST for ERMCH1115
-// Param2: the byte to go
-void ERMCH1115::CustomshiftOut(uint8_t value)
+/*!
+	@brief used in software SPI mode to shift out data
+	@param value Byte to send in MSBFIRST
+	@details a GPIO uS delay is used here(_OLEDHighFreqDelay)
+		user adjust for different CPU speeds possible
+*/
+void ERMCH1115::SoftwareSPIShiftOut(uint8_t value)
 {
 	uint8_t i;
 
-	for (i = 0; i < 8; i++)  
+	for (i = 0; i < 8; i++)
 	{
-   		!!(value & (1 << (7 - i))) ? ERMCH1115_SDA_SetHigh : ERMCH1115_SDA_SetLow ;
-			
-		ERMCH1115_SCLK_SetHigh; 
-		bcm2835_delayMicroseconds(ERMCH1115_HIGHFREQ_DELAY); 
-		ERMCH1115_SCLK_SetLow;  
-		bcm2835_delayMicroseconds(ERMCH1115_HIGHFREQ_DELAY);
+		!!(value & (1 << (7 - i))) ? ERMCH1115_SDA_SetHigh : ERMCH1115_SDA_SetLow ;
+
+		ERMCH1115_SCLK_SetHigh;
+		bcm2835_delayMicroseconds(_OLEDHighFreqDelay);
+		ERMCH1115_SCLK_SetLow;
+		bcm2835_delayMicroseconds(_OLEDHighFreqDelay);
 	}
 }
 
-// Desc: Called from OLEDbegin carries out Power on sequence and register init
-// Can be used to reset OLED to default values.
+/*!
+	@brief Called from OLEDbegin carries out Power on sequence and register init
+*/
 void ERMCH1115::OLEDinit()
  {
-
 	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
+	{
+		case 2: OLEDSPIHWSettings(); break;
 		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
 	}
 	OLEDReset();
@@ -196,17 +252,18 @@ void ERMCH1115::OLEDinit()
 	send_command(ERMCH1115_DISPLAY_ON, 0);
 	_sleep= false;
 
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
+
 	bcm2835_delay(ERMCH1115_INITDELAY);
 }
 
-// Desc: Sends a command to the display
-// Param1: the command
-// Param2: the values to change
+/*!
+	@brief Sends a command to the display
+	@param command Command to send
+	@param value the values to change
+	@note command and value  will be combined with OR
+*/
 void ERMCH1115::send_command (uint8_t command,uint8_t value)
 {
 	ERMCH1115_CD_SetLow;
@@ -214,7 +271,9 @@ void ERMCH1115::send_command (uint8_t command,uint8_t value)
 	ERMCH1115_CD_SetHigh;
 }
 
-// Desc: Resets OLED in a four wire setup called at start
+/*!
+	@brief Resets OLED in a four wire setup called at start
+*/
 void ERMCH1115::OLEDReset ()
 {
 	ERMCH1115_RST_SetHigh;
@@ -225,16 +284,15 @@ void ERMCH1115::OLEDReset ()
 	bcm2835_delay(ERMCH1115_RST_DELAY2);
 }
 
-// Desc: Turns On Display
-// Param1: bits,  1  on , 0 off
+/*!
+	@brief Turns On Display
+	@param bits  1  display on , 0 display off
+*/
 void ERMCH1115::OLEDEnable (uint8_t bits)
 {
- 	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
-	
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	if (bits)
 	{
 		_sleep= false;
@@ -244,204 +302,187 @@ void ERMCH1115::OLEDEnable (uint8_t bits)
 		 _sleep= true;
 		 send_command(ERMCH1115_DISPLAY_OFF, 0);
 	}
-	
- 	switch (GetCommMode())
-	{
-	case 2: OLEDSPIoff(); break;
-	case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: OLEDIsOff
-// Returns: bool  value of _sleep if true OLED is off and in sleep mode, 500uA.
-bool ERMCH1115::OLEDIssleeping() { return  _sleep ;}
+/*!
+	@brief getting for _sleep member . is OLED in sleep mode
+	@returns value of _sleep if true OLED is off and in sleep mode, 500uA.
+*/
+bool ERMCH1115::OLEDIsSleeping() { return  _sleep ;}
 
-// Desc: Sets up Horionztal Scroll
-// Param1: TimeInterval 0x00 -> 0x07 , 0x00 = 6 frames
-// Param2: Direction 0x26 right 0x27 left (A2 – A0)
-// Param3: Mode. Set Scroll Mode: (28H – 2BH)  0x28 = continuous
+/*!
+	@brief Sets up Horizontal Scroll
+	@param Timeinterval 0x00 -> 0x07 , 0x00 = 6 frames
+	@param Direction 0x26 right 0x27 left (A2 – A0)
+	@param mode Set Scroll Mode: (28H – 2BH)  0x28 = continuous
+*/
 void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t mode)
 {
-	 switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
-	 send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SETUP, 0);
-	 send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SET_SCOL, 0);
-	 send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SET_ECOL, 0);
-	 send_command(Direction , 0);
-	 send_command(ERMCH1115_SPAGE_ADR_SET , 0);
-	 send_command(Timeinterval , 0);
-	 send_command(ERMCH1115_EPAGE_ADR_SET , 0);
-	 send_command(mode, 0);
-	 switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
+	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SETUP, 0);
+	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SET_SCOL, 0);
+	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SET_ECOL, 0);
+	send_command(Direction , 0);
+	send_command(ERMCH1115_SPAGE_ADR_SET , 0);
+	send_command(Timeinterval , 0);
+	send_command(ERMCH1115_EPAGE_ADR_SET , 0);
+	send_command(mode, 0);
+
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: Turns on Horizontal scroll
-// Param1: bits 1  on , 0 off
-// Note OLEDscrollSetup must be called before it
+/*!
+	@brief Turns on Horizontal scroll
+	@param bits 1  Horizontal scroll on , 0 Horizontal scroll off
+	@note OLEDscrollSetup must be called before it
+*/
 void ERMCH1115::OLEDscroll(uint8_t bits)
 {
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
-	
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	bits ? send_command(ERMCH1115_ACTIVATE_SCROLL , 0) :   send_command(ERMCH1115_DEACTIVATE_SCROLL, 0);
-	
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: Adjusts contrast
-// Param1: Contrast 0x00 to 0xFF , default 0x80
-// Note: Setup during init.
+/*!
+	@brief Adjusts contrast
+	@param contrast 0x00 to 0xFF , default 0x80
+*/
 void ERMCH1115::OLEDContrast(uint8_t contrast)
 {
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	send_command(ERMCH115_CONTRAST_CONTROL  ,0);
 	send_command(contrast, 0);
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: Rotates the display vertically
-// Param1: bits 1  on , 0 off
+/*!
+	@brief Rotates the display vertically, A 180 degree 'flip'
+	@param bits 1  on , 0 off
+*/
 void ERMCH1115::OLEDFlip(uint8_t  bits)
 {
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	bits ? send_command(ERMCH1115_COMMON_SCAN_DIR, 0x08):send_command(ERMCH1115_COMMON_SCAN_DIR, 0x00)  ; // C0H - C8H
 	bits ? send_command(ERMCH1115_SEG_SET_REMAP, 0x01):   send_command(ERMCH1115_SEG_SET_REMAP, 0x00); //(A0H - A1H)
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: Turns on fade effect
-// Param1: bits
-// bits = 0x00 to stop
-// bits values: (see datasheet breatheffect P25 for more details)
-//		ON/OFF * * A4 A3 A2 A1 A0
-//		When ON/OFF =”H”, Breathing Light ON.
-//	 	Breathing Display Effect Maximum Brightness Adjust Set: (A4 – A3)
-//		Breathing Display Effect Time Interval Set: (A2 – A0)
-//		Default on is 0x81
+/*!
+	@brief Turns on fade effect
+	@param bits 0x00 to stop
+	@note bits values: (see datasheet breatheffect P25 for more details)
+		-# ON/OFF * * A4 A3 A2 A1 A0
+		-# When ON/OFF =”H”, Breathing Light ON.
+		-# Breathing Display Effect Maximum Brightness Adjust Set: (A4 – A3)
+		-# Breathing Display Effect Time Interval Set: (A2 – A0)
+		-# Default on is 0x81
+*/
 void ERMCH1115::OLEDfadeEffect(uint8_t bits)
 {
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	send_command(ERMCCH1115_BREATHEFFECT_SET,0);
 	send_command(bits,0);
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: invert the display
-// Param1: bits, 1 invert , 0 normal
+/*!
+	@brief invert the display
+	@param bits 1 invert , 0 normal
+*/
 void ERMCH1115::OLEDInvert(uint8_t bits)
 {
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	bits ? send_command(ERMCH1115_DISPLAY_INVERT, 0) :   send_command(ERMCH1115_DISPLAY_NORMAL, 0);
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: Fill the screen NOT the buffer with a datapattern
-// Param1: datapattern can be set to zero to clear screen (not buffer) range 0x00 to 0ff
-
+/*!
+	@brief Fill the screen NOT the buffer with a datapattern
+	@param dataPattern can be set to zero to clear screen (not buffer) range 0x00 to 0ff
+*/
 void ERMCH1115::OLEDFillScreen(uint8_t dataPattern)
 {
-	for (uint8_t row = 0; row < _OLED_PAGE_NUM; row++) 
+	for (uint8_t row = 0; row < _OLED_PAGE_NUM; row++)
 	{
 		OLEDFillPage(row,dataPattern);
 	}
 }
 
-// Desc: Fill the chosen page(1-8)  with a datapattern
-// Param1: datapattern can be set to 0 to FF (not buffer)
-void ERMCH1115::OLEDFillPage(uint8_t page_num, uint8_t dataPattern)
+/*!
+	 @brief Fill the chosen page(0-7)  with a datapattern
+	 @param pageNum  page 0-7 divides 64 pixel screen into 8 pages or blocks  64/8  
+	 @param dataPattern can be set to 0 to FF (not buffer)
+*/
+void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 {
-	// Commands
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
+
+	if (pageNum >= 8) 
+	{
+		printf("Error OLEDFillPage 1 :page number must be between 0 and 7 \n");
+		return;
 	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
+	// Commands
 	send_command(ERMCH1115_SET_COLADD_LSB, 0);
 	send_command(ERMCH1115_SET_COLADD_MSB, 0);
-	send_command(ERMCH1115_SET_PAGEADD, page_num);
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS,HIGH); break;
-	}
+	send_command(ERMCH1115_SET_PAGEADD, pageNum);
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
+
 	bcm2835_delayMicroseconds(5);
-	
+
 	// Data
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
-	 
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	for (uint8_t i = 0; i < _OLED_WIDTH; i++)
 	{
 		send_data(dataPattern);
 	}
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-//Desc: Draw a bitmap to the screen
-//Param1: x offset 
-//Param2: y offset 
-//Param3: width 
-//Param4 height 
+/*!
+	 @brief Draw a bitmap  to the screen
+	 @param x offset 0-128
+	 @param y offset 0-64
+	 @param w width 0-128
+	 @param h height 0-64
+	 @param data  pointer to the bitmap
+	 @note data is const. writes direct to screen , no buffer.
+*/
 void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data)
 {
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	uint8_t tx, ty;
 	uint16_t offset = 0;
 	uint8_t column = (x < 0) ? 0 : x;
@@ -461,55 +502,59 @@ void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uin
 				send_data(data[offset]);
 		}
 	}
-	switch (GetCommMode())
-	{		
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-//Desc: Send data byte with SPI to ERMCH1115
-//Param1: the data byte
+/*!
+	 @brief Send data byte with SPI to ERMCH1115
+	 @param byte the data byte to send 
+*/
 void ERMCH1115::send_data(uint8_t byte)
 {
-	if(GetCommMode() == 2 )
-		bcm2835_spi_transfer(byte);
-	else if(GetCommMode() == 3)
-		CustomshiftOut(byte); 
+	switch (GetCommMode())
+	{
+		case 2: bcm2835_spi_transfer(byte); break;
+		case 3: SoftwareSPIShiftOut(byte); break;
+	}
 }
 
 
-//Desc: updates the buffer i.e. writes it to the screen
+/*!
+	 @brief updates the OLED i.e. writes  buffer to the screen
+*/
 void ERMCH1115::OLEDupdate()
 {
-	uint8_t x = 0; 
-	uint8_t y = 0; 
-	uint8_t w = this->_OLED_WIDTH; 
+	uint8_t x = 0;
+	uint8_t y = 0;
+	uint8_t w = this->_OLED_WIDTH;
 	uint8_t h = this->_OLED_HEIGHT;
-	OLEDBuffer( x,  y,  w,  h, (uint8_t*) this->OLEDbuffer);
+	OLEDBufferScreen( x,  y,  w,  h, (uint8_t*) this->OLEDbuffer);
 }
 
-//Desc: clears the buffer i.e. does NOT write to the screen
+/*!
+	 @brief clears the active shared buffer i.e. does NOT write to the screen
+*/
 void ERMCH1115::OLEDclearBuffer()
 {
-	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH * (this->_OLED_HEIGHT /8))  ); 
+	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH * (this->_OLED_HEIGHT /8))  );
 }
 
-//Desc: Draw a bitmap to the screen
-//Param1: x offset 
-//Param2: y offset 
-//Param3: width 
-//Param4 height 
-//Param5 the bitmap data
-//Note: Called by OLEDupdate
-void ERMCH1115::OLEDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
+/*!
+	 @brief Draw a bitmap to the screen
+	 @param x offset 0-128
+	 @param y offset 0-64
+	 @param w width 0-128
+	 @param h height 0-64
+	 @param data pointer to the bitmap data array
+	 @note Called by OLEDupdate, used internally mostly 
+*/
+void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
 {
 
-	switch (GetCommMode())
-	{	
-		case 2: OLEDSPIon(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, LOW);
+
 	uint8_t tx, ty;
 	uint16_t offset = 0;
 	uint8_t column = (x < 0) ? 0 : x;
@@ -531,22 +576,24 @@ void ERMCH1115::OLEDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* 
 	}
 	}
 
-	switch (GetCommMode())
-	{
-		case 2: OLEDSPIoff(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, HIGH); break;
-	}
+	if (GetCommMode() == 3)
+		bcm2835_gpio_write(_OLED_CS, HIGH);
 }
 
-// Desc: Draws a Pixel to the buffer overides the  graphics library
-// Passed x and y co-ords and colour of pixel.
+/*!
+	@brief Draws a Pixel to the screen , overides the  graphics library 
+	@param x x co-ord of pixel
+	@param y y co-ord of pixel
+	@param colour colour of  pixel
+	@note virtual function overides the  graphics library 
+*/
 void ERMCH1115::drawPixel(int16_t x, int16_t y, uint8_t colour)
 {
 
   if ((x < 0) || (x >= this->_OLED_WIDTH) || (y < 0) || (y >= this->_OLED_HEIGHT)) {
 	return;
   }
-	  uint16_t tc = (_OLED_WIDTH * (y /8)) + x; 
+	  uint16_t tc = (_OLED_WIDTH * (y /8)) + x;
 	  switch (colour)
 	  {
 		case FOREGROUND:  this->OLEDbuffer[tc] |= (1 << (y & 7)); break;
@@ -555,5 +602,23 @@ void ERMCH1115::drawPixel(int16_t x, int16_t y, uint8_t colour)
 	  }
 
 }
+
+/*!
+	@brief Library version number getter
+	@return The lib version number eg 130 = 1.3.0
+*/
+uint16_t ERMCH1115::OLEDLibVerNumGet(void) {return _LibVersionNum;}
+
+/*!
+	@brief Freq delay used in SW SPI getter, uS delay used in SW SPI method
+	@return The  GPIO communications delay in uS
+*/
+uint16_t ERMCH1115::OLEDHighFreqDelayGet(void){return _OLEDHighFreqDelay;}
+
+/*!
+	@brief Freq delay used in SW SPI setter, uS delay used in SW SPI method
+	@param CommDelay The GPIO communications delay in uS
+*/
+void  ERMCH1115::OLEDHighFreqDelaySet(uint16_t CommDelay){_OLEDHighFreqDelay = CommDelay;}
 
 // EOF

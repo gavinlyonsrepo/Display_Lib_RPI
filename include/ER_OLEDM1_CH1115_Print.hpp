@@ -1,27 +1,16 @@
-/*
-  Print.h - Base class that provides print() and println()
-  Copyright (c) 2008 David A. Mellis.  All right reserved.
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+/*!
+	@file     ER_OLEDM1_CH1115_Print.hpp
+	@brief    Base class that provides print() and println() for  ER_OLEDM1_CH1115 library
+	@note     Port of arduino built-in print class, G Lyons 2022.
 */
 
-// This is a port of the arduino core file Print.h. see above notice
- 
-#ifndef Print_h
-#define Print_h
+#pragma once
 
-#include <inttypes.h>
-#include <stdio.h> // for size_t
-#include <string.h>
+#include <cstdint>
+#include <cstdio> // for size_t
+#include <cstring>
+#include <string>
+#include <cmath>
 
 #define PGM_P const char*
 
@@ -43,10 +32,10 @@ class Print
     void setWriteError(int err = 1) { write_error = err; }
   public:
     Print() : write_error(0) {}
-  
+
     int getWriteError() { return write_error; }
     void clearWriteError() { setWriteError(0); }
-  
+
     virtual size_t write(uint8_t) = 0;
     size_t write(const char *str) {
       if (str == NULL) return 0;
@@ -68,6 +57,7 @@ class Print
     size_t print(long, int = DEC);
     size_t print(unsigned long, int = DEC);
     size_t print(double, int = 2);
+    size_t print(const std::string &);
 
     size_t println(const char[]);
     size_t println(char);
@@ -77,7 +67,8 @@ class Print
     size_t println(unsigned long, int = DEC);
     size_t println(double, int = 2);
     size_t println(void);
+    size_t println(const std::string &s);
 
 };
 
-#endif
+

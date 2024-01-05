@@ -4,3 +4,4 @@ bin/
 examples/obj/
 examples/bin/
 src/*.o
+extras/doxygen/html/
