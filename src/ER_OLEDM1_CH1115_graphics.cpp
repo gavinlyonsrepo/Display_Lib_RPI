@@ -885,7 +885,7 @@ if (_drawBitmapAddr== true)
 	if(sizeOfBitmap != ((w/8) * h))
 	{
 		printf("Error drawBitmap 4B : Horizontal Bitmap size is incorrect:  Check Size =  (w/8 * h): %u  %i  %i \n", sizeOfBitmap , w , h);
-		printf("Check size = (w*(h/8) or Is bitmap width divisible evenly by eight or is all bitmap data there or too much \n");
+		printf("Check size = ((w/8)*h) or Is bitmap width divisible evenly by eight or is all bitmap data there or too much \n");
 		return false;
 	}
 	// Horizontal byte bitmaps mode

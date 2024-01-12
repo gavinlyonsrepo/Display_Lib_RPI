@@ -248,4 +248,10 @@ can be adjusted by passing data to function see "OLEDscrollSetup" function heade
 
 ## Notes and Issues
 
+Typo in Error message , Version 1.3.3 , ERMCH1115_graphics::drawBitmap ,  4B , line 888.
+Should  read. 
+
+```
+printf("Check size = ((w/8)*h) 	<etc>
+```
 
