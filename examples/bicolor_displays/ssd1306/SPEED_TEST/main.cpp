@@ -77,7 +77,7 @@ bool SetupTest()
 	}
 	bcm2835_delay(250);
 	// Turn on I2C bus (optional it may already be on)
-	if(!myOLED.OLED_I2C_ON())
+	if(myOLED.OLED_I2C_ON() != rpiDisplay_Success)
 	{
 		printf("Error 1202: bcm2835_i2c_begin :Cannot start I2C, Running as root?\n");
 		bcm2835_close(); // Close the library
@@ -87,6 +87,10 @@ bool SetupTest()
 	printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
 	printf("SSD1306 library Version Number :: %u\r\n",GetRDLibVersionNum());
 	myOLED.OLEDbegin(I2C_Speed, I2C_Address, I2C_debug); // initialize the OLED
+	printf("Debug status is : %u\r\n", myOLED.OLEDDebugGet());
+	printf("I2C Debug Error : %u\r\n", myOLED.OLEDI2CErrorGet()); // Print I2C error flag
+	printf("I2C Error Timeout mS : %u \r\n", myOLED.OLEDI2CErrorTimeoutGet()); // Print I2C error Timeout
+	printf("I2C Error retry attempts counts : %u \r\n", myOLED.OLEDI2CErrorRetryNumGet()); // Print I2C error retry count
 	myOLED.OLEDFillScreen(0xF1, 0); // splash screen bars, optional just for effect
 	bcm2835_delay(1000);
 	
@@ -140,10 +144,10 @@ void display_buffer(long currentFramerate, int count)
 	myOLED.print(fps);
 	myOLED.print(" fps");
 
-	myOLED.drawFastVLine(64, 0, 63, WHITE);
+	myOLED.drawFastVLine(64, 0, 63, RDL_WHITE);
 	myOLED.fillRect(70, 10, 20, 20, colour);
 	myOLED.fillCircle(110, 20, 10, !colour);
-	myOLED.drawRoundRect(80, 40, 40, 20, 10, WHITE);
+	myOLED.drawRoundRect(80, 40, 40, 20, 10, RDL_WHITE);
 	// ** END of TEST CODE ** 
 	
 	myOLED.OLEDupdate();

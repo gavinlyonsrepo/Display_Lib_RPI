@@ -12,21 +12,16 @@
 # Comment out the others. 
 
 # ================= MAX7219_7SEG ================
-SRC=max7219/HELLOWORLD_HWSPI
-#SRC=max7219/TESTS
-#SRC=max7219/TESTS_HWSPI
+SRC=max7219/TESTS_HWSPI
+#SRC=max7219/TESTS_SWSPI
 #SRC=max7219/BCDMODE
 #SRC=max7219/CLOCK_DEMO
 #SRC=max7219/CASCADE_DEMO
 #================================================
 
 # ================= TM1638 ======================
-#SRC=tm1638/HELLOWORLD_Model1
-#SRC=tm1638/HELLOWORLD_Model2
-#SRC=tm1638/HELLOWORLD_Model3
-#SRC=tm1638/TEST_Model1
+#SRC=tm1638/TEST_Model_1_3
 #SRC=tm1638/TEST_Model2
-#SRC=tm1638/TEST_Model3
 # ================================================
 
 # ************************************************

@@ -12,10 +12,7 @@
 
 # =============== ST7735 TFT LCD SPI =============
 SRC=st7735/Hello_world
-#SRC=st7735/Hello_world_SWSPI
-#SRC=st7735/Text_Tests
-#SRC=st7735/Graphic_Tests
-#SRC=st7735/Function_Tests
+#SRC=st7735/Text_Graphics_Functions
 #SRC=st7735/Bitmap_Tests
 #SRC=st7735/Frame_rate_test_bmp
 #SRC=st7735/Frame_rate_test_two

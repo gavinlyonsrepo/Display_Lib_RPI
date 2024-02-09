@@ -60,7 +60,7 @@ bool SetupTest()
 	}
 
 	// Turn on I2C bus (optionally it may already be on)
-	if(!myOLED.OLED_I2C_ON())
+	if(myOLED.OLED_I2C_ON() != rpiDisplay_Success)
 	{
 		printf("Error 1202: bcm2835_i2c_begin :Cannot start I2C, Running as root?\n");
 		bcm2835_close(); // Close the library

@@ -11,8 +11,7 @@
 # Comment out the others. 
 
 # ================= HD44780_LCD_I2C ==============
-SRC=hd44780/HELLO_16x02
-#SRC=hd44780/TEST_16x02
+SRC=hd44780/TEST_16x02
 #SRC=hd44780/TEST_20x04
 #SRC=hd44780/CLOCK_16x02
 #SRC=hd44780/TEST_I2C_16x02
