@@ -132,6 +132,10 @@ Library naming :
 3. Library File suffix  = RDL
 4. Project name = Display_Lib_RPI
 
+Class Hierarchy (from API document):
+
+![ op ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/classhierarchy.png)
+
 ## Notes and issues
 
 1. Will not work on Raspberry 5 at present as the bcm2835 Library dependency is not updated

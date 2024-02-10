@@ -59,45 +59,43 @@ static const uint8_t FontBinaryExample[] =
 
 **Font Images**
 
-1. Default TODO
+Default(uno) + Pico + mega 
 
-2. Wide Font
+![dmp](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/fontoled.jpg)
+
+Wide Font
 
 ![w](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)
 
-3. Pico TODO
-
-4. SinclairS
+SinclairS
 
 ![s](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sinclair.png)
 
-5. Retro 
+Retro 
 
 ![r](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/retro.png)
 
-6. Mega TODO
-
-7. Arial Bold
+Arial Bold
 
 ![ab](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialbold.png)
 
-8. Hallfetica
+Hallfetica
 
 ![h](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)
 
-9. Orla 
+Orla 
 
 ![o](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)
 
-10. Arial Round
+Arial Round
 
 ![ar](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)
 
-11. GroTesk 
+GroTesk 
 
 ![g](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)
 
-12. Sixteen Segment 
+Sixteen Segment 
 
 ![ss](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/ss.png)
 

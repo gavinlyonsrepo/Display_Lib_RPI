@@ -1,5 +1,5 @@
 /*! 
-	@file examples/color16_displays/st7735/Frame_rate_bmp/main.cpp
+	@file examples/color16_displays/st7735/Frame_rate_test_bmp/main.cpp
 	@brief Frame rate test. FPS Bitmaps, frame rate per second
 	@note See USER OPTIONS 1-3 in SETUP function
 	@details This test is setup for a 128by128 screen

@@ -1,5 +1,5 @@
 /*!
-	@file examples/bicolor_displays/ch1115/TEXTGRAPHICS_FUNCTIONS/main.cpp
+	@file examples/bicolor_displays/ch1115/TEXT_GRAPHICS_FUNCTIONS/main.cpp
 	@author Gavin Lyons
 	@brief Test file for  ER_OLEDM1_CH1115 display showing use of Text,graphics & functions.
 		Project Name: Display_Lib_RPI

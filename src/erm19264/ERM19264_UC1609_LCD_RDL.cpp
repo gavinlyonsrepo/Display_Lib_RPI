@@ -1,6 +1,5 @@
 /*!
-	@file ERM19264_UC1609_LCD_RDL.hpp
-	@brief ERM19264 LCD driven by UC1609C controller, source file.
+	@file ERM19264_UC1609_LCD_RDL.cpp
 	@brief ERM19264 LCD driven by UC1609C controller, source file.
 	@author Gavin Lyons.
 */

@@ -1,5 +1,5 @@
 /*!
-	@file     ST7735_TFT_LCD_RPL.cpp
+	@file     ST7735_TFT_LCD_RDL.cpp
 	@author   Gavin Lyons
 	@brief    Source file for ST7735 TFT LCD library.
 		Contains driver methods for ST7735 TFT LCD display
