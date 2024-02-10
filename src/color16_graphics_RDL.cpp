@@ -10,7 +10,7 @@
 
 /*!
 	@brief Construct a new graphics class object
- */
+*/
 color16_graphics::color16_graphics(){}
 
 /*!
@@ -36,7 +36,10 @@ void color16_graphics::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	@param h height of the rectangle
 	@param color color to fill  rectangle 565 16-bit
 	@note  uses spiWriteDataBuffer method
-	@return 0 for success , 2= out of screen bounds ,3 = Malloc failure
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_ShapeScreenBounds Error
+		-# rpiDisplay_MallocError Error
 */
 rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
 	uint8_t hi, lo;
@@ -87,6 +90,9 @@ void color16_graphics::fillScreen(uint16_t color) {
 	@param y The starting y coordinate
 	@param h The height of the line
 	@param color The color of the line 565 16 Bit color
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_ShapeScreenBounds Error
 */
 rpiDisplay_Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color) {
 	uint8_t hi, lo;
@@ -114,6 +120,9 @@ rpiDisplay_Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y
 	@param y The starting y coordinate
 	@param w The width of the line
 	@param color The color of the line 565 16 Bit color
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_ShapeScreenBounds Error
 */
 rpiDisplay_Return_Codes_e color16_graphics::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color) {
 	uint8_t hi, lo;
@@ -441,8 +450,10 @@ void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t 
 	@param color icon foreground colors ,is bi-color
 	@param backcolor icon background colors ,is bi-color
 	@param character  An array of unsigned chars containing icon data vertically addressed.
-	@return 0 for success ,2=Co-ordinates out of bounds,
-		3=invalid pointer object
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_BitmapScreenBounds Error
+		-# rpiDisplay_BitmapNullptr Error
 */
 rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t backcolor, const unsigned char character[]) {
 	// Out of screen bounds
@@ -485,8 +496,12 @@ rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uin
 	@param color bitmap foreground colors ,is bi-color
 	@param bgcolor bitmap background colors ,is bi-color
 	@param pBmp  an array of unsigned chars containing bitmap data horizontally addressed.
-	@return 0 for success ,1=invalid pointer object ,2=Co-ordinates out of bounds,
-		3= malloc failure
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_BitmapScreenBounds Error
+		-# rpiDisplay_BitmapNullptr Error
+		-# rpiDisplay_BitmapHorizontalSize Error
+		-# rpiDisplay_MallocError Error
 */
 rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const uint8_t* pBmp) {
 	int16_t byteWidth = (w + 7) / 8;
@@ -494,21 +509,17 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	uint16_t mycolor = 0;
 	uint32_t ptr;
 
-	//  Check for null pointer
-	if( pBmp == nullptr)
+	if( pBmp == nullptr) //  Check for null pointer
 	{
 		std::cout << "Error drawBitmap 1: Bitmap array is nullptr" << std::endl;
 		return rpiDisplay_BitmapNullptr;
 	}
-	
-	// check horizontal size
-	if(w % 8 != 0)
+	if(w % 8 != 0) 	// check horizontal size
 	{
 		std::cout << ("Error drawBitmap 2 : Horizontal Bitmap size is incorrect:  Check Size = w % 8 != 0: ")<< w << std::endl;
 		return rpiDisplay_BitmapHorizontalSize;
 	}
-	// Check bounds
-	if ((x >= _width) || (y >= _height))
+	if ((x >= _width) || (y >= _height)) // Check bounds
 	{
 		std::cout << "Error drawBitmap 3: Out of screen bounds, check x & y" << std::endl;
 		return rpiDisplay_BitmapScreenBounds;
@@ -554,8 +565,11 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	@param pBmp A pointer to the databuffer containing Bitmap data
 	@param w width of the bitmap in pixels
 	@param h height of the bitmap in pixels
-	@return 0 for success ,1=invalid pointer object ,2=Co-ordinates out of bounds,
-		3= malloc failure
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_BitmapScreenBounds Error
+		-# rpiDisplay_BitmapNullptr Error
+		-# rpiDisplay_MallocError Error
 	@note 24 bit color converted to 16 bit color
 */
 rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h)
@@ -614,8 +628,11 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 	@param pBmp A pointer to the databuffer containing Bitmap data
 	@param w width of the bitmap in pixels
 	@param h height of the bitmap in pixels
-	@return 0 for success ,1=invalid pointer object ,2=Co-ordinates out of bounds,
-		3= malloc failure
+	@return enum rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success for success
+		-# rpiDisplay_BitmapScreenBounds Error
+		-# rpiDisplay_BitmapNullptr Error
+		-# rpiDisplay_MallocError Error
 */
 rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h) {
 	uint8_t i, j;
@@ -679,7 +696,6 @@ int16_t color16_graphics::Color565(int16_t r, int16_t g, int16_t b) {
 /*!
  * @brief pushColor
  * @param color
- * @note not in use currently.
  */
 void color16_graphics::pushColor(uint16_t color) {
 	uint8_t hi, lo;
@@ -872,7 +888,7 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	@return Will return
 		-# rpiDisplay_Success Success
 		-# rpiDisplay_CharArrayNullptr  String pText Array invalid pointer object
-		-# 3 Failure in writeChar method upstream
+		-# Failure in writeChar method upstream
  */
 rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
 	uint8_t count=0;

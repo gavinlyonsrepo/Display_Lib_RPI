@@ -1,7 +1,6 @@
+# ER_OLEDM1_CH1115
 
 ![ OLED ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)
-
-# ER_OLEDM1_CH1115
 
 ## Table of contents
 
@@ -13,8 +12,6 @@
 	* [Bitmaps](#bitmaps)
 	* [User adjustments](#user-adjustments)
 
-
-# ER_OLEDM1_CH1115
 
 ## Overview
 
@@ -43,16 +40,6 @@
 ![ output ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_PICO/blob/main/extra/image/all.jpg)
 
 
-| Examples files main.cpp  | Description |
-| ------ | ------ |
-| HELLO_WORLD | Hello world , Basic usage |
-| BITMAP | Shows use of bitmaps methods  |
-| OLED_FUNCTIONS | misc functions, rotate, flip, scroll,  etc|
-| TEXT | Fonts + text modes test |
-| GRAPHICS |  graphics test |
-| FPS_TEST |  Frames per second test  |
-| FPS_TEST_SW_SPI | Frames per second test but with software SPI setup|
-
 ## Hardware
 
 CH1115 is a single-chip CMOS OLED driver with controller for organic light emitting diode dot-matrix graphic display system. CH1115 consists of 128 segments, 64 commons that can support a maximum display resolution of 128 X 64. It is designed for Common Cathode type OLED panel. ER-OLEDM1.09-1W-SPI is a White 1.09" OLED Display Panel with Breakout Board. This module is a combination of the two.(controller and OLED)
@@ -73,7 +60,6 @@ For SWSPI pick any GPIO you want for the 5 control lines.
 
 ## Software
 
-
 Example files : 
 
 | Examples files main.cpp  | Description |
@@ -83,7 +69,6 @@ Example files :
 | TEXT_GRAPHICS_FUNCTIONS | Fonts graphics + misc functions |
 | FPS_TEST |  Frames per second test  |
 | FPS_TEST_SW_SPI | Frames per second test but with software SPI setup|
-
 
 ### SPI
 

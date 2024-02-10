@@ -1,7 +1,7 @@
 /*!
 	@file common_data_RDL.hpp
 	@author Gavin Lyons
-	@brief file to hold common data betwen all Displays
+	@brief file to hold common data used by all Displays
 	Project Name: Display_Lib_RPI
 */
 

@@ -18,8 +18,6 @@ SSD1306::SSD1306(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(oledwi
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
 	_OLED_PAGE_NUM = (_OLED_HEIGHT/8); 
-	bufferWidth = _OLED_WIDTH;
-	bufferHeight = _OLED_HEIGHT;
 }
 
 /*!
@@ -303,7 +301,7 @@ void SSD1306::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 */
 void SSD1306::OLEDupdate()
 {
-	uint8_t x = 0; uint8_t y = 0; uint8_t w = this->bufferWidth; uint8_t h = this->bufferHeight;
+	uint8_t x = 0; uint8_t y = 0; uint8_t w = this->_OLED_WIDTH; uint8_t h = this->_OLED_HEIGHT;
 	OLEDBufferScreen( x,  y,  w,  h, this->OLEDbuffer);
 }
 
@@ -312,7 +310,7 @@ void SSD1306::OLEDupdate()
 */
 void SSD1306::OLEDclearBuffer()
 {
-	memset( this->OLEDbuffer, 0x00, (this->bufferWidth * (this->bufferHeight /8)));
+	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH* (this->_OLED_HEIGHT /8)));
 }
 
 /*!
@@ -367,7 +365,7 @@ void SSD1306::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8
 void SSD1306::drawPixel(int16_t x, int16_t y, uint8_t color)
 {
 
-	if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height)) {
+	if ((x < 0) || (x >= this->_width) || (y < 0) || (y >= this->_height)) {
 	return;
 	}
 	int16_t temp;
@@ -388,13 +386,13 @@ void SSD1306::drawPixel(int16_t x, int16_t y, uint8_t color)
 		y = HEIGHT - 1 - temp;
 	break;
 	}
-		uint16_t tc = (bufferWidth * (y /8)) + x;
-		switch (color)
-		{
-			case RDL_WHITE:  this->OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
-			case RDL_BLACK:  this->OLEDbuffer[tc] |= (1 << (y & 7)); break;
-			case RDL_INVERSE: this->OLEDbuffer[tc] ^= (1 << (y & 7)); break;
-		}
+	uint16_t tc = (_OLED_WIDTH * (y /8)) + x;
+	switch (color)
+	{
+		case RDL_WHITE:  this->OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
+		case RDL_BLACK:  this->OLEDbuffer[tc] |= (1 << (y & 7)); break;
+		case RDL_INVERSE: this->OLEDbuffer[tc] ^= (1 << (y & 7)); break;
+	}
 }
 
 /*!

@@ -4,11 +4,13 @@
 # Project Name: Display_Lib_RPI
 # URL: https://github.com/gavinlyonsrepo/Display_Lib_RPI
 # 
-# Library is installed to /usr/local/lib and include files are placed at /usr/local/include.
+# Library is installed to /usr/local/lib and 
+# include files are placed at /usr/local/include by default.
 # Run 'make help' for user options
 # ==================
 
-#The --no-print-directory option of make tells make not to print the message about entering #and leaving the working directory. However, how to specify the --no-print-directory inside #the Makefile itself?
+#The --no-print-directory option of make tells make not to print the message 
+#about entering #and leaving the working directory. 
 MAKEFLAGS += --no-print-directory
 
 # Pre-compiler and Compiler flags

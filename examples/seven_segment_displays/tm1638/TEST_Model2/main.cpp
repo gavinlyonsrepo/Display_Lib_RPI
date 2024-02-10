@@ -12,7 +12,7 @@
 		-# Test 3a 3b & 3C using DisplaySegments method
 		-# Test 4 strings
 		-# Test 5 ASCIItoSegment method 
-		-# Test 6  Brightness and reset
+		-# Test 6 Brightness and reset
 		-# Test 7 scroll text
 		-# Test 8 Buttons , ReadKey16() returns byte 1-16 decimal, press S16 to goto test9
 		-# Test 9 Buttons , Readkey16Two() alternate buttons function. 

@@ -115,11 +115,10 @@ private:
 	bool _inverse = false;  /**< LCD inverted , false for off*/
 	bool _sleep;            /**< LCD sleep mode*/
 	
-	int16_t _LCD_HEIGHT = 84;
-	int16_t _LCD_WIDTH =  48;
-
-	const uint16_t _LCD_Display_size = 504;// 504 = LCDWIDTH*LCDHEIGHT / 8
-	uint8_t LCDDisplayBuffer[504]; /**< pointer to buffer which holds screen data */
+	int16_t _LCD_HEIGHT=48; /**< height of LCD in pixels*/
+	int16_t _LCD_WIDTH=84; /**< width of LCD in pixels*/
+	uint16_t _LCD_Display_size = _LCD_WIDTH * (_LCD_HEIGHT/8);/*! size of display in pixels 504 (LCDWIDTH*(LCDHEIGHT / 8)*/
+	uint8_t LCDDisplayBuffer[504]; /**< buffer which holds screen data */
 }; //end of class
 
 

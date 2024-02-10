@@ -598,6 +598,8 @@ void Test500(void)
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 90");
+	myOLED.setCursor(5,110);
+	myOLED.print("bottom");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
 	
@@ -605,6 +607,8 @@ void Test500(void)
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 180");
+	myOLED.setCursor(5,50);
+	myOLED.print("bottom");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
 	
@@ -612,6 +616,8 @@ void Test500(void)
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate   270");
+	myOLED.setCursor(5,110);
+	myOLED.print("bottom");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
 	
@@ -619,6 +625,7 @@ void Test500(void)
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 0");
+
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
 	

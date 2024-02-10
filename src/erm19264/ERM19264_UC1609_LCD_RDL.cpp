@@ -576,10 +576,16 @@ void ERM19264_UC1609::drawPixel(int16_t x, int16_t y, uint8_t colour)
 
 }
 
-// Freq delay used in SW SPI getter, uS delay used in CustomshiftOut method
+/*! 
+	@brief Freq delay used in SW SPI getter, uS delay used in CustomshiftOut method
+	@return _LCD_HighFreqDelay
+*/
 uint16_t ERM19264_UC1609::LCD_HighFreqDelayGet(void){return _LCD_HighFreqDelay;}
 
-// Freq delay used in SW SPI setter, uS delay used in CustomshiftOut method
+/*! 
+	@brief Freq delay used in SW SPI setter, uS delay used in CustomshiftOut method
+	@param CommDelay uS  GPIO delay used in software SPI
+*/
 void ERM19264_UC1609::LCD_HighFreqDelaySet(uint16_t CommDelay){_LCD_HighFreqDelay = CommDelay;}
 
 /*!

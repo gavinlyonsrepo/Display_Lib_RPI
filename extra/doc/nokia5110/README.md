@@ -7,8 +7,6 @@
   * [Software](#software)
     * [SPI](#spi)
     * [File system](#file-system)
-    * [Bitmap](#bitmap)
-
   * [Output](#output)
 
 ## Overview
@@ -42,7 +40,7 @@ The Nokia 5110 is a basic graphic LCD screen for lots of applications.
 GPIO function on RPI, 5 Nokia 5110 LCD lines SPI bus. Use any GPIO user likes for Software SPI.
 For Hardware the user can use any GPIO for reset and data/command line
 
-Example file set up ::
+Example file set up :
 
 | RPI pin(HW SPI) | RPI pin(SW SPI)| Nokia 5110 LCD |
 | ------ | ------ | ------ |
@@ -100,20 +98,6 @@ Example files
 | BITMAP | Bitmaps | HW |
 | SPEEDTEST | Frame rate per second test | HW |
 
-### Bitmap
-
-| num | Method name | data addressing | Notes | 
-| ------ | ------ | ------ | ------ |   
-| 1 | drawBitmap() |vertical| Draws bitmaps to the buffer, Bitmap's height must be divisible by 8| 
-
-The drawBitmap will return an error code if : The Bitmap is completely off screen , 
-Invalid Bitmap pointer object, bitmap bigger than screen , bitmap bigger/smaller than provided width and height co-ordinates
-( This helps prevents buffer overflow if user enters wrong data.).
-The Bitmap's height must be divisible by 8. I.e for a full screen bitmap with width=84 and height=48.
-Bitmap excepted size = 84 * (48/8) = 504 bytes.
-
-Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) 
-See example file "BitmapTests" for more details.
 
 ## Output
 

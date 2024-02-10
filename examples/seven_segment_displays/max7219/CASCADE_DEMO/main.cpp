@@ -40,9 +40,9 @@ int main()
 	// Init the displays
 	// -Init Display one 
 	myMAX.SetCurrentDisplayNumber(1);
-	if(!myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone))
+	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone)!= rpiDisplay_Success)
 	{
-		printf("Error 1202 :: bcm2835_spi_begin failed. Are you running as root??\n");
+		printf("Error 1202-A :: bcm2835_spi_begin failed. Are you running as root??\n");
 		bcm2835_close();  // Close the bcm2835 library
 		return -1;
 	}
@@ -51,7 +51,7 @@ int main()
 	myMAX.SetCurrentDisplayNumber(2);
 	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rpiDisplay_Success)
 	{
-		printf("Error 1202 :: bcm2835_spi_begin failed. Are you running as root??\n");
+		printf("Error 1202-B :: bcm2835_spi_begin failed. Are you running as root??\n");
 		bcm2835_close();  // Close the bcm2835 library
 		return -1;
 	}

@@ -119,7 +119,7 @@ public:
 		TFT_Degrees_0 = 0, /**< No rotation 0 degrees*/
 		TFT_Degrees_90,    /**< Rotation 90 degrees*/
 		TFT_Degrees_180,   /**< Rotation 180 degrees*/
-		TFT_Degrees_270   /**< Rotation 270 degrees*/
+		TFT_Degrees_270    /**< Rotation 270 degrees*/
 	};
 
 	/*! TFT type type of PCB */
@@ -131,7 +131,7 @@ public:
 		TFT_ST7735B,         /**<  ST7735B controller */
 	};
  
-	TFT_modes_e TFT_mode;                     /**< Enum to hold display mode */
+	TFT_modes_e TFT_mode;                    /**< Enum to hold display mode */
 	TFT_rotate_e TFT_rotate = TFT_Degrees_0; /**< Enum to hold rotation */
 	TFT_PCBtype_e TFT_PCBtype;               /**< Enum to hold TFT type  */
 

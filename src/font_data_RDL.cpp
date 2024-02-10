@@ -1,6 +1,6 @@
 /*!
 	@file  font_data_RDL.cpp
-	@brief font data file 12 fonts. Project Name :: Display_Lib_RPI
+	@brief font data file fonts. Project Name :: Display_Lib_RPI
 	@author Gavin Lyons.
 */
 

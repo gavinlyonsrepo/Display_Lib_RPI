@@ -1,5 +1,5 @@
 /*!
-	@file: examples/bicolor_displays/nokia5110/SpeedTest/main.cpp
+	@file: examples/bicolor_displays/nokia5110/SPEEDTEST/main.cpp
 	@brief Description library test file,carries out FPS test  , HW SPI
 			PCD8544 Nokia 5110 SPI LCD display Library
 	@author Gavin Lyons.
@@ -23,7 +23,6 @@
 #include <iostream> // for std::cout
 #include <ctime>
 #include "NOKIA_5110_LCD_RDL.hpp" // PCD8544 controller driver
-#include "Bitmap_data.hpp" // Data for bitmap tests
 
 // *********** Test setup  **************
 #define TEST_DELAY1 1000

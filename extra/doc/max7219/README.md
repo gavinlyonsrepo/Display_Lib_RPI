@@ -1,4 +1,3 @@
-
 # MAX7219 7 Segment
 
 ![ max ](https://github.com/gavinlyonsrepo/MAX7219_7SEG_RPI/blob/main/extra/image/max.jpg)

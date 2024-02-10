@@ -1,7 +1,6 @@
+# SSD1306_OLED
 
 ![ OLED ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/device.jpg)
-
-# SSD1306_OLED
 
 ## Table of contents
 
@@ -97,9 +96,10 @@ See example file "BITMAP" for more details.
 
 ## Output
 
-Output of the example file "CLOCK_DEMO".
 
 ![ op ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)
+
+![ op2 ](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)
 
 ## Notes and issues
 

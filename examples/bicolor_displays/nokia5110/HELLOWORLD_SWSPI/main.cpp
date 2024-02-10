@@ -1,5 +1,5 @@
 /*!
-	@file examples/bicolor_displays/nokia5110/HelloWorld_SWSPI/main.cpp
+	@file examples/bicolor_displays/nokia5110/HELLOWORLD_SWSPI/main.cpp
 	@brief Description library test file, carries out hello world test , SW SPI
 			PCD8544 Nokia 5110 SPI LCD display Library
 	@author Gavin Lyons.

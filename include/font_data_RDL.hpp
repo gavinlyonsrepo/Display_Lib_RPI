@@ -1,6 +1,6 @@
 /*!
 	@file font_data_RDL.hpp
-	@brief font data file 12 fonts. Project Name :: Display_Lib_RPI
+	@brief font data file. Project Name: Display_Lib_RPI
 	@author Gavin Lyons.
 	@details
 		-#  1. pFontDefault  6 by 8

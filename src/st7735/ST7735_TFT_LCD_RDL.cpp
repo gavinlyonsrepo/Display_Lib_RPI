@@ -18,7 +18,6 @@ ST7735_TFT :: ST7735_TFT(){}
 	@details MSBFIRST, mode 0 , SPI Speed , SPICEX pin
 	@note If multiple devices on SPI bus with different settings , 
 	can be used to refresh ST7735 settings
-	
 */
 void ST7735_TFT::TFTSPIHWSettings(void)
 {
@@ -675,7 +674,7 @@ void  ST7735_TFT::HighFreqDelaySet(uint16_t CommDelay){_HighFreqDelay = CommDela
 	@param  y0  Top left corner y coordinate
 	@param  x1  Width of window
 	@param  y1  Height of window
-	@note https://en.wikipedia.org/wiki/Bit_blit
+	@note virtual function overloads graphics library
  */
 void ST7735_TFT::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
 	uint8_t x0Lower = x0 & 0xFF;

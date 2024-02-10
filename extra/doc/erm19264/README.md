@@ -1,6 +1,6 @@
-![ ERM19264 ](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/color.jpg)
-
 # ERM19264_UC1609
+
+![ ERM19264 ](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/color.jpg)
 
 ## Table of contents
 

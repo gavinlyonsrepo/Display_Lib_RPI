@@ -1,7 +1,7 @@
 /*!
 	@file     print_data_RDL.hpp
 	@brief    Base class that provides print() and println() for for the display library
-				Project Name :: Display_Lib_RPI
+			Project Name :: Display_Lib_RPI
 	@note  Port of arduino built-in print class, G Lyons 2022.
 */
 
@@ -23,7 +23,7 @@
 #define BIN 2
 
 /*!
-	Polymorphic print class toprint many data types by wrapping write function in the graphics class's
+	@brief Polymorphic print class to print many data types by wrapping write function in the graphics class's
 */
 class Print
 {
@@ -68,7 +68,7 @@ public:
 protected:
 	void setWriteError(int err = 1) { write_error = err; }
 private:
-	int write_error;
+	int write_error; /*! class Error flag */
 	size_t printNumber(unsigned long, uint8_t);
 	size_t printFloat(double, uint8_t);
 

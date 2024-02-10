@@ -1,5 +1,5 @@
 /*!
-	@file: examples/bicolor_displays/nokia5110/HelloWorld/main.cpp
+	@file: examples/bicolor_displays/nokia5110/HELLOWORLD/main.cpp
 	@brief Description library test file, carries out hello world test , HW SPI
 			PCD8544 Nokia 5110 SPI LCD display Library
 			Project Name: Display_Lib_RPI

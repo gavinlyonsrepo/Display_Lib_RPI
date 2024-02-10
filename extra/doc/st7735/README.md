@@ -1,7 +1,6 @@
+# ST7735_TFT
 
 ![ ig ](https://github.com/gavinlyonsrepo/pic_16F18346_projects/blob/master/images/st7735/pcb.jpg)
-
-#  ST7735_TFT
 
 ## Table of contents
 
@@ -24,7 +23,7 @@
 5. Graphics + print class included.
 6. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
 7. Hardware and Software SPI
-78 Dependency: bcm2835 Library
+8. Dependency: bcm2835 Library
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_16F18346_projects)
@@ -34,7 +33,7 @@
 	2. C++, g++ (Debian 12.2.0) 
 	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
 	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. [bcm2835 Library 1.73 dependency](http://www.airspayce.com/mikem/bcm2835/). Provides low level SPI bus, delays and GPIO control.
+	5. [bcm2835 Library dependency](http://www.airspayce.com/mikem/bcm2835/). Provides low level SPI bus, delays and GPIO control.
 
 
 ## Software
@@ -64,14 +63,14 @@ The function TFTInitScreenSize sets them.
 
 *USER OPTION 3 PCB Version, SPI SPEED , SPI_CE_PIN*
 
-TFTInitPCBType function is overloaded(2 off one for HW SPI the other for SW SPI).
+TFTInitPCBType function is overloaded(2 off, one for HW SPI the other for SW SPI).
 
 Param1 PCB_TYPE
 
 In the main.cpp in USER OPTION 3 PCB_TYPE select your display type.
 By passing an enum type to function  TFTInitPCBType.
 Default is "TFT_ST7735R_Red". There are 4 types of the ST7735 TFT display supported.
-If your display works but RGB colors are inverted you may have chosen wrong display type.
+If your display works but RGB colors are wrong you may have chosen wrong display type.
 
 | Number | Description | Enum label| Tested |
 | ---- | ---- | --- | ---| 
@@ -88,7 +87,8 @@ Maximum 125 Mhz , Minimum 30Khz, The default in file is 8Mhz
 If you set to 0 .Speed is set to bcm2835 
 constant BCM2835_SPI_CLOCK_DIVIDER_32. If using SW spi, ignore.
 
-Param3 SPI_CE_PIN (HW SPI Onl
+Param3A SPI_CE_PIN (HW SPI Only)
+
 Which Chip enable pin to use two choices. If using SW spi, ignore.
 	* SPICE0 = 0
 	* SPICE1 = 1
@@ -116,11 +116,11 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 
 ### Bitmap
 
-There are four functions to support drawing bitmaps
+There are four class functions to support drawing bitmaps
 
 | Function Name | Colour support | Pixel size |  Note |
 | ------ | ------ | ------ | ------ |
-| drawIcon | bi-colour | 8 x(0-127)   | Data vertically addressed |
+| drawIcon | bi-colour | (0-127) X 8  | Data vertically addressed |
 | drawBitmap | bi-colour |  2048 bytes max | Data horizontally  addressed |
 | drawBitmap16 | 16 bit color 565 BMP files |  32K max | ------ |
 | drawBitmap24  | 24 bit color BMP files | 48K max | Converted by software to 16-bit color  |
@@ -128,9 +128,7 @@ There are four functions to support drawing bitmaps
 1. Bitmap size in kiloBytes = (screenWidth * screenHeight * bitsPerPixel)/(1024 * 8)
 2. Pixel size column assumes 128 by 128 screen.
 
-The drawBitmap function will return an error if : The Bitmap is completely off screen or 
-Invalid Bitmap pointer object. The drawBitmapXX functions will also return an error if memory
-be assigned. All 4 function's will return 0 for success.
+These class functions will return an error code in event of error see API for more details.
 
 ## Hardware
 
@@ -152,8 +150,9 @@ Connections as setup in main.cpp test file.
 3. You can connect VCC to 5V if there is a 3.3 volt regulator on back of TFT module.
 4. Pick any GPIO you want for SW SPI for HW SPI: reset and DC lines are flexible.
 5. User can select  SPI_CE0  or SPI_CE1 for HW SPI
-![ wiring ](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/wiring.jpg)
 6. Backlight control is left to user.
+
+![ wiring ](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/wiring.jpg)
 
 ## Output
 

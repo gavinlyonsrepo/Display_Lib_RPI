@@ -129,11 +129,9 @@ class SSD1306 : public bicolor_graphics  {
 	uint8_t _I2C_ErrorFlag = 0x00; /**< In event of I2C error holds bcm2835 I2C reason code 0x00 = success*/
 
 
-	int16_t _OLED_WIDTH;      /**< Width of OLED Screen in pixels */
-	int16_t _OLED_HEIGHT;    /**< Height of OLED Screen in pixels */
-	int8_t _OLED_PAGE_NUM; /**< Number of byte size pages OLED screen is divided into */
-	uint8_t bufferWidth ;      /**< Width of Screen Buffer */
-	uint8_t bufferHeight ;    /**< Height of Screen Buffer */
+	uint8_t _OLED_WIDTH=128;      /**< Width of OLED Screen in pixels */
+	uint8_t _OLED_HEIGHT=64;    /**< Height of OLED Screen in pixels */
+	uint8_t _OLED_PAGE_NUM=(_OLED_HEIGHT/8); /**< Number of byte size pages OLED screen is divided into */
 
 	uint8_t* OLEDbuffer = nullptr; /**< pointer to buffer which holds screen data */
 

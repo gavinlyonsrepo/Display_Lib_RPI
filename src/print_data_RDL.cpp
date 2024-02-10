@@ -223,6 +223,11 @@ size_t Print::println(const std::string &s) {
 
 // ==== Private Methods ====
 
+/*!
+ *@brief Used internally to parse and print number
+ *@param n Number to parse
+ *@param base to print to Binary hexadecimal etc
+ */
 size_t Print::printNumber(unsigned long n, uint8_t base)
 {
 	char buf[8 * sizeof(long) + 1]; // Assumes 8-bit chars plus zero byte.
@@ -243,6 +248,11 @@ size_t Print::printNumber(unsigned long n, uint8_t base)
 	return write(str);
 }
 
+/*!
+ *@brief Used internally to parse float
+ *@param number The floating point number
+ *@param digits Number of precision digits to print
+ */
 size_t Print::printFloat(double number, uint8_t digits)
 {
 	size_t n = 0;

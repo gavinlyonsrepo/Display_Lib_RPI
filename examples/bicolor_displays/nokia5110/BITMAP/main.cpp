@@ -1,5 +1,5 @@
 /*!
-	@file: examples/bicolor_displays/nokia5110//BitmapTests/main.cpp
+	@file: examples/bicolor_displays/nokia5110/BITMAP/main.cpp
 	@brief Description library test file, carries out series of Bitmap tests , HW SPI
 			PCD8544 Nokia 5110 SPI LCD display Library
 	@author Gavin Lyons.

@@ -78,6 +78,7 @@ bool myTest() {
 	}
 
 	myLCD.LCDclearBuffer();   // Clear buffer
+	myLCD.setCursor(10,10);
 	myLCD.print("Hello world");
 	myLCD.LCDupdate();  //write to active buffer
 	delay(6000);

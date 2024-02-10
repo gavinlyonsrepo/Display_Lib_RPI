@@ -706,3 +706,11 @@ return rpiDisplay_Success;
 void bicolor_graphics::setDrawBitmapAddr(bool mode) {
 	_drawBitmapAddr = mode;
 }
+
+/*!
+	@brief turn on or off screen wrap of the text (fonts 1-6)
+	@param w TRUE on
+*/
+void bicolor_graphics::setTextWrap(bool w) {
+	_textwrap = w;
+}

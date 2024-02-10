@@ -210,7 +210,7 @@ void Test304(void)
 	bcm2835_delay(5000);
 	myOLED.OLEDclearBuffer();
 
-	myOLED.drawBitmap(0, 0, bigImageHA, 64, 64, RDL_BLACK, RDL_WHITE, sizeof(bigImageHA));
+	myOLED.drawBitmap(0, 0, bigImage64x64, 64, 64, RDL_BLACK, RDL_WHITE, sizeof(bigImage64x64));
 
 	myOLED.OLEDupdate();
 	bcm2835_delay(5000);

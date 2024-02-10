@@ -1,7 +1,7 @@
 # Fonts
 
 There are 12 fonts packaged with library. Fonts can be easily added or removed by user.
-All the Font data are in file font_data_RDL.cpp. These fonts are used by the graphic libraries displays.
+All the Font data is in file font_data_RDL.cpp. These fonts are used by the graphic libraries displays.
 
 **Font data table** 
 
@@ -28,19 +28,16 @@ Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (4*ControlByte)
 | writeCharString | draws character array |
 | print | Polymorphic print class which will print out many data types |
 
-These methods return an error code in event of an error such as, ASCII character outside chosen fonts range, 
-character out of screen bounds and invalid character array pointer object.
-
 **Adding or removing a font**
 
 1. Add/remove the Font data in font_data_RDL.cpp file
 2. Add/remove the pointer to font at bottom of font_data_RDL.cpp file
 3. Add/remove the associated extern pointer declaration in the font_data_RDL.hpp file
-4. Add/remove the font from the enum  'display_Font_name_e' in the font_data_RDL.hpp
+4. Add/remove the font from the enum 'display_Font_name_e' in the font_data_RDL.hpp
 5. Add/remove the font enum name from the switch case in function 'setFont' in font_data_RDL.cpp
 6. re-compile and re-install library. 
 
-The new ASCII font must have following font structure.
+A new ASCII font must have following font structure.
 First 4 bytes are control bytes followed by vertically addressed font data.
 
 ```
@@ -60,7 +57,7 @@ static const uint8_t FontBinaryExample[] =
 1. Some of the fonts packaged with library came from [URL](http://rinkydinkelectronics.com/)
 2. There is a monochrome font maker there at [URL](http://rinkydinkelectronics.com/t_make_font_file_mono.php)
 
-**Images**
+**Font Images**
 
 1. Default TODO
 
@@ -80,11 +77,11 @@ static const uint8_t FontBinaryExample[] =
 
 6. Mega TODO
 
-7. arial Bold
+7. Arial Bold
 
 ![ab](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialbold.png)
 
-8. hallfetica
+8. Hallfetica
 
 ![h](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)
 
@@ -92,7 +89,7 @@ static const uint8_t FontBinaryExample[] =
 
 ![o](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)
 
-10. ArialRound
+10. Arial Round
 
 ![ar](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)
 

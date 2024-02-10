@@ -4,7 +4,7 @@
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test
-	-# Test 301 "clock demo" , icons, small bitmap, font 7
+	-# Test 301 "clock demo" , icons, small bitmap
 	-# Test 302 bi-color full screen image 128x128
 	-# Test 303 24 bit color image bitmaps from the file system
 	-# Test 304 16 bit colorimage bitmaps from the file system

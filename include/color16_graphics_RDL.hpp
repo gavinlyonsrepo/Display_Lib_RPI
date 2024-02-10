@@ -64,6 +64,7 @@ class color16_graphics:public display_Fonts, public Print  {
 	~color16_graphics(){};
 	
 	// Screen related
+	// Defined in the display sub class
 	virtual void setAddrWindow(uint16_t, uint16_t, uint16_t, uint16_t) = 0;
 	void fillScreen(uint16_t color);
 	void setCursor(int16_t x, int16_t y);

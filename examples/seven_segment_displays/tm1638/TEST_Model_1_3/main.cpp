@@ -25,7 +25,7 @@
 */
 
 // ***************** USER OPTION SECTION *********************
-// Pick one define and one only to swicth between model 1 & model 3
+// Pick one define and one only to switch between model 1 & model 3
 #define TM1638_MODEL_ONE_TEST // Comment this in if testing model 1
 //#define TM1638_MODEL_THREE_TEST // Comment this in if testing model 3
 //************************************************************
@@ -80,8 +80,12 @@ static uint64_t RPI_Millis( void );
 
 int main()
 {
-
+#ifdef TM1638_MODEL_ONE_TEST
 	printf("Test Begin :: Model 1 :: TM1638plus_RPI\r\n");
+#endif
+#ifdef TM1638_MODEL_THREE_TEST
+	printf("Test Begin :: Model 3 :: TM1638plus_RPI\r\n");
+#endif
 	if(!bcm2835_init()) {return -1;}
 	
 	tm.displayBegin();

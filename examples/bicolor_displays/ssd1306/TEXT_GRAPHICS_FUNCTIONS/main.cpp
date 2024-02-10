@@ -5,11 +5,7 @@
 		Project Name: Display_Lib_RPI
 
 	@test
-		-# Test 501 Enable and disable Screen (Sleep mode)
-		-# Test 502 Invert screen color
-		-# Test 503 Contrast screen
-		-# Test 504 Scroll Screen
-		-# Test 505 Rotate
+		-# Test 901 Graphics test
 		-# Test 701 Default font
 		-# Test 702 Wide font
 		-# Test 703 Pico font
@@ -28,7 +24,11 @@
 		-# Test 716 print method String object
 		-# Test 717 print method numbers
 		-# Test 720 Text methods error Checking
-		-# Test 901 Graphics test
+		-# Test 501 Enable and disable Screen (Sleep mode)
+		-# Test 502 Invert screen color
+		-# Test 503 Contrast screen
+		-# Test 504 Scroll Screen
+		-# Test 505 Rotate
 */
 
 #include <bcm2835.h>
@@ -39,6 +39,8 @@
 #define myOLEDheight 64
 #define FULLSCREEN (myOLEDwidth * (myOLEDheight/8))
 SSD1306 myOLED(myOLEDwidth ,myOLEDheight) ; // instantiate  an object
+// Define a buffer to cover whole screen
+uint8_t  screenBuffer[FULLSCREEN];
 
 // Test timing parameters
 #define DisplayDelay1 4000
@@ -69,7 +71,6 @@ void Test714(void);
 void Test715(void);
 void Test716(void);
 void Test717(void);
-
 void testErrorCheck(void);
 void DisplayGraphics(void);
 
@@ -127,11 +128,9 @@ void EndTests()
 
 void myTests()
 {
-	// Define a buffer to cover whole screen
-	uint8_t  screenBuffer[FULLSCREEN];
 	if (myOLED.OLEDSetBufferPtr(myOLEDwidth, myOLEDheight, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
 	myOLED.OLEDclearBuffer();
-
+	
 	Test500();
 	Test701();
 	Test702();
@@ -151,7 +150,6 @@ void myTests()
 	Test715();
 	Test716();
 	Test717();
-
 	testErrorCheck();
 	DisplayGraphics();
 }
@@ -539,15 +537,8 @@ void testErrorCheck(void)
 
 void Test500()
 {
-	myOLED.setRotation(displayBC_Degrees_0);
-	// Define a buffer to cover whole screen
-	uint8_t  screenBuffer[FULLSCREEN];
-	if (myOLED.OLEDSetBufferPtr(myOLEDwidth, myOLEDheight, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
-	myOLED.OLEDclearBuffer(); // clear the buffer
-
 	// Set text parameters
 	myOLED.setFont(font_default);
-
 
 	//  ** Test 501 OLED display enable and disable **
 	myOLED.setCursor(0, 30);
@@ -623,6 +614,8 @@ void Test500()
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 90");
+	myOLED.setCursor(5,110);
+	myOLED.print("bottom");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
 
@@ -630,14 +623,17 @@ void Test500()
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 180");
+	myOLED.setCursor(5,50);
+	myOLED.print("bottom");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
-
 
 	myOLED.setRotation(displayBC_Degrees_270);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate   270");
+	myOLED.setCursor(5,110);
+	myOLED.print("bottom");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
 
@@ -647,9 +643,9 @@ void Test500()
 	myOLED.print("rotate 0");
 	myOLED.OLEDupdate();
 	bcm2835_delay(3000);
-
-
-	myOLED.OLEDclearBuffer();
+	
+	myOLED.OLEDFillScreen(0x00, 0); // Clear the screen
 	myOLED.OLEDupdate();
-	bcm2835_delay(1000);
+	myOLED.OLEDclearBuffer();
+	bcm2835_delay(500);
 }

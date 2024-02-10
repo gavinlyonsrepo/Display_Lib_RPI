@@ -1,4 +1,5 @@
-[![Website](https://img.shields.io/badge/Website-Link-blue.svg)](https://gavinlyonsrepo.github.io/)  [![Rss](https://img.shields.io/badge/Subscribe-RSS-yellow.svg)](https://gavinlyonsrepo.github.io//feed.xml)  [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
+# HD44780 LCD
+
 
 ![ lcd ](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/LCDPCF.jpg)
 
@@ -12,7 +13,8 @@
 	* [Example files](#example-files)
   * [Output](#output)
   * [Notes and issues](#notes-and-issues)
-  
+ 
+
 ## Overview
 
 * Name : HD44780_LCD

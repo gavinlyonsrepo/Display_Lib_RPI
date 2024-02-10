@@ -16,7 +16,8 @@
 
 // Section :: Globals 
 ST7735_TFT myTFT;
-bool TestHardwareSPI = false; // True for hardware SPI false for Software SPI
+bool TestHardwareSPI = true; // True for hardware SPI, false for Software SPI
+
 //  Section ::  Function Headers 
 
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI

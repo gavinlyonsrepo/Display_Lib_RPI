@@ -85,7 +85,7 @@ bool Setup(void)
 	}
 	printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
 	printf("MAX7219_7SEG Library version number :: %u\r\n", GetRDLibVersionNum()); 
-	if(!myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone))
+	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rpiDisplay_Success)
 	{
 		printf("Error 1202 :: bcm2835_spi_begin failed. Are you running as root??\n");
 		return false;
