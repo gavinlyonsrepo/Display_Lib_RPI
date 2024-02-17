@@ -81,8 +81,7 @@ User can turn on debug messages with LCDDebugSet method see example file.
 
 Output  of custom character test in test file.
 
-[![ op image ](https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)]
-(https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)
+[![ op image ](https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)](https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)
 
 20x04 display. 
 
