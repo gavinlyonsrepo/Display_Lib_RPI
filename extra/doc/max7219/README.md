@@ -1,6 +1,6 @@
-# MAX7219 7 Segment
+# MAX7219 7 Segment Readme
 
-![ max ](https://github.com/gavinlyonsrepo/MAX7219_7SEG_RPI/blob/main/extra/image/max.jpg)
+[![ max image ](https://github.com/gavinlyonsrepo/MAX7219_7SEG_RPI/blob/main/extra/image/max.jpg)](https://github.com/gavinlyonsrepo/MAX7219_7SEG_RPI/blob/main/extra/image/max.jpg)
 
 ## Table of contents
 

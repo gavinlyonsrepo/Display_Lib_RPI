@@ -1,6 +1,6 @@
-# ST7735_TFT
+# ST7735 TFT Readme
 
-![ ig ](https://github.com/gavinlyonsrepo/pic_16F18346_projects/blob/master/images/st7735/pcb.jpg)
+[![ Image TFT ](https://github.com/gavinlyonsrepo/pic_16F18346_projects/blob/master/images/st7735/pcb.jpg)](https://github.com/gavinlyonsrepo/pic_16F18346_projects/blob/master/images/st7735/pcb.jpg)
 
 ## Table of contents
 
@@ -27,14 +27,6 @@
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_16F18346_projects)
-
-* Development Tool chain. 
-	1. Raspberry PI 3 model b
-	2. C++, g++ (Debian 12.2.0) 
-	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. [bcm2835 Library dependency](http://www.airspayce.com/mikem/bcm2835/). Provides low level SPI bus, delays and GPIO control.
-
 
 ## Software
 
@@ -152,7 +144,7 @@ Connections as setup in main.cpp test file.
 5. User can select  SPI_CE0  or SPI_CE1 for HW SPI
 6. Backlight control is left to user.
 
-![ wiring ](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/wiring.jpg)
+[![ Wiring pic ](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/wiring.jpg)](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/wiring.jpg)
 
 ## Output
 
@@ -160,5 +152,5 @@ Connections as setup in main.cpp test file.
 2. 24-bit color bitmap test image
 3. 16-bit color bitmap test image
 
-![ pic1 ](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/4.jpg)
+[![ Demo pic ](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/4.jpg)](https://github.com/gavinlyonsrepo/ST7735_TFT_RPI/blob/main/extra/images/4.jpg)
 

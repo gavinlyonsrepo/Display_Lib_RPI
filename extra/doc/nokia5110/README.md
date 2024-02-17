@@ -1,4 +1,4 @@
-# NOKIA_5110
+# NOKIA 5110 Readme
 
 ## Table of contents
 
@@ -26,13 +26,7 @@
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_18F47K42_projects)
-* Development Tool chain. 
-	1. Raspberry PI 3 model b
-	2. C++, g++ (Debian 12.2.0) 
-	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. [bcm2835 Library 1.71 dependency](http://www.airspayce.com/mikem/bcm2835/). Provides low level SPI bus, delays and GPIO control.
-	
+
 
 ## Hardware
 
@@ -58,7 +52,7 @@ GND(pin8) and LIGHT(pin7) to switch on /off backlight and adjust brightness.
 
 [Nokia 5110 LCD dataSheet ](https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf)
 
-![PICTURE](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/NOKIA2.jpg)
+[![ image nokia ](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/NOKIA2.jpg)](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/NOKIA2.jpg)
 
 ## Software
 
@@ -76,7 +70,7 @@ Default Speed is BCM2835_SPI_CLOCK_DIVIDER_64,
 the divider value in the contructor as an argument. These values are
 defined by enum bcm2835SPIClockDivider. For full list see
 
-![bcm2](https://github.com/gavinlyonsrepo/NOKIA_5110_RPI/blob/main/extra/images/bcm2.png)
+https://github.com/gavinlyonsrepo/NOKIA_5110_RPI/blob/main/extra/images/bcm2.png
 
 User can also adjust which HW SPI chip enable pin they use(CE0 or CE1).
 in constructor arguments. This device uses bit order MSB First and SPI Mode 0.
@@ -103,4 +97,4 @@ Example files
 
 Example output.
 
-![OUTPUT](https://github.com/gavinlyonsrepo/pic_18F47K42_projects/blob/master/images/nokiagraph1.jpg)
+[![output image](https://github.com/gavinlyonsrepo/pic_18F47K42_projects/blob/master/images/nokiagraph1.jpg)](https://github.com/gavinlyonsrepo/pic_18F47K42_projects/blob/master/images/nokiagraph1.jpg)

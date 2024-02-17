@@ -1,11 +1,10 @@
-# TM1638
+# TM1638 Readme
 
 ## Table of contents
 
   * [Overview](#overview)
   * [Hardware](#hardware)
   * [Software](#software)
-  * [Notes and Issues](#notes-and-issues)
 
 ## Overview
 
@@ -36,7 +35,7 @@ Pictured at from left to right.
 | Model 2 | TM1638 KEYS, QYF  | 0 | 16 |
 | Model 3 | TM1638 V1.3 or LKM1638  | 8 bi color,  red and green  | 8 |
 
-![ module pics ](https://github.com/gavinlyonsrepo/TM1638plus/blob/master/extra/images/tm16383.jpg)
+[![ module pics ](https://github.com/gavinlyonsrepo/TM1638plus/blob/master/extra/images/tm16383.jpg)](https://github.com/gavinlyonsrepo/TM1638plus/blob/master/extra/images/tm16383.jpg)
 
 Library uses a type of software SPI like bus.
 
@@ -55,7 +54,3 @@ Communications optional delay.
 It may be necessary to adjust the constant  TMCommDelay in the TM1638plus_common.h file. It is Microsecond delay used in communications clocking, it is currently set to 1, 
 It can be set to 0 or higher. On a different CPU Frequency to one tested, it may be necessary to increase/decrease this.
 The user can do this with the Getter method provided. TMCommDelayGet.
-
-## Notes and Issues
-
-

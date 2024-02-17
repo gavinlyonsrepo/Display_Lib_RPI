@@ -1,6 +1,6 @@
-# ERM19264_UC1609
+# ERM19264 UC1609 Readme
 
-![ ERM19264 ](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/color.jpg)
+[![ ERM19264 image](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/color.jpg)](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/color.jpg)
 
 ## Table of contents
 
@@ -24,24 +24,14 @@
 3. Sleep mode.
 4. Bitmaps supported.
 5. Hardware & software SPI options
-6. Dependency: bcm2835 Library
 
 * Author: Gavin Lyons
 
 * This is a port of my [Arduino library](https://github.com/gavinlyonsrepo/ERM19264_UC1609)
-    More details there as well as link to the API(There are some differences between this port and Arduino library most notably use of glyph fonts)
-
-* Development Tool chain. 
-	1. Raspberry PI 3 model b
-	2. C++, g++ (Debian 12.2.0) 
-	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. bcm2835 Library 1.73 dependency. Provides low level I2C bus, delays and GPIO control.
 
 ## Output
 
-![ op ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/1.jpg)
-
+[![ output image ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/erm19264.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/erm19264.jpg)
 
 ## Hardware
 
@@ -57,12 +47,12 @@ There are 3 different colours in range, Parts used purchased from [ebay](https:/
 
 Wiring Diagram from supplier showing connection to RPI.
 
-![ ERM19264 ](https://github.com/gavinlyonsrepo/ERM19264_UC1609_RPI/blob/main/extras/image/wiring.png)
+[![ Wiring image](https://github.com/gavinlyonsrepo/ERM19264_UC1609_RPI/blob/main/extras/image/wiring.png)](https://github.com/gavinlyonsrepo/ERM19264_UC1609_RPI/blob/main/extras/image/wiring.png)
 
 This wiring Diagram from the manufacturer showing hardware setup connected to an ~8051 MCU, showing both 3.3 volt and 5 volt systems.
 Note status of J1 PCB jumper.
 
-![ ERM192642 ](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/connect.jpg)
+[![ Connection image ](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/connect.jpg)](https://github.com/gavinlyonsrepo/ERM19264_UC1609/blob/main/extras/image/connect.jpg)
 
 ## Software
 

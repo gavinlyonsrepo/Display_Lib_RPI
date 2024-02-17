@@ -1,6 +1,6 @@
-# ER_OLEDM1_CH1115
+# CH1115 OLED Readme
 
-![ OLED ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)
+[![ OLED image](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)
 
 ## Table of contents
 
@@ -25,19 +25,12 @@
 3. Bitmaps supported.
 4. Hardware and Software SPI
 
-* Development Tool chain.
-	1. Raspberry PI 3 model b
-	2. C++, g++ (Debian 12.2.0)
-	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. [bcm2835 Library 1.73 dependency](http://www.airspayce.com/mikem/bcm2835/). Provides low level SPI bus, delays and GPIO control.
-
 * Author: Gavin Lyons
 * Port of my Arduino [library link](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115).
 
 ## Output
 
-![ output ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_PICO/blob/main/extra/image/all.jpg)
+[![ output image ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_PICO/blob/main/extra/image/all.jpg)](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_PICO/blob/main/extra/image/all.jpg)
 
 
 ## Hardware
@@ -56,7 +49,7 @@ For SWSPI pick any GPIO you want for the 5 control lines.
 | 6 | Any you want | DC | This pin is Data or Command control pin. |
 | 7 | SPICEO GPIO 8 | CS | This pin is the chip select input.  |
 
-![ wiring ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/wiring.png)
+[![ wiring ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ch1115.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ch1115.png)
 
 ## Software
 
@@ -84,12 +77,11 @@ Default Speed is BCM2835_SPI_CLOCK_DIVIDER_64,
 the divider value in the begin method as an argument. These values are
 defined by enum bcm2835SPIClockDivider. For full list see
 
-![bcm2](https://github.com/gavinlyonsrepo/NOKIA_5110_RPI/blob/main/extra/images/bcm2.png)
+[![bcm2](https://github.com/gavinlyonsrepo/NOKIA_5110_RPI/blob/main/extra/images/bcm2.png)](https://github.com/gavinlyonsrepo/NOKIA_5110_RPI/blob/main/extra/images/bcm2.png)
 
 User can also adjust which HW SPI chip enable pin they use(CE0 or CE1).
 in begin method  arguments. This device uses bit order MSB First and SPI Mode 0.
 
-Measured SPI speed results Version 1.3 are in the FPS test example file header comment block.
 The member OLEDHighFreqDelay is a GPIO uS delay that
 can be used to slow down or speed up Software SPI.
 By default it is set to 0uS. It may have to be increased depending on device/CPU used.
@@ -128,5 +120,3 @@ default is 0x81.
 
 There is a  Horizontal scroll effect. Whose parameters(TimeInterval , direction , mode)
 can be adjusted by passing data to function see "OLEDscrollSetup" function header in .cpp and datasheet for details. defaults are in header file are 6 frames , right , continuous mode.
-
-

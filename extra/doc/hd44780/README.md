@@ -1,7 +1,7 @@
-# HD44780 LCD
+# HD44780 LCD Readme
 
 
-![ lcd ](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/LCDPCF.jpg)
+[![ lcd image](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/LCDPCF.jpg)](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/LCDPCF.jpg)
 
 ## Table of contents
 
@@ -30,13 +30,6 @@
 6. Tested on size 16x02 and 20x04 (but may work on other sizes eg 16x04 , untested)
 
 * Author: Gavin Lyons
-* Development Tool chain. 
-	1. Raspberry PI 3 model b
-	2. C++, g++ (Debian 12.2.0) 
-	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. bcm2835 Library 1.71 dependency. Provides low level I2C bus, delays and GPIO control.
-
 
 ## Hardware
 
@@ -67,7 +60,7 @@ and can monitor the Error flag to see current bcm2835I2CReasonCodes.
 The I2C clock speed function may have to called before each tranche of LCD commands.
 and not just at start. 
 
-![ bcm ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)
+[![ bcm image](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)
 
 For more info on bcm2835I2CClockDivider & bcm2835I2CReasonCodes see [bcm2835 doc's for details](http://www.airspayce.com/mikem/bcm2835/group__constants.html)
 
@@ -88,11 +81,12 @@ User can turn on debug messages with LCDDebugSet method see example file.
 
 Output  of custom character test in test file.
 
-![ pic ](https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)
+[![ op image ](https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)]
+(https://github.com/gavinlyonsrepo/HD44780_LCD_RPI/blob/main/extras/image/custom_output.jpg)
 
 20x04 display. 
 
-![ pic2 ](https://github.com/gavinlyonsrepo/HD44780_LCD_PCF8574/blob/main/extras/image/2004.jpg)
+[![ op image 2 ](https://github.com/gavinlyonsrepo/HD44780_LCD_PCF8574/blob/main/extras/image/2004.jpg)](https://github.com/gavinlyonsrepo/HD44780_LCD_PCF8574/blob/main/extras/image/2004.jpg)
 
 ## Notes and issues
 

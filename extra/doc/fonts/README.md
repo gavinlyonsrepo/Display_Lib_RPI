@@ -1,9 +1,9 @@
-# Fonts
+# Fonts Readme
 
 There are 12 fonts packaged with library. Fonts can be easily added or removed by user.
 All the Font data is in file font_data_RDL.cpp. These fonts are used by the graphic libraries displays.
 
-**Font data table** 
+## Font data table 
 
 | num | Font enum name | character size XxY |  ASCII range | Size in bytes |
 | ------ | ------ | ------ | ------ |  ------ | 
@@ -28,7 +28,7 @@ Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (4*ControlByte)
 | writeCharString | draws character array |
 | print | Polymorphic print class which will print out many data types |
 
-**Adding or removing a font**
+## Adding or removing a font
 
 1. Add/remove the Font data in font_data_RDL.cpp file
 2. Add/remove the pointer to font at bottom of font_data_RDL.cpp file
@@ -52,50 +52,50 @@ static const uint8_t FontBinaryExample[] =
 }
 ```
 
-**Sources**
+## Sources
 
 1. Some of the fonts packaged with library came from [URL](http://rinkydinkelectronics.com/)
 2. There is a monochrome font maker there at [URL](http://rinkydinkelectronics.com/t_make_font_file_mono.php)
 
-**Font Images**
+## Font Images
 
-Default(uno) + Pico + mega 
+Pico + Default(uno)  + mega 
 
-![dmp](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/fontoled.jpg)
+[![Font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/fontoled.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/fontoled.jpg)
 
 Wide Font
 
-![w](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)
+[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)
 
 SinclairS
 
-![s](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sinclair.png)
+[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sinclair.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sinclair.png)
 
 Retro 
 
-![r](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/retro.png)
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/retro.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/retro.png)
 
 Arial Bold
 
-![ab](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialbold.png)
+[![Font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialbold.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialbold.png)
 
 Hallfetica
 
-![h](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)
 
 Orla 
 
-![o](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)
 
 Arial Round
 
-![ar](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)
 
 GroTesk 
 
-![g](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)
 
 Sixteen Segment 
 
-![ss](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/ss.png)
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/ss.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/ss.png)
 

@@ -1,6 +1,6 @@
-# SSD1306_OLED
+# SSD1306 OLED Readme
 
-![ OLED ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/device.jpg)
+[![ OLED image ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/device.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/device.jpg)
 
 ## Table of contents
 
@@ -29,23 +29,13 @@
 6. Bitmaps supported.
 7. Hardware I2C
 8. Also tested on 128X32 display size. Should work for 96X16 display size.
-9. Dependency: bcm2835 Library
-
-* Author: Gavin Lyons
-
-* Development Tool chain.
-	1. Raspberry PI 3 model b
-	2. C++, g++ (Debian 12.2.0)
-	3. Raspbian , Debian 12 bookworm OS, , 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. [bcm2835 Library 1.71 dependency](http://www.airspayce.com/mikem/bcm2835/). Provides low level I2C bus, delays and GPIO control.
 
 
 ## Hardware
 
 Manufacturers diagram showing connections.
 
-![ wiring ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/wiring.jpg)
+[![ Wiring Image](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/wiring.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/wiring.jpg)
 
 ## Software
 
@@ -76,7 +66,7 @@ See image below.
 	This error code is the bcm2835I2CReasonCodes enum. Debug flag must be set to true to see this output.
 	See image below for  bcm2835I2CReasonCodes.
 
-![ bcm ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)
+[![ bcm image](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)
 
 For more info on bcm2835I2CClockDivider & bcm2835I2CReasonCodes see [bcm2835 doc's for details](http://www.airspayce.com/mikem/bcm2835/group__constants.html)
 
@@ -96,10 +86,9 @@ See example file "BITMAP" for more details.
 
 ## Output
 
+[![ Output image ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)
 
-![ op ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)
-
-![ op2 ](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)
+[![ Output image 2 ](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)
 
 ## Notes and issues
 
