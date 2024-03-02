@@ -13,14 +13,10 @@
 #include <cmath>
 #include <string>
 
-
-#define DEC 10
-#define HEX 16
-#define OCT 8
-#ifdef BIN // Prevent warnings if BIN is previously defined in "iotnx4.h" or similar
-#undef BIN
-#endif
-#define BIN 2
+#define RDL_DEC 10
+#define RDL_HEX 16
+#define RDL_OCT 8
+#define RDL_BIN 2
 
 /*!
 	@brief Polymorphic print class to print many data types by wrapping write function in the graphics class's
@@ -35,7 +31,7 @@ public:
 
 	virtual size_t write(uint8_t) = 0;
 	size_t write(const char *str) {
-	  if (str == NULL) return 0;
+	  if (str == nullptr) return 0;
 	  return write((const uint8_t *)str, strlen(str));
 	}
 	virtual size_t write(const uint8_t *buffer, size_t size);
@@ -49,19 +45,19 @@ public:
 
 	size_t print(const char[]);
 	size_t print(char);
-	size_t print(int, int = DEC);
-	size_t print(unsigned int, int = DEC);
-	size_t print(long, int = DEC);
-	size_t print(unsigned long, int = DEC);
+	size_t print(int, int = RDL_DEC);
+	size_t print(unsigned int, int = RDL_DEC);
+	size_t print(long, int = RDL_DEC);
+	size_t print(unsigned long, int = RDL_DEC);
 	size_t print(double, int = 2);
 	size_t print(const std::string &);
 
 	size_t println(const char[]);
 	size_t println(char);
-	size_t println(int, int = DEC);
-	size_t println(unsigned int, int = DEC);
-	size_t println(long, int = DEC);
-	size_t println(unsigned long, int = DEC);
+	size_t println(int, int = RDL_DEC);
+	size_t println(unsigned int, int = RDL_DEC);
+	size_t println(long, int = RDL_DEC);
+	size_t println(unsigned long, int = RDL_DEC);
 	size_t println(double, int = 2);
 	size_t println(void);
 	size_t println(const std::string &s);

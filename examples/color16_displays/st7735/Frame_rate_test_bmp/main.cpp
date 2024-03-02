@@ -87,7 +87,7 @@ int8_t Setup(void)
 	}
 //*****************************
 	std::cout << "ST7735 library version : " << GetRDLibVersionNum()<< std::endl;
-	TFT_MILLISEC_DELAY(50);
+	delayMilliSecRDL(50);
 	return 0;
 }
 
@@ -110,7 +110,7 @@ void TestFPS(void) {
 	{
 		if (img[i] == nullptr){ 
 			for(uint8_t j=0; j< numberOfFiles; j++) free(img[j]); // Free Up Buffer if set
-			TFT_MILLISEC_DELAY(TEST_DELAY1);
+			delayMilliSecRDL(TEST_DELAY1);
 			return;
 		}
 	}
@@ -146,7 +146,7 @@ void EndTests(void)
 	myTFT.setFont(font_retro);
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.writeCharString(5, 50, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTPowerDown(); // Power down device
 	bcm2835_close(); // Close the bcm2835 library
 	std::cout << "TFT End" << std::endl;

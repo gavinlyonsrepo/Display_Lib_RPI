@@ -27,9 +27,6 @@
 #define MAX7219_CLK_SetDigitalOutput bcm2835_gpio_fsel(_MAX7219_CLK_IO, BCM2835_GPIO_FSEL_OUTP)
 #define MAX7219_DIN_SetDigitalOutput bcm2835_gpio_fsel(_MAX7219_DIN_IO, BCM2835_GPIO_FSEL_OUTP)
 
-// Delay abstraction
-#define MAX7219_MicroSecondDelay bcm2835_delayMicroseconds
-#define MAX7219_MilliSecondDelay bcm2835_delay
 
 /*!
 	@brief  The main Class , used drive MAX7219 seven segment displays

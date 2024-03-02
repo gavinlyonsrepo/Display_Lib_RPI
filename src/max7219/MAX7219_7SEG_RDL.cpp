@@ -106,7 +106,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 			}
 		}
 		
-		MAX7219_MilliSecondDelay(50); // small init delay before commencing transmissions
+		delayMilliSecRDL(50); // small init delay before commencing transmissions
 	}
 	
 	_NoDigits = numDigits+1;
@@ -453,9 +453,9 @@ void MAX7219_SS_RPI::HighFreqshiftOut(uint8_t value)
 	{
 		!!(value & (1 << (7 - bit))) ? MAX7219_DIN_SetHigh: MAX7219_DIN_SetLow; // MSBFIRST
 		MAX7219_CLK_SetHigh;
-		MAX7219_MicroSecondDelay(_CommDelay);
+		delayMicroSecRDL(_CommDelay);
 		MAX7219_CLK_SetLow;
-		MAX7219_MicroSecondDelay(_CommDelay);
+		delayMicroSecRDL(_CommDelay);
 	}
 }
 

@@ -22,7 +22,7 @@ SSD1306::SSD1306(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(oledwi
 
 /*!
 	@brief  begin Method initialise OLED
-	@param I2C_speed default=0 , 0=bcm2835_i2c_set_baudrate(100000) 100k baudrate, >0 = BCM2835_I2C_CLOCK_DIVIDER,choices=2500 ,622 ,150 ,148
+	@param I2C_speed default=0 , 0=bcm2835_i2c_set_baudrate(100000) 100k baudrate, >0 = BCM2835_I2C_CLOCK_DIVIDER,choices=2500 ,626 ,150 ,148
 	@param I2c_address by default 0x3C
 	@param I2c_debug default false
 */
@@ -133,7 +133,7 @@ void SSD1306::OLED_I2C_OFF(void){bcm2835_i2c_end();}
 void SSD1306::OLEDPowerDown(void)
 {
 	OLEDEnable(0);
-	bcm2835_delay(100);
+	delayMilliSecRDL(100);
 }
 
 /*!
@@ -142,7 +142,7 @@ void SSD1306::OLEDPowerDown(void)
 void SSD1306::OLEDinit()
  {
 
-	bcm2835_delay(SSD1306_INITDELAY);
+	delayMilliSecRDL(SSD1306_INITDELAY);
 	SSD1306_command( SSD1306_DISPLAY_OFF);
 	SSD1306_command( SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO);
 	SSD1306_command( 0x80);
@@ -189,7 +189,7 @@ switch (_OLED_HEIGHT)
 	SSD1306_command( SSD1306_DEACTIVATE_SCROLL );
 	SSD1306_command( SSD1306_DISPLAY_ON );
 
-	bcm2835_delay(SSD1306_INITDELAY);
+	delayMilliSecRDL(SSD1306_INITDELAY);
 }
 
 /*!
@@ -239,7 +239,7 @@ void SSD1306::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 		for (uint8_t col = 0; col < _OLED_WIDTH; col++)
 		{
 			SSD1306_data(dataPattern);
-			bcm2835_delay(delay);
+			delayMilliSecRDL(delay);
 		}
 	}
 }
@@ -261,7 +261,7 @@ void SSD1306::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay
 	for (uint8_t i = 0; i < numofbytes; i++)
 	{
 		SSD1306_data(dataPattern);
-		bcm2835_delay(mydelay);
+		delayMilliSecRDL(mydelay);
 	}
 }
 
@@ -287,7 +287,7 @@ void SSD1306::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 			printf("Error I2C_Write_Byte : Cannot Write byte attempt no :: %u\n", +attemptI2Cwrite);
 			printf("bcm2835I2CReasonCodes :: Error code :: %u\n", +ReasonCodes);
 		}
-		bcm2835_delay(_I2C_ErrorDelay); // delay mS
+		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
 		ReasonCodes  = bcm2835_i2c_write(ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt

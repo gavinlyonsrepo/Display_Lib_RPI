@@ -77,7 +77,7 @@ bool Setup(void)
 	}else{
 		std::cout<< "bcm2835 library version : " << bcm2835_version() << std::endl;
 	}
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	if(myLCD.LCDBegin(inverse, contrast, bias) != rpiDisplay_Success)
 	{
 		std::cout<< "Error 1202: bcm2835_spi_begin :Cannot start spi, Running as root?" << std::endl;
@@ -85,7 +85,7 @@ bool Setup(void)
 		return false;
 	}
 	std::cout<< "Nokia 5110 library version : " << GetRDLibVersionNum()<< std::endl;
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	myLCD.LCDdisplayClear();
 	myLCD.LCDHighFreqDelaySet(0);
 	return true;

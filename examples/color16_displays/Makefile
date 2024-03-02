@@ -1,7 +1,9 @@
 # Gavin Lyons 01-2024
 # Makefile to build example program for
 # Display_Lib_RPI : 16 bit color Graphic displays
-# Display 1 = ST7735 TFT LCD SPI
+# Display 1 = ST7735X  TFT LCD SPI
+# Display 2 = ST7789   TFT LCD SPI
+# Display 3 = ILI9341  TFT LCD SPI
 # URL: https://github.com/gavinlyonsrepo/Display_Lib_RPI
 # NOTE : Run make help for options
 
@@ -16,6 +18,25 @@ SRC=st7735/Hello_world
 #SRC=st7735/Bitmap_Tests
 #SRC=st7735/Frame_rate_test_bmp
 #SRC=st7735/Frame_rate_test_two
+#=================================================
+
+# =============== ST7789 TFT LCD SPI =============
+#SRC=st7789/Hello_world
+#SRC=st7789/Bitmap_Tests
+#SRC=st7789/Text_Graphics_Functions
+#SRC=st7789/Frame_rate_test_bmp
+#=================================================
+
+# =============== ILI9341 TFT LCD SPI ============
+#SRC=ili9341/Hello_world
+#SRC=ili9341/Bitmap_Tests
+#SRC=ili9341/Text_Graphics_Functions
+#SRC=ili9341/Mandelbrot_set
+#SRC=ili9341/Touch_Screen
+#=================================================
+
+# =========== XPT2046 touchscreen basic test =======
+#SRC=xpt2046/xpt_Test
 #=================================================
 
 # ************************************************

@@ -7,9 +7,9 @@
 
 /*!
 	@brief  get the library version number 
-	@return the library version number eg 101 = 1.0.1
+	@return the library version number eg 120 = 1.2.0
 */
 uint16_t GetRDLibVersionNum(void)
 {
-	return 101;
+	return 120;
 }

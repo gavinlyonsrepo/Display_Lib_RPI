@@ -46,7 +46,7 @@ size_t Print::print(char c)
 /*!
 	@brief print an integer of base number system
 	@param n integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::print(int n, int base)
 {
@@ -56,7 +56,7 @@ size_t Print::print(int n, int base)
 /*!
 	@brief print an unsigned integer of base number system
 	@param n integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::print(unsigned int n, int base)
 {
@@ -66,7 +66,7 @@ size_t Print::print(unsigned int n, int base)
 /*!
 	@brief print an long  integer of base number system
 	@param n integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::print(long n, int base)
 {
@@ -91,7 +91,7 @@ size_t Print::print(long n, int base)
 /*!
 	@brief print an unsigned long integer of base number system
 	@param n integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::print(unsigned long n, int base)
 {
@@ -153,7 +153,7 @@ size_t Print::println(char c)
 /*!
 	@brief print an integer of base number system followed by new line
 	@param num integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::println(int num, int base)
 {
@@ -165,7 +165,7 @@ size_t Print::println(int num, int base)
 /*!
 	@brief print an unsigned integer of base number system followed by new line
 	@param num integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::println(unsigned int num, int base)
 {
@@ -177,7 +177,7 @@ size_t Print::println(unsigned int num, int base)
 /*!
 	@brief print an long  integer of base number system followed by new line
 	@param num integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::println(long num, int base)
 {
@@ -189,7 +189,7 @@ size_t Print::println(long num, int base)
 /*!
 	@brief print an unsigned long integer of base number system followed by new line
 	@param num integer to print
-	@param base the base number system to use (BIN HEX OCT DEC)
+	@param base the base number system to use (BIN HEX OCT RDL_DEC)
 */
 size_t Print::println(unsigned long num, int base)
 {

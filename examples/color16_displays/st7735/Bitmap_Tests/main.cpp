@@ -14,7 +14,7 @@
 // Section ::  libraries
 #include <bcm2835.h> // for SPI GPIO and delays.
 #include <ctime> // for test301
-#include "Bi_Color_Bitmap_Data.hpp" // Data for test 401-402
+#include "Bi_Color_Bitmap_Data.hpp" // Data for test 301-302
 #include "ST7735_TFT_LCD_RDL.hpp"
 
 // Section :: Defines
@@ -97,7 +97,7 @@ uint8_t Setup(void)
 	}
 //*****************************
 	std::cout << "ST7735 library version : " << GetRDLibVersionNum()<< std::endl;
-	TFT_MILLISEC_DELAY(50);
+	delayMilliSecRDL(50);
 	return 0;
 }
 
@@ -161,7 +161,7 @@ void Test301(void)
 		myTFT.setTextColor(RDLC_CYAN, RDLC_BLACK);
 		myTFT.print(teststr1);
 	}
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myTFT.fillScreen(RDLC_BLACK);
 	
 }
@@ -174,11 +174,11 @@ void Test302(void)
 	myTFT.setFont(font_default);
 	char teststr1[] = "Bitmap 2 ";
 	myTFT.writeCharString(5, 5, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	
 	if(myTFT.drawBitmap(0, 0, myTFTWidth , myTFTHeight, RDLC_WHITE , RDLC_GREEN, pBackupMenuBitmap) != rpiDisplay_Success)
 		return;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 }
 
 // bitmap 24 colour , All files format = Windows BITMAPINFOHEADER offset 54
@@ -190,7 +190,7 @@ void Test303(void)
 	char teststr1[] = "Bitmap 24";
 	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
 	myTFT.writeCharString(5, 5, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 
 	FILE *pFile ;
 	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
@@ -231,7 +231,7 @@ void Test303(void)
 			free(bmpBuffer);
 			return;
 		}
-		TFT_MILLISEC_DELAY(TEST_DELAY5);
+		delayMilliSecRDL(TEST_DELAY5);
 	}
 	free(bmpBuffer);  // Free Up Buffer
 }
@@ -250,7 +250,7 @@ void Test304(void)
 	myTFT.fillScreen(RDLC_BLACK);
 	char teststr1[] = "Bitmap 16";
 	myTFT.writeCharString(5, 5, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 
 	FILE *pFile ;
 	size_t pixelSize = 2; // 16 bit 2 bytes per pixel
@@ -299,7 +299,7 @@ void Test304(void)
 			free(bmpBuffer1);
 			return;
 		}
-		TFT_MILLISEC_DELAY(TEST_DELAY5);
+		delayMilliSecRDL(TEST_DELAY5);
 	} // end of for loop
 
 	free(bmpBuffer1); // Free Up Buffer
@@ -313,7 +313,7 @@ void EndTests(void)
 	myTFT.setFont(font_retro);
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.writeCharString(5, 50, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.TFTPowerDown(); // Power down device
 	bcm2835_close(); // Close the bcm2835 library

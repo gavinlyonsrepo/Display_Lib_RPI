@@ -66,8 +66,8 @@ ERM19264_UC1609 :: ERM19264_UC1609(int16_t lcdwidth, int16_t lcdheight , int8_t 
  */
 rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t VbiasPOT, uint32_t spi_divider, uint8_t SPICE_Pin)
 {
-	bcm2835_gpio_fsel(_LCD_RST, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_fsel(_LCD_CD, BCM2835_GPIO_FSEL_OUTP);
+	UC1609_RST_SetDigitalOutput;
+	UC1609_CD_SetDigitalOutput;
 
 	_VbiasPOT  = VbiasPOT;
 	if (AddressSet > 7 ) AddressSet = 0x02;
@@ -82,9 +82,9 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 				return rpiDisplay_SPIbeginFail;
 		break;
 		case 3:
-			bcm2835_gpio_fsel( _LCD_CS, BCM2835_GPIO_FSEL_OUTP);
-			bcm2835_gpio_fsel(_LCD_SCLK, BCM2835_GPIO_FSEL_OUTP);
-			bcm2835_gpio_fsel(_LCD_DIN, BCM2835_GPIO_FSEL_OUTP);
+			UC1609_CS_SetDigitalOutput;
+			UC1609_SCLK_SetDigitalOutput;
+			UC1609_DIN_SetDigitalOutput;
 		break;
 	}
 
@@ -163,7 +163,7 @@ void ERM19264_UC1609::LCDinit()
 
 	UC1609_CD_SetHigh;
 
-	bcm2835_delay(UC1609_INIT_DELAY2);
+	delayMilliSecRDL(UC1609_INIT_DELAY2);
 
 	LCDReset();
 
@@ -172,7 +172,7 @@ void ERM19264_UC1609::LCDinit()
 	send_command(UC1609_FRAMERATE_REG, UC1609_FRAMERATE_SET);
 	send_command(UC1609_BIAS_RATIO, UC1609_BIAS_RATIO_SET);
 	send_command(UC1609_POWER_CONTROL,  UC1609_PC_SET);
-	bcm2835_delay(UC1609_INIT_DELAY);
+	delayMilliSecRDL(UC1609_INIT_DELAY);
 
 	send_command(UC1609_GN_PM, 0);
 	send_command(UC1609_GN_PM, _VbiasPOT); //  changed by user
@@ -209,9 +209,9 @@ void ERM19264_UC1609::send_command (uint8_t command, uint8_t value)
 void ERM19264_UC1609::LCDReset ()
 {
 	UC1609_RST_SetLow;
-	bcm2835_delay(UC1609_RESET_DELAY);
+	delayMilliSecRDL(UC1609_RESET_DELAY);
 	UC1609_RST_SetHigh;
-	bcm2835_delay(UC1609_RESET_DELAY2);
+	delayMilliSecRDL(UC1609_RESET_DELAY2);
 }
 
 /*!
@@ -360,7 +360,7 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 		case 3: UC1609_CS_SetHigh; break;
 	}
 
-	bcm2835_delayMicroseconds(5);
+	delayMicroSecRDL(5);
 
 	switch (GetCommMode())
 	{
@@ -452,9 +452,9 @@ void ERM19264_UC1609::CustomshiftOut(uint8_t value)
 	 	!!(value & (1 << (7 - i))) ? UC1609_SDA_SetHigh : UC1609_SDA_SetLow ;
 
 		UC1609_SCLK_SetHigh;
-		bcm2835_delayMicroseconds(_LCD_HighFreqDelay);
+		delayMicroSecRDL(_LCD_HighFreqDelay);
 		UC1609_SCLK_SetLow;
-		bcm2835_delayMicroseconds(_LCD_HighFreqDelay);
+		delayMicroSecRDL(_LCD_HighFreqDelay);
 	}
 }
 

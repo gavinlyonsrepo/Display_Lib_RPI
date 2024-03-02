@@ -128,7 +128,7 @@ bool Setup(void)
 	}else{
 		printf("bcm2835 library version : %u\r\n", bcm2835_version());
 	}
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	if(myOLED.OLEDbegin(OLEDcontrast, SPICLK_FREQ , SPI_CE_PIN) != rpiDisplay_Success) // initialize the OLED
 	{
 		printf("Error 1202: Setup : bcm2835_spi_begin :Cannot start spi, Running as root?\r\n");
@@ -136,7 +136,7 @@ bool Setup(void)
 		return false;
 	}
 	printf("CH1115 OLED library version : %u\r\n", GetRDLibVersionNum());
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	myOLED.OLEDFillScreen(0x00); // clear screen
 	return true;
 }
@@ -164,7 +164,7 @@ void Test301(void)
 	// Method (1) OLED bitmap method, write bitmap directly to screen
 	printf(" Test 301 OLED bitmap method, write bitmap directly to screen\n");
 	myOLED.OLEDBitmap(5, 5 , 16, 8, SignalIconVa);
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDFillScreen(0x00);
 }
 
@@ -179,7 +179,7 @@ void Test302(void)
 		exit(-1);
 	}
 	myOLED.OLEDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDclearBuffer();
 }
 
@@ -192,7 +192,7 @@ void Test303(void)
 	myOLED.drawBitmap(30, 20, SignalIconVa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconVa));
 	myOLED.drawBitmap(70, 30, TemperatureImageVA, 16, 16, RDL_WHITE, RDL_BLACK, sizeof(TemperatureImageVA));
 	myOLED.OLEDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDclearBuffer();
 
 }
@@ -207,13 +207,13 @@ void Test304(void)
 	myOLED.drawBitmap(60, 20, SignalIconHa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconHa));
 
 	myOLED.OLEDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDclearBuffer();
 
 	myOLED.drawBitmap(0, 0, bigImage64x64, 64, 64, RDL_BLACK, RDL_WHITE, sizeof(bigImage64x64));
 
 	myOLED.OLEDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDclearBuffer();
 }
 

@@ -69,10 +69,10 @@ bool SetupTest()
 
 	printf("SSD1306 library Version Number :: %u\r\n",GetRDLibVersionNum());
 	printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
-	bcm2835_delay(500);
+	delayMilliSecRDL(500);
 	myOLED.OLEDbegin(I2C_Speed, I2C_Address, I2C_debug); // initialize the OLED
 	myOLED.OLEDFillScreen(0xF0, 0); // splash screen bars, optional just for effect
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	return true;
 }
 
@@ -102,7 +102,7 @@ void Test301(void)
 	printf("OLED Test 301 64x64 pixel Image\r\n");
 	myOLED.drawBitmap(0, 0 ,bigImage64x64, 64, 64, RDL_BLACK,RDL_WHITE, sizeof(bigImage64x64));
 	myOLED.OLEDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDFillScreen(0x00, 0);
 	myOLED.OLEDclearBuffer();
 }
@@ -114,7 +114,7 @@ void Test302(void)
 	myOLED.drawBitmap(40, 10,SignalIconHa, 16, 8,RDL_WHITE, RDL_BLACK, sizeof(SignalIconHa));
 	myOLED.OLEDupdate();
 
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDFillScreen(0x00, 0);
 	myOLED.OLEDclearBuffer();
 
@@ -126,7 +126,7 @@ void Test303(void)
 	myOLED.drawBitmap(0, 0, backupicon128x64, myOLEDwidth, myOLEDheight, RDL_WHITE, RDL_BLACK, sizeof(backupicon128x64));
 	myOLED.OLEDupdate();
 
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDFillScreen(0x00, 0);
 	myOLED.OLEDclearBuffer();
 }
@@ -137,6 +137,6 @@ void Test304(void)
 	myOLED.drawBitmap(0, 0, TemperatureImageVA, 16, 16, RDL_BLACK, RDL_WHITE, sizeof(TemperatureImageVA));
 	myOLED.OLEDupdate();
 
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDFillScreen(0x00, 0);
 }

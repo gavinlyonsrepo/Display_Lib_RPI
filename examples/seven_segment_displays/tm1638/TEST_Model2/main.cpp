@@ -61,7 +61,7 @@ int main()
 	
 	tm.displayBegin(); // Init the module
 	tm.DisplayStr("testing", 0);
-	bcm2835_delay(myTestDelay1);
+	delayMilliSecRDL(myTestDelay1);
 	tm.reset(); // Test 0 reset test
 	Test1();  // Test 1 decimal and float numbers
 	Test2();  // Test 2 Hexadecimal number
@@ -88,27 +88,27 @@ void Test1(void)
 	printf("Test 1: Numbers \r\n");
 	// Test 1a decimal number right aligned
 	tm.DisplayDecNum(250, 1 << 2, tm.TMAlignTextRight); // "     2.50"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	// Test 1b decimal number left aligned
 	tm.DisplayDecNum(99791, 1 << 4, tm.TMAlignTextLeft); // "9979.1   "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	// Test 1c decimal number leading zeros
 	tm.DisplayDecNum(2882, 0 , tm.TMAlignTextZeros);  // 00002882
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	
 	// Test 1d negative number 
 	tm.DisplayDecNum(-33, 0 , tm.TMAlignTextLeft); // "-33        "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	
 	// Test 1e  decimal numbers with the DisplayDecNumNibble right aligned
 	tm.DisplayDecNumNibble(213 , 78, 0 , tm.TMAlignTextRight); // " 213  78"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	// Test 1f  decimal numbers with the DisplayDecNumNibble left aligned
 	tm.DisplayDecNumNibble(2 , 95, 1<<3 , tm.TMAlignTextLeft); // "2   9.5  "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	// Test 1g  decimal numbers with the DisplayDecNumNibble leading zeros
 	tm.DisplayDecNumNibble(134 , 47, 1<<1 , tm.TMAlignTextZeros); // "0134004.7"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test2(void)
@@ -116,13 +116,13 @@ void Test2(void)
 	printf("Test 2: Hexadecimal numbers \r\n");
 	// Test 2a Hexadecimal number right aligned
 	tm.DisplayHexNum(0x00FF, 0x056E, 0x00, tm.TMAlignTextRight); //"  FF 56E"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	// Test 2a Hexadecimal number left aligned
 	tm.DisplayHexNum(0x0ABC, 0x000F, 0x00, tm.TMAlignTextLeft); // "ABC F   "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	// Test 2a Hexadecimal number leading zeros
 	tm.DisplayHexNum(0x0EE1, 0x00F4, 1 << 4, tm.TMAlignTextZeros); // "0EE1.00F4"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test3(void)
@@ -138,7 +138,7 @@ void Test3(void)
 	tm.DisplaySegments(5, 0x00); //f
 	tm.DisplaySegments(6, 0x00); //g
 	tm.DisplaySegments(7, 0x00); //DP
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 
 	// Test 3b manually set segments
 	// Display "00000005"
@@ -150,7 +150,7 @@ void Test3(void)
 	tm.DisplaySegments(5, 0xFF); //f
 	tm.DisplaySegments(6, 0x01); //g , for g middle segment, digit one only on
 	tm.DisplaySegments(7, 0x00); //decimal point, turn off all decmial points
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 
 	// Test 3c manually set segments scroll g 
 	// Display "-" countup to "--------"
@@ -161,9 +161,9 @@ void Test3(void)
 		
 		tm.DisplaySegments(6, dashvalue); // g scrolling 
 		dashvalue = (dashvalue*2)+1; // 1 to 256
-		bcm2835_delay(myTestDelay1);
+		delayMilliSecRDL(myTestDelay1);
 	}
-	bcm2835_delay(myTestDelay1);
+	delayMilliSecRDL(myTestDelay1);
 
 }
 
@@ -172,15 +172,15 @@ void Test4(void)
 	// Test 4 strings
 	printf("Test 4: Strings \r\n");
 	tm.DisplayStr("helloYOU", 1); // "helloYOU."
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.DisplayStr("      Hi", 0x08); // "     . Hi"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.DisplayStr("   ---   ", 0XE7); // ". . .---. . ."
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.DisplayStr(" helloU2", 0); // " helloU2"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.DisplayStr("string", 0);  // "string   "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test5(void)
@@ -194,7 +194,7 @@ void Test5(void)
 	
 	tm.ASCIItoSegment(values);
 	
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test6(void)
@@ -205,7 +205,7 @@ void Test6(void)
 	{
 		tm.brightness(brightness);
 		tm.DisplayStr("brightnes", 1);
-		bcm2835_delay(myTestDelay1);
+		delayMilliSecRDL(myTestDelay1);
 	}
 	tm.brightness(2); 
 	tm.reset();
@@ -251,11 +251,11 @@ void Test8(void)
 		// NOTE: pressing  S16 will move to test 9 
 		buttons = tm.ReadKey16();
 		tm.DisplayDecNum(buttons, 0 , tm.TMAlignTextRight); 
-		bcm2835_delay( myTestDelay2);
+		delayMilliSecRDL( myTestDelay2);
 		if (buttons == 16)
 		{
 			 //pressing 16 moves  to test 9
-			bcm2835_delay( myTestDelay2);
+			delayMilliSecRDL( myTestDelay2);
 			return;
 		}
 		}
@@ -267,7 +267,7 @@ void Test9(void)
 	printf("Test 9: Buttons :: Press S16 to quit\r\n");
 	uint16_t buttons=0;
 	tm.DisplayStr("buttons2", 0);
-	bcm2835_delay( myTestDelay2);
+	delayMilliSecRDL( myTestDelay2);
 	tm.reset();
 	while(1) 
 		{
@@ -285,12 +285,12 @@ void Test9(void)
 		if (buttons == 0x8000)
 		{
 			//pressing 16 to quit
-			bcm2835_delay( myTestDelay2);
+			delayMilliSecRDL( myTestDelay2);
 			tm.DisplayStr("quiting", 0);
-			bcm2835_delay( myTestDelay1);
+			delayMilliSecRDL( myTestDelay1);
 			return;
 		}
-		bcm2835_delay( myTestDelay2);
+		delayMilliSecRDL( myTestDelay2);
 		}
 }
 

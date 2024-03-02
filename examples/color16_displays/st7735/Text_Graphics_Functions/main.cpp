@@ -20,7 +20,6 @@
 	-# Test 902 rectangles
 	-# Test 903 Circle
 	-# Test 904 Triangles
-	-# Test 905 More shapes, media buttons graphic.
 */
 
 // Section ::  libraries
@@ -60,7 +59,6 @@ void Test901(void);  // pixels and lines
 void Test902(void);  // rectangles
 void Test903(void);  // Circle
 void Test904(void);  // Triangles
-void Test905(void);  // More shapes, media buttons graphic.
 
 
 //  Section ::  MAIN loop
@@ -87,7 +85,6 @@ int main(void)
 	Test902();
 	Test903();
 	Test904();
-	Test905();
 
 	EndTests();
 	return 0;
@@ -133,7 +130,7 @@ uint8_t Setup(void)
 	}
 //*****************************
 	std::cout << "ST7735 library version : " <<GetRDLibVersionNum()<< std::endl;
-	TFT_MILLISEC_DELAY(50);
+	delayMilliSecRDL(50);
 	return 0;
 }
 
@@ -148,7 +145,7 @@ void Test500(void)
 	myTFT.fillRoundRect(80, 10, 24, 60, 8, RDLC_YELLOW);
 	myTFT.fillRoundRect(104, 10, 24, 60, 8, RDLC_WHITE);
 	std::cout << "If colors are wrong user may have selected wrong PCB type in setup option 3" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(RDLC_BLACK);
 }
 
@@ -172,7 +169,7 @@ void Test501(void)
 			pos++;
 			// check pos if necessary: must be < tftTFT_HEIGHT - TOP_FIXED - BOTTOM_FIXED
 		}
-	TFT_MILLISEC_DELAY(TEST_DELAY);
+	delayMilliSecRDL(TEST_DELAY);
 	}
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
 	myTFT.fillScreen(RDLC_BLACK);
@@ -192,25 +189,25 @@ void Test502()
 	myTFT.TFTsetRotation(myTFT.TFT_Degrees_0);
 	myTFT.writeCharString(5, 5, teststr0);
 	myTFT.writeCharString(5, 108, teststr0);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.TFTsetRotation(myTFT.TFT_Degrees_90);
 	myTFT.writeCharString(5, 5, teststr1);
 	myTFT.writeCharString(5, 108, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.TFTsetRotation(myTFT.TFT_Degrees_180);
 	myTFT.writeCharString(5, 5, teststr2);
 	myTFT.writeCharString(5, 108, teststr2);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.TFTsetRotation(myTFT.TFT_Degrees_270);
 	myTFT.writeCharString(5, 5, teststr3);
 	myTFT.writeCharString(5, 108, teststr3);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 
 	myTFT.TFTsetRotation(myTFT.TFT_Degrees_0);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
@@ -227,33 +224,33 @@ void Test503()
 	myTFT.fillRoundRect(80, 10, 24, 60, 8, RDLC_YELLOW);
 	myTFT.fillRoundRect(104, 10, 24, 60, 8, RDLC_WHITE);
 	myTFT.writeCharString(10, 80, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Invert_mode);
 	std::cout << "Test 503-2: Mode Invert" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
 	std::cout << "Test 503-3: Mode Normal" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Display_off_mode);
 	std::cout << "Test 503-4: Mode Display off" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Display_on_mode);
 	std::cout << "Test 503-5: Mode Display on" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Sleep_mode);
 	std::cout << "Test 503-6: Mode Sleep on" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
 	std::cout << "Test 503-7 Mode Normal" << std::endl;
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 }
 
 
 void Test701(void) {
 
-	std::cout << "Test 701: Print out fonts 1-12 with writeCharString" << std::endl;
+	std::cout << "Test 701: Print out some fonts with writeCharString" << std::endl;
 	char teststr1[] = "Default ";
 	char teststr2[] = "WIDE ";
 	char teststr3[] = "Pico ";
@@ -396,7 +393,7 @@ void Test705(void)
 {
 	std::cout << "Test 705: Print class methods" << std::endl;
 
-	// Test Fonts 1-5
+	// Test Fonts default + wide + pico+ sinclair + retro
 	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
 
 	myTFT.setCursor(5,5);
@@ -426,7 +423,7 @@ void Test705(void)
 
 	DisplayReset();
 
-	// Test font 6-8
+	// Test font  mega Arial bold and Hallf.
 	myTFT.setCursor(5,5);
 	myTFT.setFont(font_mega);
 	myTFT.println("mega ");
@@ -444,7 +441,7 @@ void Test705(void)
 
 	DisplayReset();
 
-	// Test Font 9-10
+	// Test Font orla + arial round
 
 	myTFT.setFont(font_orla);
 	myTFT.setCursor(5,5);
@@ -458,7 +455,7 @@ void Test705(void)
 
 	DisplayReset();
 
-	// Test font 11-12
+	// Test font grotesk + sixteen segment
 	myTFT.setCursor(5,5);
 	myTFT.setFont(font_groTesk);
 	myTFT.println("GROTESK");
@@ -468,6 +465,18 @@ void Test705(void)
 	myTFT.setFont(font_sixteenSeg);
 	myTFT.print(1245);
 
+	DisplayReset();
+	
+	// Test font thick , seven segment + mint
+	myTFT.setCursor(5,5);
+	myTFT.setFont(font_sevenSeg);
+	myTFT.println(1234);
+	myTFT.setFont(font_thick);
+	myTFT.println("THICK");
+	myTFT.setFont(font_mint);
+	myTFT.println("MINT");
+	myTFT.setFont(font_mint);
+	myTFT.print("9`C");
 	DisplayReset();
 
 }
@@ -517,13 +526,13 @@ void Test706(void)
 	uint8_t numPos = 47;
 	myTFT.setFont(font_wide);
 	myTFT.setCursor(5,5);
-	myTFT.print(numPos , DEC); // 47
+	myTFT.print(numPos , RDL_DEC); // 47
 	myTFT.setCursor(5,25);
-	myTFT.print(numPos , BIN); // 10111
+	myTFT.print(numPos , RDL_BIN); // 10111
 	myTFT.setCursor(5,45);
-	myTFT.print(numPos , OCT); // 57
+	myTFT.print(numPos , RDL_OCT); // 57
 	myTFT.setCursor(5,65);
-	myTFT.print(numPos , HEX); // 2F
+	myTFT.print(numPos , RDL_HEX); // 2F
 
 	DisplayReset();
 
@@ -654,7 +663,7 @@ void Test901(void)
 	myTFT.drawFastVLine(40, 40, 40, RDLC_GREEN);
 	myTFT.drawFastHLine(60, 60, 40, RDLC_YELLOW);
 
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(RDLC_BLACK);
 }
 
@@ -671,7 +680,7 @@ void Test902(void) {
 	myTFT.drawRoundRect(15, 60, 50, 50, 5, RDLC_CYAN);
 	myTFT.fillRoundRect(70, 60, 50, 50, 10, RDLC_WHITE);
 
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(RDLC_BLACK);
 }
 
@@ -685,31 +694,13 @@ void Test904(void) {
 	myTFT.drawTriangle(5, 80, 50, 40, 95, 80,RDLC_CYAN);
 	myTFT.fillTriangle(55, 120, 100, 90, 127, 120, RDLC_RED);
 
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(RDLC_BLACK);
-}
-
-void Test905()
-{
-	std::cout << "Test 905: More shapes, media buttons graphic." << std::endl;
-	char teststr1[] = "Press Play";
-	//Draw play button
-	myTFT.fillRoundRect(25, 10, 78, 60, 8, RDLC_WHITE);
-	myTFT.fillTriangle(42, 20, 42, 60, 90, 40, RDLC_RED);
-	myTFT.writeCharString(25, 80, teststr1);
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
-
-	// change play color
-	myTFT.fillTriangle(42, 20, 42, 60, 90, 40,RDLC_GREEN);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
-	// change play color
-	myTFT.fillTriangle(42, 20, 42, 60, 90, 40, RDLC_BLUE);
-	TFT_MILLISEC_DELAY(TEST_DELAY2);
 }
 
 void DisplayReset(void)
 {
-	TFT_MILLISEC_DELAY(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(RDLC_BLACK);
 }
 

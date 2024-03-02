@@ -28,6 +28,7 @@
 		-# Test 715 println + print & textwrap 
 		-# Test 716 print method String object 
 		-# Test 717 print method numbers 
+		-# Test 718 Fonts thick mint and seven segment
 		-# Test 720 Text methods error Checking
 */
 
@@ -80,6 +81,7 @@ void Test714(void);
 void Test715(void);
 void Test716(void);
 void Test717(void);
+void Test718(void);
 void testErrorCheck(void);
 void DisplayGraphics();
 
@@ -104,7 +106,7 @@ bool setup() {
 		return false;
 	}
 		printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
-		bcm2835_delay(100);
+		delayMilliSecRDL(100);
 
 	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, SPICLK_FREQ , SPI_CE_PIN) != rpiDisplay_Success)
 	{
@@ -114,7 +116,7 @@ bool setup() {
 	}
 	printf("ERM19264 Library version number :: %u \r\n", GetRDLibVersionNum());
 	myLCD.LCDFillScreen(0x33); // display splash screen bars, optional for effect
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	return true;
 }
 
@@ -128,7 +130,7 @@ void EndTest()
 void TestReset()
 {
 	myLCD.LCDupdate();  // Write to the buffer
-	bcm2835_delay(DisplayDelay1);
+	delayMilliSecRDL(DisplayDelay1);
 	myLCD.LCDclearBuffer();
 }
 
@@ -157,6 +159,7 @@ void myTest()
 	Test715();
 	Test716();
 	Test717();
+	Test718();
 
 	testErrorCheck();
 	DisplayGraphics();
@@ -171,7 +174,7 @@ void Test701(void)
 	myLCD.writeChar(0,0 ,'a');
 	myLCD.writeCharString(0,10, TestStr);
 	myLCD.setCursor(5,20);
-	myLCD.print(-45.98);
+	myLCD.print(-33.98);
 	myLCD.setInvertFont(true);
 	myLCD.writeChar(0,30 ,'5');
 	myLCD.writeCharString(0,40, InvertedStr);
@@ -225,7 +228,7 @@ void Test704(void){
 	myLCD.writeChar(0,0 ,'u');
 	myLCD.writeCharString(0,10, TestStr);
 	myLCD.setCursor(5,20);
-	myLCD.print(-3.14);
+	myLCD.print(-2.19);
 	myLCD.setInvertFont(true);
 	myLCD.writeChar(0,30 ,'5');
 	myLCD.writeCharString(0,40, InvertedStr);
@@ -271,7 +274,7 @@ void Test707(void){
 	char InvertedStr[] = "Invert";
 	myLCD.writeCharString(0,0, TestStr);
 	myLCD.setCursor(5,16);
-	myLCD.print(-3.14);
+	myLCD.print(-8.14);
 	myLCD.setInvertFont(true);
 	myLCD.writeCharString(0,32, InvertedStr);
 	myLCD.setCursor(5,48);
@@ -396,13 +399,13 @@ void Test714(void)
 	printf("LCD Test 714 Base number systems using print \r\n");
 	myLCD.setFont(font_default);
 	myLCD.setCursor(0, 0);
-	myLCD.print(47 , DEC);
+	myLCD.print(47 , RDL_DEC);
 	myLCD.setCursor(0, 16);
-	myLCD.print(47 , HEX); 
+	myLCD.print(47 , RDL_HEX); 
 	myLCD.setCursor(0, 32);
-	myLCD.print(47, BIN);
+	myLCD.print(47, RDL_BIN);
 	myLCD.setCursor(0, 48);
-	myLCD.print(47 , OCT);
+	myLCD.print(47 , RDL_OCT);
 	TestReset();
 }
 
@@ -449,6 +452,20 @@ void Test717(void)
 	myLCD.println("hello");
 	myLCD.setInvertFont(true);
 	myLCD.print('P');
+	TestReset();
+}
+
+void Test718(void){
+	printf("LCD Test 718 mint & thick & seven segment font\r\n");
+	myLCD.setFont(font_mint);
+	myLCD.setCursor(5,5);
+	myLCD.print("21.35`C"); // Note ` gives degree symbol
+	myLCD.setCursor(5,40);
+	myLCD.setFont(font_thick);
+	myLCD.print("THICK");
+	myLCD.setCursor(5,50);
+	myLCD.setFont(font_sevenSeg);
+	myLCD.print("14.88");
 	TestReset();
 }
 
@@ -541,22 +558,22 @@ void Test500()
 	myLCD.setCursor(20, 30);
 	myLCD.print("All Pixels on");
 	myLCD.LCDupdate();
-	bcm2835_delay(4000);
+	delayMilliSecRDL(4000);
 	myLCD.LCDclearBuffer();
 	myLCD.LCDupdate();
 	myLCD.LCDallpixelsOn(1);
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 	myLCD.LCDallpixelsOn(0);
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 
 	// Test 502 inverse
 	myLCD.setCursor(20, 30);
 	myLCD.print("inverse test  ");
 	myLCD.LCDupdate();
 	myLCD.LCDinvert(0); // Normal
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 	myLCD.LCDinvert(1); // Inverted
-	bcm2835_delay(4000);
+	delayMilliSecRDL(4000);
 	myLCD.LCDinvert(0);
 
 	// Test 503 Flip 180 with LCD rotate command screen
@@ -564,13 +581,13 @@ void Test500()
 	myLCD.setCursor(20, 30);
 	myLCD.print("flip 180  test");
 	myLCD.LCDupdate();
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 	myLCD.LCDrotate(UC1609_ROTATION_FLIP_ONE);
 	myLCD.LCDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myLCD.LCDrotate(UC1609_ROTATION_NORMAL);
 	myLCD.LCDupdate();
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 
 	// Test 504 LCD scroll
 	myLCD.LCDclearBuffer();
@@ -581,7 +598,7 @@ void Test500()
 	{
 		myLCD.LCDscroll(i);
 		myLCD.LCDupdate();
-		bcm2835_delay(100);
+		delayMilliSecRDL(100);
 	}
 	myLCD.LCDscroll(0);
 
@@ -590,9 +607,9 @@ void Test500()
 	myLCD.setCursor(0, 30);
 	myLCD.print("LCD Disable test");
 	myLCD.LCDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myLCD.LCDEnable(0);
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myLCD.LCDEnable(1);
 	myLCD.LCDclearBuffer();
 
@@ -605,7 +622,7 @@ void Test500()
 	myLCD.setCursor(5,180);
 	myLCD.print("bottom");
 	myLCD.LCDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 
 	myLCD.setRotation(displayBC_Degrees_180);
 	myLCD.LCDclearBuffer();
@@ -614,7 +631,7 @@ void Test500()
 	myLCD.setCursor(5,56);
 	myLCD.print("bottom");
 	myLCD.LCDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 
 	myLCD.setRotation(displayBC_Degrees_270);
 	myLCD.LCDclearBuffer();
@@ -623,7 +640,7 @@ void Test500()
 	myLCD.setCursor(5,180);
 	myLCD.print("bottom");
 	myLCD.LCDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 
 	myLCD.setRotation(displayBC_Degrees_0); //default normal
 	myLCD.LCDclearBuffer();
@@ -632,11 +649,11 @@ void Test500()
 	myLCD.setCursor(5,56);
 	myLCD.print("bottom");
 	myLCD.LCDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 
 	myLCD.LCDclearBuffer();
 	myLCD.LCDupdate();
-	bcm2835_delay(500);
+	delayMilliSecRDL(500);
 }
 
 // *************** EOF *********************

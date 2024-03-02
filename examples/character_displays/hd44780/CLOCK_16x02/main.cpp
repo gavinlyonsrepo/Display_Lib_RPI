@@ -37,7 +37,7 @@ int main()
 	while(1)
 	{
 		DisplayInfo();
-		bcm2835_delay(DISPLAY_DELAY_1);
+		delayMilliSecRDL(DISPLAY_DELAY_1);
 	} 
 	endTest();
 	
@@ -56,7 +56,7 @@ bool setup(void) {
 		return false;
 	}
 
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	
 	// Turn on I2C bus (optionally it may already be on)
 	if (myLCD.LCD_I2C_ON() != rpiDisplay_Success)

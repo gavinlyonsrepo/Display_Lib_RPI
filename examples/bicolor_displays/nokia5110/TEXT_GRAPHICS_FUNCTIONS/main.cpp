@@ -167,7 +167,7 @@ bool Setup(void)
 	}else{
 		printf( "bcm2835 library version : %u\n",bcm2835_version());
 	}
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	if(myLCD.LCDBegin(inverse, contrast, bias) != rpiDisplay_Success)
 	{
 		printf( "Error 1202: Setup : bcm2835_spi_begin :Cannot start spi, Running as root?\n");
@@ -175,7 +175,7 @@ bool Setup(void)
 		return false;
 	}
 	printf( "Nokia 5110 library version : %u\n",GetRDLibVersionNum());
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	return true;
 }
 
@@ -404,13 +404,13 @@ void Test714(void)
 	printf("LCD Test 714 Base number systems using print \r\n");
 	myLCD.setFont(font_default);
 	myLCD.setCursor(0, 0);
-	myLCD.print(47 , DEC);
+	myLCD.print(47, RDL_DEC);
 	myLCD.setCursor(0, 9);
-	myLCD.print(47 , HEX);
+	myLCD.print(47, RDL_HEX);
 	myLCD.setCursor(0, 20);
-	myLCD.print(47, BIN);
+	myLCD.print(47, RDL_BIN);
 	myLCD.setCursor(0, 29);
-	myLCD.print(47 , OCT);
+	myLCD.print(47 ,RDL_OCT);
 	screenReset();
 }
 
@@ -565,14 +565,14 @@ void testSleepMode(void) {
 	myLCD.print(testStr1);
 	myLCD.LCDdisplayUpdate();
 
-	bcm2835_delay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myLCD.LCDenableSleep();
-	bcm2835_delay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myLCD.LCDdisableSleep();
 
 	myLCD.print(testStr2);
 	myLCD.LCDdisplayUpdate();
-	bcm2835_delay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	screenReset();
 }
 
@@ -629,9 +629,9 @@ void testInvert(void)
 
 	// Invert the display
 	myLCD.LCDinvertDisplay(true);
-	bcm2835_delay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myLCD.LCDinvertDisplay(false);
-	bcm2835_delay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 }
 
 void testFillScreen(void){
@@ -644,7 +644,7 @@ void testFillScreen(void){
 
 void screenReset(void) {
 	myLCD.LCDdisplayUpdate();
-	bcm2835_delay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myLCD.LCDdisplayClear();
 }
 

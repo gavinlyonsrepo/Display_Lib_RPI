@@ -61,11 +61,11 @@ bool Setup(void)
 	}else{
 		std::cout<< "bcm2835 library version : " << bcm2835_version() << std::endl;
 	}
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	myLCD.LCDBegin(inverse, contrast, bias);
 	std::cout<< "Nokia 5110 library version : " << GetRDLibVersionNum() << std::endl;
 	std::cout<< "Nokia 5110 Software SPI GPIO delay is set to " << myLCD.LCDHighFreqDelayGet() << "uS" << std::endl;
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	myLCD.LCDdisplayClear();
 	return true;
 }
@@ -85,5 +85,5 @@ void Test(void)
 	myLCD.setCursor(0, 0);
 	myLCD.print(testStr);
 	myLCD.LCDdisplayUpdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 }

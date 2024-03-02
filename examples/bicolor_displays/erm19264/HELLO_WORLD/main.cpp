@@ -52,7 +52,7 @@ bool setup() {
 		printf("Error 1201: init bcm2835 library , Is it installed ?\r\n");
 		return false;
 	}
-	bcm2835_delay(100);
+	delayMilliSecRDL(100);
 	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, SPICLK_FREQ , SPI_CE_PIN) != rpiDisplay_Success)
 	{
 		printf("Error 1202: bcm2835_spi_begin :Cannot start spi, Running as root?\n");
@@ -63,7 +63,7 @@ bool setup() {
 	printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
 	printf("ERM19264 Library version number :: %u \r\n", GetRDLibVersionNum());
 	myLCD.LCDFillScreen(0x33); // display splash screen bars, optional for effect
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	return true;
 }
 

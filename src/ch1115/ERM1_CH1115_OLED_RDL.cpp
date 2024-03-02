@@ -68,13 +68,13 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, uint32_t O
 	_OLED_SPICLK_DIVIDER  = OLED_spi_divider;
 	_OLED_SPICE_PIN = SPICE_Pin;
 
-	bcm2835_gpio_fsel(_OLED_RST, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_fsel(_OLED_CD, BCM2835_GPIO_FSEL_OUTP);
+	ERMCH1115_RST_SetDigitalOutput;
+	ERMCH1115_CD_SetDigitalOutput;
 	if(GetCommMode() == 3)
 	{
-		bcm2835_gpio_fsel( _OLED_CS, BCM2835_GPIO_FSEL_OUTP);
-		bcm2835_gpio_fsel(_OLED_SCLK, BCM2835_GPIO_FSEL_OUTP);
-		bcm2835_gpio_fsel(_OLED_DIN, BCM2835_GPIO_FSEL_OUTP);
+		ERMCH1115_CS_SetDigitalOutput;
+		ERMCH1115_SCLK_SetDigitalOutput;
+		ERMCH1115_DIN_SetDigitalOutput;
 	}else{
 		if(!bcm2835_spi_begin())
 			return rpiDisplay_SPIbeginFail;
@@ -157,13 +157,13 @@ void ERMCH1115::OLEDSPIoff(void)
 void ERMCH1115::OLEDPowerDown(void)
 {
 	OLEDEnable(0);
-	bcm2835_gpio_write(_OLED_CD, LOW);
-	bcm2835_gpio_write(_OLED_RST, LOW);
+	ERMCH1115_CD_SetLow;
+	ERMCH1115_RST_SetLow;
 	if(GetCommMode()== 3)
 	{
-		bcm2835_gpio_write(_OLED_SCLK, LOW);
-		bcm2835_gpio_write(_OLED_DIN, LOW);
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_SCLK_SetLow;
+		ERMCH1115_SDA_SetLow;
+		ERMCH1115_CS_SetLow;
 	}
 	_sleep= true;
 }
@@ -189,9 +189,9 @@ void ERMCH1115::SoftwareSPIShiftOut(uint8_t value)
 		!!(value & (1 << (7 - i))) ? ERMCH1115_SDA_SetHigh : ERMCH1115_SDA_SetLow ;
 
 		ERMCH1115_SCLK_SetHigh;
-		bcm2835_delayMicroseconds(_OLEDHighFreqDelay);
+		delayMicroSecRDL(_OLEDHighFreqDelay);
 		ERMCH1115_SCLK_SetLow;
-		bcm2835_delayMicroseconds(_OLEDHighFreqDelay);
+		delayMicroSecRDL(_OLEDHighFreqDelay);
 	}
 }
 
@@ -203,7 +203,7 @@ void ERMCH1115::OLEDinit()
 	switch (GetCommMode())
 	{
 		case 2: OLEDSPIHWSettings(); break;
-		case 3: bcm2835_gpio_write(_OLED_CS, LOW); break;
+		case 3: ERMCH1115_CS_SetLow; break;
 	}
 	OLEDReset();
 
@@ -251,9 +251,9 @@ void ERMCH1115::OLEDinit()
 	_sleep= false;
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 
-	bcm2835_delay(ERMCH1115_INITDELAY);
+	delayMilliSecRDL(ERMCH1115_INITDELAY);
 }
 
 /*!
@@ -275,11 +275,11 @@ void ERMCH1115::send_command (uint8_t command,uint8_t value)
 void ERMCH1115::OLEDReset ()
 {
 	ERMCH1115_RST_SetHigh;
-	bcm2835_delay(ERMCH1115_RST_DELAY1);
+	delayMilliSecRDL(ERMCH1115_RST_DELAY1);
 	ERMCH1115_RST_SetLow;
-	bcm2835_delay(ERMCH1115_RST_DELAY1);
+	delayMilliSecRDL(ERMCH1115_RST_DELAY1);
 	ERMCH1115_RST_SetHigh ;
-	bcm2835_delay(ERMCH1115_RST_DELAY2);
+	delayMilliSecRDL(ERMCH1115_RST_DELAY2);
 }
 
 /*!
@@ -289,7 +289,7 @@ void ERMCH1115::OLEDReset ()
 void ERMCH1115::OLEDEnable (uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	if (bits)
 	{
@@ -302,7 +302,7 @@ void ERMCH1115::OLEDEnable (uint8_t bits)
 	}
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -320,7 +320,7 @@ bool ERMCH1115::OLEDIsSleeping() { return  _sleep ;}
 void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t mode)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SETUP, 0);
 	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SET_SCOL, 0);
@@ -332,7 +332,7 @@ void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t
 	send_command(mode, 0);
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -343,12 +343,12 @@ void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t
 void ERMCH1115::OLEDscroll(uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	bits ? send_command(ERMCH1115_ACTIVATE_SCROLL , 0) :   send_command(ERMCH1115_DEACTIVATE_SCROLL, 0);
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -358,12 +358,12 @@ void ERMCH1115::OLEDscroll(uint8_t bits)
 void ERMCH1115::OLEDContrast(uint8_t contrast)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	send_command(ERMCH115_CONTRAST_CONTROL  ,0);
 	send_command(contrast, 0);
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -373,12 +373,12 @@ void ERMCH1115::OLEDContrast(uint8_t contrast)
 void ERMCH1115::OLEDFlip(uint8_t  bits)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	bits ? send_command(ERMCH1115_COMMON_SCAN_DIR, 0x08):send_command(ERMCH1115_COMMON_SCAN_DIR, 0x00)  ; // C0H - C8H
 	bits ? send_command(ERMCH1115_SEG_SET_REMAP, 0x01):   send_command(ERMCH1115_SEG_SET_REMAP, 0x00); //(A0H - A1H)
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -394,13 +394,13 @@ void ERMCH1115::OLEDFlip(uint8_t  bits)
 void ERMCH1115::OLEDfadeEffect(uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	send_command(ERMCCH1115_BREATHEFFECT_SET,0);
 	send_command(bits,0);
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -410,12 +410,12 @@ void ERMCH1115::OLEDfadeEffect(uint8_t bits)
 void ERMCH1115::OLEDInvert(uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	bits ? send_command(ERMCH1115_DISPLAY_INVERT, 0) :   send_command(ERMCH1115_DISPLAY_NORMAL, 0);
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -444,27 +444,27 @@ void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 		return;
 	}
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	// Commands
 	send_command(ERMCH1115_SET_COLADD_LSB, 0);
 	send_command(ERMCH1115_SET_COLADD_MSB, 0);
 	send_command(ERMCH1115_SET_PAGEADD, pageNum);
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 
-	bcm2835_delayMicroseconds(5);
+	delayMicroSecRDL(5);
 
 	// Data
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	for (uint8_t i = 0; i < _OLED_WIDTH; i++)
 	{
 		send_data(dataPattern);
 	}
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -479,7 +479,7 @@ void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data)
 {
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	uint8_t tx, ty;
 	uint16_t offset = 0;
@@ -501,7 +501,7 @@ void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uin
 		}
 	}
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!
@@ -551,7 +551,7 @@ void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uin
 {
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, LOW);
+		ERMCH1115_CS_SetLow;
 
 	uint8_t tx, ty;
 	uint16_t offset = 0;
@@ -575,7 +575,7 @@ void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uin
 	}
 
 	if (GetCommMode() == 3)
-		bcm2835_gpio_write(_OLED_CS, HIGH);
+		ERMCH1115_CS_SetHigh ;
 }
 
 /*!

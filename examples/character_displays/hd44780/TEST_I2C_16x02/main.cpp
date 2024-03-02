@@ -53,7 +53,7 @@ bool setup(void) {
 		return false;
 	}
 	
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	myLCD.LCDDebugSet(false); // Turn debug messages on 
 	myLCD.LCD_I2C_SetSpeed();
 	if (myLCD.LCDCheckConnection() != 0)
@@ -82,7 +82,7 @@ void test(void)
 	char testString[] = "I2C Test";
 	myLCD.LCDGOTO(myLCD.LCDLineNumberOne, 0);
 	myLCD.LCDSendString(testString);
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myLCD.LCDClearScreen();
 }
 

@@ -79,6 +79,11 @@
 #define  UC1609_SDA_SetHigh bcm2835_gpio_write(_LCD_DIN, HIGH)
 #define  UC1609_SDA_SetLow bcm2835_gpio_write(_LCD_DIN, LOW)
 
+#define UC1609_RST_SetDigitalOutput bcm2835_gpio_fsel(_LCD_RST, BCM2835_GPIO_FSEL_OUTP);
+#define UC1609_CD_SetDigitalOutput bcm2835_gpio_fsel(_LCD_CD, BCM2835_GPIO_FSEL_OUTP);
+#define UC1609_CS_SetDigitalOutput bcm2835_gpio_fsel( _LCD_CS, BCM2835_GPIO_FSEL_OUTP); // SW SPI only last 3 lines
+#define UC1609_SCLK_SetDigitalOutput bcm2835_gpio_fsel(_LCD_SCLK, BCM2835_GPIO_FSEL_OUTP);
+#define UC1609_DIN_SetDigitalOutput bcm2835_gpio_fsel(_LCD_DIN, BCM2835_GPIO_FSEL_OUTP);
 
 /*!
 	@brief class to drive the ERM19264_UC1609 LCD

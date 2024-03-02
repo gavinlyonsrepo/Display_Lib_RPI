@@ -20,10 +20,10 @@
 0. C++ Library for a TFT SPI LCD, ST7735 Driver
 1. Dynamic install-able Raspberry Pi C++ library.
 2. Inverse colour, rotate, sleep, idle  & vertical scroll modes supported.
-5. Graphics + print class included.
-6. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
-7. Hardware and Software SPI
-8. Dependency: bcm2835 Library
+3. Graphics + print class included.
+4. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
+5. Hardware and Software SPI
+6. Dependency: bcm2835 Library
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_16F18346_projects)
@@ -57,7 +57,7 @@ The function TFTInitScreenSize sets them.
 
 TFTInitPCBType function is overloaded(2 off, one for HW SPI the other for SW SPI).
 
-Param1 PCB_TYPE
+PCB_TYPE
 
 In the main.cpp in USER OPTION 3 PCB_TYPE select your display type.
 By passing an enum type to function  TFTInitPCBType.
@@ -72,20 +72,22 @@ If your display works but RGB colors are wrong you may have chosen wrong display
 | 4 | ST7735S Black Tab | TFT_ST7735S_Black | RED PCB v1.2, 1.8, 128 x 160 pixels |
 
 
-Param2A SPI_Speed (HW SPI Only)
+SPI_Speed (HW SPI Only)
 
 Here the user can pass the SPI Bus freq in Hertz,
 Maximum 125 Mhz , Minimum 30Khz, The default in file is 8Mhz 
+Although it is possible to select high speeds for the SPI interface, up to 125MHz,
+Don't expect any speed faster than 32MHz to work reliably.
 If you set to 0 .Speed is set to bcm2835 
 constant BCM2835_SPI_CLOCK_DIVIDER_32. If using SW spi, ignore.
 
-Param3A SPI_CE_PIN (HW SPI Only)
+SPI_CE_PIN (HW SPI Only)
 
 Which Chip enable pin to use two choices. If using SW spi, ignore.
 	* SPICE0 = 0
 	* SPICE1 = 1
 
-Param2B SPI_CommDelay (SW SPI Only)
+SPI_CommDelay (SW SPI Only)
 
 The user can adjust If user is having reliability issues with SW SPI in some setups.
 This is a microsecond delay in SW SPI GPIO loop. It is set to 0 by default, Increasing it will slow 

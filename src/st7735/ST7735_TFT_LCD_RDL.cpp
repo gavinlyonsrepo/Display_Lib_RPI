@@ -4,7 +4,6 @@
 	@brief    Source file for ST7735 TFT LCD library.
 		Contains driver methods for ST7735 TFT LCD display
 	Project Name: Display_Lib_RPI
-
 */
 
 #include "../../include/st7735/ST7735_TFT_LCD_RDL.hpp"
@@ -69,11 +68,11 @@ if (_hardwareSPI == false)
 void ST7735_TFT ::TFTResetPIN() {
 	Display_RST_SetDigitalOutput;
 	Display_RST_SetHigh;
-	TFT_MILLISEC_DELAY(TFT_RESET_DELAY);
+	delayMilliSecRDL(TFT_RESET_DELAY);
 	Display_RST_SetLow;
-	TFT_MILLISEC_DELAY(TFT_RESET_DELAY);
+	delayMilliSecRDL(TFT_RESET_DELAY);
 	Display_RST_SetHigh;
-	TFT_MILLISEC_DELAY(TFT_RESET_DELAY);
+	delayMilliSecRDL(TFT_RESET_DELAY);
 }
 
 /*!
@@ -115,15 +114,16 @@ void ST7735_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, in
 */
 rpiDisplay_Return_Codes_e ST7735_TFT ::TFTGreenTabInitialize() {
 	TFTResetPIN();
-	Display_DC_SetLow;
 	Display_DC_SetDigitalOutput;
+	Display_DC_SetLow;
 if (_hardwareSPI == false){
-	Display_CS_SetHigh;
 	Display_CS_SetDigitalOutput;
-	Display_SCLK_SetLow;
-	Display_SDATA_SetLow;
 	Display_SCLK_SetDigitalOutput;
 	Display_SDATA_SetDigitalOutput;
+	Display_CS_SetHigh;
+	Display_SCLK_SetLow;
+	Display_SDATA_SetLow;
+
 }else{
 	if (!bcm2835_spi_begin())
 		return rpiDisplay_SPIbeginFail;
@@ -155,16 +155,17 @@ void ST7735_TFT ::Rcmd2green() {
 */
 rpiDisplay_Return_Codes_e ST7735_TFT ::TFTRedTabInitialize() {
 	TFTResetPIN();
-	Display_DC_SetLow;
 	Display_DC_SetDigitalOutput;
+	Display_DC_SetLow;
 if (_hardwareSPI == false)
 {
-	Display_CS_SetHigh;
-	Display_CS_SetDigitalOutput;
-	Display_SCLK_SetLow;
-	Display_SDATA_SetLow;
 	Display_SCLK_SetDigitalOutput;
 	Display_SDATA_SetDigitalOutput;
+	Display_CS_SetDigitalOutput;
+	Display_CS_SetHigh;
+	Display_SCLK_SetLow;
+	Display_SDATA_SetLow;
+
 }else{
 	if (!bcm2835_spi_begin())
 		return rpiDisplay_SPIbeginFail;
@@ -183,16 +184,17 @@ if (_hardwareSPI == false)
 */
 rpiDisplay_Return_Codes_e ST7735_TFT ::TFTBlackTabInitialize() {
 	TFTResetPIN();
-	Display_DC_SetLow;
 	Display_DC_SetDigitalOutput;
+	Display_DC_SetLow;
 if (_hardwareSPI == false)
 {
-	Display_CS_SetHigh;
-	Display_CS_SetDigitalOutput;
-	Display_SCLK_SetLow;
-	Display_SDATA_SetLow;
 	Display_SCLK_SetDigitalOutput;
 	Display_SDATA_SetDigitalOutput;
+	Display_CS_SetDigitalOutput;
+	Display_CS_SetHigh;
+	Display_SCLK_SetLow;
+	Display_SDATA_SetLow;
+
 }else{
 	if (!bcm2835_spi_begin())
 		return rpiDisplay_SPIbeginFail;
@@ -213,16 +215,17 @@ if (_hardwareSPI == false)
 */
 rpiDisplay_Return_Codes_e ST7735_TFT ::TFTST7735BInitialize() {
 	TFTResetPIN();
-	Display_DC_SetLow;
 	Display_DC_SetDigitalOutput;
+	Display_DC_SetLow;
 if (_hardwareSPI == false)
 {
-	Display_CS_SetHigh;
-	Display_CS_SetDigitalOutput;
-	Display_SCLK_SetLow;
-	Display_SDATA_SetLow;
 	Display_SCLK_SetDigitalOutput;
 	Display_SDATA_SetDigitalOutput;
+	Display_CS_SetDigitalOutput;
+	Display_CS_SetHigh;
+	Display_SCLK_SetLow;
+	Display_SDATA_SetLow;
+
 }else{
 	if (!bcm2835_spi_begin())
 		return rpiDisplay_SPIbeginFail;
@@ -243,17 +246,17 @@ void ST7735_TFT ::Bcmd() {
 	uint8_t seq8[] {0x00, 0x02, 0x08 , 0x81};
 	uint8_t seq9[] {0x00, 0x01, 0x08 , 0xA0};
 	writeCommand(ST7735_SWRESET);
-	TFT_MILLISEC_DELAY(50);
+	delayMilliSecRDL(50);
 	writeCommand(ST7735_SLPOUT);
-	TFT_MILLISEC_DELAY(500);
+	delayMilliSecRDL(500);
 	writeCommand(ST7735_COLMOD);
 	writeData(0x05);
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_FRMCTR1);
 	writeData(0x00);
 	writeData(0x06);
 	writeData(0x03);
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_MADCTL);
 	writeData(0x08);
 	writeCommand(ST7735_DISSET5);
@@ -264,7 +267,7 @@ void ST7735_TFT ::Bcmd() {
 	writeCommand(ST7735_PWCTR1);
 	writeData(0x02);
 	writeData(0x70);
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_PWCTR2);
 	writeData(0x05);
 	writeCommand(ST7735_PWCTR3);
@@ -273,7 +276,7 @@ void ST7735_TFT ::Bcmd() {
 	writeCommand(ST7735_VMCTR1);
 	writeData(0x3C);
 	writeData(0x38);
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_PWCTR6);
 	writeData(0x11);
 	writeData(0x15);
@@ -281,15 +284,15 @@ void ST7735_TFT ::Bcmd() {
 	spiWriteDataBuffer(seq6, sizeof(seq6));
 	writeCommand(ST7735_GMCTRN1);
 	spiWriteDataBuffer(seq7, sizeof(seq7));
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_CASET);
 	spiWriteDataBuffer(seq8, sizeof(seq8));
 	writeCommand(ST7735_RASET);
 	spiWriteDataBuffer(seq9, sizeof(seq9));
 	writeCommand(ST7735_NORON);
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_DISPON);
-	TFT_MILLISEC_DELAY(500);
+	delayMilliSecRDL(500);
 }
 
 
@@ -301,9 +304,9 @@ void ST7735_TFT ::Rcmd1() {
 	uint8_t seq1[] { 0x01, 0x2C, 0x2D };
 	uint8_t seq3[] { 0xA2, 0x02, 0x84 };
 	writeCommand(ST7735_SWRESET);
-	TFT_MILLISEC_DELAY(150);
+	delayMilliSecRDL(150);
 	writeCommand(ST7735_SLPOUT);
-	TFT_MILLISEC_DELAY(500);
+	delayMilliSecRDL(500);
 	writeCommand(ST7735_FRMCTR1);
 
 	spiWriteDataBuffer(seq1, sizeof(seq1));
@@ -359,9 +362,9 @@ void ST7735_TFT ::Rcmd3() {
 	uint8_t seq5[] {0x03, 0x1D, 0x07, 0x06, 0x2E, 0x2C, 0x29, 0x2D, 0x2E, 0x2E, 0x37, 0x3F, 0x00, 0x00, 0x02, 0x10};
 	spiWriteDataBuffer(seq5, sizeof(seq5));
 	writeCommand(ST7735_NORON);
-	TFT_MILLISEC_DELAY(10);
+	delayMilliSecRDL(10);
 	writeCommand(ST7735_DISPON);
-	TFT_MILLISEC_DELAY(100);
+	delayMilliSecRDL(100);
 }
 
 
@@ -448,7 +451,7 @@ void ST7735_TFT ::TFTchangeMode(TFT_modes_e mode) {
 			}
 			if (TFT_mode == TFT_Sleep_mode) {//was in sleep?
 				writeCommand(ST7735_SLPOUT);
-				TFT_MILLISEC_DELAY(120);
+				delayMilliSecRDL(120);
 			}
 			if (TFT_mode == TFT_Invert_mode) {//was inverted?
 				TFT_mode = TFT_Normal_mode;
@@ -468,7 +471,7 @@ void ST7735_TFT ::TFTchangeMode(TFT_modes_e mode) {
 		case TFT_Sleep_mode:
 			writeCommand(ST7735_SLPIN);
 			TFT_mode = TFT_Sleep_mode;
-			TFT_MILLISEC_DELAY(5);
+			delayMilliSecRDL(5);
 			return;
 		case TFT_Invert_mode:
 			writeCommand(ST7735_INVON);
@@ -677,20 +680,16 @@ void  ST7735_TFT::HighFreqDelaySet(uint16_t CommDelay){_HighFreqDelay = CommDela
 	@note virtual function overloads graphics library
  */
 void ST7735_TFT::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
-	uint8_t x0Lower = x0 & 0xFF;
-	uint8_t y0Lower = y0 & 0xFF;
-	uint8_t x1Lower = x1 & 0xFF;
-	uint8_t y1Lower = y1 & 0xFF;
+	uint8_t x0Lower = (x0 & 0xFF) + _XStart;
+	uint8_t y0Lower = (y0 & 0xFF) +_YStart;
+	uint8_t x1Lower = (x1 & 0xFF) + _XStart;
+	uint8_t y1Lower = (y1 & 0xFF) +_YStart;
+	uint8_t seqCASET[]   {0x00 ,x0Lower,0x00, x1Lower};
+	uint8_t seqRASET[]   {0x00,y0Lower,0x00, y1Lower};
 	writeCommand(ST7735_CASET);
-	writeData(0);
-	writeData(x0Lower + _XStart);
-	writeData(0);
-	writeData(x1Lower + _XStart);
+	spiWriteDataBuffer(seqCASET, sizeof(seqCASET));
 	writeCommand(ST7735_RASET);
-	writeData(0);
-	writeData(y0Lower +_YStart);
-	writeData(0);
-	writeData(y1Lower +_YStart);
+	spiWriteDataBuffer(seqRASET, sizeof(seqRASET));
 	writeCommand(ST7735_RAMWR); // Write to RAM
 }
 

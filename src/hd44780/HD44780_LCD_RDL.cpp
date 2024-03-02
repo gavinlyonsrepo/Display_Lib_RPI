@@ -15,7 +15,7 @@
 	@param I2Cspeed I2C Bus Clock speed in KHz. Default BCM2835_I2C_CLOCK_DIVIDER_626 
 	@details 
 		-# = 0  //bcm2835_i2c_set_baudrate(100000); 100k baudrate
-		-# > 0  BCM2835_I2C_CLOCK_DIVIDER, choices = 2500 , 622 , 150 , 148
+		-# > 0  BCM2835_I2C_CLOCK_DIVIDER, choices = 2500 , 626 , 150 , 148
 		-# BCM2835_I2C_CLOCK_DIVIDER_2500   = 2500, 2500 = 10us = 100 kHz 
 		-# BCM2835_I2C_CLOCK_DIVIDER_626    = 626,  626 = 2.504us = 399.3610 kHz 
 		-# BCM2835_I2C_CLOCK_DIVIDER_150    = 150, 150 = 60ns = 1.666 MHz (default at reset) 
@@ -66,7 +66,7 @@ void HD44780PCF8574LCD::LCDSendData(unsigned char data) {
 			std::cout << "Error 601 I2C  Data bcm2835I2CReasonCodes : " << +ReasonCodes << std::endl;
 			std::cout << "Attempt Count: " << +AttemptCount << std::endl;
 		}
-		bcm2835_delay(_I2C_ErrorDelay );
+		delayMilliSecRDL(_I2C_ErrorDelay );
 		ReasonCodes = bcm2835_i2c_write(dataBufferI2C, 4); // retransmit
 		_I2C_ErrorFlag = ReasonCodes;
 		AttemptCount--;
@@ -109,7 +109,7 @@ void HD44780PCF8574LCD::LCDSendCmd(unsigned char cmd) {
 			std::cout << "Error 602: I2C Command bcm2835I2CReasonCodes : " << +ReasonCodes << std::endl;
 			std::cout << "Attempt Count : " << +AttemptCount<< std::endl;
 		}
-		bcm2835_delay(_I2C_ErrorDelay);
+		delayMilliSecRDL(_I2C_ErrorDelay);
 		ReasonCodes = bcm2835_i2c_write(cmdBufferI2C,4); // retransmit
 		_I2C_ErrorFlag = ReasonCodes;
 		AttemptCount--;
@@ -183,7 +183,7 @@ void HD44780PCF8574LCD::LCDResetScreen(LCDCursorType_e CursorType) {
 	LCDSendCmd(CursorType);
 	LCDSendCmd(LCDCmdClearScreen);
 	LCDSendCmd(LCDEntryModeThree);
-	bcm2835_delay(5);
+	delayMilliSecRDL(5);
 }
 
 /*!
@@ -192,7 +192,7 @@ void HD44780PCF8574LCD::LCDResetScreen(LCDCursorType_e CursorType) {
 */
 void HD44780PCF8574LCD::LCDDisplayON(bool OnOff) {
 	OnOff ? LCDSendCmd(LCDCmdDisplayOn) : LCDSendCmd(LCDCmdDisplayOff);
-	bcm2835_delay(5);
+	delayMilliSecRDL(5);
 }
 
 
@@ -202,19 +202,19 @@ void HD44780PCF8574LCD::LCDDisplayON(bool OnOff) {
 */
 void HD44780PCF8574LCD::LCDInit(LCDCursorType_e CursorType) {
 
-	bcm2835_delay(15);
+	delayMilliSecRDL(15);
 	LCDSendCmd(LCDCmdHomePosition);
-	bcm2835_delay(5);
+	delayMilliSecRDL(5);
 	LCDSendCmd(LCDCmdHomePosition);
-	bcm2835_delay(5);
+	delayMilliSecRDL(5);
 	LCDSendCmd(LCDCmdHomePosition);
-	bcm2835_delay(5);
+	delayMilliSecRDL(5);
 	LCDSendCmd(LCDCmdModeFourBit);
 	LCDSendCmd(LCDCmdDisplayOn);
 	LCDSendCmd(CursorType);
 	LCDSendCmd(LCDEntryModeThree);
 	LCDSendCmd(LCDCmdClearScreen);
-	bcm2835_delay(5);
+	delayMilliSecRDL(5);
 }
 
 /*!
@@ -379,7 +379,7 @@ rpiDisplay_Return_Codes_e HD44780PCF8574LCD::LCD_I2C_ON(void)
 void HD44780PCF8574LCD::LCD_I2C_SetSpeed()
 {
 		uint32_t I2CBaudRate = 100000;// 100K 
-		// BCM2835_I2C_CLOCK_DIVIDER enum choice 2500 622 150 148
+		// BCM2835_I2C_CLOCK_DIVIDER enum choice 2500 626 150 148
 		// Clock divided is based on nominal base clock rate of 250MHz
 		switch(_LCDSpeedI2C) 
 		{
@@ -440,7 +440,7 @@ size_t HD44780PCF8574LCD::write(uint8_t character)
 */
 void HD44780PCF8574LCD::LCDClearScreenCmd(void) {
 	LCDSendCmd(LCDCmdClearScreen);
-	bcm2835_delay(3); // Requires a delay
+	delayMilliSecRDL(3); // Requires a delay
 }
 
 /*!
@@ -448,7 +448,7 @@ void HD44780PCF8574LCD::LCDClearScreenCmd(void) {
 */
 void HD44780PCF8574LCD::LCDHome(void) {
 	LCDSendCmd(LCDCmdHomePosition);
-	bcm2835_delay(3); // Requires a delay
+	delayMilliSecRDL(3); // Requires a delay
 }
 
 /*!
@@ -458,7 +458,7 @@ void HD44780PCF8574LCD::LCDHome(void) {
 void HD44780PCF8574LCD::LCDChangeEntryMode(LCDEntryMode_e newEntryMode)
 {
 	LCDSendCmd(newEntryMode);
-	bcm2835_delay(3); // Requires a delay
+	delayMilliSecRDL(3); // Requires a delay
 }
 
 /*!

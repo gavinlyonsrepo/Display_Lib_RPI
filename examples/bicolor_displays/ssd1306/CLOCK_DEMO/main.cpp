@@ -66,7 +66,7 @@ bool SetupTest()
 
 	std::cout<<"SSD1306 library Version Number :: " <<  GetRDLibVersionNum() << std::endl;
 	std::cout<<"bcm2835 library Version Number :: "  << bcm2835_version()    << std::endl;
-	bcm2835_delay(500);
+	delayMilliSecRDL(500);
 	myOLED.OLEDbegin(I2C_Speed, I2C_Address, I2C_debug); // initialize the OLED
 	return true;
 }
@@ -126,13 +126,13 @@ void DisplayClock(void)
 
 		myOLED.drawBitmap(80, 40, MsgIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(MsgIconHa));
 		myOLED.drawBitmap(100, 40, MsgIconHa, 16, 8, RDL_BLACK, RDL_WHITE,sizeof(MsgIconHa));
-		bcm2835_delay(1000);
+		delayMilliSecRDL(1000);
 		myOLED.OLEDupdate();
 		myOLED.OLEDclearBuffer();
 		count++;
 	}
 
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myOLED.OLEDFillScreen(0x00, 0);
 	myOLED.OLEDclearBuffer();
 
@@ -142,7 +142,7 @@ void SplashScreen(void)
 {
 	myOLED.drawBitmap(0, 0, backupicon128x64, myOLEDwidth, myOLEDheight, RDL_BLACK , RDL_WHITE, sizeof(backupicon128x64));
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	myOLED.OLEDFillScreen(0x00, 0);
 	myOLED.OLEDclearBuffer();
 }

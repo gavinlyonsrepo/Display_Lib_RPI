@@ -118,31 +118,31 @@ void Test1(void)
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr1, myMAX.AlignLeft);
-	MAX7219_MilliSecondDelay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr1, myMAX.AlignRight);
-	MAX7219_MilliSecondDelay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr2, myMAX.AlignRight);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr3, myMAX.AlignLeft);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr4, myMAX.AlignLeft);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr5, myMAX.AlignLeft);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	myMAX.DisplayText(teststr6, myMAX.AlignRight);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 }
 
@@ -152,11 +152,11 @@ void Test2(void)
 	myMAX.DisplayText(teststr1, myMAX.AlignLeft);
 	printf("Test 2:: Brightness \r\n");
 	myMAX.SetBrightness(myMAX.IntensityMin);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.SetBrightness(myMAX.IntensityMax);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.SetBrightness(myMAX.IntensityDefault);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 }
 
@@ -164,7 +164,7 @@ void Test3(void)
 {
 	printf("Test 3:: Display Test Mode \r\n");
 	myMAX.DisplayTestMode(true);
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.DisplayTestMode(false);
 }
 
@@ -173,11 +173,11 @@ void Test4(void)
 	printf("Test 4:: Shutdown Mode\r\n");
 	char teststr1[] = "shutdown";
 	myMAX.DisplayText(teststr1, myMAX.AlignLeft);
-	MAX7219_MilliSecondDelay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myMAX.ShutdownMode(true);
-	MAX7219_MilliSecondDelay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myMAX.ShutdownMode(false);
-	MAX7219_MilliSecondDelay(TEST_DELAY2);
+	delayMilliSecRDL(TEST_DELAY2);
 	myMAX.ClearDisplay();
 }
 
@@ -185,21 +185,21 @@ void Test5(void)
 {
 	printf("Test 5:: Display characters ab.cde1.23. \r\n");
 	myMAX.DisplayChar(7, 'a', myMAX.DecPointOff);  // Digit 7 is LHS of display
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(6, 'b', myMAX.DecPointOn);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(5, 'c', myMAX.DecPointOff);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(4, 'd', myMAX.DecPointOff);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(3, 'e', myMAX.DecPointOff);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(2, '1', myMAX.DecPointOn);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(1, '2', myMAX.DecPointOff);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(0, '3', myMAX.DecPointOn);
-	MAX7219_MilliSecondDelay(TEST_DELAY1);
+	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.ClearDisplay();
 }
 
@@ -209,7 +209,7 @@ void Test6(void)
 	for (uint8_t digit = 0; digit <8 ; digit++)
 	{ 
 		myMAX.SetSegment(digit, 1<<digit);
-		MAX7219_MilliSecondDelay(TEST_DELAY1);
+		delayMilliSecRDL(TEST_DELAY1);
 	}
 	myMAX.ClearDisplay();
 }
@@ -218,32 +218,32 @@ void Test7(void)
 {
 	printf("Test 7:: Decimal number \r\n");
 	myMAX.DisplayIntNum(45, myMAX.AlignRight); // "        45"
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	
 	myMAX.ClearDisplay();
 	myMAX.DisplayIntNum(798311, myMAX.AlignLeft); // "798311  "
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	
 	myMAX.DisplayIntNum(93391, myMAX.AlignRightZeros); // "00093391"
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	
 	myMAX.DisplayIntNum(12345678, myMAX.AlignRight); // "12345678"
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	// TEST 7d tm.DisplayDecNumNIbble right aligned
 	myMAX.DisplayDecNumNibble(134, 78, myMAX.AlignRight); // " 134" 78"
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	// TEST 7e tm.DisplayDecNumNIbble left aligned
 	myMAX.DisplayDecNumNibble(123, 662, myMAX.AlignLeft); // "123 662 "
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	
 	// TEST 7f tm.DisplayDecNumNIbble leading zeros
 	myMAX.DisplayDecNumNibble(493, 62, myMAX.AlignRightZeros); // "04930062"
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 }
 
@@ -254,16 +254,16 @@ void Test8(void)
 	char teststr1[] = "Hello...";
 	char teststr2[] = "...---...";
 	myMAX.DisplayText(teststr1);   
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 	myMAX.DisplayText(teststr2);//SOS in morse
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 
 	//TEST8b user overflow
 	printf("Test 8B: overflow test \r\n");
 	char teststr3[] = "1234567890abc";
 	myMAX.DisplayText(teststr3); //should display just 12345678
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 }
 
@@ -275,7 +275,7 @@ void Test9(void)
 	sprintf(workStr, "ADC=%.2f", voltage);
 	
 	myMAX.DisplayText(workStr); // ADC=12.45
-	MAX7219_MilliSecondDelay(TEST_DELAY5);
+	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
 }
 
@@ -287,7 +287,7 @@ void Test10(void)
 	{
 		sprintf(workStr, "%.1f", counter);
 		myMAX.DisplayText(workStr, myMAX.AlignRight); 
-		MAX7219_MilliSecondDelay(TEST_DELAY1);
+		delayMilliSecRDL(TEST_DELAY1);
 	}
 	myMAX.ClearDisplay();
 }

@@ -1,6 +1,6 @@
 # Fonts Readme
 
-There are 12 fonts packaged with library. Fonts can be easily added or removed by user.
+There are 15 fonts packaged with library. Fonts can be easily added or removed by user.
 All the Font data is in file font_data_RDL.cpp. These fonts are used by the graphic libraries displays.
 
 ## Font data table 
@@ -8,17 +8,20 @@ All the Font data is in file font_data_RDL.cpp. These fonts are used by the grap
 | num | Font enum name | character size XxY |  ASCII range | Size in bytes |
 | ------ | ------ | ------ | ------ |  ------ | 
 | 1 | font_default | 6x8 |  0 - 0xFE, Full Extended  | 1534 |
-| 2 | font_wide | 9x8 | 0x20 - 0x5A, NO lowercase letters | 535 |
-| 3 | font_pico | 4x6 | 0x20 - 0x7E  | 289 | 
-| 4 | font_sinclairS  | 8x8 | 0x20 - 0x7E | 764 |
-| 5 | font_retro | 8x16 | 0x20 - 0x7E | 1524 |
-| 6 | font_mega | 16x16 | 0x20 - 0x7E | 3044 |
-| 7 | font_arialBold  | 16x16 | 0x20 - 0x7E |  3044 |
-| 8 | font_hallfetica | 16x16 | 0x20 - 0x7E | 3044 |
-| 9 | font_orla | 16x24 | 0x20 - 0x7E | 4564 |
-| 10 | font_arialRound| 16x24 | 0x20 - 0x7E | 4564 |
-| 11 | font_groTesk | 16x32 | 0x20 - 0x7A |  5828 |
-| 12 | font_sixteenSeg | 32x48 | 0x2D-0x3A , 0-10 : . / - only | 2692 |
+| 2 | font_thick | 8x8 | 0x20 - 0x5A, NO lowercase letters | 476 |
+| 3 | font_wide | 9x8 | 0x20 - 0x5A, NO lowercase letters | 535 |
+| 4 | font_font_sevenSeg | 6x8 | 0x2D-0x3A , 0-10 : . / - only | 74 |
+| 5 | font_pico | 4x6 | 0x20 - 0x7E  | 289 | 
+| 6 | font_sinclairS  | 8x8 | 0x20 - 0x7E | 764 |
+| 7 | font_retro | 8x16 | 0x20 - 0x7E | 1524 |
+| 8 | font_mega | 16x16 | 0x20 - 0x7E | 3044 |
+| 9 | font_arialBold  | 16x16 | 0x20 - 0x7E |  3044 |
+| 10 | font_hallfetica | 16x16 | 0x20 - 0x7E | 3044 |
+| 11 | font_orla | 16x24 | 0x20 - 0x7E | 4564 |
+| 12 | font_arialRound| 16x24 | 0x20 - 0x7E | 4564 |
+| 13 | font_groTesk | 16x32 | 0x20 - 0x7A |  5828 |
+| 14 | font_mint | 24x32  | 0x20 - 0x7A |  8740 |
+| 15 | font_sixteenSeg | 32x48 | 0x2D-0x3A , 0-10 : . / - only | 2692 |
 
 Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (4*ControlByte)
 
@@ -67,6 +70,14 @@ Wide Font
 
 [![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)
 
+Thick Font
+
+[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/thick.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/thick.png)
+
+Seven Segment
+
+[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sevens.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sevens.png)
+
 SinclairS
 
 [![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sinclair.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sinclair.png)
@@ -91,9 +102,13 @@ Arial Round
 
 [![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)
 
-GroTesk 
+GroTesk
 
 [![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)
+
+Mint
+
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/mint.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/mint.png)
 
 Sixteen Segment 
 

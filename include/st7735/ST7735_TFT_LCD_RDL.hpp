@@ -84,7 +84,6 @@
 
 
 // Delays
-#define TFT_MILLISEC_DELAY bcm2835_delay /**<Delay abstraction also used in examples files*/
 #define TFT_RESET_DELAY 10 /**< Reset delay in mS*/
 
 /*!
@@ -150,6 +149,7 @@ public:
 	void HighFreqDelaySet(uint16_t);
 	void TFTSPIHWSettings(void);
 	void TFTPowerDown(void);
+	void TFTResetPIN(void);
 	// Screen related
 	void TFTsetRotation(TFT_rotate_e r);
 	void TFTchangeInvertMode(bool invertModeOn);
@@ -158,8 +158,6 @@ public:
 	void TFTVerticalScroll(uint8_t vsp);
 
 private:
-
-	void TFTResetPIN(void);
 	rpiDisplay_Return_Codes_e TFTST7735BInitialize(void);
 	rpiDisplay_Return_Codes_e TFTGreenTabInitialize(void);
 	rpiDisplay_Return_Codes_e TFTBlackTabInitialize(void);

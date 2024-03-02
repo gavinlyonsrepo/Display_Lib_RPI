@@ -574,7 +574,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 */
 rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h)
 {
-	uint8_t i, j;
+	uint16_t i, j;
 	uint16_t color;
 	uint32_t rgb, ptr;
 	// 1. Check for null pointer
@@ -635,7 +635,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 		-# rpiDisplay_MallocError Error
 */
 rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h) {
-	uint8_t i, j;
+	uint16_t i, j;
 	uint16_t color;
 	uint32_t ptr;
 	// 1. Check for null pointer
@@ -772,12 +772,40 @@ void color16_graphics::spiWriteSoftware(uint8_t spidata) {
 		if (spidata & 0x80)
 			Display_SDATA_SetHigh; // b1000000 Mask with 0 & all zeros out.
 		Display_SCLK_SetHigh;
-		bcm2835_delayMicroseconds(_HighFreqDelay);
+		delayMicroSecRDL(_HighFreqDelay);
 		spidata <<= 1;
 		Display_SCLK_SetLow;
-		bcm2835_delayMicroseconds(_HighFreqDelay);
+		delayMicroSecRDL(_HighFreqDelay);
 	}
 }
+
+
+//uint8_t color16_graphics::spiRead(uint8_t commandByte) {
+	//if (_hardwareSPI == false)
+	//{
+		//return spiReadSoftware(commandByte);
+	//} else {
+		//return bcm2835_spi_transfer(commandByte);
+	//}
+//}
+
+//uint8_t color16_graphics::spiReadSoftware(uint8_t commandByte) {
+
+	//wrietCommand(commandbyte);
+	//Display_MISO_SetDigitalInput;
+	//uint8_t value = 0;
+	//uint8_t i = 0;
+
+	//for(i = 0; i < 8; ++i) 
+	//{
+		//value |= Display_MISO_Read << i;
+		//Display_SCLK_SetHigh;
+		//delayMicroSecRDL(_HighFreqDelay);
+		//Display_SCLK_SetLow;
+		//delayMicroSecRDL(_HighFreqDelay);
+	//}
+	//return value;
+//}
 
 /*!
 	@brief Set the Cursor Position on screen

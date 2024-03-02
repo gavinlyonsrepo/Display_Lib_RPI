@@ -75,7 +75,7 @@ bool SetupTest()
 		printf("Error 1201: init bcm2835 library , Is it installed ?\r\n");
 		return false;
 	}
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	// Turn on I2C bus (optional it may already be on)
 	if(myOLED.OLED_I2C_ON() != rpiDisplay_Success)
 	{
@@ -92,7 +92,7 @@ bool SetupTest()
 	printf("I2C Error Timeout mS : %u \r\n", myOLED.OLEDI2CErrorTimeoutGet()); // Print I2C error Timeout
 	printf("I2C Error retry attempts counts : %u \r\n", myOLED.OLEDI2CErrorRetryNumGet()); // Print I2C error retry count
 	myOLED.OLEDFillScreen(0xF1, 0); // splash screen bars, optional just for effect
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	
 	return true;
 }

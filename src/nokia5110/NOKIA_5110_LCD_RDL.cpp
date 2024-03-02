@@ -69,10 +69,10 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 
 	LCD_RST_SetDigitalOutput;
 	LCD_DC_SetDigitalOutput;
-	bcm2835_delay(100);
+	delayMilliSecRDL(100);
 	LCD_RST_SetHigh;
 	LCD_RST_SetLow;
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	LCD_RST_SetHigh;
 if (isHardwareSPI() == false)
 {
@@ -171,13 +171,13 @@ void NOKIA_5110_RPI::LCDWriteData(uint8_t data)
 		for (bit_n = 0x80; bit_n; bit_n >>= 1)
 		{
 			LCD_CLK_SetLow;
-			bcm2835_delayMicroseconds(_LCDHighFreqDelay);
+			delayMicroSecRDL(_LCDHighFreqDelay);
 			if (data & bit_n)
 				LCD_DIN_SetHigh;
 			else
 				LCD_DIN_SetLow;
 			LCD_CLK_SetHigh;
-			bcm2835_delayMicroseconds(_LCDHighFreqDelay);
+			delayMicroSecRDL(_LCDHighFreqDelay);
 		}
 	}else{
 			bcm2835_spi_transfer(data);

@@ -80,12 +80,18 @@
 #define ERMCH1115_CD_SetLow  bcm2835_gpio_write(_OLED_CD, LOW)
 #define ERMCH1115_RST_SetHigh  bcm2835_gpio_write(_OLED_RST, HIGH)
 #define ERMCH1115_RST_SetLow  bcm2835_gpio_write(_OLED_RST, LOW)
-#define ERMCH1115_CS_SetHigh bcm2835_gpio_write(_OLED_CS, HIGH) // SW SPI last 6 lines
+#define ERMCH1115_CS_SetHigh bcm2835_gpio_write(_OLED_CS, HIGH) // SW SPI only last 6 lines
 #define ERMCH1115_CS_SetLow bcm2835_gpio_write(_OLED_CS, LOW)
 #define ERMCH1115_SCLK_SetHigh bcm2835_gpio_write(_OLED_SCLK, HIGH)
 #define ERMCH1115_SCLK_SetLow  bcm2835_gpio_write(_OLED_SCLK, LOW)
 #define ERMCH1115_SDA_SetHigh bcm2835_gpio_write(_OLED_DIN, HIGH)
 #define ERMCH1115_SDA_SetLow  bcm2835_gpio_write(_OLED_DIN,LOW)
+
+#define ERMCH1115_RST_SetDigitalOutput bcm2835_gpio_fsel(_OLED_RST, BCM2835_GPIO_FSEL_OUTP);
+#define ERMCH1115_CD_SetDigitalOutput bcm2835_gpio_fsel(_OLED_CD, BCM2835_GPIO_FSEL_OUTP);
+#define ERMCH1115_CS_SetDigitalOutput bcm2835_gpio_fsel( _OLED_CS, BCM2835_GPIO_FSEL_OUTP); // SW SPI only last 3 lines
+#define ERMCH1115_SCLK_SetDigitalOutput bcm2835_gpio_fsel(_OLED_SCLK, BCM2835_GPIO_FSEL_OUTP);
+#define ERMCH1115_DIN_SetDigitalOutput bcm2835_gpio_fsel(_OLED_DIN, BCM2835_GPIO_FSEL_OUTP);
 
 // Delays
 #define ERMCH1115_INITDELAY 100 /**< Init delay mS */

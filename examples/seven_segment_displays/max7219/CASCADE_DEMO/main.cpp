@@ -61,19 +61,19 @@ int main()
 	myMAX.SetCurrentDisplayNumber(1);
 	printf("Display 1\r\n");
 	myMAX.DisplayText(teststr1, myMAX.AlignRight);
-	MAX7219_MilliSecondDelay(5000);
+	delayMilliSecRDL(5000);
 	
 	// Write to Display Two 
 	myMAX.SetCurrentDisplayNumber(2);
 	printf("Display 2\r\n");
 	myMAX.DisplayText(teststr2, myMAX.AlignRight);
-	MAX7219_MilliSecondDelay(5000);
+	delayMilliSecRDL(5000);
 	
 	// Write to Display one again
 	myMAX.SetCurrentDisplayNumber(1);
 	printf("Display 1 again\r\n");
 	myMAX.DisplayIntNum(111, myMAX.AlignRight);
-	MAX7219_MilliSecondDelay(5000);
+	delayMilliSecRDL(5000);
 	
 	// Clear the displays 
 	printf("Clear the displays\r\n");

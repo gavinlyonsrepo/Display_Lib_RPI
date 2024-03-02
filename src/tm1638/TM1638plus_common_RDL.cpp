@@ -96,9 +96,9 @@ uint8_t  TM1638plus_common::HighFreqshiftin(uint8_t dataPin, uint8_t clockPin)
 	{
 		value |= bcm2835_gpio_lev(dataPin) << i;
 		bcm2835_gpio_write(clockPin, HIGH);
-		bcm2835_delayMicroseconds(_TMCommDelay);
+		delayMicroSecRDL(_TMCommDelay);
 		bcm2835_gpio_write(clockPin, LOW);
-		bcm2835_delayMicroseconds(_TMCommDelay);
+		delayMicroSecRDL(_TMCommDelay);
 	}
 	return value;
 }
@@ -118,9 +118,9 @@ void TM1638plus_common::HighFreqshiftOut(uint8_t dataPin, uint8_t clockPin, uint
 	{
 		bcm2835_gpio_write(dataPin, !!(val & (1 << i)));
 		bcm2835_gpio_write(clockPin, HIGH);
-		bcm2835_delayMicroseconds(_TMCommDelay);
+		delayMicroSecRDL(_TMCommDelay);
 		bcm2835_gpio_write (clockPin, LOW);
-		bcm2835_delayMicroseconds(_TMCommDelay);
+		delayMicroSecRDL(_TMCommDelay);
 	}
 }
 

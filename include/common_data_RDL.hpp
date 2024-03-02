@@ -11,6 +11,9 @@
 
 uint16_t GetRDLibVersionNum(void);
 
+#define delayMicroSecRDL bcm2835_delayMicroseconds /**< bcm2835 library Micro second delay abstraction */
+#define delayMilliSecRDL bcm2835_delay             /**< bcm2835 library Milli second delay abstraction */
+
 /*! Enum to define a standard return code for most functions that return failures*/
 enum rpiDisplay_Return_Codes_e : uint8_t
 {

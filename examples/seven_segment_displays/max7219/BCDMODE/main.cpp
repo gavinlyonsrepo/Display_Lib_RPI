@@ -81,13 +81,13 @@ void myTest(void)
 	myMAX.DisplayBCDChar(2, myMAX.CodeBFontFour);
 	myMAX.DisplayBCDChar(1, myMAX.CodeBFontDash);
 	myMAX.DisplayBCDChar(0, myMAX.CodeBFontOne); // Digit 0 RHS
-	MAX7219_MilliSecondDelay(5000);
+	delayMilliSecRDL(5000);
 	myMAX.ClearDisplay();
 	
 	// Test BCD string 
 	char teststring1[] = "PH  3-14";
 	myMAX.DisplayBCDText(teststring1);
-	MAX7219_MilliSecondDelay(5000);
+	delayMilliSecRDL(5000);
 	myMAX.ClearDisplay();
 }
 

@@ -162,7 +162,7 @@ bool setup() {
 		return false;
 	}
 		printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
-		bcm2835_delay(100);
+		delayMilliSecRDL(100);
 
 	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, SPICLK_FREQ , SPI_CE_PIN) != rpiDisplay_Success)
 	{
@@ -172,7 +172,7 @@ bool setup() {
 	}
 	printf("ERM19264 Library version number :: %u \r\n", GetRDLibVersionNum());
 	myLCD.LCDFillScreen(0x33); // display splash screen bars, optional for effect
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	return true;
 }
 
@@ -203,9 +203,9 @@ void Test301(void)
 	// Method (1) LCD bitmap method , writes data directly to screen
 	printf("Test301: LCDBitmap method, full screen\n");
 	myLCD.LCDBitmap(0, 0 , myLCDwidth, myLCDheight, screenBuffer192x64);
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myLCD.LCDFillScreen(0x00);
-	bcm2835_delay(1500);
+	delayMilliSecRDL(1500);
 }
 
 void Test303(void)
@@ -213,9 +213,9 @@ void Test303(void)
 	printf("Test303: LCDupdate method, full screen\n");
 	 // Screen buffer array has been preloaded with data , just update!
 	myLCD.LCDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 	myLCD.LCDFillScreen(0x00);
-	bcm2835_delay(1500);
+	delayMilliSecRDL(1500);
 }
 
 void Test304(void)
@@ -229,7 +229,7 @@ void Test304(void)
 	myLCD.drawBitmap(150, 5, BatIconVa, 16, 8 , RDL_BLACK, RDL_WHITE,sizeof(BatIconVa));
 
 	myLCD.LCDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 }
 
 void Test305(void)
@@ -243,5 +243,5 @@ void Test305(void)
 	myLCD.drawBitmap(60, 20, SignalIconHa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconHa));
 
 	myLCD.LCDupdate();
-	bcm2835_delay(5000);
+	delayMilliSecRDL(5000);
 }

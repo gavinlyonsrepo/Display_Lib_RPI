@@ -1,16 +1,17 @@
-# CH1115 OLED Readme
+# ERM CH1115 OLED Readme
 
 [![ OLED image](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115/blob/main/extras/image/oled.jpg)
 
 ## Table of contents
 
+
   * [Overview](#overview)
   * [Output](#output)
   * [Hardware](#hardware)
   * [Software](#software)
-	* [SPI](#spi)
-	* [Bitmaps](#bitmaps)
-	* [User adjustments](#user-adjustments)
+      * [SPI](#spi)
+      * [Bitmaps](#bitmaps)
+      * [User adjustments](#user-adjustments)
 
 
 ## Overview

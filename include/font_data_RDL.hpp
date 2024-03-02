@@ -3,18 +3,21 @@
 	@brief font data file. Project Name: Display_Lib_RPI
 	@author Gavin Lyons.
 	@details
-		-#  1. pFontDefault  6 by 8
-		-#  2. pFontWide  9 by 8 (NO LOWERCASE letters)
-		-#  3. pFontPico 3 by 6
-		-#  4. pFontSinclairS 8 by 8
-		-#  5. pFontOrla 8x12
-		-#  6. pFontRetro 8x16
-		-#  7. pFontMega  16 by 16
-		-#  8. pFontArialBold 16 by 16
-		-#  9. pFontHallfetica 16 by 16
-		-#  10. pFontArialRound 16 by 24
-		-#  11. pFontGroTesk 16 by 32
-		-#  12. pFontSixteenSeg 32 by 48 (NUMBERS ONLY + : . -)
+		-#  pFontDefault  6 by 8
+		-#  pFontPico 3 by 6
+		-#  pFontSevenSeg 5 by 8 (NUMBERS ONLY + : . -)
+		-#  pFontThick  8 by 8 (NO LOWERCASE letters)
+		-#  pFontWide  9 by 8 (NO LOWERCASE letters)
+		-#  pFontSinclairS 8 by 8
+		-#  pFontOrla 8x12
+		-#  pFontRetro 8x16
+		-#  pFontMega  16 by 16
+		-#  pFontArialBold 16 by 16
+		-#  pFontHallfetica 16 by 16
+		-#  pFontArialRound 16 by 24
+		-#  pFontGroTesk 16 by 32
+		-#  pFontMint 24 by 32
+		-#  pFontSixteenSeg 32 by 48 (NUMBERS ONLY + : . -)
 */
 
 #pragma once
@@ -25,8 +28,10 @@
 
 // Font data is in the cpp file accessed thru extern pointers.
 extern const uint8_t * pFontDefault;
-extern const uint8_t * pFontWide;
 extern const uint8_t * pFontPico;
+extern const uint8_t * pFontSevenSeg;
+extern const uint8_t * pFontThick;
+extern const uint8_t * pFontWide;
 extern const uint8_t * pFontSinclairS;
 extern const uint8_t * pFontRetro;
 extern const uint8_t * pFontMega;
@@ -35,6 +40,7 @@ extern const uint8_t * pFontHallfetica;
 extern const uint8_t * pFontOrla;
 extern const uint8_t * pFontArialRound;
 extern const uint8_t * pFontGroTesk;
+extern const uint8_t * pFontMint;
 extern const uint8_t * pFontSixteenSeg;
 
 
@@ -42,17 +48,20 @@ extern const uint8_t * pFontSixteenSeg;
 enum display_Font_name_e : uint8_t
 {
 	font_default = 1,     /**< default 6by8  (FUll ASCII with mods) */
-	font_wide = 2,        /**< wide 9by8 (NO LOWERCASE) */
-	font_pico = 3,        /**< Pico 3by6 */
-	font_sinclairS = 4,   /**< Sinclair 8by8 */
-	font_retro = 5,       /**< Retro 8x16 */
-	font_mega = 6,        /**< Mega 16by16 */
-	font_arialBold = 7,   /**< Arial bold 16by16 */
-	font_hallfetica = 8,  /**< Hallfetica 16by16 */
-	font_orla = 9,        /**< Orla 16by24 */
-	font_arialRound = 10, /**< ArialRound 16by24 */
-	font_groTesk = 11,    /**< GroTesk 16by32 */
-	font_sixteenSeg = 12  /**< pFontSixteenSeg 32by48 (NUMBERS ONLY + : . -) */
+	font_pico = 2,        /**< Pico 3by6 */
+	font_sevenSeg = 3,    /**< Seven Segment 6by8 (NUMBERS ONLY + : . -) */
+	font_thick = 4,       /**< Thick 8by8 (NO LOWERCASE) */
+	font_wide = 5,        /**< wide 9by8 (NO LOWERCASE) */
+	font_sinclairS = 6,   /**< Sinclair 8by8 */
+	font_retro = 7,       /**< Retro 8x16 */
+	font_mega = 8,        /**< Mega 16by16 */
+	font_arialBold = 9,   /**< Arial bold 16by16 */
+	font_hallfetica = 10, /**< Hallfetica 16by16 */
+	font_orla = 11,       /**< Orla 16by24 */
+	font_arialRound = 12, /**< ArialRound 16by24 */
+	font_groTesk = 13,    /**< GroTesk 16by32 */
+	font_mint = 14,       /**< Mint 16by32 */
+	font_sixteenSeg = 15  /**< pFontSixteenSeg 32by48 (NUMBERS ONLY + : . -) */
 };
 
 /*! @brief Font class to hold font data object  */

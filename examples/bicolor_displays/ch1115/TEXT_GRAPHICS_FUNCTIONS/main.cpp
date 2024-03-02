@@ -30,6 +30,7 @@
 		-# Test 715 println + print & textwrap 
 		-# Test 716 print method String object 
 		-# Test 717 print method numbers 
+		-# Test 718 Fonts thick, seven segment + mint
 		-# Test 720 Text methods error Checking
 		-# Test 901 Graphic tests
 */
@@ -79,6 +80,7 @@ void Test714(void);
 void Test715(void);
 void Test716(void);
 void Test717(void);
+void Test718(void);
 void testErrorCheck(void);
 void Test901(void);
 
@@ -104,7 +106,7 @@ bool SetupTest()
 	}else{
 		printf("bcm2835 library version : %u\r\n", bcm2835_version());
 	}
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	if(myOLED.OLEDbegin(OLEDcontrast, SPICLK_FREQ , SPI_CE_PIN) != rpiDisplay_Success) // initialize the OLED
 	{
 		printf("Error 1202: Setup : bcm2835_spi_begin :Cannot start spi, Running as root?\r\n");
@@ -112,9 +114,9 @@ bool SetupTest()
 		return false;
 	}
 	printf("CH1115 OLED library version : %u\r\n", GetRDLibVersionNum());
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	myOLED.OLEDFillScreen(0x0F); //splash screen bars
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	return true;
 }
 
@@ -152,6 +154,7 @@ void myTests()
 	Test715();
 	Test716();
 	Test717();
+	Test718();
 	testErrorCheck();
 	Test901();
 
@@ -159,7 +162,7 @@ void myTests()
 
 void TestReset(void){
 	myOLED.OLEDupdate();
-	bcm2835_delay(DisplayDelay1);
+	delayMilliSecRDL(DisplayDelay1);
 	myOLED.OLEDclearBuffer();
 }
 
@@ -397,13 +400,13 @@ void Test714(void)
 	printf("OLED Test 714 Base number systems using print \r\n");
 	myOLED.setFont(font_default);
 	myOLED.setCursor(0, 0);
-	myOLED.print(47 , DEC);
+	myOLED.print(47 , RDL_DEC);
 	myOLED.setCursor(0, 16);
-	myOLED.print(47 , HEX); 
+	myOLED.print(47 , RDL_HEX); 
 	myOLED.setCursor(0, 32);
-	myOLED.print(47, BIN);
+	myOLED.print(47, RDL_BIN);
 	myOLED.setCursor(0, 48);
-	myOLED.print(47 , OCT);
+	myOLED.print(47 , RDL_OCT);
 	TestReset();
 }
 
@@ -453,6 +456,19 @@ void Test717(void)
 	TestReset();
 }
 
+void Test718(void)
+{
+	printf("OLED Test 718 Font thick , seven seg + mint \r\n");	
+	myOLED.setCursor(0, 0);
+	myOLED.setFont(font_sevenSeg);
+	myOLED.println(398);
+	myOLED.setFont(font_thick);
+	myOLED.println("THICK");
+	myOLED.setFont(font_mint);
+	myOLED.println("Mint");
+	TestReset();
+}
+
 void testErrorCheck(void)
 {
 	// Error checking
@@ -494,50 +510,50 @@ void Test500(void)
 	myOLED.print("OLED Disable test 501");
 	myOLED.OLEDupdate();
 
-	bcm2835_delay(3000); //display message
+	delayMilliSecRDL(3000); //display message
 	myOLED.OLEDEnable(0); //turn off display (sleep mode 500uA measured)
-	bcm2835_delay(3000); //wait for 3
+	delayMilliSecRDL(3000); //wait for 3
 	myOLED.OLEDEnable(1); //turn on
-	bcm2835_delay(2000); //display message
+	delayMilliSecRDL(2000); //display message
 	myOLED.OLEDclearBuffer();
 
 	// ** Test 502 inverse **
 	myOLED.setCursor(0, 10);
 	myOLED.print("OLED Inverse test 502");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	myOLED.OLEDInvert(1); // Inverted
-	bcm2835_delay(4000);
+	delayMilliSecRDL(4000);
 	myOLED.OLEDInvert(0);
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 
 	// ** Test 503 OLED flip **
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5, 5);
 	myOLED.print("Flip test 503");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	myOLED.OLEDFlip(1);
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	myOLED.OLEDFlip(0);
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 
 	// ** Test 504 contrast **
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(0, 0);
 	myOLED.print("Contrast test 504");
 	myOLED.OLEDupdate();
-	bcm2835_delay(2500);
+	delayMilliSecRDL(2500);
 	myOLED.OLEDFillScreen(0x77); // fill screen
 
 	myOLED.OLEDContrast(0x00);
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	myOLED.OLEDContrast(0x80);
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	myOLED.OLEDContrast(0xFF);
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	myOLED.OLEDContrast(OLEDcontrast);
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	myOLED.OLEDclearBuffer();
 
 	// ** Test 505 OLED scroll **
@@ -545,7 +561,7 @@ void Test500(void)
 	myOLED.setCursor(0, 40);
 	myOLED.print("Scroll test 505 ");
 	myOLED.OLEDupdate();
-	bcm2835_delay(2500);
+	delayMilliSecRDL(2500);
 
 	// See .cpp file for more info on these parmeters.
 	uint8_t timeInterval = 0x00; // 6 frames 0x00 - 0x07
@@ -553,17 +569,17 @@ void Test500(void)
 	uint8_t scrollMode = 0x28; // contiunous 0x28-0x2A,
 	myOLED.OLEDscrollSetup(timeInterval, scrollDirection , scrollMode);
 	myOLED.OLEDscroll(1); //start scroll
-	bcm2835_delay(15000);
+	delayMilliSecRDL(15000);
 	myOLED.OLEDscroll(0); // stop Scroll
 
-	bcm2835_delay(1);
+	delayMilliSecRDL(1);
 
 	timeInterval = 0x02; // 64 frames , 0x00 - 0x07
 	scrollDirection = 0x27; // left , 0x26 or 0x27
 	scrollMode = 0x29; // contiunous 0x28 one shot 0x29 , one col 0x2A,
 	myOLED.OLEDscrollSetup(timeInterval, scrollDirection , scrollMode);
 	myOLED.OLEDscroll(1); //start
-	bcm2835_delay(15000);
+	delayMilliSecRDL(15000);
 	myOLED.OLEDscroll(0); // stop
 
 	// ** TEST 506 fade ~ breath effect **
@@ -572,10 +588,10 @@ void Test500(void)
 	myOLED.setCursor(5, 5);
 	myOLED.print("Fade effect test 506");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	myOLED.OLEDfadeEffect();
 	myOLED.OLEDFillScreen(0xE3);
-	bcm2835_delay(10000);
+	delayMilliSecRDL(10000);
 	myOLED.OLEDfadeEffect(0x00); // switch off fade
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5, 5);
@@ -587,7 +603,7 @@ void Test500(void)
 	for (pageNum = 0 ; pageNum < 8 ; pageNum ++)
 	{
 		myOLED.OLEDFillPage(pageNum, 0x17); // Write pattern (0001 0111) to all 8 page's.
-		bcm2835_delay(500);
+		delayMilliSecRDL(500);
 	}
 	myOLED.OLEDFillScreen(0x00); // Clear the screen
 	
@@ -601,7 +617,7 @@ void Test500(void)
 	myOLED.setCursor(5,110);
 	myOLED.print("bottom");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	
 	myOLED.setRotation(displayBC_Degrees_180);
 	myOLED.OLEDclearBuffer();
@@ -610,7 +626,7 @@ void Test500(void)
 	myOLED.setCursor(5,50);
 	myOLED.print("bottom");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	
 	myOLED.setRotation(displayBC_Degrees_270);
 	myOLED.OLEDclearBuffer();
@@ -619,7 +635,7 @@ void Test500(void)
 	myOLED.setCursor(5,110);
 	myOLED.print("bottom");
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	
 	myOLED.setRotation(displayBC_Degrees_0); //default normal 
 	myOLED.OLEDclearBuffer();
@@ -627,12 +643,12 @@ void Test500(void)
 	myOLED.print("rotate 0");
 
 	myOLED.OLEDupdate();
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	
 	myOLED.OLEDFillScreen(0x00); // Clear the screen
 	myOLED.OLEDupdate();
 	myOLED.OLEDclearBuffer();
-	bcm2835_delay(500);
+	delayMilliSecRDL(500);
 }
 
 // Function to display Graphics test
@@ -679,7 +695,7 @@ void  Test901()
 		{
 			myOLED.drawRect(70 + i, 40 + i, 50 - i * 2, 20 - i * 2, RDL_BLACK);
 			myOLED.OLEDupdate();
-			bcm2835_delay(50);
+			delayMilliSecRDL(50);
 		}
 		myOLED.OLEDclearBuffer();
 		count++;

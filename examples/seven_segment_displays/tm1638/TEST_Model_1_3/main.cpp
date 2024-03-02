@@ -89,7 +89,7 @@ int main()
 	if(!bcm2835_init()) {return -1;}
 	
 	tm.displayBegin();
-	bcm2835_delay(myTestDelay1);
+	delayMilliSecRDL(myTestDelay1);
 	
 	Test0();  //Test 0 reset
 	Test1();  // Brightness
@@ -119,7 +119,7 @@ void Test0()
 	printf("Test 0: Reset\r\n");
 	tm.setLED(0, 1);
 	tm.displayText("testing");
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 }
 
@@ -130,7 +130,7 @@ void Test1() {
 	{
 		tm.brightness(brightness);
 		tm.displayText("00000000");
-		bcm2835_delay(myTestDelay1);
+		delayMilliSecRDL(myTestDelay1);
 	}
 	tm.reset();
 	// restore default brightness
@@ -144,7 +144,7 @@ void Test2() {
 	tm.displayASCII(1, '3');
 	tm.displayASCII(2, '4');
 	tm.displayASCII(3, '1');
-	bcm2835_delay(myTestDelay1);
+	delayMilliSecRDL(myTestDelay1);
 	tm.reset();
 }
 
@@ -157,7 +157,7 @@ void Test3() {
 	for (pos = 0 ; pos<8 ; pos++)
 	{
 		tm.display7Seg(pos, 1<<(7-pos)); 
-		bcm2835_delay(myTestDelay1);
+		delayMilliSecRDL(myTestDelay1);
 	}
 }
 
@@ -172,7 +172,7 @@ void Test4() {
 	tm.displayHex(5, 5);
 	tm.displayHex(6, 6);
 	tm.displayHex(7, 7);  
-	bcm2835_delay(myTestDelay); // display 12345678
+	delayMilliSecRDL(myTestDelay); // display 12345678
 
 	tm.displayHex(0, 8);
 	tm.displayHex(1, 9);
@@ -182,12 +182,12 @@ void Test4() {
 	tm.displayHex(5, 0x0D);
 	tm.displayHex(6, 0x0E);
 	tm.displayHex(7, 0x0F);
-	bcm2835_delay(myTestDelay); // display 89ABCDEF
+	delayMilliSecRDL(myTestDelay); // display 89ABCDEF
 	tm.reset();
 	
 	tm.displayHex(1, 0xFE);
 	tm.displayHex(7, 0x10);
-	bcm2835_delay(myTestDelay);// display " E      0"
+	delayMilliSecRDL(myTestDelay);// display " E      0"
 }
 
 void Test5() {
@@ -195,7 +195,7 @@ void Test5() {
 	// abcdefgh with decimal point for c and d
 	printf("Test 5: Text String with Decimal point\r\n");
 	tm.displayText("abc.d.efgh");
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test6() {
@@ -208,7 +208,7 @@ void Test6() {
 	tm.displayASCII(5, '9');
 	tm.displayASCII(6, '4');
 	tm.displayASCII(7, '8');
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 }
 
@@ -216,28 +216,28 @@ void Test7() {
 	printf("Test 7: Integer\r\n");
 	// TEST 7a Integer right aligned
 	tm.displayIntNum(45, tm.TMAlignTextRight); // "        45"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 	// TEST 7b Integer left aligned 
 	tm.displayIntNum(798311, tm.TMAlignTextLeft); // "798311  "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 	// TEST 7c Integer // leading zeros
 	tm.displayIntNum(93391, tm.TMAlignTextZeros); // "00093391"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 
 	
 	// TEST 7d tm.DisplayDecNumNIbble right aligned
 	tm.DisplayDecNumNibble(134, 78, tm.TMAlignTextRight); // " 134" 78"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 	// TEST 7e tm.DisplayDecNumNIbble left aligned
 	tm.DisplayDecNumNibble(123, 662, tm.TMAlignTextLeft); // "123 662 "
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 	// TEST 7f tm.DisplayDecNumNIbble leading zeros
 	tm.DisplayDecNumNibble(493, 62, tm.TMAlignTextZeros); // "04930062"
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 }
 
@@ -248,7 +248,7 @@ void Test8() {
 	uint16_t  data = 234;
 	sprintf(workStr, "ADC=.%04d", data); // "ADC=.0234"
 	tm.displayText(workStr);
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test9() {
@@ -258,7 +258,7 @@ void Test9() {
 	char workStr[11];
 	sprintf(workStr, "ADC=%.2f", voltage);
 	tm.displayText(workStr); // ADC=12.45
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.reset();
 }
 
@@ -267,9 +267,9 @@ void Test10()
 	//TEST 10 Multiple dots test
 	printf("Test 10: Multiple dots test \r\n");
 	tm.displayText("Hello...");
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 	tm.displayText("...---..."); //SOS in morse
-	bcm2835_delay(myTestDelay);
+	delayMilliSecRDL(myTestDelay);
 }
 
 void Test11()
@@ -277,7 +277,7 @@ void Test11()
 	//TEST11 user overflow
 	printf("Test 11: overflow test \r\n");
 	tm.displayText("1234567890abc"); //should display just 12345678
-	bcm2835_delay(myTestDelay1);
+	delayMilliSecRDL(myTestDelay1);
 	tm.reset();
 }
 
@@ -320,7 +320,7 @@ void Test13()
 	// Test 13A Turn on redleds one by one, left to right, with setLED where 0 is L1 and 7 is L8 (L8 RHS of display)
 	for (LEDposition = 0; LEDposition < 8; LEDposition++) {
 		tm.setLED(LEDposition, 1);
-		bcm2835_delay(500);
+		delayMilliSecRDL(500);
 		tm.setLED(LEDposition, 0);
 	}
 
@@ -328,17 +328,17 @@ void Test13()
 	// NOTE passed L8-L1 and on display L8 is on right hand side. i.e. 0x01 turns on L1. LXXX XXXX
 
 	tm.setLEDs(0xFF); //  all LEDs on 
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	tm.setLEDs(0x01); // Displays as LXXX XXXX (L1-L8) , NOTE on display L8 is on right hand side.
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	tm.setLEDs(0xF0); //  Displays as XXXX LLLL (L1-L8) , NOTE on display L8 is on right hand side.
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	tm.setLEDs(0x07); //  Displays as LLLX XXXX (L1-L8) , NOTE on display L8 is on right hand side.
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	tm.setLEDs(0x41); //  Displays as LXXX XXLX (L1-L8) , NOTE on display L8 is on right hand side.
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 	tm.setLEDs(0x00); // all off
-	bcm2835_delay(3000);
+	delayMilliSecRDL(3000);
 
 }
 #endif 
@@ -395,7 +395,7 @@ void Test14() {
 	// NOTE: Press S1 & S8 together to quit
 	printf("Test 14: Buttons :: Press S1 & S8 together to quit\r\n");
 	tm.displayText("buttons ");
-	bcm2835_delay(2000);
+	delayMilliSecRDL(2000);
 	while (1) // Loop here until user quits 
 	{
 		uint8_t buttons = tm.readButtons();
@@ -412,12 +412,12 @@ void Test14() {
 			*/
 		doLEDs(buttons);
 		tm.displayIntNum(buttons, tm.TMAlignTextRight); 
-		bcm2835_delay(250); 
+		delayMilliSecRDL(250); 
 		if (buttons == 129) break; // if Press S1 & S8 together =  quit loop
 	}
 	tm.reset();
 	tm.displayText("end test");
-	bcm2835_delay(2000); 
+	delayMilliSecRDL(2000); 
 }
 
 // scans the individual bits of value sets a LED based on which button pressed

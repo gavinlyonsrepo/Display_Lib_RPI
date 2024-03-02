@@ -53,7 +53,7 @@ bool Setup(void)
 	}else{
 		printf("bcm2835 library version : %u\r\n", bcm2835_version());
 	}
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	if(myOLED.OLEDbegin(OLEDcontrast, SPICLK_FREQ , SPI_CE_PIN) != rpiDisplay_Success) // initialize the OLED
 	{
 		printf("Error 1202: Setup : bcm2835_spi_begin :Cannot start spi, Running as root?\r\n");
@@ -61,9 +61,9 @@ bool Setup(void)
 		return false;
 	}
 	printf("CH1115 OLED library version : %u\r\n", GetRDLibVersionNum());
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	myOLED.OLEDFillScreen(0x0F); //splash screen bars
-	bcm2835_delay(1500);
+	delayMilliSecRDL(1500);
 	return true;
 }
 
@@ -85,9 +85,9 @@ void myTest() {
 	myOLED.OLEDclearBuffer(); // Clear buffer
 	myOLED.setFont(font_default);
 	myOLED.setCursor(20, 20);
-	myOLED.print("Hello world.");
+	myOLED.print("Hello World.");
 	myOLED.OLEDupdate();  //write to active buffer
-	bcm2835_delay(7000);
+	delayMilliSecRDL(7000);
 }
 
 // ============== EOF =========

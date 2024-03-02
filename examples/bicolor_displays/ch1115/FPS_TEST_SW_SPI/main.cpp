@@ -65,14 +65,14 @@ bool Setup(void)
 	}else{
 		printf("bcm2835 library version : %u\r\n", bcm2835_version());
 	}
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	
 	myOLED.OLEDbegin(OLEDcontrast);// initialize the OLED
 	printf("CH1115 OLED library version : %u\r\n", GetRDLibVersionNum());
 	printf("Software SPI OLED GPIO delay : %u uS\r\n", myOLED.OLEDHighFreqDelayGet());
-	bcm2835_delay(50);
+	delayMilliSecRDL(50);
 	myOLED.OLEDFillScreen(0x77); //splash screen bars
-	bcm2835_delay(1000);
+	delayMilliSecRDL(1000);
 	return true;
 }
 
@@ -98,7 +98,7 @@ void myTest() {
 		display(framerate, count);
 		framerate++;
 		count++;
-		bcm2835_delay(1);
+		delayMilliSecRDL(1);
 	}
 
 }

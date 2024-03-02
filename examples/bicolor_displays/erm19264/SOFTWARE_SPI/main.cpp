@@ -63,12 +63,12 @@ bool setup() {
 		printf("Error 1201: init bcm2835 library , Is it installed ?\r\n");
 		return false;
 	}
-	bcm2835_delay(100);
+	delayMilliSecRDL(100);
 	myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast);
 	printf("bcm2835 library Version Number :: %u\r\n",bcm2835_version());
 	printf("ERM19264 Library version number :: %u \r\n", GetRDLibVersionNum());
 	myLCD.LCDFillScreen(0x33); // display splash screen bars, optional for effect
-	bcm2835_delay(1500);
+	delayMilliSecRDL(1500);
 	return true;
 }
 
@@ -97,7 +97,7 @@ bool myTest() {
 
 		framerate++;
 		count++;
-		bcm2835_delay(1);
+		delayMilliSecRDL(1);
 	}
 	return true;
 }

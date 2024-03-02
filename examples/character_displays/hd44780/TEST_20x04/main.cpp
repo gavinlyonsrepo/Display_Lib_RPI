@@ -79,7 +79,7 @@ bool setup(void) {
 		return false;
 	}
 
-	bcm2835_delay(250);
+	delayMilliSecRDL(250);
 	
 	// Turn on I2C bus (optional, it may already be on)
 	if (myLCD.LCD_I2C_ON() != rpiDisplay_Success)
@@ -113,22 +113,22 @@ void helloWorld(void) {
 	myLCD.LCDGOTO(myLCD.LCDLineNumberThree , 0);
 	myLCD.LCDSendString(teststr2); // Display a string
 	myLCD.LCDSendChar('!'); // Display a single character
-	bcm2835_delay(DISPLAY_DELAY_1);
+	delayMilliSecRDL(DISPLAY_DELAY_1);
 }
 
 void cursorMoveTest(void) {
 	myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 2);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDMoveCursor(myLCD.LCDMoveLeft, 2);
 }
 
 void scrollTest(void) {
 	for (uint8_t i = 0; i < 10; i++) {
 		myLCD.LCDScroll(myLCD.LCDMoveRight, 1);
-		bcm2835_delay(DISPLAY_DELAY_2);
+		delayMilliSecRDL(DISPLAY_DELAY_2);
 	}
 	myLCD.LCDScroll(myLCD.LCDMoveLeft, 10);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 }
 
 void gotoTest(void) {
@@ -151,7 +151,7 @@ void gotoTest(void) {
 	myLCD.LCDSendString(teststr3);
   myLCD.LCDGOTO(myLCD.LCDLineNumberFour , 0);
 	myLCD.LCDSendString(teststr4);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 
   myLCD.LCDClearScreen();
 
@@ -183,20 +183,20 @@ void gotoTest(void) {
     myLCD.LCDGOTO(myLCD.LCDLineNumberFour, columnPos);
     myLCD.LCDSendChar(testchar++);
   } // Line 4
-  bcm2835_delay(DISPLAY_DELAY_2);
+  delayMilliSecRDL(DISPLAY_DELAY_2);
 
 }
 
 void clearLineTest(void)
 {
 	myLCD.LCDClearLine(myLCD.LCDLineNumberOne);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearLine(myLCD.LCDLineNumberTwo);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
   	myLCD.LCDClearLine(myLCD.LCDLineNumberThree);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
   	myLCD.LCDClearLine(myLCD.LCDLineNumberFour);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 }
 
 void cursorTest(void) {
@@ -208,25 +208,25 @@ void cursorTest(void) {
 	myLCD.LCDResetScreen(myLCD.LCDCursorTypeOnBlink); //type 4 cursor
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 0);
 	myLCD.LCDSendString(teststr1);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearLine(myLCD.LCDLineNumberTwo);
 
 	myLCD.LCDResetScreen(myLCD.LCDCursorTypeOff); //type 1 cursor
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 0);
 	myLCD.LCDSendString(teststr2);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearLine(myLCD.LCDLineNumberTwo);
 
 	myLCD.LCDResetScreen(myLCD.LCDCursorTypeBlink); //type 2 cursor
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 0);
 	myLCD.LCDSendString(teststr3);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearLine(myLCD.LCDLineNumberTwo);
 
 	myLCD.LCDResetScreen(myLCD.LCDCursorTypeOn); // Back to initial state , type 3
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 0);
 	myLCD.LCDSendString(teststr4);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearLine(myLCD.LCDLineNumberTwo);
 }
 
@@ -243,19 +243,19 @@ void writeNumTest()
 	myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 2);
 	myLCD.print(myPI,3);
 
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearScreen();
 
 	myLCD.LCDGOTO(myLCD.LCDLineNumberOne, 0); // 11
-	myLCD.print(11);
+	myLCD.print(11, RDL_DEC);
 	myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 2);  // 13
-	myLCD.print(11,OCT);
+	myLCD.print(11, RDL_OCT);
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo , 0); // B
-	myLCD.print(11, HEX);
+	myLCD.print(11, RDL_HEX);
 	myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 2); // 1011
-	myLCD.print(11,BIN);
+	myLCD.print(11, RDL_BIN);
 
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 }
 
 void customChar(void) {
@@ -287,10 +287,10 @@ void customChar(void) {
 	for (index = 0; index < 8; index ++) {
 		myLCD.LCDPrintCustomChar(index);
 		myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 1);
-		bcm2835_delay(500);
+		delayMilliSecRDL(500);
 	}
 
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearScreen();
 }
 
@@ -302,7 +302,7 @@ void backLightTest(void)
 
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo , 1);
 	myLCD.LCDSendString(teststr4);
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDBackLightSet(true);
 	myLCD.LCDClearScreen();
 }
@@ -314,24 +314,24 @@ void entryModeTest(void) {
 	myLCD.LCDChangeEntryMode(myLCD.LCDEntryModeOne);
 	myLCD.LCDGOTO(myLCD.LCDLineNumberOne, 8);
 	myLCD.LCDSendString(teststr8); // <-C4321
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearScreenCmd();
 
 	myLCD.LCDChangeEntryMode(myLCD.LCDEntryModeTwo);
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 8);
 	myLCD.LCDSendString(teststr8); // C4321->
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearScreenCmd();
 
 	myLCD.LCDChangeEntryMode(myLCD.LCDEntryModeFour);
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 8);
 	myLCD.LCDSendString(teststr8); // <-1234C
-	bcm2835_delay(DISPLAY_DELAY_2);
+	delayMilliSecRDL(DISPLAY_DELAY_2);
 	myLCD.LCDClearScreenCmd();
 
 	myLCD.LCDChangeEntryMode(myLCD.LCDEntryModeThree); // Set back to default entry mode
 	myLCD.LCDClearScreenCmd();
-	bcm2835_delay(DISPLAY_DELAY_1);
+	delayMilliSecRDL(DISPLAY_DELAY_1);
 }
 
 void endTest()

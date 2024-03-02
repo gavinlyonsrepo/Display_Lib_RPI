@@ -86,8 +86,8 @@ uint8_t SetupHWSPI(void)
 		return 3;
 	}
 //*****************************
-	std::cout << "ST7735 library version : " << GetRDLibVersionNum()<< std::endl;
-	TFT_MILLISEC_DELAY(50);
+	std::cout << "ST77XX library version : " << GetRDLibVersionNum()<< std::endl;
+	delayMilliSecRDL(50);
 	return 0;
 }
 
@@ -129,9 +129,9 @@ uint8_t SetupSWSPI(void)
 		return 3;
 	}
 //*****************************
-	std::cout << "ST7735 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ST77XX library version : " << GetRDLibVersionNum()<< std::endl;
 	std::cout << "SWSPI Comm GPIO Delay set to : " << myTFT.HighFreqDelayGet()<< "uS" << std::endl;
-	TFT_MILLISEC_DELAY(50);
+	delayMilliSecRDL(50);
 	return 0;
 }
 
@@ -142,7 +142,7 @@ void HelloWorld(void)
 	myTFT.setCursor(10,10);
 	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
 	myTFT.print("Hello World");
-	TFT_MILLISEC_DELAY(5000);
+	delayMilliSecRDL(5000);
 }
 
 void EndTests(void)

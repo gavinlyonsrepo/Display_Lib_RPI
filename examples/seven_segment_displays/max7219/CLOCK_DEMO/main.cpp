@@ -79,7 +79,7 @@ int main()
 		myMAX.SetCurrentDisplayNumber(2);
 		myMAX.DisplayText((char*)cstrDateInfo, myMAX.AlignRight);
 
-		MAX7219_MilliSecondDelay(1000);
+		delayMilliSecRDL(1000);
 	}
 
 	endTest();
