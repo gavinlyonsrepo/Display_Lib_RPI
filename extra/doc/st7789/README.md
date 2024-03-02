@@ -91,13 +91,14 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 
 ## Hardware
 
-Tested and developed on
-    * Size 1.69" IPS color TFT LCD
-    * Resolution: 240 (H) RGB x280 (V)
-    * Control chip: st7789v2
-    * Display area 27.972 (H) x 32.634 (V)
-    * Panel size 30.07 (H) x37.43 (V) x1.56 (d)
-    * Logic voltage 3.3V
+Tested and developed on:
+
+* Size 1.69" IPS color TFT LCD
+* Resolution: 240 (H) RGB x280 (V)
+* Control chip: st7789v2
+* Display area 27.972 (H) x 32.634 (V)
+* Panel size 30.07 (H) x37.43 (V) x1.56 (d)
+* Logic voltage 3.3V
 
 Connections as setup in main.cpp test file.
 

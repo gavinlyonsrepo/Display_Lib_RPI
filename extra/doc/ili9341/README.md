@@ -92,15 +92,16 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 
 ## Hardware
 
-Tested and developed on
-    * Size 2.4" SPI Serial  IPS color TFT LCD
-    * Resolution: 240 (H) RGB x 320 (V)
-    * Color Depth: 262K/65K (65K used)
-    * Control chip:ILI9341
-    * Display area 27.972 (H) x 32.634 (V)
-    * Panel size 36.72(W)X48.96(H)mm
-    * Logic voltage 3.3V
-    * Touch panel with XPT2046 IC
+Tested and developed on:
+
+* Size 2.4" SPI Serial  IPS color TFT LCD
+* Resolution: 240 (H) RGB x 320 (V)
+* Color Depth: 262K/65K (65K used)
+* Control chip:ILI9341
+* Display area 27.972 (H) x 32.634 (V)
+* Panel size 36.72(W)X48.96(H)mm
+* Logic voltage 3.3V
+* Touch panel with XPT2046 IC
 
 
 Connections as setup in main.cpp test file.
@@ -110,8 +111,7 @@ Connections as setup in main.cpp test file.
 | 1 | VCC | VCC | 3.3 or 5V ,CAUTION your display must have 3.3V regulator on back to connect to 5V |
 | 2 | GND | GND | |
 | 3 | CS | SPICE0 |TFT Chip select |
-| 4 | RESET | GPIO25 |Reset, Use any GPIO for this, If no reset pin, pass -1 in here
-& display will use software rst| 
+| 4 | RESET | GPIO25 |Reset, Use any GPIO for this, If no reset pin, pass -1 in here & display will use software rst|
 | 5 | DC | GPIO24 | Data or command, Use any GPIO for this line |
 | 6 | SDI(MOSI) | SPIMOSI | |
 | 7 | SCLK | SPICLK | | 
