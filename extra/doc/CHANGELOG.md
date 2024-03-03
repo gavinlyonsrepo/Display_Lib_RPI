@@ -1,4 +1,4 @@
-Version control history, Display_Lib_RPI
+Version control history
 ====================
 
 * Version 1.0.1 02-2024

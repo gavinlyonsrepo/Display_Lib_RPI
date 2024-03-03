@@ -106,7 +106,7 @@ clean:
 	rm -rvf $(BIN)
 	@echo '***************'
 
-# explains the options you can use
+# Help task , explains the options you can use
 .PHONY: help
 help:
 	@echo '[HELP!]'

@@ -61,7 +61,7 @@ enum display_Font_name_e : uint8_t
 	font_arialRound = 12, /**< ArialRound 16by24 */
 	font_groTesk = 13,    /**< GroTesk 16by32 */
 	font_mint = 14,       /**< Mint 16by32 */
-	font_sixteenSeg = 15  /**< pFontSixteenSeg 32by48 (NUMBERS ONLY + : . -) */
+	font_sixteenSeg = 15  /**< Sixteen Segment 32by48 (NUMBERS ONLY + : . -) */
 };
 
 /*! @brief Font class to hold font data object  */

@@ -23,12 +23,9 @@
    driven by the SSD1306 controller for the Raspberry PI.
 1. Dynamic install-able system level Raspberry Pi C++ library.
 2. Inverse color, rotate, sleep, scroll and contrast control.
-3. Default font is Extended ASCII, scalable font.
-4. 12 fonts included.
-5. Graphics class included.
-6. Bitmaps supported.
-7. Hardware I2C
-8. Also tested on 128X32 display size. Should work for 96X16 display size.
+3. Bitmaps supported.
+4. Hardware I2C
+5. Also tested on 128X32 display size. Should work for 96X16 display size.
 
 
 ## Hardware

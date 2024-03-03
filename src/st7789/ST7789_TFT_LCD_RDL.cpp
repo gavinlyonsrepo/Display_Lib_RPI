@@ -34,7 +34,7 @@
 #define ST7789_RAMRD    0x2E /**< Memory read */
 #define ST7789_PTLAR    0x30 /**< Partial Area */
 #define ST7789_VSCRDEF  0x33 /**< Vertical scroll def */
-#define ST7789_SRLBTT   0x28 /**> Scroll direction bottom to top */
+#define ST7789_SRLBTT   0x28 /**< Scroll direction bottom to top */
 #define ST7789_SRLTTB   0x30 /**< Scroll direction top to bottom */
 #define ST7789_COLMOD   0x3A /**< Interface Pixel Format */
 #define ST7789_MADCTL   0x36 /**< Memory Access Control */

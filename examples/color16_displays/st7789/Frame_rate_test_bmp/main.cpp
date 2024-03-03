@@ -83,7 +83,7 @@ int8_t Setup(void)
 		return 3;
 	}
 //*****************************
-	std::cout << "ST7735 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ST7789 library version : " << GetRDLibVersionNum()<< std::endl;
 	std::cout <<"bcm2835 library version :" << bcm2835_version() << std::endl;
 	delayMilliSecRDL(50);
 	return 0;

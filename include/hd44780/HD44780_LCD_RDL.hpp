@@ -13,6 +13,10 @@
 
 
 // Section: Class's
+
+/*!
+	@brief class to drive the HD44780  LCD with PCF8574 I2C interface
+*/
 class HD44780PCF8574LCD : public Print{
   public:
 	// public enums

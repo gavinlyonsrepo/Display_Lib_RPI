@@ -29,7 +29,7 @@
 
 
 /*!
-	@brief  The main Class , used drive MAX7219 seven segment displays
+	@brief  Drive MAX7219 seven segment displays
 */
 class MAX7219_SS_RPI
 {

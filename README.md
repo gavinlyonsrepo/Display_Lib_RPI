@@ -130,6 +130,10 @@ Library naming :
 3. Library File suffix  = RDL
 4. Project name = Display_Lib_RPI
 
+Basic project overview, see API documentation for more detailed diagrams :
+
+[![Overview image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/diagram.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/diagram.png)
+
 ### Tool chain
 
 * Development Tool chain.

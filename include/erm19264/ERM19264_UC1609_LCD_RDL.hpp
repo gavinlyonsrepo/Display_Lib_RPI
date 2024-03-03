@@ -86,7 +86,7 @@
 #define UC1609_DIN_SetDigitalOutput bcm2835_gpio_fsel(_LCD_DIN, BCM2835_GPIO_FSEL_OUTP);
 
 /*!
-	@brief class to drive the ERM19264_UC1609 LCD
+	@brief class to drive the ERM19264 UC1609 LCD
 */
 class ERM19264_UC1609 : public bicolor_graphics {
 public:

@@ -17,12 +17,9 @@
 0. C++ Library for Nokia 5110 LCD, PCD8544 Driver. 84 x 48 pixels.
 1. Dynamic install-able Raspberry Pi C++ library.
 2. Invert colour, rotate, sleep, contrast bias control supported.
-3. 12 fonts.
-4. Graphics class included.
-5. Polymorphic print class included.
-6. Bitmaps supported.
-7. Hardware and Software SPI
-8. Dependency: bcm2835 Library
+3. Bitmaps supported.
+4. Hardware and Software SPI
+5. Dependency: bcm2835 Library
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_18F47K42_projects)

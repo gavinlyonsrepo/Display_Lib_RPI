@@ -32,7 +32,7 @@ enum displayBC_rotate_e : uint8_t
 	displayBC_Degrees_270 = 3     /**< display screen rotated 270 degrees */
 };
 
-/*! @brief Graphics class to hold graphic related functions */
+/*! @brief Graphics class to hold graphic related functions  for 1-bit displays*/
 class bicolor_graphics : public display_Fonts, public Print{
 
  public:

@@ -10,7 +10,7 @@ All the Font data is in file font_data_RDL.cpp. These fonts are used by the grap
 | 1 | font_default | 6x8 |  0 - 0xFE, Full Extended  | 1534 |
 | 2 | font_thick | 8x8 | 0x20 - 0x5A, NO lowercase letters | 476 |
 | 3 | font_wide | 9x8 | 0x20 - 0x5A, NO lowercase letters | 535 |
-| 4 | font_font_sevenSeg | 6x8 | 0x2D-0x3A , 0-10 : . / - only | 74 |
+| 4 | font_sevenSeg | 6x8 | 0x2D-0x3A , 0-10 : . / - only | 74 |
 | 5 | font_pico | 4x6 | 0x20 - 0x7E  | 289 | 
 | 6 | font_sinclairS  | 8x8 | 0x20 - 0x7E | 764 |
 | 7 | font_retro | 8x16 | 0x20 - 0x7E | 1524 |
