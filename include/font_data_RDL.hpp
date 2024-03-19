@@ -60,7 +60,7 @@ enum display_Font_name_e : uint8_t
 	font_orla = 11,       /**< Orla 16by24 */
 	font_arialRound = 12, /**< ArialRound 16by24 */
 	font_groTesk = 13,    /**< GroTesk 16by32 */
-	font_mint = 14,       /**< Mint 16by32 */
+	font_mint = 14,       /**< Mint 24by32 */
 	font_sixteenSeg = 15  /**< Sixteen Segment 32by48 (NUMBERS ONLY + : . -) */
 };
 

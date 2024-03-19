@@ -708,7 +708,7 @@ void bicolor_graphics::setDrawBitmapAddr(bool mode) {
 }
 
 /*!
-	@brief turn on or off screen wrap of the text (fonts 1-6)
+	@brief turn on or off screen wrap of the text
 	@param w TRUE on
 */
 void bicolor_graphics::setTextWrap(bool w) {

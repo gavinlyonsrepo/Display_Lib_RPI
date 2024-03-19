@@ -9,6 +9,7 @@
       * [User Options](#user-options)
       * [File system](#file-system) 
   * [Hardware](#hardware)
+  * [Output](#output)
   * [Touchscreen](#touchscreen)
 
 ## Overview
@@ -129,6 +130,13 @@ Connections as setup in main.cpp test file.
 3. Pins marked with T_ prefix are related to the touchscreen IC XP2046 if user is not using the touch
 screen do not connect these. The touch screen and TFT share the SPI bus but have different chip select lines.
 TFT SPI settings(Speed, active chip select) should be refreshed after ever read cycle of XPT2046 sensor, see example.
+
+## Output
+
+
+Four-Byte Burger 240x320 16-bit bitmap test image, Credits [Ahoy](https://www.youtube.com/watch?v=i4EFkspO5p4)
+
+[![output pic](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output2.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output2.jpg)
 
 
 ## Touchscreen

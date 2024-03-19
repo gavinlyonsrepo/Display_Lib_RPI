@@ -68,8 +68,8 @@ private:
 
 	// SPI
 	bool _resetPinOn = true; /**< reset pin? true:hw rst pin, false:sw rt*/
-	uint32_t _SPIhertz;      /**< Spi freq in Hertz , MAX 125 Mhz MIN 30Khz */
-	uint8_t  _SPICEX_pin;    /**< value = X , which SPI_CE pin to use 0 or 1*/
+	uint32_t _SPIhertz = 8000000;      /**< Spi freq in Hertz , MAX 125 Mhz MIN 30Khz */
+	uint8_t  _SPICEX_pin= 0;    /**< value = X , which SPI_CE pin to use 0 or 1*/
 	
 	// Screen 
 	uint16_t _widthStartTFT = 240;  /**< never change after first init */

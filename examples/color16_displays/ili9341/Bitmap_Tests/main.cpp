@@ -12,7 +12,8 @@
 	-# Test 302 bi-color image 128x128
 	-# Test 303A 24 bit 240by280 color image bitmap from the file system
 	-# Test 303B 24 bit 128by128 color image bitmaps from the file system
-	-# Test 304 16 bit 128by128 color image bitmaps from the file system
+	-# Test 304A 16 bit 128by128 color image bitmaps from the file system
+	-# Test 304B 16 bit 240by320 color image bitmap from the file system
 	-# Test 601 Frame rate per second (FPS) test. 24 bit bitmaps.
 */
 
@@ -48,7 +49,8 @@ void Test301(void); // "clock demo" icons, small bi-color bitmaps
 void Test302(void); // 2 color bitmap
 void Test303A(void); // 24 color bitmap
 void Test303B(void); // 24 color bitmap
-void Test304(void); // 16 color bitmap
+void Test304A(void); // 16 color bitmap
+void Test304B(void); // 16 color bitmap
 std::string UTC_string(void); // for clock demo
 void TestFPS(void); // Frames per second 24 color bitmap test,
 int64_t getTime(); // Utility for FPS test
@@ -67,7 +69,8 @@ int main(void)
 	Test302();
 	Test303A();
 	Test303B();
-	Test304();
+	Test304A();
+	Test304B();
 	TestFPS();
 	EndTests();
 	return 0;
@@ -186,7 +189,7 @@ void Test302(void)
 	myTFT.fillScreen(RDLC_BLACK);
 	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
 	myTFT.setFont(font_default);
-	char teststr1[] = "Bitmap 2";
+	char teststr1[] = "Bitmap bi-color, 128 X 128";
 	myTFT.writeCharString(25, 25, teststr1);
 	delayMilliSecRDL(TEST_DELAY2);
 	
@@ -198,14 +201,14 @@ void Test302(void)
 }
 
 // bitmap 24 colour , File format = Windows BITMAPINFOHEADER offset 54
-// bitmap is 240 by 280
+// bitmap is 220 by 240
 void Test303A(void)
 {
 	std::cout << "Test 303-A: 24 bit color image bitmaps from the file system" << std::endl;
 	myTFT.fillScreen(RDLC_BLACK);
-	char teststr1[] = "Bitmap 24";
+	char teststr1[] = "Bitmap 24,  220 X 240";
 	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
-	myTFT.writeCharString(25, 25, teststr1);
+	myTFT.writeCharString(10,10, teststr1);
 	delayMilliSecRDL(TEST_DELAY1);
 
 	FILE *pFile ;
@@ -213,7 +216,7 @@ void Test303A(void)
 	uint8_t FileHeaderOffset = 54;
 	uint8_t* bmpBuffer = nullptr;
 	uint16_t widthBitmap = 220;
-	uint16_t heightBitmap = 280;
+	uint16_t heightBitmap = 240;
 	bmpBuffer = (uint8_t*)malloc(( widthBitmap * heightBitmap) * pixelSize);
 	
 	if (bmpBuffer == nullptr)
@@ -233,7 +236,7 @@ void Test303A(void)
 	fread(bmpBuffer, pixelSize, widthBitmap *heightBitmap, pFile);
 	fclose(pFile);
 
-	if(myTFT.drawBitmap24(10, 10, bmpBuffer,widthBitmap ,heightBitmap) != rpiDisplay_Success)
+	if(myTFT.drawBitmap24(10, 20, bmpBuffer,widthBitmap ,heightBitmap) != rpiDisplay_Success)
 	{// Check for success 0x00
 		std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
 		free(bmpBuffer);
@@ -250,7 +253,7 @@ void Test303B(void)
 {
 	std::cout << "Test 303-B: 24 bit color image bitmaps from the file system" << std::endl;
 	myTFT.fillScreen(RDLC_BLACK);
-	char teststr1[] = "Bitmap 24";
+	char teststr1[] = "Bitmap 24, 128 X 128";
 	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
 	myTFT.writeCharString(5, 5, teststr1);
 	delayMilliSecRDL(TEST_DELAY1);
@@ -309,11 +312,11 @@ void Test303B(void)
 // OS/2 OS22XBITMAPHEADER (BITMAPINFOHEADER2) offset 72
 // NO color space information written
 // All bitmaps are 128 by 128.
-void Test304(void)
+void Test304A(void)
 {
-	std::cout << "Test 304: 16 bit color image bitmaps from the file system" << std::endl;
+	std::cout << "Test 304-A: 16 bit color image bitmaps from the file system" << std::endl;
 	myTFT.fillScreen(RDLC_BLACK);
-	char teststr1[] = "Bitmap 16";
+	char teststr1[] = "Bitmap 16, 128 X 128";
 	myTFT.writeCharString(25, 25, teststr1);
 	delayMilliSecRDL(TEST_DELAY2);
 
@@ -330,7 +333,7 @@ void Test304(void)
 
 	if (bmpBuffer1 == nullptr)
 	{
-		std::cout << "Error Test 304 : MALLOC could not assign memory " << std::endl;
+		std::cout << "Error Test 304-A : MALLOC could not assign memory " << std::endl;
 		return;
 	}
 
@@ -351,7 +354,7 @@ void Test304(void)
 		}
 		if (pFile == nullptr)
 		{
-			std::cout << "Error Test 404 : File does not exist" << std::endl;
+			std::cout << "Error Test 304-A : File does not exist" << std::endl;
 			free(bmpBuffer1);
 			return;
 		}
@@ -361,7 +364,6 @@ void Test304(void)
 
 		if (myTFT.drawBitmap16(40, 40, bmpBuffer1, bitmapWidth, bitmapHeight) != rpiDisplay_Success)
 		{
-		// Check for success 0x00
 			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
 			free(bmpBuffer1);
 			return;
@@ -373,6 +375,64 @@ void Test304(void)
 	myTFT.fillScreen(RDLC_BLACK);
 } // end of test 
 
+
+// test function for 16 bit color bitmap made in GIMP (RGB 565 16 bit color)
+// File 1 fourbyteburger240X320.bmp BITMAPV5HEADER offset 132 , 240x320 pixels
+// Color space information written
+void Test304B(void)
+{
+	std::cout << "Test 304-B: 16 bit color image bitmap from the file system" << std::endl;
+	myTFT.fillScreen(RDLC_BLACK);
+	char teststr1[] = "Bitmap 16, 240 X 320";
+	myTFT.writeCharString(25, 25, teststr1);
+	delayMilliSecRDL(TEST_DELAY2);
+
+	FILE *pFile ;
+	size_t pixelSize = 2; // 16 bit 2 bytes per pixel
+	uint8_t NumberOfFiles  = 1;
+	uint8_t offsetBMPHeader = 132;
+	uint16_t bitmapWidth = 240;
+	uint16_t bitmapHeight = 320;
+	uint8_t* bmpBuffer1 = nullptr;
+	bmpBuffer1 = (uint8_t*)malloc((bitmapWidth * bitmapHeight) * pixelSize);
+
+	if (bmpBuffer1 == nullptr)
+	{
+		std::cout << "Error Test 304-B : MALLOC could not assign memory " << std::endl;
+		return;
+	}
+
+	for (uint8_t i = 0 ; i < NumberOfFiles ; i++)
+	{
+		switch (i) // select file
+		{
+			case 0:
+				pFile = fopen("bitmap/bitmap16images/fourbyteburger240X320.bmp", "r");
+			break;
+		}
+		if (pFile == nullptr)
+		{
+			std::cout << "Error Test 304-B : File does not exist" << std::endl;
+			free(bmpBuffer1);
+			return;
+		}
+		fseek(pFile, offsetBMPHeader, 0);
+		fread(bmpBuffer1, pixelSize, bitmapWidth * bitmapHeight, pFile);
+		fclose(pFile);
+
+		if (myTFT.drawBitmap16(0, 0, bmpBuffer1, bitmapWidth, bitmapHeight) != rpiDisplay_Success)
+		{
+			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
+			free(bmpBuffer1);
+			return;
+		}
+		delayMilliSecRDL(TEST_DELAY5);
+		delayMilliSecRDL(TEST_DELAY5);
+	} // end of for loop
+
+	free(bmpBuffer1); // Free Up Buffer
+	myTFT.fillScreen(RDLC_BLACK);
+} // end of test 
 
 //Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
 // used in  Clock demo

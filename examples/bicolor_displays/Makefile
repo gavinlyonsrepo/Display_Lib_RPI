@@ -1,10 +1,12 @@
 # Gavin Lyons 01-2024
 # Makefile to build example program for
 # Display_Lib_RPI Display = bicolor Graphic displays
-# Display 1 = SSD1306 LCD I2C
+# Display 1 = SSD1306 OLED I2C
 # Display 2 = ERM19264 LCD SPI
 # Display 3 = NOKIA5110 LCD SPI
-# Display 4 = EROLEDM1 CH1115 I2C
+# Display 4 = CH1115 OLED I2C
+# Display 5 = Sh1106 OLED I2C
+# Display 6 = Sh1107 OLED I2C
 # URL: https://github.com/gavinlyonsrepo/Display_Lib_RPI
 # NOTE : Run make help for options
 
@@ -21,7 +23,7 @@ SRC=ssd1306/HELLO_WORLD
 #SRC=ssd1306/CLOCK_DEMO
 #=================================================
 
-# ===========ERM19264_UC1609 LCD SPI==============
+# ========== ERM19264_UC1609 LCD SPI==============
 #SRC=erm19264/HELLO_WORLD
 #SRC=erm19264/TEXT_GRAPHICS_FUNCTIONS
 #SRC=erm19264/FRAMERATE_PER_SEC
@@ -29,7 +31,7 @@ SRC=ssd1306/HELLO_WORLD
 #SRC=erm19264/SOFTWARE_SPI
 #=================================================
 
-# =================NOKIA5110 LCD SPI=============
+# ================ NOKIA5110 LCD SPI=============
 #SRC=nokia5110/HELLOWORLD
 #SRC=nokia5110/TEXT_GRAPHICS_FUNCTIONS
 #SRC=nokia5110/SPEEDTEST
@@ -37,13 +39,22 @@ SRC=ssd1306/HELLO_WORLD
 #SRC=nokia5110/HELLOWORLD_SWSPI
 #=================================================
 
-# ==============OLED CH1115 LCD SPI ==============
+# ============= OLED CH1115 LCD SPI ==============
 #SRC=ch1115/HELLO_WORLD
 #SRC=ch1115/TEXT_GRAPHICS_FUNCTIONS
 #SRC=ch1115/FPS_TEST
 #SRC=ch1115/FPS_TEST_SW_SPI
 #SRC=ch1115/BITMAP
 #================================================
+
+# ================= SH1106 OLED I2C =============
+#SRC=sh1106/HELLO_WORLD
+#SRC=sh1106//BITMAP
+#=================================================
+
+# ================= SH1107 OLED I2C =============
+#SRC=sh1107//HELLO_WORLD
+#=================================================
 
 # ************************************************
 

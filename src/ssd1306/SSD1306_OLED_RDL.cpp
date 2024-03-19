@@ -314,7 +314,7 @@ void SSD1306::OLEDclearBuffer()
 }
 
 /*!
-	@brief Draw a bitmap directly to the screen
+	@brief Draw the buffer directly to the screen
 	@param x x axis  offset 0-128
 	@param y y axis offset 0-64
 	@param w width 0-128

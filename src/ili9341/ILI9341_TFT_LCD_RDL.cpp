@@ -74,7 +74,10 @@
 #define MADCTL_MH  0x04  /**< LCD refresh right to left */
 
 /*! @brief Constructor for class ILI9341_TFT */
-ILI9341_TFT::ILI9341_TFT(){}
+ILI9341_TFT::ILI9341_TFT(){
+	_SPIhertz = 8000000;
+	_SPICEX_pin= 0;
+	}
 
 /*!
 	@brief  sets up TFT GPIO for Hardware SPi
