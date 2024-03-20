@@ -1,7 +1,7 @@
 /*!
 	@file examples/bicolor_displays/sh1106/HELLO_WORLD/main.cpp
 	@author Gavin Lyons
-	@brief Test file for Sh1106_OLED display, showing  "hello world" basic use case
+	@brief Test file for Sh1106 OLED display, showing  "hello world" basic use case
 	Project Name: Display_Lib_RPI
 
 	@test

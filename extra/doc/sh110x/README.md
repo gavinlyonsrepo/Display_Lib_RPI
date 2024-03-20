@@ -1,6 +1,4 @@
-# SSD1306 OLED Readme
-
-[![ OLED image ](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/device.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/device.jpg)
+# SH110X OLED Readme
 
 ## Table of contents
 
@@ -10,22 +8,19 @@
 	* [File system](#file-system)
 	* [I2C](#i2c)
 	* [Bitmaps](#bitmaps)
-  * [Output](#output)
-  * [Notes and issues](#notes-and-issues)
 
 
 ## Overview
 
-* Name : SSD1306_OLED
+* Name : SH110X
 * Description :
 
 0. Library to support the I2C 128X64 OLED Display Module
-   driven by the SSD1306 controller for the Raspberry PI.
+   driven by the Sh1106 or Sh1107 controller for the Raspberry PI.
 1. Dynamic install-able system level Raspberry Pi C++ library.
 2. Inverse color, rotate, sleep, scroll and contrast control.
 3. Bitmaps supported.
 4. Hardware I2C
-5. Also tested on 128X32 display size. Should work for 96X16 display size.
 
 
 ## Hardware
@@ -38,15 +33,16 @@ Manufacturers diagram showing connections.
 
 ### File system
 
+Not many examples files as I did not have device for test.
+These where tested by a third party.
+
 Example files 
 
-| Filepath | File Function | Screen Size |
-| ---- | ---- | ---- |
-| HELLO_WORLD | Basic use case | 128x64 |
-| BITMAP  | Shows use of bitmaps | 128x64 |
-| CLOCK_DEMO | A basic clock Demo | 128x64 |
-| SPEED_TEST | Frame rate per second test | 128x64 |
-| TEXT_GRAPHICS_FUNCTIONS |Tests Text,graphics and functions| 128x64 |
+| Controller | Filepath | File Function | Screen Size |
+| ---- | ---- | ---- | ---- |
+| Sh1106 | HELLO_WORLD | Basic use case | 128x64 |
+| SH1106 | BITMAP  | Shows use of bitmaps | 128x64 |
+| Sh1107 | HELLO_WORLD | Basic use case | 128x64 |
 
 ### I2C
 
@@ -78,20 +74,3 @@ Different bitmaps methods can be used.
 
 Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/)
 See example file "BITMAP" for more details.
-
-## Output
-
-[![ Output image ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)
-
-[![ Output image 2 ](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)
-
-## Notes and issues
-
-1. To test on a different size of display edit the myOLEDwidth & myOLEDheight
-variables in examples files.
-
-| Display size | Supported | Tested |
-| ------ | ------ | ------ |
-| 128x64 | Yes | Yes |
-| 128x32 | Yes | Yes |
-| ???x16 | Yes | NO |

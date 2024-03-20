@@ -159,6 +159,9 @@ void SH110X_RDL::OLEDinit()
 	}
 }
 
+/*!
+	@brief Handles OLED reset, if reset pin present on device.
+*/
 void SH110X_RDL::OLEDReset(void)
 {
 	const uint8_t resetDelay = 10; /**< reset delay in miliseconds*/
@@ -322,8 +325,8 @@ void SH110X_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 }
 
 /*!
-	@brief Fill the chosen page(1-8)  with a datapattern
-	@param page_num chosen page (1-8)
+	@brief Fill the chosen page with a data pattern
+	@param page_num chosen page (1-X)
 	@param dataPattern can be set to 0 to FF (not buffer)
 	@param mydelay optional delay in milliseconds can be set to zero normally.
 */

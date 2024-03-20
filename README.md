@@ -42,7 +42,7 @@
 	* Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/1.2.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/1.3.0.tar.gz | tar xz
 ```
 
 3. Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
@@ -50,7 +50,7 @@ curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/1.2.0.tar.gz 
 	* You can run 'make help' here to see other make options(uninstall etc).
 
 ```sh
-cd Display_Lib_RPI-1.2.0
+cd Display_Lib_RPI-1.3.0
 make
 sudo make install
 ```
@@ -99,7 +99,8 @@ Display category name path table:
 | Nokia 5110 PCD8544| Bi colour Graphic LCD |SPI HW & SW| [Readme](extra/doc/nokia5110/README.md) |
 | ERM1 CH1115 | Bi colour Graphic OLED |SPI HW & SW| [Readme](extra/doc/ch1115/README.md) |
 | SSD1306| Bi colour Graphic OLED | I2C | [Readme](extra/doc/ssd1306/README.md) |
-| HD44780 PCF8574 | Character LCD | I2C | [Readme](extra/doc/hd44780/README.md) |
+| SH1106 SH1107| Bi colour Graphic OLED | I2C | [Readme](extra/doc/sh110x/README.md) |
+| HD44780_PCF8574 | Character LCD | I2C | [Readme](extra/doc/hd44780/README.md) |
 | TM1638 | LED 7 segment display| ~SPI SW | [Readme](extra/doc/tm1638/README.md) |
 | MAX7219 | LED 7 segment display | SPI HW & SW| [Readme](extra/doc/max7219/README.md) |
 
