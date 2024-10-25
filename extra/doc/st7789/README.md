@@ -10,6 +10,8 @@
       * [File system](#file-system) 
   * [Hardware](#hardware)
   * [Output](#output)
+  * [Notes](#notes)
+     * [Multiple SPI devices](#multiple-spi-devices)
 
 ## Overview
 
@@ -124,3 +126,10 @@ Connections as setup in main.cpp test file.
 
 [![output pic](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/st7789output.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/st7789output.jpg)
 
+## Notes
+
+### Multiple SPI devices
+
+When using hardware SPI for multiple devices on the bus.
+If the devices require different SPI settings (speed of bus, bit order , chip enable pins , SPI data mode).
+The user must call function **TFTSPIHWSettings()** before each block of SPI transactions for display in order to refresh the SPI hardware settings for that device. See github [issue #1](https://github.com/gavinlyonsrepo/Display_Lib_RPI/issues/1).

@@ -11,6 +11,9 @@
   * [Hardware](#hardware)
   * [Output](#output)
   * [Touchscreen](#touchscreen)
+  * [Notes](#notes)
+     * [Multiple SPI devices](#multiple-spi-devices)
+
 
 ## Overview
 
@@ -128,8 +131,7 @@ Connections as setup in main.cpp test file.
 1. This is a 3.3V logic device do NOT connect the I/O logic lines to 5V logic device.
 2. LED Backlight control is left to user.
 3. Pins marked with T_ prefix are related to the touchscreen IC XP2046 if user is not using the touch
-screen do not connect these. The touch screen and TFT share the SPI bus but have different chip select lines.
-TFT SPI settings(Speed, active chip select) should be refreshed after ever read cycle of XPT2046 sensor, see example.
+screen do not connect these. The touch screen and TFT share the SPI bus but have different chip select lines. TFT SPI settings(Speed, active chip select) should be refreshed after ever read cycle of XPT2046 sensor, see example.
 
 ## Output
 
@@ -158,3 +160,13 @@ Co-ord system returned by XPT_2046_RDL class is as follows:
 Output of the basic touch screen example included. 
 
 [![output pic](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output.jpg)
+
+## Notes
+
+### Multiple SPI devices
+
+When using hardware SPI for multiple devices on the bus.
+If the devices require different SPI settings (speed of bus, bit order , chip enable pins , SPI data mode).
+The user must call function **TFTSPIHWSettings()** before each block of SPI transactions for display in order to refresh the SPI hardware settings for that device. See github [issue #1](https://github.com/gavinlyonsrepo/Display_Lib_RPI/issues/1).
+
+The touch screen functionality is considered a different SPI device ,  TFT SPI settings(Speed, active chip select) should be refreshed after ever read cycle of XPT2046 sensor, see example.

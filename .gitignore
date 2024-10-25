@@ -9,4 +9,5 @@ examples/bicolor_displays/Bin
 examples/bicolor_displays/Build
 examples/color16_displays/Bin
 examples/color16_displays/Build
+display.cppcheck
 
