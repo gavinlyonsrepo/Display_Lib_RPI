@@ -16,7 +16,8 @@
   * [Software](#software)
     * [File-system](#file-system)
     * [Tool chain](#tool-chain)
-  * [Notes and issues](#notes-and-issues)
+  * [Notes](#notes)
+    * [Raspberry Pi five](#raspberry-pi-five)
 
 
 ## Overview
@@ -144,8 +145,9 @@ Basic project overview, see API documentation for more detailed diagrams :
 	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
 	5. bcm2835 Library v1.75 dependency.
 
+## Notes
 
-## Notes and issues
+### Raspberry Pi five
 
-1. Will not work on Raspberry 5 at present as the bcm2835 Library dependency is not updated
-to work yet on Rpi5. Hopefully it will be updated soon , If it is not going to be updated, another path forward will be found.
+Will not work on Raspberry 5 at present as the bcm2835 Library dependency is not updated
+to work yet on Rpi5.

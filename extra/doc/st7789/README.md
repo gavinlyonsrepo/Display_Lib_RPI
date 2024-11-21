@@ -12,6 +12,7 @@
   * [Output](#output)
   * [Notes](#notes)
      * [Multiple SPI devices](#multiple-spi-devices)
+     * [Display offsets](#display-offsets)
 
 ## Overview
 
@@ -133,3 +134,14 @@ Connections as setup in main.cpp test file.
 When using hardware SPI for multiple devices on the bus.
 If the devices require different SPI settings (speed of bus, bit order , chip enable pins , SPI data mode).
 The user must call function **TFTSPIHWSettings()** before each block of SPI transactions for display in order to refresh the SPI hardware settings for that device. See github [issue #1](https://github.com/gavinlyonsrepo/Display_Lib_RPI/issues/1).
+
+### Display offsets
+
+The display initialisation requires an offset calculation which differs for different size and resolution displays.
+This is in the code(Function AdjustWidthHeight()) but the many different size displays are not available for testing or dealt with.
+If using a display other than 240x320(the default and size of ST7789 VRAM) and if user finds they cannot address all screen
+or their data is offset. Try Setting the pixel width and height of your screen to 240X320 and do not write as 
+much as possible to the part of the Video RAM you cannot see.
+For example  if you have a 240X280 display in 0 degree rotation
+1. Set pixel Width = 240 and pixel height = 320
+2. Do not write to the missing 40 pixels in the Y-axis, you still can but it is inefficient.
