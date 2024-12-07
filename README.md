@@ -150,9 +150,8 @@ Basic project overview, see API documentation for more detailed diagrams :
 
 The last version of Display_lib_RPI (V1.3.0) which used the bcm2835 library as a dependency low level interface 
 is in releases and can still be downloaded and used. Version 1.3.0 will NOT work on raspberry pi 5 and uses direct register access.
-It is generally speaking faster than the lgpio.
-
-The lgpio library  works with linux device drivers like spidev.
-Using Linux device drivers allow the library to work on Raspberry 5 as well as other linux computers that lgpio can be installed on 
+It is generally speaking faster than the lgpio. The lgpio replaced it in version 2.0.0.
+The lgpio library works with linux device drivers like spidev.
+Using Linux device drivers allow the library to work on Raspberry 5 as well as other Linux Single Board Computers that lgpio can be installed on.
 This provides more Flexibility, portability, better API, user space access,better compatibility and other advantages.
 

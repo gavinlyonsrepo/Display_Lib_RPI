@@ -12,7 +12,7 @@
   * [Hardware](#hardware)
   * [Output](#output)
   * [Notes](#notes)
-     * [Multiple SPI devices](#multiple-spi-devices)
+     * [spidev buf size](#spidev-buf-size)
 
 ## Overview
 

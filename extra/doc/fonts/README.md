@@ -22,7 +22,7 @@ All the Font data is in file font_data_RDL.cpp. These fonts are used by the grap
 | 13 | font_mint | 24x32  | 0x20 -0x7A |  8740 |
 | 14 | font_sixteenSeg | 32x48 | 0x2D-0x3A , 0-10 : . / - only | 2692 |
 | 15 | font_sevenSeg | 32X50| 0x2D-0x3A , 0-10 : . / - only | 2804 |
-| 16 | font_groTeskBig | 32X64| ox20 - 0x5A, NO lowercase letters | 15108 |
+| 16 | font_groTeskBig | 32X64| 0x20 - 0x5A, NO lowercase letters | 15108 |
 
 
 Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (ControlBytes)
@@ -49,7 +49,7 @@ First 4 bytes are control bytes followed by **horizontally** addressed font data
 // Example Font
 // An 8 by 8 character size font starting at 
 // ASCII offset 0x30 in ASCII table with 0x02 characters in font. 
-// 0 and 1 , size 14 bytes, 4 Control bytes at start.
+// 0 and 1 , size 20 bytes, 4 Control bytes at start.
 static const uint8_t FontBinaryExample[] =
 {
 0x08, 0x08, 0x30, 0x01,   // x-size, y-size, offset, (last character-offset : 0x31-0x30)
