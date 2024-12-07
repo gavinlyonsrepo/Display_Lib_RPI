@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <bcm2835.h> // Dependency
+#include <lgpio.h>
 #include "color16_graphics_RDL.hpp"
 
 #define ILI9341_RDMODE     0x0A /**< Read the power mode */
@@ -41,14 +41,13 @@ public:
 	void SetupGPIO(int8_t RST, int8_t DC, int8_t CS, int8_t SCLK, int8_t MOSI, int8_t MISO); //SW SPI
 	void SetupGPIO(int8_t RST, int8_t DC); // HW SPI
 	void InitScreenSize(uint16_t w, uint16_t h);
-	void InitSPI(uint16_t CommDelay); // SW SPI
-	rpiDisplay_Return_Codes_e InitSPI(uint32_t hertz = 0, uint8_t SPICE_Pin = 0 ); // HW SPI
+	rpiDisplay_Return_Codes_e InitSPI(uint16_t CommDelay, int gpioDev); // SW SPI
+	rpiDisplay_Return_Codes_e InitSPI(int device, int channel, int speed, int flags, int gpioDev); // HW SPI
 
 	// SPI related
 	uint16_t HighFreqDelayGet(void);
 	void HighFreqDelaySet(uint16_t);
-	void TFTSPIHWSettings(void);
-	void PowerDown(void);
+	rpiDisplay_Return_Codes_e PowerDown(void);
 	void ResetPIN(void);
 	void EnableDisplay(bool enableDisplay);
 
@@ -58,18 +57,26 @@ public:
 	void scrollTo(uint16_t y);
 	void setScrollMargins(uint16_t top, uint16_t bottom);
 	void NormalMode(void);
+	rpiDisplay_Return_Codes_e TFTResetPin(void);
 
 protected:
 
 private:
+
+	rpiDisplay_Return_Codes_e TFTDataCommandPin(void);
+	rpiDisplay_Return_Codes_e TFTClock_Data_ChipSelect_Pins(void);
 	rpiDisplay_Return_Codes_e ILI9341Initialize(void);
 	void TFTSetupResetPin(int8_t rst);
 	void cmdInit(void);
 
 	// SPI
 	bool _resetPinOn = true; /**< reset pin? true:hw rst pin, false:sw rt*/
-	uint32_t _SPIhertz = 8000000;      /**< Spi freq in Hertz , MAX 125 Mhz MIN 30Khz */
-	uint8_t  _SPICEX_pin= 0;    /**< value = X , which SPI_CE pin to use 0 or 1*/
+	
+	// SPI related 
+	int _spiDev = 0; /**< A SPI device, >= 0. */
+	int _spiChan = 0; /**< A SPI channel, >= 0. */
+	int _spiBaud = 50000;   /**< The speed of serial communication in bits per second. */
+	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode */ 
 	
 	// Screen 
 	uint16_t _widthStartTFT = 240;  /**< never change after first init */

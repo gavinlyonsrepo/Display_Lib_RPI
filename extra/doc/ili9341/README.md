@@ -12,7 +12,7 @@
   * [Output](#output)
   * [Touchscreen](#touchscreen)
   * [Notes](#notes)
-     * [Multiple SPI devices](#multiple-spi-devices)
+    * [spidev buf size](#spidev-buf-size)
 
 
 ## Overview
@@ -21,13 +21,14 @@
 * Description:
 
 0. C++ Library for a TFT SPI LCD, ILI9341 Driver (might also work with ILI9340)
-1. Dynamic install-able Raspberry Pi C++ library.
+1. Dynamic install-able or Linux Single Board Computers C++ library.
 2. Inverse colour, rotate, scroll, modes supported.
 3. Graphics + print class included.
 4. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
 5. Hardware and Software SPI
-6. Dependency: bcm2835 Library
+6. Dependency: lgpio Library
 7. Support for XPT2046 Touchscreen IC included
+8. NB 'spidev.bufsiz' setting must be 65536 or greater see Notes section. 
 
 * Author: Gavin Lyons
 
@@ -40,41 +41,34 @@ where user can make adjustments to select for SPI type used, and screen size.
 
 1. USER OPTION 1 GPIO/SPI TYPE
 2. USER OPTION 2 SCREEN SECTION 
-3. USER OPTION 3 SPI SPEED , SPI_CE_PIN
+3. USER OPTION 3 SPI SETINGS
 
 *USER OPTION 1 SPI TYPE / GPIO*
 
 This library supports both Hardware SPI and software SPI.
 The TFTSetupGPIO function is overloaded(2 off one for HW SPI the other for SW SPI).
 The parameters set for TFTSetupGPIO define which is used.
-HW SPI is far faster and more reliable than SW SPI
+
 
 *USER OPTION 2 Screen size*
 
 User can adjust screen pixel height, screen pixel width 
 The function TFTInitScreenSize sets them.
 
-*USER OPTION 3  SPI SPEED , SPI_CE_PIN*
+*USER OPTION 3  SPI Settings*
 
 TFTInitSPI function is overloaded(2 off, one for HW SPI the other for SW SPI).
 
-Param SPI_Speed (HW SPI Only)
+| parameter | default value | note | SPi type |
+| --- | --- | --- |  --- |
+| HWSPI_DEVICE | 0| A SPI device, >= 0. which SPI interface to use , ls /dev/spi*|  Hardware  |
+| HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1| Hardware  |
+| HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.| Hardware  |
+| HWSPI_FLAGS | 0|  mode 0 for this device | Hardware  |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip* | both |
+| SWSPI_CommDelay | 0 | uS delay for GPIO | software | 
 
-Here the user can pass the SPI Bus freq in Hertz,
-Maximum 125 Mhz , Minimum 30Khz, The default in file is 8Mhz 
-Although it is possible to select high speeds for the SPI interface, up to 125MHz,
-Don't expect any speed faster than 32MHz to work reliably.
-If you set to 0 .Speed is set to bcm2835 constant BCM2835_SPI_CLOCK_DIVIDER_32.
-
-Param SPI_CE_PIN (HW SPI Only)
-
-Which Chip enable pin to use two choices.
-	* SPICE0 = 0
-	* SPICE1 = 1
-
-Param SPI_CommDelay (SW SPI Only)
-
-The user can adjust If user is having reliability issues with SW SPI in some setups.
+The user can adjust if  having reliability issues with SW SPI in some setups.
 This is a microsecond delay in SW SPI GPIO loop. It is set to 0 by default, Increasing it will slow 
 down SW SPI further.
 
@@ -93,6 +87,7 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 | 4 | Mandelbrot_set | Drawing a mandelbrot set demo |
 | 5 | Touch_Screen | Basic Touch screen  demo |
 | 6 | xpt_Test | Touch screen test  without TFT |
+| 7 | Hello_world_SWSPI | Basic use case software SPI |
 
 ## Hardware
 
@@ -163,10 +158,26 @@ Output of the basic touch screen example included.
 
 ## Notes
 
-### Multiple SPI devices
+### spidev buf size
 
-When using hardware SPI for multiple devices on the bus.
-If the devices require different SPI settings (speed of bus, bit order , chip enable pins , SPI data mode).
-The user must call function **TFTSPIHWSettings()** before each block of SPI transactions for display in order to refresh the SPI hardware settings for that device. See github [issue #1](https://github.com/gavinlyonsrepo/Display_Lib_RPI/issues/1).
+The maximum transaction size that 'lgpio' can handle by default is 65536 bytes.
+So this is also the maximum transaction size of Display_lib_RPI, if more than that needs to be sent
+it is sent in blocks of 65536 bytes. 
+Certain 'Display_lib_RPI' functions use buffered writes, the ones that draw bitmaps, write fonts, 
+fill rectangles, clear screen, etc. In order for this to work the spidev.buf size must be at least 65536.
+To check the setting on your device run command:
 
-The touch screen functionality is considered a different SPI device ,  TFT SPI settings(Speed, active chip select) should be refreshed after ever read cycle of XPT2046 sensor, see example.
+```sh
+cat /sys/module/spidev/parameters/bufsiz
+```
+
+If it is lower than 65536 you can change it by adding 
+this to the start of line in file /boot/firmware/cmdline.txt.(raspberry pi )
+Make sure everything is on one line and there is space ' ' between this parameter and next one.
+Then reboot machine. Verify again by running last cat command above
+
+```sh
+spidev.bufsiz=65536
+```
+
+bufsiz defines the number of bytes that the SPI driver will use as a buffer for data transfers.

@@ -1,0 +1,28 @@
+
+====================================
+Rpi 3b lgpio , Display_RPI_LIB version 2.0.0 
+=========================================
+(NOTE beta , before draw pixel to buffer change in wrtieChar will need to be retested, ) 
+
+
+ST7735
+
+Bitmap FPS test
+============
+1 Mhz 25 frames, 10 sec, 2.49 fps
+2 Mhz 58 frames, 10 sec, 5.78 fps
+4 Mhz  125 frames, 10 sec, 12.48 fps
+8 Mhz  206 frames, 10 sec, 20.49 fps
+16 Mhz 518 frames, 10 sec, 51.77 fps
+24 Mhz 650 frames, 10 sec, 64.10 fps
+
+Text + Graphics FPS test
+====================
+1 Mhz  5 FPS
+2 Mhz  9 FPS
+4 Mhz  11 FPS
+8 Mhz  14 FPS
+16 Mhz 15 FPS
+24 Mhz 16 FPS
+
+

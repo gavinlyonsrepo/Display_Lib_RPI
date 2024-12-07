@@ -84,12 +84,14 @@ class bicolor_graphics : public display_Fonts, public Print{
 protected:
 
 	displayBC_rotate_e  _display_rotate = displayBC_Degrees_0; /**< Enum to hold rotation */
+
 	const int16_t WIDTH;  /**< This is the 'raw' display w - never changes */
-	const int16_t HEIGHT;  /**< This is the 'raw' display h - never changes*/
-	int16_t _width;  /**< Display w as modified by current _rotation*/
-	int16_t _height;  /**< Display h as modified by current _rotation*/
-	int16_t _cursor_x; /**< Current X co-ord cursor position */
-	int16_t _cursor_y;  /**< Current Y co-ord cursor position */
+	const int16_t HEIGHT; /**< This is the 'raw' display h - never changes*/
+	int16_t _width;       /**< Display w as modified by current _rotation*/
+	int16_t _height;      /**< Display h as modified by current _rotation*/
+	int16_t _cursor_x;    /**< Current X co-ord cursor position */
+	int16_t _cursor_y;    /**< Current Y co-ord cursor position */
+
 	bool _textwrap = true;  /**< If set, text at right edge of display will wrap, print method*/
 
 private:

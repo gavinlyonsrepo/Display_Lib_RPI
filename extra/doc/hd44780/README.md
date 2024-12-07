@@ -21,12 +21,12 @@
 * Description :
 
 0. Library to support the HD44780 LCD , (I2C PCF8574 "backpack" interface) 
-   for the Raspberry PI.
-1. Dynamic install-able system level Raspberry Pi C++ library.
+   for the Raspberry PI and other linux based SBC.
+1. Dynamic install-able system level C++ library.
 2. Backlight, scroll, cursor and entrymode control.
 3. Custom character support + print class for numerical data.
-4. Hardware I2C using bcm2835 library
-5. Dependency: bcm2835 Library
+4. Hardware I2C
+5. Dependency: lgpio Library
 6. Tested on size 16x02 and 20x04 (but may work on other sizes eg 16x04 , untested)
 
 * Author: Gavin Lyons
@@ -45,24 +45,26 @@ Connections
 Hardware I2C.
 
 1. I2C Address is set by default to 0x27(your module could be different, 
-user can change argument passed into LCD class constructor).
+user can change argument passed into LCD class constructor). 
+LCD_I2C_FLAGS No flags are currently defined. This parameter should be set to zero.
+The value to set LCD_I2C_DEVICE, can be found by running command, to view available I2C device numbers
 
-2. I2C Clock rate can be a passed into in the LCD class constructor method as a argument, 
-User can pass 1 of 4 BCM2835_I2C_CLOCK_DIVIDER values 2500, 626 150 or 148.
-See image below.
+```sh
+i2cdetect -l
+```
+
+2. I2C Clock rate is set by device installed on. During development and testing on raspberry pi 5
+it was found that by default the baudrate was set to 100,000 baud. By modifying the file 
+/boot/firmware/config.txt baud can be increased 
+
+```sh
+param=i2c_arm=on,i2c_arm_baudrate=400000
+#dtparam=i2s=on
+```
 
 3. In the event of an error writing a byte, debug info with error code will be written to console. 
-This error code is the bcm2835I2CReasonCodes enum. Debug flag must be set to true to see this output.
-See image below for  bcm2835I2CReasonCodes. User can set error timeout between retry attempts and number of retry attempts 
-and can monitor the Error flag to see current bcm2835I2CReasonCodes.
-
-4. If you have multiple devices on I2C bus at different clock speeds.
-The I2C clock speed function may have to called before each tranche of LCD commands.
-and not just at start. 
-
-[![ bcm image](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)
-
-For more info on bcm2835I2CClockDivider & bcm2835I2CReasonCodes see [bcm2835 doc's for details](http://www.airspayce.com/mikem/bcm2835/group__constants.html)
+Debug flag must be set to true to see this output. User can set error timeout between retry attempts and number of retry attempts 
+and can monitor the Error flag.
 
 ### Debug
 

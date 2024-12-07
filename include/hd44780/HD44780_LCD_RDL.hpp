@@ -4,8 +4,7 @@
 	@brief    HD44780-based character LCD I2C(PCF8574)library header file for RPI
 */
 
-#include <bcm2835.h>
-#include <iostream> // for cout error messages
+#include <lgpio.h>
 #include "common_data_RDL.hpp"
 #include "print_data_RDL.hpp"
 
@@ -58,7 +57,7 @@ class HD44780PCF8574LCD : public Print{
 	}; 
 	
 	
-	HD44780PCF8574LCD(uint8_t NumRow, uint8_t NumCol, uint8_t I2Caddress, uint16_t I2Cspeed);
+	HD44780PCF8574LCD(uint8_t NumRow, uint8_t NumCol, int I2Cdevice, int I2Caddress, int I2Cflags);
 	~HD44780PCF8574LCD(){};
 	
 	void LCDInit(LCDCursorType_e);
@@ -69,10 +68,9 @@ class HD44780PCF8574LCD : public Print{
 	bool LCDBackLightGet(void);
 	
 	rpiDisplay_Return_Codes_e LCD_I2C_ON(void);
-	void LCD_I2C_SetSpeed(void);
-	void LCD_I2C_OFF(void);
-	uint8_t LCDCheckConnection(void);
-	uint8_t LCDI2CErrorGet(void);
+	rpiDisplay_Return_Codes_e LCD_I2C_OFF(void);
+	int LCDCheckConnection(void);
+	int LCDI2CErrorGet(void);
 	uint16_t LCDI2CErrorTimeoutGet(void);
 	void LCDI2CErrorTimeoutSet(uint16_t);
 	uint8_t LCDI2CErrorRetryNumGet(void);
@@ -123,13 +121,14 @@ class HD44780PCF8574LCD : public Print{
 	
 	
 	bool _DebugON = false;  /**< debug flag , if true error messages will be printed to console */
-	
-	const uint8_t LCD_I2C_ADDRESS = 0x27;  /**< Default I2C address for I2C module PCF8574 backpack on LCD */
-	uint8_t _LCDSlaveAddresI2C = LCD_I2C_ADDRESS ; /**< I2C address for I2C module PCF8574 backpack on LCD*/
-	uint16_t  _LCDSpeedI2C = BCM2835_I2C_CLOCK_DIVIDER_626 ; /**< I2C speed default 0(100K) or BCM2835_I2C_CLOCK_DIVIDER enum values */ 
+
+	int _LCDI2CAddress = 0x27 ; /**< I2C address for I2C module PCF8574 backpack on LCD*/
+	int _LCDI2CDevice = 1; /**< An I2C device number. */
+	int _LCDI2CFlags =  0;   /**< Flags which modify an I2C open command. None are currently defined. */
+	int _LCDI2CHandle = 0;  /**< A number referencing an object opened by one of lgI2cOpen */
 	uint16_t _I2C_ErrorDelay = 100; /**<I2C delay(in between retry attempts) in event of error in mS*/
 	uint8_t _I2C_ErrorRetryNum = 3; /**< In event of I2C error number of retry attempts*/
-	uint8_t _I2C_ErrorFlag = 0; /**< In event of I2C error holds bcm2835 I2C reason code 0x00 = success*/
+	int _I2C_ErrorFlag = 0; /**< In event of I2C error holds code*/
 	
 	uint8_t _NumRowsLCD = 2; /**< number of rows on LCD*/
 	uint8_t _NumColsLCD = 16; /**< number of columns on LCD*/

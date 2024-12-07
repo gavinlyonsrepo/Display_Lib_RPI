@@ -9,23 +9,31 @@
 #pragma once
 
 // Libraries
-#include <bcm2835.h>
 #include <cstring>
 #include <cstdio> //snprintf
+#include <lgpio.h>
 #include "MAX7219_7SEG_Font_RDL.hpp"
 #include "common_data_RDL.hpp"
 
-// GPIO abstraction
-#define MAX7219_CS_SetHigh  bcm2835_gpio_write(_MAX7219_CS_IO, HIGH)
-#define MAX7219_CS_SetLow   bcm2835_gpio_write(_MAX7219_CS_IO, LOW)
-#define MAX7219_CLK_SetHigh bcm2835_gpio_write(_MAX7219_CLK_IO, HIGH)
-#define MAX7219_CLK_SetLow  bcm2835_gpio_write(_MAX7219_CLK_IO, LOW)
-#define MAX7219_DIN_SetHigh bcm2835_gpio_write(_MAX7219_DIN_IO, HIGH)
-#define MAX7219_DIN_SetLow  bcm2835_gpio_write(_MAX7219_DIN_IO,LOW)
-
-#define MAX7219_CS_SetDigitalOutput  bcm2835_gpio_fsel(_MAX7219_CS_IO, BCM2835_GPIO_FSEL_OUTP)
-#define MAX7219_CLK_SetDigitalOutput bcm2835_gpio_fsel(_MAX7219_CLK_IO, BCM2835_GPIO_FSEL_OUTP)
-#define MAX7219_DIN_SetDigitalOutput bcm2835_gpio_fsel(_MAX7219_DIN_IO, BCM2835_GPIO_FSEL_OUTP)
+// GPIO abstraction for lg library
+// GPIO Write
+#define MAX7219_CS_SetHigh lgGpioWrite(_GpioHandle, _MAX7219_CS_IO, 1)
+#define MAX7219_CS_SetLow  lgGpioWrite(_GpioHandle, _MAX7219_CS_IO, 0)
+#define MAX7219_CLK_SetHigh  lgGpioWrite(_GpioHandle, _MAX7219_CLK_IO, 1)
+#define MAX7219_CLK_SetLow   lgGpioWrite(_GpioHandle, _MAX7219_CLK_IO, 0)
+#define MAX7219_DIN_SetHigh  lgGpioWrite(_GpioHandle,_MAX7219_DIN_IO, 1)
+#define MAX7219_DIN_SetLow  lgGpioWrite(_GpioHandle, _MAX7219_DIN_IO, 0)
+// GPIO claim modes 
+#define MAX7219_CS_SetDigitalOutput  lgGpioClaimOutput(_GpioHandle, 0, _MAX7219_CS_IO, 0)
+#define MAX7219_CLK_SetDigitalOutput   lgGpioClaimOutput(_GpioHandle, 0, _MAX7219_CLK_IO, 0)
+#define MAX7219_DIN_SetDigitalOutput  lgGpioClaimOutput(_GpioHandle, 0, _MAX7219_DIN_IO, 0)
+// GPIO open and close
+#define MAX7219_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
+#define MAX7219_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
+// GPIO free modes
+#define MAX7219_GPIO_FREE_CS lgGpioFree(_GpioHandle , _MAX7219_CS_IO)
+#define MAX7219_GPIO_FREE_CLOCK lgGpioFree(_GpioHandle , _MAX7219_CLK_IO)
+#define MAX7219_GPIO_FREE_DATA lgGpioFree(_GpioHandle , _MAX7219_DIN_IO)
 
 
 /*!
@@ -34,8 +42,8 @@
 class MAX7219_SS_RPI
 {
 public:
-	MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect ,uint8_t data);
-	MAX7219_SS_RPI(uint32_t kiloHertz, uint8_t SPICEX_PIN);
+	MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect ,uint8_t data, int gpioDev);
+	MAX7219_SS_RPI(int device, int channel, int speed, int flags);
 
 	/*! The decode-mode register sets BCD code B or no-decode operation for each digit */
 	enum DecodeMode_e : uint8_t
@@ -120,7 +128,7 @@ public:
 
 	rpiDisplay_Return_Codes_e InitDisplay(ScanLimit_e numDigits, DecodeMode_e decodeMode);
 	void ClearDisplay(void);
-	void DisplayEndOperations(void);
+	rpiDisplay_Return_Codes_e DisplayEndOperations(void);
 
 	void SetBrightness(uint8_t brightness);
 	void DisplayTestMode(bool OnOff);
@@ -144,6 +152,8 @@ public:
 	void DisplayBCDText(char *text);
 	void SetSegment(uint8_t digit, uint8_t segment);
 
+protected:
+
 
 private:
 
@@ -154,8 +164,12 @@ private:
 	uint16_t _CommDelay = 0; /**<  uS delay used in communications SW SPI, User adjust */
 	uint8_t _NoDigits   = 8; /**<  Number of digits in display */
 
-	uint32_t _KiloHertz = 5000;   /**< Spi freq in kiloHertz , MAX 125 Mhz MIN 30Khz */
-	uint8_t  _SPICEX_CS_IO = 0;  /**< value = X , which SPI_CE pin to use, X = 1 or 0 */
+	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _GpioHandle = 0; /** This holds a handle to a device opened by lgGpiochipOpen or lgSpiOpen( */
+	int _spiDev = 0; /**< A SPI device, >= 0. */
+	int _spiChan = 0; /**< A SPI channel, >= 0. */
+	int _spiBaud = 50000;   /**< The speed of serial communication in bits per second. */
+	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode See MAX7219_SS_RPI constructor notes */ 
 	bool _HardwareSPI = false;  /**< Is the Hardware SPI on , true yes , false SW SPI*/
 
 	DecodeMode_e CurrentDecodeMode; /**< Enum to store current decode mode  */

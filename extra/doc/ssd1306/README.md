@@ -52,20 +52,27 @@ Example files
 
 Hardware I2C.
 
-1. I2C Address is set by default to 0x3C(your module could be different,
-	user can change argument passed into "OLEDbegin" method).
+1. I2C Address is set by default to 0x3C(your module could be different, 
+user can change argument passed into OLED class constructor). 
+OLED_I2C_FLAGS No flags are currently defined. This parameter should be set to zero.
+The value to set OLED_I2C_DEVICE , can be found by running command, to view available I2C device numbers
 
-2.  I2C Clock rate can be a passed into in the LCD class constructor method as a argument,
-User can pass 1 of 4 BCM2835_I2C_CLOCK_DIVIDER values 2500, 626 150 or 148.
-See image below.
+```sh
+i2cdetect -l
+```
 
-3. In the event of an error writing a byte, debug info with error code will be written to console.
-	This error code is the bcm2835I2CReasonCodes enum. Debug flag must be set to true to see this output.
-	See image below for  bcm2835I2CReasonCodes.
+2. I2C Clock rate is set by device installed on. During development and testing on raspberry pi 5
+it was found that by default the baudrate was set to 100,000 baud. By modifying the file 
+/boot/firmware/config.txt baud can be increased 
 
-[![ bcm image](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_RPI/blob/main/extras/image/bcm.jpg)
+```sh
+param=i2c_arm=on,i2c_arm_baudrate=400000
+#dtparam=i2s=on
+```
 
-For more info on bcm2835I2CClockDivider & bcm2835I2CReasonCodes see [bcm2835 doc's for details](http://www.airspayce.com/mikem/bcm2835/group__constants.html)
+3. In the event of an error writing a byte, debug info with error code will be written to console. 
+Debug flag must be set to true to see this output. User can set error timeout between retry attempts and number of retry attempts 
+and can monitor the Error flag.
 
 ### Bitmaps
 
@@ -87,7 +94,7 @@ See example file "BITMAP" for more details.
 
 ## Notes and issues
 
-1. To test on a different size of display edit the myOLEDwidth & myOLEDheight
+1. To test on a different size of display edit the my_OLED_width & my_OLED_height
 variables in examples files.
 
 | Display size | Supported | Tested |

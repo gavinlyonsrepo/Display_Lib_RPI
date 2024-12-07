@@ -13,7 +13,7 @@
 	@param oledwidth width of OLED in pixels 
 	@param oledheight height of OLED in pixels 
 */
-SSD1306::SSD1306(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(oledwidth, oledheight)
+SSD1306_RDL::SSD1306_RDL(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(oledwidth, oledheight)
 {
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
@@ -22,16 +22,11 @@ SSD1306::SSD1306(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(oledwi
 
 /*!
 	@brief  begin Method initialise OLED
-	@param I2C_speed default=0 , 0=bcm2835_i2c_set_baudrate(100000) 100k baudrate, >0 = BCM2835_I2C_CLOCK_DIVIDER,choices=2500 ,626 ,150 ,148
-	@param I2c_address by default 0x3C
 	@param I2c_debug default false
 */
-void SSD1306::OLEDbegin( uint16_t I2C_speed , uint8_t I2c_address, bool I2c_debug)
+void  SSD1306_RDL::OLEDbegin(bool I2c_debug)
 {
-	_I2C_speed = I2C_speed;
-	_I2C_address = I2c_address;
 	_I2C_DebugFlag = I2c_debug;
-	OLED_I2C_Settings();
 	OLEDinit();
 }
 
@@ -46,7 +41,7 @@ void SSD1306::OLEDbegin( uint16_t I2C_speed , uint8_t I2c_address, bool I2c_debu
 		-# Error 1 rpiDisplay_BufferSize
 		-# Error 2 rpiDisplay_BUfferNullptr
 */
-rpiDisplay_Return_Codes_e SSD1306::OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
+rpiDisplay_Return_Codes_e SSD1306_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
 {
 	if(sizeOfBuffer !=  width * (height/8))
 	{
@@ -63,74 +58,58 @@ rpiDisplay_Return_Codes_e SSD1306::OLEDSetBufferPtr(uint8_t width, uint8_t heigh
 }
 
 /*!
-	@brief  Start I2C operations. Forces RPi I2C pins P1-03 (SDA) and P1-05 (SCL) 
-	to alternate function ALT0, which enables those pins for I2C interface. 
-	@return Error on I2C init failure , User not running as root?
+	@brief  Start I2C operations
+	@param I2C_device An I2C device number.
+	@param I2C_addr  The address of a device on the I2C bus. PCF8574  default is 0x3C
+	@param I2C_flags Flags which modify an I2C open command. None are currently defined.
+	@return
+		-#  rpiDisplay_Success everything worked
+		-#  rpiDisplay_I2CbeginFail Cannot open I2C device
 */
-rpiDisplay_Return_Codes_e SSD1306::OLED_I2C_ON()
+rpiDisplay_Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags)
 {
-	if (!bcm2835_i2c_begin())
-		return rpiDisplay_I2CbeginFail;
-	else
-		return rpiDisplay_Success;
-}
+	_OLEDI2CDevice = I2C_device;
+	_OLEDI2CAddress = I2C_addr;
+	_OLEDI2CFlags = I2C_flags;
 
-/*! 
-	@brief Sets the address and speed I2C bus , should be called before all writes.
-*/
-void SSD1306::OLED_I2C_Settings()
-{
-	bcm2835_i2c_setSlaveAddress(_I2C_address);  //i2c address
-	uint32_t I2CBaudRate = 100000;// 100K 
-	// BCM2835_I2C_CLOCK_DIVIDER enum choice 2500 626 150 148
-	// Clock divided is based on nominal base clock rate of 250MHz
-	switch(_I2C_speed)
+	int I2COpenHandle = 0;
+
+	I2COpenHandle = lgI2cOpen(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
+	if (I2COpenHandle < 0 )
 	{
-		case 0:
-			// default or use set_baudrate instead of clockdivder 100k if zero passed
-			bcm2835_i2c_set_baudrate(I2CBaudRate); 
-		break;
-		case BCM2835_I2C_CLOCK_DIVIDER_2500:// ~100K
-		case BCM2835_I2C_CLOCK_DIVIDER_626: // ~400k
-		case BCM2835_I2C_CLOCK_DIVIDER_150:
-		case BCM2835_I2C_CLOCK_DIVIDER_148:
-			bcm2835_i2c_setClockDivider(_I2C_speed);
-		break;
-		default:
-			// error message 
-			if (_I2C_DebugFlag == true)
-			{
-				printf("Warning OLED_I2C_Settings 610: Invalid BCM2835_I2C_CLOCK_DIVIDER value : %u\n", _I2C_speed);
-				printf("	Must be 2500 626 150 or 148 \n");
-				printf("	Setting I2C baudrate to 100K with bcm2835_i2c_set_baudrate:\n");
-			}
-			bcm2835_i2c_set_baudrate(I2CBaudRate); 
-		break; 
+		printf("Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
+		return rpiDisplay_I2CbeginFail;
+	}
+	else
+	{
+		_OLEDI2CHandle = I2COpenHandle;
+		return rpiDisplay_Success;
 	}
 }
 
-/*!
-	@brief getter to read I2C bus speed
-	@return I2C bus speed see Readme for details
-*/
-uint16_t SSD1306::getI2Cspeed(void){return _I2C_speed;}
 
 /*!
-	@brief setter to set I2C bus speed
-	@param I2CSpeed I2C bus speed see Readme for details
+	@brief End I2C operations. This closes the I2C device. 
+	@return in event of any error
+		-#  rpiDisplay_Success everything worked
+		-#  rpiDisplay_I2CcloseFail cannot close I2c bus device
 */
-void SSD1306::setI2Cspeed(uint16_t I2CSpeed){_I2C_speed = I2CSpeed;}
-
-/*!
-	@brief End I2C operations. I2C pins P1-03 (SDA) and P1-05 (SCL) 	
-	are returned to their default INPUT behaviour. 
-*/
-void SSD1306::OLED_I2C_OFF(void){bcm2835_i2c_end();}
+rpiDisplay_Return_Codes_e  SSD1306_RDL::OLED_I2C_OFF(void)
+{
+	int I2COpenHandleStatus = 0;
+	I2COpenHandleStatus = lgI2cClose(_OLEDI2CHandle);
+	if (I2COpenHandleStatus < 0 )
+	{
+		printf("Error OLED_I2C_OFF :: Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
+		return rpiDisplay_I2CcloseFail;
+	}
+	return rpiDisplay_Success;
+}
 
 /*! 
 	@brief Disables  OLED Call when powering down
 */
-void SSD1306::OLEDPowerDown(void)
+void SSD1306_RDL::OLEDPowerDown(void)
 {
 	OLEDEnable(0);
 	delayMilliSecRDL(100);
@@ -139,7 +118,7 @@ void SSD1306::OLEDPowerDown(void)
 /*!
 	@brief Called from OLEDbegin carries out Power on sequence and register init
 */
-void SSD1306::OLEDinit()
+void SSD1306_RDL::OLEDinit()
  {
 
 	delayMilliSecRDL(SSD1306_INITDELAY);
@@ -196,9 +175,8 @@ switch (_OLED_HEIGHT)
 	@brief Turns On Display
 	@param bits   1  on , 0 off
 */
-void SSD1306::OLEDEnable(uint8_t bits)
+void SSD1306_RDL::OLEDEnable(uint8_t bits)
 {
-	OLED_I2C_Settings();
 	bits ? SSD1306_command(SSD1306_DISPLAY_ON) : SSD1306_command(SSD1306_DISPLAY_OFF);
 }
 
@@ -206,9 +184,8 @@ void SSD1306::OLEDEnable(uint8_t bits)
 	@brief Adjusts contrast
 	@param contrast 0x00 to 0xFF , default 0x80
 */
-void SSD1306::OLEDContrast(uint8_t contrast)
+void SSD1306_RDL::OLEDContrast(uint8_t contrast)
 {
-	OLED_I2C_Settings();
 	SSD1306_command( SSD1306_SET_CONTRAST_CONTROL );
 	SSD1306_command(contrast);
 }
@@ -217,9 +194,8 @@ void SSD1306::OLEDContrast(uint8_t contrast)
 	@brief invert the display
 	@param value true invert , false normal
 */
-void SSD1306::OLEDInvert(bool value)
+void SSD1306_RDL::OLEDInvert(bool value)
 {
-	OLED_I2C_Settings();
 	value ? SSD1306_command( SSD1306_INVERT_DISPLAY ) : SSD1306_command( SSD1306_NORMAL_DISPLAY );
 }
 
@@ -228,9 +204,8 @@ void SSD1306::OLEDInvert(bool value)
 	@param dataPattern can be set to zero to clear screen (not buffer) range 0x00 to 0ff
 	@param delay in milliseconds can be set to zero normally.
 */
-void SSD1306::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
+void SSD1306_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 {
-	OLED_I2C_Settings();
 	for (uint8_t row = 0; row < _OLED_PAGE_NUM; row++)
 	{
 		SSD1306_command( 0xB0 | row);
@@ -250,9 +225,8 @@ void SSD1306::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 	@param dataPattern can be set to 0 to FF (not buffer)
 	@param mydelay optional delay in milliseconds can be set to zero normally.
 */
-void SSD1306::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay)
+void SSD1306_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay)
 {
-	OLED_I2C_Settings();
 	uint8_t Result =0xB0 | page_num; 
 	SSD1306_command(Result);
 	SSD1306_command(SSD1306_SET_LOWER_COLUMN);
@@ -269,26 +243,25 @@ void SSD1306::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay
 	@brief Writes a byte to I2C address,command or data, used internally
 	@param value write the value to be written
 	@param cmd command or data
-	@note In the event of an error will loop  _I2C_ErrorRetryNum times each time.with delay _I2C_ErrorDelay
-	Printing the error code , see bcm2835I2CReasonCodes in bcm2835 docs.
+	@note if _I2C_DebugFlag == true  ,will output data on I2C failures.
 */
-void SSD1306::I2C_Write_Byte(uint8_t value, uint8_t cmd)
+void SSD1306_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 {
 	char ByteBuffer[2] = {cmd,value};
 	uint8_t attemptI2Cwrite = _I2C_ErrorRetryNum;
-	uint8_t ReasonCodes = 0;
+	int  ReasonCodes = 0;
 	
-	ReasonCodes = bcm2835_i2c_write(ByteBuffer, 2); 
-	while(ReasonCodes != 0)
+	ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); 
+	while(ReasonCodes < 0)
 	{//failure to write I2C byte ,Error handling retransmit
 		
 		if (_I2C_DebugFlag == true)
 		{
-			printf("Error I2C_Write_Byte : Cannot Write byte attempt no :: %u\n", +attemptI2Cwrite);
-			printf("bcm2835I2CReasonCodes :: Error code :: %u\n", +ReasonCodes);
+			printf("Error 602 I2C Command : %s\n", lguErrorText(ReasonCodes));
+			printf("Attempt Count: %u\n", attemptI2Cwrite);
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
-		ReasonCodes  = bcm2835_i2c_write(ByteBuffer, 2); //retry
+		ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt
 		if (attemptI2Cwrite == 0) break;
@@ -299,7 +272,7 @@ void SSD1306::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 /*!
 	@brief updates the buffer i.e. writes it to the screen
 */
-void SSD1306::OLEDupdate()
+void SSD1306_RDL::OLEDupdate()
 {
 	uint8_t x = 0; uint8_t y = 0; uint8_t w = this->_OLED_WIDTH; uint8_t h = this->_OLED_HEIGHT;
 	OLEDBufferScreen( x,  y,  w,  h, this->OLEDbuffer);
@@ -308,7 +281,7 @@ void SSD1306::OLEDupdate()
 /*!
 	@brief clears the buffer memory i.e. does NOT write to the screen
 */
-void SSD1306::OLEDclearBuffer()
+void SSD1306_RDL::OLEDclearBuffer()
 {
 	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH* (this->_OLED_HEIGHT /8)));
 }
@@ -322,9 +295,9 @@ void SSD1306::OLEDclearBuffer()
 	@param data the buffer data
 	@note Called by OLEDupdate internally 
 */
-void SSD1306::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
+void SSD1306_RDL::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
 {
-	OLED_I2C_Settings();
+	
 	uint8_t tx, ty;
 	uint16_t offset = 0;
 		
@@ -362,7 +335,7 @@ void SSD1306::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8
 	@param y y axis  position
 	@param color color of pixel.
 */
-void SSD1306::drawPixel(int16_t x, int16_t y, uint8_t color)
+void SSD1306_RDL::drawPixel(int16_t x, int16_t y, uint8_t color)
 {
 
 	if ((x < 0) || (x >= this->_width) || (y < 0) || (y >= this->_height)) {
@@ -400,9 +373,9 @@ void SSD1306::drawPixel(int16_t x, int16_t y, uint8_t color)
 	@param start start position
 	@param stop stop position 
 */
-void SSD1306::OLEDStartScrollRight(uint8_t start, uint8_t stop) 
+void SSD1306_RDL::OLEDStartScrollRight(uint8_t start, uint8_t stop) 
 {
-	OLED_I2C_Settings();
+	
 	SSD1306_command(SSD1306_RIGHT_HORIZONTAL_SCROLL);
 	SSD1306_command(0X00);
 	SSD1306_command(start);  // start page
@@ -418,9 +391,9 @@ void SSD1306::OLEDStartScrollRight(uint8_t start, uint8_t stop)
 	@param start start position
 	@param stop stop position 
 */
-void SSD1306::OLEDStartScrollLeft(uint8_t start, uint8_t stop) 
+void SSD1306_RDL::OLEDStartScrollLeft(uint8_t start, uint8_t stop) 
 {
-	OLED_I2C_Settings();
+	
 	SSD1306_command(SSD1306_LEFT_HORIZONTAL_SCROLL);
 	SSD1306_command(0X00);
 	SSD1306_command(start);
@@ -436,9 +409,9 @@ void SSD1306::OLEDStartScrollLeft(uint8_t start, uint8_t stop)
 	@param start start position
 	@param stop stop position 
 */
-void SSD1306::OLEDStartScrollDiagRight(uint8_t start, uint8_t stop) 
+void SSD1306_RDL::OLEDStartScrollDiagRight(uint8_t start, uint8_t stop) 
 {
-	OLED_I2C_Settings();
+	
 	SSD1306_command(SSD1306_SET_VERTICAL_SCROLL_AREA);
 	SSD1306_command(0X00);
 	SSD1306_command(_OLED_HEIGHT);
@@ -456,9 +429,9 @@ void SSD1306::OLEDStartScrollDiagRight(uint8_t start, uint8_t stop)
 	@param start start position
 	@param stop stop position 
 */
-void SSD1306::OLEDStartScrollDiagLeft(uint8_t start, uint8_t stop) 
+void SSD1306_RDL::OLEDStartScrollDiagLeft(uint8_t start, uint8_t stop) 
 {
-	OLED_I2C_Settings();
+	
 	SSD1306_command(SSD1306_SET_VERTICAL_SCROLL_AREA);
 	SSD1306_command(0X00);
 	SSD1306_command(_OLED_HEIGHT);
@@ -474,9 +447,9 @@ void SSD1306::OLEDStartScrollDiagLeft(uint8_t start, uint8_t stop)
 /*!
 	@brief  Stop scroll mode
 */
-void SSD1306::OLEDStopScroll(void) 
+void SSD1306_RDL::OLEDStopScroll(void) 
 {
-	OLED_I2C_Settings();
+	
 	SSD1306_command(SSD1306_DEACTIVATE_SCROLL);
 }
 
@@ -486,7 +459,7 @@ void SSD1306::OLEDStopScroll(void)
 	 @param OnOff passed bool True = debug on , false = debug off
 	 @note prints out statements, if ON and if errors occur
 */
-void SSD1306::OLEDDebugSet(bool OnOff)
+void SSD1306_RDL::OLEDDebugSet(bool OnOff)
 {
 	 OnOff ? (_I2C_DebugFlag  = true) : (_I2C_DebugFlag = false);
 }
@@ -495,27 +468,21 @@ void SSD1306::OLEDDebugSet(bool OnOff)
 	 @brief get DEBUG mode status
 	 @return debug mode status flag
 */
-bool SSD1306::OLEDDebugGet(void) { return _I2C_DebugFlag;}
+bool SSD1306_RDL::OLEDDebugGet(void) { return _I2C_DebugFlag;}
 
 
 /*!
 	@brief get I2C error Flag
-	@details bcm2835I2Creasoncode.
-		-# BCM2835_I2C_REASON_OK   	     = 0x00,Success 
-		-# BCM2835_I2C_REASON_ERROR_NACK    = 0x01,Received a NACK 
-		-# BCM2835_I2C_REASON_ERROR_CLKT    = 0x02,Received Clock Stretch Timeout 
-		-# BCM2835_I2C_REASON_ERROR_DATA    = 0x04, Not all data is sent / receive
-		-# BCM2835_I2C_REASON_ERROR_TIMEOUT = 0x08 Time out occurred during sending 
-	 @return I2C error flag = 0x00 no error , > 0 bcm2835I2Creasoncode.
+	@return See Error Codes at bottom of https://abyz.me.uk/lg/lgpio.html
 */
-uint8_t SSD1306::OLEDI2CErrorGet(void) { return _I2C_ErrorFlag;}
+int SSD1306_RDL::OLEDI2CErrorGet(void) { return _I2C_ErrorFlag;}
 
 /*!
 	 @brief Sets the I2C timeout, in the event of an I2C write error
 	@param newTimeout I2C timeout delay in mS
 	@details Delay between retry attempts in event of an error , mS
 */
-void SSD1306::OLEDI2CErrorTimeoutSet(uint16_t newTimeout)
+void SSD1306_RDL::OLEDI2CErrorTimeoutSet(uint16_t newTimeout)
 {
 	_I2C_ErrorDelay = newTimeout;
 }
@@ -525,37 +492,44 @@ void SSD1306::OLEDI2CErrorTimeoutSet(uint16_t newTimeout)
 	 @details Delay between retry attempts in event of an error , mS
 	 @return  I2C timeout delay in mS, _I2C_ErrorDelay
 */
-uint16_t SSD1306::OLEDI2CErrorTimeoutGet(void){return _I2C_ErrorDelay;}
+uint16_t SSD1306_RDL::OLEDI2CErrorTimeoutGet(void){return _I2C_ErrorDelay;}
 
 /*!
 	 @brief Gets the I2C error retry attempts, used in the event of an I2C write error
 	 @details Number of times to retry in event of an error
 	 @return   _I2C_ErrorRetryNum
 */
-uint8_t SSD1306::OLEDI2CErrorRetryNumGet(void){return _I2C_ErrorRetryNum;}
+uint8_t SSD1306_RDL::OLEDI2CErrorRetryNumGet(void){return _I2C_ErrorRetryNum;}
 
 /*!
 	 @brief Sets the I2C error retry attempts used in the event of an I2C write error
 	 @details Number of times to retry in event of an error
 	 @param AttemptCount I2C retry attempts 
 */
-void SSD1306::OLEDI2CErrorRetryNumSet(uint8_t AttemptCount)
+void SSD1306_RDL::OLEDI2CErrorRetryNumSet(uint8_t AttemptCount)
 {
 	_I2C_ErrorRetryNum = AttemptCount;
 }
 
-/*! 
+/*!
 	@brief checks if OLED on I2C bus
-	@return bcm2835I2CReasonCodes , BCM2835_I2C_REASON_OK 0x00 = Success
-*/ 
-uint8_t SSD1306::OLEDCheckConnection(void)
+	@return lg Error codes, LG_OKAY   0x00 = Success
+	@note Error codes are here https://abyz.me.uk/lg/lgpio.html
+*/
+int  SSD1306_RDL::OLEDCheckConnection(void)
 {
-	char rxdata[1]; //buffer to hold return byte
-	
-	bcm2835_i2c_setSlaveAddress(_I2C_address);  // set i2c address
-	_I2C_ErrorFlag = bcm2835_i2c_read(rxdata, 1); // returns reason code , 0 success
+	char rxdatabuf[1]; //buffer to hold return byte
+	int I2CReadStatus = 0;
 
+	I2CReadStatus = lgI2cReadDevice(_OLEDI2CHandle, rxdatabuf, 1);
+	if (I2CReadStatus < 0 )
+	{
+		printf("Error :: OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));
+	}
+
+	_I2C_ErrorFlag = I2CReadStatus;
 	return _I2C_ErrorFlag;
 }
+
 
 // ---  EOF ---

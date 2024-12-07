@@ -1,0 +1,49 @@
+
+================================================
+Rpi 5 lgpio , Display_RPI_LIB version 2.0.0
+================================================
+
+ST7735 128X128 HW SPI Bitmap test
+		* 289 frames, 10 sec, 28.86 fps at 8Mhz SPI Baud rate
+		* 530 frames, 10 sec, 52.9858 fps at 16Mhz SPI Baud rate
+ST7735 128x128 HW SPI text + graphics test
+		* 16 fps at 8Mhz SPI Baud rate, HW SPI
+
+St7789 240x280 HW SPI bitmap test(128 x 128 images)
+		* 289 frames, 10 sec, 28.8573 fps  at 8Mhz SPI Baud rate
+		* 530 frames, 10 sec, 52.9367 fps at 16Mhz SPI Baud rate
+
+ST7789 240x280 HW SPI text + graphics test
+		* 15 FPS RPI 5 V2.00 at 8Mhz HW SPi
+
+ili9341 240X320 HW SPI mandelbrot set
+		SPI SPEED 24Mhz = Time Taken :: 78 ms
+ili9341 240X320 HW SPI Bitmap test (128 x 128 images)
+		* 289 frames, 10 sec, 28.862 fps at 8Mhz SPI Baud rate
+
+SSD1306 I2C
+		* I2C_Speed =  4 Fps at I2C baud = 100,000
+		* I2C_Speed = 11 Fps at I2C baud = 400,000
+
+ch1115 HW SPI text + graphics
+		* 51 Fps at 8 Mhz
+ch1115 SW SPI text + graphics
+		* 45 FPS
+
+Nokia HW SPI text + graphics
+	* 70 FPS at  1Mhz
+	* 110 FPS at 4Mhz
+Nokia SW SPI text + graphics
+	* 99 FPS software SPI
+
+ERM19264 UC1609 HW SPI text + graphics
+	*  22 fps at 1Mhz
+	*  35 fps at 8Mhz
+ERM19264 UC1609 SW SPI text + graphics
+	* 39 fps 
+
+
+
+
+
+

@@ -19,7 +19,6 @@
 2. Invert colour, rotate, sleep, contrast bias control supported.
 3. Bitmaps supported.
 4. Hardware and Software SPI
-5. Dependency: bcm2835 Library
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_18F47K42_projects)
@@ -56,26 +55,32 @@ GND(pin8) and LIGHT(pin7) to switch on /off backlight and adjust brightness.
 ### SPI
 
 This library supports both Hardware SPI and software SPI.
-The constructor of the main class is overloaded. 
+The constructor of the main class is overloaded.
 Which SPI is started depends on which constructor called by user.
-Hardware SPI uses bcm2835 library spi module.
-The SPI settings are in LCDSPIHWSettings function.
-If there are multiple SPI devices on Bus(with different settings) the user can call this method 
-to refresh settings before a tranche of LCD commands.
-Default Speed is BCM2835_SPI_CLOCK_DIVIDER_64,
-6.25MHz on RPI3. This can be adjusted in code or you can pass
-the divider value in the contructor as an argument. These values are
-defined by enum bcm2835SPIClockDivider. For full list see
 
-https://github.com/gavinlyonsrepo/NOKIA_5110_RPI/blob/main/extra/images/bcm2.png
+*Software SPI*
 
-User can also adjust which HW SPI chip enable pin they use(CE0 or CE1).
-in constructor arguments. This device uses bit order MSB First and SPI Mode 0.
-
-Measured SPI speed results Version 1.3 are in the SpeedTest example file header comment block.
-The parameter LCDHardwareSPI is a GPIO uS delay that
+For Software SPI Pick any GPIO you want.
+To get the number for GPIO_CHIP_DEVICE parameter you can check ls /dev/gpiochip*
+At time of testing it was found that Raspberry pi 5 = 4 and raspberry pi 3 = zero 
+But now it look like both are zero after software update, although 4 should still work for RPi5 
+if a symlink is in /dev/ folder. 
+The member LCDHighFreqDelay is a GPIO uS delay that
 can be used to slow down or speed up Software SPI.
-By default it is set to 2uS. It may have to be adjusted depending on device/CPU used.
+By default it is set to 0uS. It may have to be increased depending on device/CPU used.
+
+*Hardware SPI*
+
+For Hardware SPI the User must use fixed SPI pins SPIMOSI and SPISCLK, user can choice between SPICE0 and SPICE1 
+for chip select. In hardware SPI user can pick SPI bus speed. SPI must be turned on device.
+
+| parameter | default value | note  |
+| --- | --- | --- |
+| HWSPI_DEVICE | 0| A SPI device, >= 0. which SPI interface to use , ls /dev/spi*|
+| HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1|
+| HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.|
+| HWSPI_FLAGS | 0|  mode 0 for this device |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip |
 
 ### File system
 

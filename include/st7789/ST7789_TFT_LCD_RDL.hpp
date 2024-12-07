@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstdbool>
 #include <cstring>
-#include <bcm2835.h> // Dependency
+#include <lgpio.h>
 #include "color16_graphics_RDL.hpp"
 
 /*!
@@ -44,14 +44,13 @@ public:
 	void TFTSetupGPIO(int8_t, int8_t, int8_t, int8_t, int8_t); //SW SPI
 	void TFTSetupGPIO(int8_t, int8_t); // HW SPI
 	void TFTInitScreenSize(uint8_t xOffset, uint8_t yOffset, uint16_t w, uint16_t h);
-	void TFTInitSPI(uint16_t CommDelay); // SW SPI
-	rpiDisplay_Return_Codes_e TFTInitSPI(uint32_t hertz = 0, uint8_t SPICE_Pin = 0 ); // HW SPI
+	rpiDisplay_Return_Codes_e TFTInitSPI(uint16_t CommDelay, int gpioDev ); // SW SPI
+	rpiDisplay_Return_Codes_e TFTInitSPI(int device, int channel, int speed, int flags, int gpioDev); // HW SPI
 
 	// SPI related
 	uint16_t HighFreqDelayGet(void);
 	void HighFreqDelaySet(uint16_t);
-	void TFTSPIHWSettings(void);
-	void TFTPowerDown(void);
+	rpiDisplay_Return_Codes_e  TFTPowerDown(void);
 	// Screen related
 	void TFTsetRotation(TFT_rotate_e r);
 	void TFTchangeInvertMode(bool m);
@@ -62,10 +61,12 @@ public:
 	void TFTNormalMode(void);
 	void TFTsetScrollDefinition(uint16_t th, uint16_t tb, bool sd);
 	void TFTVerticalScroll(uint16_t vsp);
+	rpiDisplay_Return_Codes_e TFTResetPin(void);
 
 private:
 
-	void TFTResetPIN(void);
+	rpiDisplay_Return_Codes_e TFTDataCommandPin(void);
+	rpiDisplay_Return_Codes_e TFTClock_Data_ChipSelect_Pins(void);
 	rpiDisplay_Return_Codes_e TFTST7789Initialize(void);
 	void cmd89(void);
 	void AdjustWidthHeight(void);
@@ -78,9 +79,11 @@ private:
 	uint16_t _widthStartTFT = 240;  /**<  never change after first init */
 	uint16_t _heightStartTFT = 280; /**< never change after first init */
 
-	// SPI
-	uint32_t _hertz = 8000000; /**< Spi freq in Hertz , MAX 125 Mhz MIN 30Khz */
-	uint8_t _SPICEX_pin = 0;    /**< value = X , which SPI_CE pin to use */
+	// SPI related 
+	int _spiDev = 0;       /**< A SPI device, >= 0. */
+	int _spiChan = 0;     /**< A SPI channel, >= 0. */
+	int _spiBaud = 50000; /**< The speed of serial communication in bits per second. */
+	int _spiFlags = 0;    /**<The flags 2 LSB defines SPI mode */ 
 
 }; //end of ST7789_TFT  class
 

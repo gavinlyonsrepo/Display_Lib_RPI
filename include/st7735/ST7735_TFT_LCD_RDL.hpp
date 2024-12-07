@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstdbool>
 #include <cstring>
-#include <bcm2835.h> // Dependency
+#include <lgpio.h>
 #include "color16_graphics_RDL.hpp"
 
 // Section:  Defines
@@ -141,15 +141,14 @@ public:
 	void TFTSetupGPIO(int8_t, int8_t, int8_t, int8_t, int8_t); //SW SPI
 	void TFTSetupGPIO(int8_t, int8_t); // HW SPI
 	void TFTInitScreenSize(uint8_t xOffset, uint8_t yOffset, uint16_t w, uint16_t h);
-	rpiDisplay_Return_Codes_e TFTInitPCBType(TFT_PCBtype_e pcbType, uint16_t CommDelay); // SW SPI
-	rpiDisplay_Return_Codes_e TFTInitPCBType(TFT_PCBtype_e pcbType, uint32_t hertz = 0, uint8_t SPICE_Pin = 0 ); // HW SPI
+	rpiDisplay_Return_Codes_e TFTInitPCBType(TFT_PCBtype_e pcbType, uint16_t CommDelay, int gpioDev); // SW SPI
+	rpiDisplay_Return_Codes_e TFTInitPCBType(TFT_PCBtype_e pcbType, int device, int channel, int speed, int flags, int gpioDev); // HW SPI
 
 	// SPI related
 	uint16_t HighFreqDelayGet(void);
 	void HighFreqDelaySet(uint16_t);
-	void TFTSPIHWSettings(void);
-	void TFTPowerDown(void);
-	void TFTResetPIN(void);
+	rpiDisplay_Return_Codes_e TFTPowerDown(void);
+	rpiDisplay_Return_Codes_e TFTResetPin(void);
 	// Screen related
 	void TFTsetRotation(TFT_rotate_e r);
 	void TFTchangeInvertMode(bool invertModeOn);
@@ -162,6 +161,10 @@ private:
 	rpiDisplay_Return_Codes_e TFTGreenTabInitialize(void);
 	rpiDisplay_Return_Codes_e TFTBlackTabInitialize(void);
 	rpiDisplay_Return_Codes_e TFTRedTabInitialize(void);
+	rpiDisplay_Return_Codes_e TFTSPIInit(void);
+	rpiDisplay_Return_Codes_e TFTDataCommandPin(void);
+	rpiDisplay_Return_Codes_e TFTClock_Data_ChipSelect_Pins(void);
+	
 	void Rcmd1(void);
 	void Rcmd2red(void);
 	void Rcmd3(void);
@@ -175,8 +178,10 @@ private:
 	uint16_t _heightStartTFT; /**< never change after first init */
 
 	//SPI
-	uint32_t _hertz;        /**< Spi freq in Hertz , MAX 125 Mhz MIN 30Khz */
-	uint8_t  _SPICEX_pin;  /**< value = X , which SPI_CE pin to use */
+	int _spiDev = 0;      /**< A SPI device, >= 0. */
+	int _spiChan = 0;     /**< A SPI channel, >= 0. */
+	int _spiBaud = 50000; /**< The speed of serial communication in bits per second. */
+	int _spiFlags = 0;    /**<The flags 2 LSB defines SPI mode */ 
 
 }; //end of ST7735_TFT  class
 

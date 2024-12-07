@@ -38,13 +38,28 @@ Example files list:
 
 ## Hardware
 
+### Software SPI
+
 For Software SPI Pick any GPIO you want.
+To get the number for GPIO_CHIP_DEVICE parameter you can check ls /dev/gpiochip*
+At time of testing it was found that Raspberry pi 5 = 4 and raspberry pi 3 = zero 
+But now it look like both are zero after software update, although 4 should still work for RPi5 
+if a symlink is in /dev/ folder. In software SPI user may need to increase or decrease 
+CommDelay variable (uS Communication delay) depending on speed of CPU on system. 
+
+### Hardware SPI
+
 For Hardware SPI the User must use fixed SPI pins SPIMOSI and SPISCLK, user can choice between SPICE0 and SPICE1 
 for chip select. The Datasheet says it's a 10MHZ device, In hardware SPI user can pick SPI bus speed.
-In software SPI user may need to increase or decrease CommDelay variable (uS Communication delay) depending on speed 
-of CPU on system. User can adjust brightness from 0x00 to 0x0f by default it is 0x08. 0x0f being brightest
- 
-Connections to RPI:
+
+| parameter | default value | note  |
+| --- | --- | --- |
+| HWSPI_DEVICE | 0| A SPI device, >= 0. which SPI interface to use , ls /dev/spi*|
+| HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1|
+| HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.|
+| HWSPI_FLAGS | 0|  mode 0 for this device |
+
+### Connections to RPI:
 
 | Pin no  | RPI SW SPI | RPI HW SPI  | Pin function |
 | --- | --- | --- | --- |
@@ -55,8 +70,7 @@ Connections to RPI:
 
 VCC 5V in theory but works at 3.3V in testing, albeit with a dimmer display.
 Logic seems to work fine at 3.3V , It safe as it is all one way communications
-From RPI to MAX.
-
+From RPI to MAX. User can adjust brightness from 0x00 to 0x0f by default it is 0x08. 0x0f being brightest
 
 ## Notes and Issues
 
@@ -64,4 +78,3 @@ From RPI to MAX.
 
 Support for Cascaded Displays added is untested as only one display available.
 Casacded Displays are displays connected together. Din-> Dout and CS lines tied together.
-

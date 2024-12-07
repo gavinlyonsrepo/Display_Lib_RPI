@@ -74,10 +74,7 @@
 #define MADCTL_MH  0x04  /**< LCD refresh right to left */
 
 /*! @brief Constructor for class ILI9341_TFT */
-ILI9341_TFT::ILI9341_TFT(){
-	_SPIhertz = 8000000;
-	_SPICEX_pin= 0;
-	}
+ILI9341_TFT::ILI9341_TFT(){}
 
 /*!
 	@brief  sets up TFT GPIO for Hardware SPi
@@ -144,64 +141,74 @@ void ILI9341_TFT:: InitScreenSize(uint16_t width_TFT, uint16_t height_TFT)
 
 /*!
 	@brief intialise  SPI, Hardware SPI
-	@param hertz  SPI Clock frequency in Hz, HW SPI only MAX 125 Mhz , MIN 30Khz(RPI3). typical/tested 8000000
-	@param SPICE_Pin which SPI CE/CS pin to use 0 = SPICE0 GPIO08 RPI3, 1 = SPICE1 GPIO07 RPI3
+	@param device A SPI device, >= 0. 
+	@param channel A SPI channel, >= 0. 
+	@param speed The speed of serial communication in bits per second. 
+	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@return
 		-# rpiDisplay_Success = success
-		-# rpiDisplay_SPICEXPin SPI pin  incorrect value (upstream)
-		-# rpiDisplay_SPIbeginFail bcm2835_spi_begin has failed (upstream)
+		-# Upstream error code from ILI9341Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(uint32_t hertz, uint8_t SPICE_Pin)
+rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(int device, int channel, int speed, int flags, int gpioDev)
 {
-	if (SPICE_Pin >= 2)
-	{
-		std::cout << "Error:InitSPI 2: SPICE_PIN value incorrect must be 0 or 1:" << SPICE_Pin <<std::endl;
-		return  rpiDisplay_SPICEXPin;
-	}
-
-	_SPICEX_pin = SPICE_Pin;
-	_SPIhertz = hertz;
-
+	_DeviceNumGpioChip = gpioDev;
+	_spiDev = device;
+	_spiChan = channel;
+	_spiBaud = speed;
+	_spiFlags = flags;
 	return ILI9341Initialize();
 }
 
 /*!
 	@brief intialise PCBtype and SPI, Software SPI
 	@param CommDelay uS GPIO delay used in software SPI
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@return Upstream error code from ILI9341Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
-void ILI9341_TFT::InitSPI(uint16_t CommDelay)
+rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(uint16_t CommDelay , int gpioDev)
 {
 	HighFreqDelaySet(CommDelay);
-	ILI9341Initialize();
+	_DeviceNumGpioChip = gpioDev;
+	return ILI9341Initialize();
 }
 
 /*!
 	@brief init routine for ILI9341_TFTcontroller
-	@return Error if bcm2835_spi_begin has failed
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioPinClaim
+		-# rpiDisplay_SPIOpenFailure;
 */
 rpiDisplay_Return_Codes_e ILI9341_TFT::ILI9341Initialize()
 {
-	ResetPIN();
-	Display_DC_SetDigitalOutput;
-	Display_DC_SetLow;
-if (_hardwareSPI == false)
-{
-	Display_SCLK_SetDigitalOutput;
-	Display_SDATA_SetDigitalOutput;
-	Display_CS_SetDigitalOutput;
-	Display_CS_SetHigh;
-	Display_SCLK_SetLow;
-	Display_SDATA_SetLow;
-}else{
-	if (!bcm2835_spi_begin())
+	//  gpio Device open?
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	if ( _GpioHandle < 0)	// open error
 	{
-		std::cout << "Error:ILI9341Initialize:  bcm2835_spi_begin :Cannot start spi, Running as root?" << std::endl;
-		return rpiDisplay_SPIbeginFail;
+		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
 	}
-	TFTSPIHWSettings();
-}
+	// reset routine GPIO pin
+	if (TFTResetPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	// Data or command routine  GPIO pin 
+	if (TFTDataCommandPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+
+	if (_hardwareSPI == false)
+	{
+		// Setup Software SPI for the 3 other GPIO : SCLK, Data & CS
+		if (TFTClock_Data_ChipSelect_Pins() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	}else{
+		_spiHandle = Display_OPEN_SPI;
+		if ( _spiHandle  < 0)
+		{
+			fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
+			return rpiDisplay_SPIOpenFailure;
+		}
+	}
 	cmdInit();
 	return rpiDisplay_Success;
 }
@@ -221,75 +228,94 @@ uint16_t ILI9341_TFT::HighFreqDelayGet(void){return _HighFreqDelay;}
 void  ILI9341_TFT::HighFreqDelaySet(uint16_t CommDelay){_HighFreqDelay = CommDelay;}
 
 /*!
-	@brief  Init Hardware SPI settings
-	@details MSBFIRST, mode 0 , SPI Speed , SPICEX pin
-	@note If multiple devices on SPI bus with different settings,
-	can be used to refresh ST7789 settings
-*/
-void ILI9341_TFT::TFTSPIHWSettings(void)
-{
-	bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
-	bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
-
-	if (_SPIhertz > 0)
-		bcm2835_spi_setClockDivider(bcm2835_aux_spi_CalcClockDivider(_SPIhertz));
-	else //SPI_CLOCK_DIVIDER_32 = 7.8125MHz on Rpi2, 12.5MHz on RPI3
-		bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
-
-	if (_SPICEX_pin == 0)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
-	}else if (_SPICEX_pin == 1)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS1);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS1, LOW);
-	}
-}
-
-/*!
 	@brief Call when powering down TFT
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioPinFree
+		-# rpiDisplay_SPIOpenClose
 	@note Turns off Display Sets GPIO low and turns off SPI
-	End SPI operations. SPI0 pins P1-19 (MOSI), P1-21 (MISO), P1-23 (CLK),
-	P1-24 (CE0) and P1-26 (CE1) are returned to their default INPUT behavior.
 */
-void ILI9341_TFT::PowerDown(void)
+rpiDisplay_Return_Codes_e  ILI9341_TFT::PowerDown(void)
 {
 	EnableDisplay(false);
+	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
+
+	// 1. free reset & DC GPIO lines
+	if (_resetPinOn == true)
+	{
+		int GpioResetErrorStatus = 0;
+		Display_RST_SetLow;
+		GpioResetErrorStatus = Display_GPIO_FREE_RST;
+		if (GpioResetErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error: Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
+			ErrorFlag = 2;
+		}
+	}
+	int GpioDCErrorStatus = 0;
 	Display_DC_SetLow;
-	if (_resetPinOn == true){Display_RST_SetLow;}
+	GpioDCErrorStatus  =  Display_GPIO_FREE_DC;
+	if (GpioDCErrorStatus  < 0 )
+	{
+		fprintf(stderr,"Error: Can't Free CD GPIO (%s)\n", lguErrorText(GpioDCErrorStatus));
+		ErrorFlag = 2;
+	}
 
 	if (_hardwareSPI == false)
 	{
+		// 2A Software SPI free other 3 GPIO LINES
+		int GpioCSErrorStatus = 0;
+		int GpioCLKErrorStatus = 0;
+		int GpioSDATAErrorStatus = 0;
+		Display_CS_SetLow;
 		Display_SCLK_SetLow;
 		Display_SDATA_SetLow;
-		Display_CS_SetLow;
+		GpioCSErrorStatus = Display_GPIO_FREE_CS;
+		GpioCLKErrorStatus =  Display_GPIO_FREE_CLK;
+		GpioSDATAErrorStatus =   Display_GPIO_FREE_SDATA;
+		if (GpioCSErrorStatus < 0 ){
+			fprintf(stderr,"Error: Can't Free CS GPIO (%s)\n", lguErrorText(GpioCSErrorStatus ));
+			ErrorFlag = 2;
+		}else if (GpioCLKErrorStatus< 0 ){
+			fprintf(stderr,"Error: Can't Free CLK GPIO t (%s)\n", lguErrorText(GpioCLKErrorStatus));
+			ErrorFlag = 2;
+		}else if (GpioSDATAErrorStatus< 0 ){
+			fprintf(stderr, "Error: Can't free DATA GPIO (%s)\n", lguErrorText(GpioSDATAErrorStatus));
+			ErrorFlag =2;
+		}
 	}else{
-		bcm2835_spi_end();
+		// 2B hardware SPi Closes a SPI device 
+		int spiErrorStatus = 0;
+		spiErrorStatus =  Display_CLOSE_SPI;
+		if (spiErrorStatus <0) 
+		{
+			fprintf(stderr, "Error: Cannot Close SPI device :(%s)\n", lguErrorText(spiErrorStatus));
+			return rpiDisplay_SPICloseFailure;
+		}
 	}
-}
-
-/*!
-	@brief: Method for Hardware & software Reset pin control
-*/
-void ILI9341_TFT::ResetPIN() {
-
-	if (_resetPinOn == true)
+	// 3 Closes the opened gpiochip device.
+	int GpioCloseStatus = 0;
+	GpioCloseStatus =Display_CLOSE_GPIO_HANDLE; // close gpiochip
+	if ( GpioCloseStatus < 0)
 	{
-		Display_RST_SetDigitalOutput;
-		Display_RST_SetHigh;
-		delayMilliSecRDL(5);
-		Display_RST_SetLow;
-		delayMilliSecRDL(20);
-		Display_RST_SetHigh;
-		delayMilliSecRDL(120);
-	}else{
-		writeCommand(ILI9341_SWRESET); // no hw reset pin, software reset.
-		delayMilliSecRDL(120);
+		fprintf(stderr,"Error: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
 	}
 
+	// 4 Check error flag ( we don't want to return early just for one failure)
+	switch (ErrorFlag)
+	{
+		case 0:return rpiDisplay_Success;break;
+		case 2:return rpiDisplay_GpioPinFree;break;
+		case 3:return rpiDisplay_SPICloseFailure;break;
+		case 4:return rpiDisplay_GpioChipDevice;break;
+		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+	}
 
+	return rpiDisplay_Success;
 }
+
 
 /*!
 	@brief Command Initialization sequence for ILI9341 LCD TFT display
@@ -486,4 +512,93 @@ void ILI9341_TFT::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t 
 	writeCommand(ILI9341_PASET); //Row address set
 	spiWriteDataBuffer(seqPASET, sizeof(seqPASET));
 	writeCommand(ILI9341_RAMWR); // Write to RAM*/
+}
+
+/*!
+	@brief: Method for Hardware Reset pin control
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioPinClaim
+*/
+rpiDisplay_Return_Codes_e ILI9341_TFT ::TFTResetPin() 
+{
+	if (_resetPinOn == true)
+	{
+		// Claim GPIO as outputs for RST line
+		int GpioResetErrorStatus = 0;
+		GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+		if (GpioResetErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+			return rpiDisplay_GpioPinClaim;
+		}
+		Display_RST_SetHigh;
+		delayMilliSecRDL(5);
+		Display_RST_SetLow;
+		delayMilliSecRDL(20);
+		Display_RST_SetHigh;
+		delayMilliSecRDL(120);
+	}else{
+		writeCommand(ILI9341_SWRESET); // no hw reset pin, software reset.
+		delayMilliSecRDL(120);
+	}
+	return rpiDisplay_Success;
+}
+
+/*!
+	@brief: Method for Data or Command pin setup
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioPinClaim
+*/
+rpiDisplay_Return_Codes_e ILI9341_TFT::TFTDataCommandPin(void) {
+	
+	// Claim GPIO as outputs for DC line
+	int GpioDCErrorStatus = 0;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
+	if (GpioDCErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+	Display_DC_SetLow;
+	return rpiDisplay_Success;
+}
+
+/*!
+	@brief: Method for Clock, data and chip select  pin setup routine for software SPI.
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioPinClaim
+*/
+rpiDisplay_Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
+{
+	// Claim 3 GPIO as outputs
+	int GpioCSErrorStatus = 0;
+	int GpioClockErrorStatus = 0;
+	int GpioSDATAErrorStatus = 0;
+	GpioCSErrorStatus= Display_CS_SetDigitalOutput;
+	GpioClockErrorStatus= Display_SCLK_SetDigitalOutput;
+	GpioSDATAErrorStatus= Display_SDATA_SetDigitalOutput;
+
+	if (GpioCSErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim CS GPIO for output (%s)\n", lguErrorText(GpioCSErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+	if (GpioClockErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+	if (GpioSDATAErrorStatus < 0 )
+	{
+		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioSDATAErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+
+	Display_CS_SetHigh;
+	Display_SCLK_SetLow;
+	Display_SDATA_SetLow;
+	return rpiDisplay_Success;
 }

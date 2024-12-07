@@ -21,8 +21,8 @@
 NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_RST, uint8_t LCD_DC, uint8_t LCD_CE, int8_t LCD_DIN, int8_t LCD_CLK) :bicolor_graphics(lcdwidth, lcdheight)
 {
 	_LCD_RST = LCD_RST;
-	_LCD_CE = LCD_CE;
 	_LCD_DC  = LCD_DC;
+	_LCD_CE = LCD_CE;
 	_LCD_DIN  = LCD_DIN;
 	_LCD_CLK  = LCD_CLK;
 	_LCD_WIDTH = lcdwidth;
@@ -37,17 +37,13 @@ NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_
 	@param lcdheight height of lcd in pixels
 	@param LCD_RST reset GPIO
 	@param LCD_DC data or command GPIO
-	@param spi_divider SPI clock divider , bcm2835SPIClockDivider
-	@param SPICE_Pin which SPI_CE pin to use , 0 or 1 ,
 	@note Hardware SPI default , RST pin 1, DC pin 2 , overloaded
 */
-NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_RST, uint8_t LCD_DC, uint32_t spi_divider, uint8_t SPICE_Pin) : bicolor_graphics(lcdwidth, lcdheight)
+NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_RST, uint8_t LCD_DC) : bicolor_graphics(lcdwidth, lcdheight)
 
 {
 	_LCD_RST = LCD_RST;
 	_LCD_DC  = LCD_DC;
-	_LCD_SPICLK_DIVIDER  = spi_divider; // HW SPI only
-	_LCD_SPICE_PIN = SPICE_Pin; // HW SPI only
 	_LCD_WIDTH = lcdwidth;
 	_LCD_HEIGHT = lcdheight;
 	_LCDHardwareSPI = true;
@@ -55,38 +51,155 @@ NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_
 
 
 /*!
-	@brief  This sends the commands to the PCD8544 to  init LCD
+	@brief This sends the commands to the PCD8544 to init LCD
 	@param Inverse false normal mode true display inverted
 	@param Contrast Set LCD VOP contrast range 0xB1-BF
 	@param Bias LCD Bias mode 1:48 0x12 to 0x14
-	@return error  if spi hw begin fails (most likely user not running as root)
+	@param device A SPI device, >= 0. 
+	@param channel A SPI channel, >= 0. 
+	@param speed The speed of serial communication in bits per second. 
+	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@note overloaded this one is for  Hardware SPI
+	@return rpiDisplay_Return_Codes_e
+		-# rpiDisplay_Success
+		-# rpiDisplay_WrongModeChosen
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioPinClaim
+		-# rpiDisplay_SPIOpenFailure
 */
-rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias)
+rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int device, int channel, int speed, int flags, int gpioDev)
 {
 	_inverse = Inverse;
 	_bias = Bias;
 	_contrast = Contrast;
+	_DeviceNumGpioChip = gpioDev;
+	_spiDev = device;
+	_spiChan = channel;
+	_spiBaud = speed;
+	_spiFlags = flags;
 
-	LCD_RST_SetDigitalOutput;
-	LCD_DC_SetDigitalOutput;
+	// 1. check communication mode being called, if user called wrong one.
+	if(isHardwareSPI() == false)
+	{
+		printf("Wrong SPI mode chosen this method is for Hardware SPI \n");
+		return rpiDisplay_WrongModeChosen;
+	}
+
+	// 2. setup gpioDev
+	_GpioHandle = LCD_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	if ( _GpioHandle < 0)	// open error
+	{
+		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
+	}
+
+	// 3. Claim 2 GPIO as outputs for RST and CD lines
+	int GpioResetErrorStatus = 0;
+	int GpioDCErrorStatus = 0;
+	GpioResetErrorStatus= LCD_RST_SetDigitalOutput;
+	GpioDCErrorStatus= LCD_DC_SetDigitalOutput;
+	if (GpioResetErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+	if (GpioDCErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+
+	// 4. set up spi open
+	 _spiHandle  = LCD_OPEN_SPI;
+	if ( _spiHandle  < 0)
+	{
+		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
+		return rpiDisplay_SPIOpenFailure;
+	}
+
+	LCDInit();
+	return rpiDisplay_Success;
+}
+
+/*!
+	@brief This sends the commands to the PCD8544 to init LCD
+	@param Inverse false normal mode true display inverted
+	@param Contrast Set LCD VOP contrast range 0xB1-BF
+	@param Bias LCD Bias mode 1:48 0x12 to 0x14
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@note overloaded this one is for Software SPI
+	@return rpiDisplay_Return_Codes_e
+		-# rpiDisplay_Success
+		-# rpiDisplay_WrongModeChosen
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioPinClaim
+*/
+rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int gpioDev)
+{
+	_inverse = Inverse;
+	_bias = Bias;
+	_contrast = Contrast;
+	_DeviceNumGpioChip = gpioDev;
+	bool ErrorFlag = true;
+
+	// 1. check communication mode being called, if user called wrong one.
+	if(isHardwareSPI() == true )
+	{
+		printf("Wrong SPI mode chosen this method is for Software SPI.\n");
+		return rpiDisplay_WrongModeChosen;
+	}
+
+	// 2. setup gpioDev
+	_GpioHandle = LCD_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	if ( _GpioHandle < 0)	// open error
+	{
+		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
+	}
+
+	// 3. Claim 5 GPIO as outputs
+	int GpioResetErrorStatus = 0;
+	int GpioDCErrorStatus = 0;
+	int GpioCEErrorStatus = 0;
+	int GpioCLKErrorStatus = 0;
+	int GpioDINErrorStatus = 0;
+
+	GpioResetErrorStatus= LCD_RST_SetDigitalOutput;
+	GpioDCErrorStatus= LCD_DC_SetDigitalOutput;
+	GpioCEErrorStatus= LCD_CE_SetDigitalOutput;
+	GpioCLKErrorStatus= LCD_CLK_SetDigitalOutput;
+	GpioDINErrorStatus= LCD_DIN_SetDigitalOutput;
+
+	if (GpioResetErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+	} else if (GpioDCErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
+	} else if (GpioCEErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim CE GPIO for output (%s)\n", lguErrorText(GpioCEErrorStatus));
+	} else if (GpioCLKErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim SCLK GPIO for output (%s)\n", lguErrorText(GpioCLKErrorStatus));
+	} else if (GpioDINErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim DIN GPIO for output (%s)\n", lguErrorText(GpioDINErrorStatus));
+	} else { ErrorFlag = false;}
+
+	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
+
+	LCD_CE_SetHigh;
+	LCDInit();
+	return rpiDisplay_Success;
+}
+
+/*! 
+	@brief Init the LCD command sequence, called from begin 
+*/
+void  NOKIA_5110_RPI::LCDInit(void)
+{
 	delayMilliSecRDL(100);
 	LCD_RST_SetHigh;
 	LCD_RST_SetLow;
 	delayMilliSecRDL(50);
 	LCD_RST_SetHigh;
-if (isHardwareSPI() == false)
-{
-	LCD_CE_SetDigitalOutput;
-	LCD_CE_SetHigh;
-	LCD_CLK_SetDigitalOutput;
-	LCD_DIN_SetDigitalOutput;
-}else{
-	 if(!bcm2835_spi_begin())
-		return rpiDisplay_SPIbeginFail;
-	else
-		LCDSPIHWSettings();
-}
-
 	// get into the EXTENDED mode
 	LCDWriteCommand(LCD_FUNCTIONSET | LCD_EXTENDEDINSTRUCTION );
 	LCDWriteCommand(_bias);
@@ -98,48 +211,85 @@ if (isHardwareSPI() == false)
 		LCDWriteCommand(LCD_DISPLAYCONTROL | LCD_DISPLAYNORMAL);
 	else
 		LCDWriteCommand(LCD_DISPLAYCONTROL | LCD_DISPLAYINVERTED);
-	return rpiDisplay_Success;
 }
 
 /*!
-	@brief Init Hardware SPI
-	@note can be called during program to refresh NOKIA 5110 SPI settings
-	if another device is on bus using different settings.
-	@details Sets the  Bit Order, SPI mode , SPI bus speed , Chip enable pin.
+	@brief End SPI operations. 
+	@return
+		-#  rpiDisplay_Success
+		-#  rpiDisplay_GpioPinFree
+		-#  rpiDisplay_SPICloseFailure
+		-#  rpiDisplay_GpioChipDevice
 */
-void NOKIA_5110_RPI::LCDSPIHWSettings()
+rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 {
-	// 1. Bit Order
-	bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
-	// 2. SPI mode
-	bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
+	
+	// 1. free rst & DC GPIO lines
+	int GpioResetErrorStatus = 0;
+	int GpioDCErrorStatus = 0;
+	LCD_RST_SetLow;
+	LCD_DC_SetLow;
+	GpioResetErrorStatus = LCD_GPIO_FREE_RST;
+	GpioDCErrorStatus  =  LCD_GPIO_FREE_DC;
 
-	// 3.  SPI bus speed
-	if (_LCD_SPICLK_DIVIDER > 0)
-		bcm2835_spi_setClockDivider(_LCD_SPICLK_DIVIDER);
-	else // default, BCM2835_SPI_CLOCK_DIVIDER_64 3.90MHz Rpi2, 6.250MHz RPI3
-		bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
-
-	// 4. Chip enable pin select
-	if (_LCD_SPICE_PIN == 0)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
-	}else if (_LCD_SPICE_PIN  == 1)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS1);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS1, LOW);
+	if (GpioResetErrorStatus < 0 ){
+		fprintf(stderr,"Error: Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
+	}else if (GpioDCErrorStatus  < 0 ){
+		fprintf(stderr,"Error: Can't Free DC GPIO (%s)\n", lguErrorText(GpioDCErrorStatus));
 	}
-}
-
-/*!
-	@brief End SPI operations. SPI0 pins P1-19 (MOSI), P1-21 (MISO), P1-23 (CLK),
-	P1-24 (CE0) and P1-26 (CE1) are returned to their default INPUT behavior.
-	@note Hardware SPI only
-*/
-void NOKIA_5110_RPI::LCDSPIoff(void)
-{
-	if(isHardwareSPI() == true){bcm2835_spi_end();}
+	
+	// 2A Software SPI other 3 GPIO LINES
+	if (isHardwareSPI()  == false) // software spi
+	{
+		int GpioCEErrorStatus = 0;
+		int GpioCLKErrorStatus = 0;
+		int GpioDINErrorStatus = 0;
+		LCD_CE_SetLow;
+		LCD_CLK_SetLow;
+		LCD_DIN_SetLow;
+		GpioCEErrorStatus = LCD_GPIO_FREE_CE;
+		GpioCLKErrorStatus =  LCD_GPIO_FREE_CLK;
+		GpioDINErrorStatus =   LCD_GPIO_FREE_DIN;
+		if (GpioCEErrorStatus < 0 ){
+			fprintf(stderr,"Error: Can't Free CE GPIO (%s)\n", lguErrorText(GpioCEErrorStatus ));
+			ErrorFlag = 2;
+		}else if (GpioCLKErrorStatus< 0 ){
+			fprintf(stderr,"Error: Can't Free CLK GPIO t (%s)\n", lguErrorText(GpioCLKErrorStatus));
+			ErrorFlag = 2;
+		}else if (GpioDINErrorStatus< 0 ){
+			fprintf(stderr, "Error: Can't free DATA GPIO (%s)\n", lguErrorText(GpioDINErrorStatus));
+			ErrorFlag = 2;
+		}
+	 // 2B hardware SPi Closes a SPI device 
+	}else
+	{
+		int spiErrorStatus = 0;
+		spiErrorStatus =  LCD_CLOSE_SPI;
+		if (spiErrorStatus <0) 
+		{
+			fprintf(stderr, "Error : Cannot Close SPI device :(%s)\n", lguErrorText(spiErrorStatus));
+			ErrorFlag = 3;
+		}
+	}
+	// 3 Closes the opened gpiochip device.
+	int GpioCloseStatus = 0;
+	GpioCloseStatus =LCD_CLOSE_GPIO_HANDLE; // close gpiochip
+	if ( GpioCloseStatus < 0)
+	{
+		fprintf(stderr,"Error: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		ErrorFlag = 4;
+	}
+	// 4 Check error flag ( we don't want to return early just for one failure)
+	switch (ErrorFlag)
+	{
+		case 0:return rpiDisplay_Success;break;
+		case 2:return rpiDisplay_GpioPinFree;break;
+		case 3:return rpiDisplay_SPICloseFailure;break;
+		case 4:return rpiDisplay_GpioChipDevice;break;
+		default:printf("Warning:Unknown error flag value in LCDSPIoff"); break;
+	}
+	return rpiDisplay_Success;
 }
 
 
@@ -148,22 +298,22 @@ void NOKIA_5110_RPI::LCDSPIoff(void)
 */
 void NOKIA_5110_RPI::LCDPowerDown(void)
 {
-	bcm2835_gpio_write(_LCD_DC, LOW);
-	bcm2835_gpio_write(_LCD_RST, LOW);
+	LCD_DC_SetLow;
+	LCD_RST_SetLow;
 
 	if(isHardwareSPI() == false)
 	{
-		bcm2835_gpio_write(_LCD_CLK, LOW);
-		bcm2835_gpio_write(_LCD_DIN, LOW);
-		bcm2835_gpio_write(_LCD_CE, LOW);
+		LCD_CE_SetLow;
+		LCD_CLK_SetLow;
+		LCD_DIN_SetLow;
 	}
 }
 
 /*!
 	@brief  Writes a byte to the PCD8544
-	@param data byte will be sent as command or data depending on status of DC line
+	@param dataByte byte will be sent as command or data depending on status of DC line
 */
-void NOKIA_5110_RPI::LCDWriteData(uint8_t data)
+void NOKIA_5110_RPI::LCDWriteData(uint8_t dataByte)
 {
 	if (isHardwareSPI() == false)
 	{
@@ -172,7 +322,7 @@ void NOKIA_5110_RPI::LCDWriteData(uint8_t data)
 		{
 			LCD_CLK_SetLow;
 			delayMicroSecRDL(_LCDHighFreqDelay);
-			if (data & bit_n)
+			if (dataByte & bit_n)
 				LCD_DIN_SetHigh;
 			else
 				LCD_DIN_SetLow;
@@ -180,7 +330,14 @@ void NOKIA_5110_RPI::LCDWriteData(uint8_t data)
 			delayMicroSecRDL(_LCDHighFreqDelay);
 		}
 	}else{
-			bcm2835_spi_transfer(data);
+			int spiErrorStatus = 0;
+			char TransmitBuffer[1];
+			TransmitBuffer[0] = dataByte;
+			spiErrorStatus = LCD_WRITE_SPI;
+			if (spiErrorStatus <0) 
+			{
+				fprintf(stderr, "Error : Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
 		}
 }
 
@@ -340,8 +497,8 @@ void NOKIA_5110_RPI::LCDdisableSleep(void)
 bool NOKIA_5110_RPI::LCDIsSleeping() { return _sleep;}
 
 /*!
-	@brief Checks if software SPI is on
-	@return true 1 if hardware SPi on , false 0 for software spi
+	@brief Checks which SPI mode is on
+	@return true 1 if hardware SPI on , false 0 for software SPI
 */
 bool NOKIA_5110_RPI::isHardwareSPI(){return _LCDHardwareSPI;}
 

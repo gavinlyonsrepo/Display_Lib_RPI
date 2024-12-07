@@ -1,29 +1,31 @@
 # Fonts Readme
 
-There are 15 fonts packaged with library. Fonts can be easily added or removed by user.
-All the Font data is in file font_data_RDL.cpp. These fonts are used by the graphic libraries displays.
+There are 16 fonts packaged with library. Fonts can be added or removed by user.
+All the Font data is in file font_data_RDL.cpp. These fonts are used by the graphics displays.
 
 ## Font data table 
 
 | num | Font enum name | character size XxY |  ASCII range | Size in bytes |
 | ------ | ------ | ------ | ------ |  ------ | 
-| 1 | font_default | 6x8 |  0 - 0xFE, Full Extended  | 1534 |
-| 2 | font_thick | 8x8 | 0x20 - 0x5A, NO lowercase letters | 476 |
-| 3 | font_wide | 9x8 | 0x20 - 0x5A, NO lowercase letters | 535 |
-| 4 | font_sevenSeg | 6x8 | 0x2D-0x3A , 0-10 : . / - only | 74 |
-| 5 | font_pico | 4x6 | 0x20 - 0x7E  | 289 | 
-| 6 | font_sinclairS  | 8x8 | 0x20 - 0x7E | 764 |
-| 7 | font_retro | 8x16 | 0x20 - 0x7E | 1524 |
-| 8 | font_mega | 16x16 | 0x20 - 0x7E | 3044 |
-| 9 | font_arialBold  | 16x16 | 0x20 - 0x7E |  3044 |
-| 10 | font_hallfetica | 16x16 | 0x20 - 0x7E | 3044 |
-| 11 | font_orla | 16x24 | 0x20 - 0x7E | 4564 |
-| 12 | font_arialRound| 16x24 | 0x20 - 0x7E | 4564 |
-| 13 | font_groTesk | 16x32 | 0x20 - 0x7A |  5828 |
-| 14 | font_mint | 24x32  | 0x20 - 0x7A |  8740 |
-| 15 | font_sixteenSeg | 32x48 | 0x2D-0x3A , 0-10 : . / - only | 2692 |
+| 1 | font_default | 8x8 |  020-0x7E| 764 |
+| 2 | font_sinclairS  | 8x8 | 0x20-0x7E | 764 |
+| 3 | font_gll | 8x8 | 0x20-0x5A , NO lowercase letters | 476 | 
+| 4 | font_pico | 8x12 | 0x20-0x7E  | 1144| 
+| 5 | font_retro | 8x16 | 0x20-0x7E | 1524 |
+| 6 | font_mega | 16x16 | 0x20-0x7E | 3044 |
+| 7 | font_arialBold  | 16x16 | 0x20 0x7E |  3044 |
+| 8 | font_hallfetica | 16x16 | 0x20-0x7E | 3044 |
+| 9 | font_orla | 16x24 | 0x20-0x7E | 4564 |
+| 10 | font_arialRound| 16x24 | 0x20-0x7E | 4564 |
+| 11 | font_groTesk | 16x32 | 0x20-0x7A |  5828 |
+| 12 | font_inconsola | 24x32 | 0x20-0x7A | 8740 |
+| 13 | font_mint | 24x32  | 0x20 -0x7A |  8740 |
+| 14 | font_sixteenSeg | 32x48 | 0x2D-0x3A , 0-10 : . / - only | 2692 |
+| 15 | font_sevenSeg | 32X50| 0x2D-0x3A , 0-10 : . / - only | 2804 |
+| 16 | font_groTeskBig | 32X64| ox20 - 0x5A, NO lowercase letters | 15108 |
 
-Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (4*ControlByte)
+
+Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (ControlBytes)
 
 | Font class Function | Notes |
 | ------ | ------ | 
@@ -41,42 +43,34 @@ Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (4*ControlByte)
 6. re-compile and re-install library. 
 
 A new ASCII font must have following font structure.
-First 4 bytes are control bytes followed by vertically addressed font data.
+First 4 bytes are control bytes followed by **horizontally** addressed font data.
 
 ```
-// An 4 by 8 character size font starting at 
+// Example Font
+// An 8 by 8 character size font starting at 
 // ASCII offset 0x30 in ASCII table with 0x02 characters in font. 
-// 0 and 1 
+// 0 and 1 , size 14 bytes, 4 Control bytes at start.
 static const uint8_t FontBinaryExample[] =
 {
-0x04, 0x08, 0x30, 0x02,   // x-size, y-size, offset, total characters
-(data),(data),(data),(data) // font data '0'
-(data),(data),(data),(data) // font data '1'
-}
+0x08, 0x08, 0x30, 0x01,   // x-size, y-size, offset, (last character-offset : 0x31-0x30)
+0x7C,0xC6,0xCE,0xD6,0xE6,0xC6,0x7C,0x00, // ASCII font data '0' : 0x30
+0x18,0x38,0x18,0x18,0x18,0x18,0x7E,0x00 // ASCII font data  '1' : 0x31
+};
 ```
 
 ## Sources
 
-1. Some of the fonts packaged with library came from [URL](http://rinkydinkelectronics.com/)
-2. There is a monochrome font maker there at [URL](http://rinkydinkelectronics.com/t_make_font_file_mono.php)
+Some of the fonts packaged with library came from [rinky dink electronics ](http://rinkydinkelectronics.com/)
 
 ## Font Images
 
-Pico + Default(uno)  + mega 
+Default 
 
-[![Font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/fontoled.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/fontoled.jpg)
+[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/default.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/default.png)
 
-Wide Font
+Pico
 
-[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/wide.png)
-
-Thick Font
-
-[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/thick.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/thick.png)
-
-Seven Segment
-
-[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sevens.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/sevens.png)
+[![Font Image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/pico.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/pico.png)
 
 SinclairS
 
@@ -94,17 +88,22 @@ Hallfetica
 
 [![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/hall.png)
 
-Orla 
-
-[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)
 
 Arial Round
 
 [![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/arialround.png)
 
+Orla 
+
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/orla.png)
+
 GroTesk
 
 [![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/grotesk.png)
+
+Inconsola
+
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/inconsola.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/inconsola.png)
 
 Mint
 
@@ -114,3 +113,10 @@ Sixteen Segment
 
 [![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/ss.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/ss.png)
 
+Seven  Segment 
+
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/7seg.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/7seg.png)
+
+GroTesk Big
+
+[![font image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/groteskbig.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/fonts/groteskbig.png)

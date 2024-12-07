@@ -58,18 +58,33 @@ Note status of J1 PCB jumper.
 
 ### SPI
 
-Hardware and software SPI. Two different class constructors. User can pick the relevant constructor, 
-see examples files. Hardware SPI is recommended, far faster and more reliable but Software SPI allows 
-for more flexible GPIO selection. When running Software SPI it may be necessary on very high 
-frequency MCU's to change the LCD_HighFreqDelaySet method, It is a microsecond delay by default it is at 0.
+This library supports both Hardware SPI and software SPI.
+The constructor of the main class is overloaded.
+Which SPI is started depends on which constructor called by user.
 
-The SPI settings are in LCDSPIon function.
-Speed is currently at BCM2835_SPI_CLOCK_DIVIDER_64. 
-6.25MHz on RPI3. This can be adjusted in code or user can pass 
-the divider value in the "begin" method as a parameter. These values are
-defined by enum bcm2835SPIClockDivider. For full list see
-[link.](http://www.airspayce.com/mikem/bcm2835/group__constants.html#gaf2e0ca069b8caef24602a02e8a00884e)
-User can also adjust which SPI chip enable pin the use uing "begin" method parameter.
+*Software SPI*
+
+For Software SPI Pick any GPIO you want.
+To get the number for GPIO_CHIP_DEVICE parameter you can check ls /dev/gpiochip*
+At time of testing it was found that Raspberry pi 5 = 4 and raspberry pi 3 = zero 
+But now it look like both are zero after software update, although 4 should still work for RPi5 
+if a symlink is in /dev/ folder. 
+The member OLEDHighFreqDelay is a GPIO uS delay that
+can be used to slow down or speed up Software SPI.
+By default it is set to 0uS. It may have to be increased depending on device/CPU used.
+
+*Hardware SPI*
+
+For Hardware SPI the User must use fixed SPI pins SPIMOSI and SPISCLK, user can choice between SPICE0 and SPICE1 
+for chip select. In hardware SPI user can pick SPI bus speed. SPI must be turned on device.
+
+| parameter | default value | note  |
+| --- | --- | --- |
+| HWSPI_DEVICE | 0| A SPI device, >= 0. which SPI interface to use , ls /dev/spi*|
+| HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1|
+| HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.|
+| HWSPI_FLAGS | 0|  mode 0 for this device |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip |
 
 ### Bitmaps
 

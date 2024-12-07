@@ -1,13 +1,8 @@
 stuff/
 bin/
 build/
-examples/seven_segment_displays/Bin
-examples/seven_segment_displays/Build
-examples/character_displays/Bin
-examples/character_displays/Build
-examples/bicolor_displays/Bin
-examples/bicolor_displays/Build
-examples/color16_displays/Bin
-examples/color16_displays/Build
+examples/Bin
+examples/Build
 display.cppcheck
+run.sh
 

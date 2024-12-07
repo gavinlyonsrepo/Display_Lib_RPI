@@ -25,7 +25,8 @@
 3. Graphics + print class included.
 4. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
 5. Hardware and Software SPI
-6. Dependency: bcm2835 Library
+6. Dependency: lgpio Library
+7. NB 'spidev.bufsiz' setting must be 65536 or greater see Notes section. 
 
 * Author: Gavin Lyons
 * Port of my PIC library at [github link.](https://github.com/gavinlyonsrepo/pic_16F18346_projects)
@@ -39,7 +40,7 @@ where user can make adjustments to select for SPI type used, PCB type used and s
 
 1. USER OPTION 1 GPIO/SPI TYPE
 2. USER OPTION 2 SCREEN SECTION 
-3. USER OPTION 3 PCB_TYPE, SPI SPEED , SPI_CE_PIN
+3. USER OPTION 3 PCB_TYPE, + SPI SETTINGS
 
 *USER OPTION 1 SPI TYPE / GPIO*
 
@@ -55,14 +56,22 @@ These offsets can be used in the event of screen damage or manufacturing errors 
 such as cropped data or defective pixels.
 The function TFTInitScreenSize sets them.
 
-*USER OPTION 3 PCB Version, SPI SPEED , SPI_CE_PIN*
+*USER OPTION 3 PCB Version, SPI Settings*
 
 TFTInitPCBType function is overloaded(2 off, one for HW SPI the other for SW SPI).
 
-PCB_TYPE
+| parameter | default value | note | SPi type |
+| --- | --- | --- |  --- |
+| SWSPI_CommDelay | 0 | uS delay for GPIO to change speed| software | 
+| HWSPI_DEVICE | 0| A SPI device, >= 0. which SPI interface to use , ls /dev/spi*|  Hardware  |
+| HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1| Hardware  |
+| HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.| Hardware  |
+| HWSPI_FLAGS | 0|  mode 0 for this device | Hardware  |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip* | both |
+| PCB_TYPE | TFT_ST7735R_Red | see table and text below |  Both  |
 
-In the main.cpp in USER OPTION 3 PCB_TYPE select your display type.
-By passing an enum type to function  TFTInitPCBType.
+PCB_TYPE: In the main.cpp in USER OPTION 3 PCB_TYPE select your display type,
+by passing an enum type to function  TFTInitPCBType.
 Default is "TFT_ST7735R_Red". There are 4 types of the ST7735 TFT display supported.
 If your display works but RGB colors are wrong you may have chosen wrong display type.
 
@@ -74,27 +83,6 @@ If your display works but RGB colors are wrong you may have chosen wrong display
 | 4 | ST7735S Black Tab | TFT_ST7735S_Black | RED PCB v1.2, 1.8, 128 x 160 pixels |
 
 
-SPI_Speed (HW SPI Only)
-
-Here the user can pass the SPI Bus freq in Hertz,
-Maximum 125 Mhz , Minimum 30Khz, The default in file is 8Mhz 
-Although it is possible to select high speeds for the SPI interface, up to 125MHz,
-Don't expect any speed faster than 32MHz to work reliably.
-If you set to 0 .Speed is set to bcm2835 
-constant BCM2835_SPI_CLOCK_DIVIDER_32. If using SW spi, ignore.
-
-SPI_CE_PIN (HW SPI Only)
-
-Which Chip enable pin to use two choices. If using SW spi, ignore.
-	* SPICE0 = 0
-	* SPICE1 = 1
-
-SPI_CommDelay (SW SPI Only)
-
-The user can adjust If user is having reliability issues with SW SPI in some setups.
-This is a microsecond delay in SW SPI GPIO loop. It is set to 0 by default, Increasing it will slow 
-down SW SPI further.
-
 ### File system
 
 In example folder:
@@ -105,10 +93,12 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 | # | example file name  | Desc|
 | ------ | ------ |  ------ |
 | 1 | Hello_world| Basic use case |
-| 2 | Text_Graphic_Functions | Tests text,graphics & function testing  |
-| 3 | Bitmap_Tests | bitmap |
-| 4 | Frame_rate_test_bmp | Frame rate per second (FPS) bitmaps |
-| 5 | Frame_rate_test_two  | Frame rate per second (FPS) text + graphics |
+| 2 | Hello_world_SWSPI| Basic use case fro software spi |
+| 3 | Text_Graphic_Functions | Tests text,graphics & function testing  |
+| 4 | Bitmap_Tests | bitmap |
+| 5 | Frame_rate_test_bmp | Frame rate per second (FPS) bitmaps |
+| 6 | Frame_rate_test_two  | Frame rate per second (FPS) text + graphics |
+| 7 | Multiple_displays  | shows use of two displays on same spi bus(OLED AND LCD) |
 
 ### Bitmap
 
@@ -160,9 +150,27 @@ Connections as setup in main.cpp test file.
 
 ## Notes
 
-### Multiple SPI devices
+### spidev buf size
 
-When using hardware SPI for multiple devices on the bus.
-If the devices require different SPI settings (speed of bus, bit order , chip enable pins , SPI data mode).
-The user must call function **TFTSPIHWSettings()** before each block of SPI transactions for display in order to refresh the SPI hardware settings for that device. See github [issue #1](https://github.com/gavinlyonsrepo/Display_Lib_RPI/issues/1).
+The maximum transaction size that 'lgpio' can handle by default is 65536 bytes.
+So this is also the maximum transaction size of Display_lib_RPI, if more than that needs to be sent
+it is sent in blocks of 65536 bytes. 
+Certain 'Display_lib_RPI' functions use buffered writes, the ones that draw bitmaps, write fonts, 
+fill rectangles, clear screen, etc. In order for this to work the spidev.buf size must be at least 65536.
+To check the setting on your device run command:
+
+```sh
+cat /sys/module/spidev/parameters/bufsiz
+```
+
+If it is lower than 65536 you can change it by adding 
+this to the start of line in file /boot/firmware/cmdline.txt.(raspberry pi )
+Make sure everything is on one line and there is space ' ' between this parameter and next one.
+Then reboot machine. Verify again by running last cat command above
+
+```sh
+spidev.bufsiz=65536
+```
+
+bufsiz defines the number of bytes that the SPI driver will use as a buffer for data transfers.
  

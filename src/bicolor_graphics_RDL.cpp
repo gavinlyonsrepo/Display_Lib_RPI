@@ -9,7 +9,7 @@
 #include "../include/bicolor_graphics_RDL.hpp"
 
 /*!
-	@brief init the OLED  Graphics class object
+	@brief init the Display  Graphics class object
 	@param w width defined  in sub-class
 	@param h height defined in sub-class
  */
@@ -25,10 +25,11 @@ bicolor_graphics::bicolor_graphics(int16_t w, int16_t h):
 
 
 /*!
-	@brief Write 1 character on OLED.
-	@param  x character starting position on x-axis. Valid values: 0..127
-	@param  y character starting position on x-axis. Valid values: 0..63
+	@brief Write 1 character on display
+	@param  x character starting position on x-axis.
+	@param  y character starting position on x-axis.
 	@param  value Character to be written.
+	@note Horizontal font addressing 
 	@return Will return rpiDisplay_Return_Codes_e enum
 		-# rpiDisplay_Success  success
 		-# rpiDisplay_CharScreenBounds co-ords out of bounds check x and y
@@ -36,76 +37,52 @@ bicolor_graphics::bicolor_graphics(int16_t w, int16_t h):
  */
 rpiDisplay_Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char value) {
 
-	// 1. Check for screen out of  bounds
-	if((x >= _width)            || // Clip right
-	(y >= _height)           || // Clip bottom
-	((x + _Font_X_Size+1) < 0) || // Clip left
-	((y + _Font_Y_Size) < 0))   // Clip top
-	{
+	// 1. Check for screen out of bounds
+	if ((x >= _width) || // Clip right
+		(y >= _height) || // Clip bottom
+		((x + _Font_X_Size + 1) < 0) || // Clip left
+		((y + _Font_Y_Size) < 0)) { // Clip top
 		printf("writeChar Error 1: Co-ordinates out of bounds \r\n");
 		return rpiDisplay_CharScreenBounds;
 	}
+
 	// 2. Check for character out of font range bounds
-	if ( value < _FontOffset || value >= (_FontOffset + _FontNumChars+1))
-	{
-		printf("writeChar Error 2: Character out of Font bounds  %c : %u<->%u \r\n", value  ,_FontOffset, _FontOffset + _FontNumChars);
+	if (value < _FontOffset || value >= (_FontOffset + _FontNumChars + 1)) {
+		printf("writeChar Error 2: Character out of Font bounds  %c : %u<->%u \r\n", value, _FontOffset, _FontOffset + _FontNumChars);
 		return rpiDisplay_CharFontASCIIRange;
 	}
 
 	uint16_t fontIndex = 0;
-
-	if (_Font_Y_Size % 8 == 0) // Is the font height divisible by 8
+	int16_t colByte, cx, cy;
+	int16_t colbit;
+	fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
+	colByte = *(_FontSelect + fontIndex);
+	colbit = 7;
+	// Loop through each row (cy) and column (cx) of the character bitmap
+	for (cy = 0; cy < _Font_Y_Size; cy++)
 	{
-		uint16_t rowCount = 0;
-		uint16_t temp = 0;
-		uint16_t count;
-		uint8_t colIndex;
-		fontIndex = ((value - _FontOffset)*(_Font_X_Size * (_Font_Y_Size/ 8))) + 4;
-		for (rowCount = 0; rowCount < (_Font_Y_Size / 8); rowCount++)
-		{
-			for (count = 0; count < _Font_X_Size; count++)
-			{
-				temp = *(_FontSelect + fontIndex + count + (rowCount * _Font_X_Size));
-				for (colIndex = 0; colIndex < 8; colIndex++)
-				{
-					if (temp & (1 << colIndex)) {
-							drawPixel(x + count, y + (rowCount * 8) + colIndex, !getInvertFont());
-					} else {
-							drawPixel(x + count, y + (rowCount * 8) + colIndex, getInvertFont());
-					}
-				}
-			}
-		}
-	} else
-	{
-		int16_t colByte, cx, cy;
-		int16_t colbit;
-		fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
-		colByte = *(_FontSelect + fontIndex);
-		colbit = 7;
 		for (cx = 0; cx < _Font_X_Size; cx++)
 		{
-			for (cy = 0; cy < _Font_Y_Size; cy++)
-			{
-				if ((colByte & (1 << colbit)) != 0) {
-					drawPixel(x + cx, y + cy, !getInvertFont());
-				} else {
-					drawPixel(x + cx, y + cy, getInvertFont());
-				}
-				colbit--;
-				if (colbit < 0) {
-					colbit = 7;
-					fontIndex++;
-					colByte = *(_FontSelect + fontIndex);
-				}
+			 // Check if the current bit is set
+			if ((colByte & (1 << colbit)) != 0) {
+				drawPixel(x + cx, y + cy, !getInvertFont());
+			} else {
+				drawPixel(x + cx, y + cy, getInvertFont());
+			}
+			colbit--;
+			if (colbit < 0) {
+				colbit = 7;
+				fontIndex++;
+				colByte = *(_FontSelect + fontIndex);
 			}
 		}
 	}
-	return rpiDisplay_Success ;
+	return rpiDisplay_Success;
 }
 
+
 /*!
-	@brief Write Text character array on OLED.
+	@brief Write Text character array on Display.
 	@param  x character starting position on x-axis.
 	@param  y character starting position on y-axis.
 	@param  pText Pointer to the array of the text to be written.
@@ -600,7 +577,7 @@ void bicolor_graphics::setRotation(displayBC_rotate_e  CurrentRotation) {
 	@brief Draw a 1-bit color bitmap
 	@param x x co-ord position
 	@param y y co-ord posiiton a
-	@param bitmap pointer to bitmap data (must be PROGMEM memory)
+	@param bitmap pointer to bitmap data 
 	@param w width of the bitmap
 	@param h height of the bitmap
 	@param color foreground colour

@@ -1,6 +1,6 @@
 /*!
 * @file SH110X_OLED_RDL.cpp
-* @brief   OLED driven by SH110X_RDL controller. Sh1106 and Sh1107, Source file
+* @brief   OLED driven by  controller. Sh1106 and Sh1107, Source file
 * @details Project Name: Display_Lib_RPI
 * 	URL: https://github.com/gavinlyonsrepo/Display_Lib_RPI
 */
@@ -22,20 +22,40 @@ SH110X_RDL::SH110X_RDL(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(
 /*!
 	@brief  begin Method initialise OLED
 	@param OLEDtype enum type of display sh1106 or sh1107
-	@param I2C_speed default=0 , 0=bcm2835_i2c_set_baudrate(100000) 100k baudrate, >0 = BCM2835_I2C_CLOCK_DIVIDER,choices=2500 ,626 ,150 ,148
-	@param I2c_address by default 0x3C
 	@param I2c_debug default false
 	@param resetPin Used only if reset pin present on device, iF not = set to -1
+	@param gpioDev device num gpiochip 4-RPI5, 0=RPI3 Used only rst pin on device
+	@return
+		-#  rpiDisplay_Success everything worked
+		-#  rpiDisplay_GpioPinClaim Cannot claim the reset pin (if used)
+		-#  rpiDisplay_GpioChipDevice Cannot open the gpio handle for reset pin (if used)
 */
-void SH110X_RDL::OLEDbegin(OLED_IC_type_e OLEDtype, uint16_t I2C_speed , uint8_t I2c_address, bool I2c_debug, int8_t resetPin)
+rpiDisplay_Return_Codes_e SH110X_RDL::OLEDbegin(OLED_IC_type_e OLEDtype, bool I2c_debug, int8_t resetPin, int gpioDev)
 {
-	_I2C_speed = I2C_speed;
-	_I2C_address = I2c_address;
 	_I2C_DebugFlag = I2c_debug;
 	_OLED_IC_type = OLEDtype;
 	_Display_RST = resetPin;
-	OLED_I2C_Settings();
+	_DeviceNumGpioChip = gpioDev;
+	// If reset pin is used , open gpio device and claim as output
+	if(_Display_RST >= 0)
+	{
+		int GpioResetErrorstatus = 0;
+		_GpioHandle = SH110X_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+		if ( _GpioHandle < 0)	// open error
+		{
+			fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+			return rpiDisplay_GpioChipDevice;
+		}
+		// Clain GPIO as outputs
+		GpioResetErrorstatus = SH110X_RST_SetDigitalOutput;
+		if (GpioResetErrorstatus < 0 )
+		{
+			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorstatus));
+			return rpiDisplay_GpioPinClaim;
+		}
+	}
 	OLEDinit();
+	return rpiDisplay_Success;
 }
 
 /*!
@@ -66,69 +86,86 @@ rpiDisplay_Return_Codes_e SH110X_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t he
 }
 
 /*!
-	@brief  Start I2C operations. Forces RPi I2C pins P1-03 (SDA) and P1-05 (SCL)
-	to alternate function ALT0, which enables those pins for I2C interface.
-	@return Error on I2C init failure , User not running as root?
+	@brief  Start I2C operations.
+	@return
+		-#  rpiDisplay_Success everything worked
+		-#  rpiDisplay_I2CbeginFail Cannot open I2C device
 */
-rpiDisplay_Return_Codes_e SH110X_RDL::OLED_I2C_ON()
+rpiDisplay_Return_Codes_e SH110X_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags)
 {
-	if (!bcm2835_i2c_begin())
-		return rpiDisplay_I2CbeginFail;
-	else
-		return rpiDisplay_Success;
-}
+	_OLEDI2CDevice = I2C_device;
+	_OLEDI2CAddress = I2C_addr;
+	_OLEDI2CFlags = I2C_flags;
 
-/*!
-	@brief Sets the address and speed I2C bus , should be called before all writes.
-*/
-void SH110X_RDL::OLED_I2C_Settings()
-{
-	bcm2835_i2c_setSlaveAddress(_I2C_address);  //i2c address
-	uint32_t I2CBaudRate = 100000;// 100K
-	// BCM2835_I2C_CLOCK_DIVIDER enum choice 2500 626 150 148
-	// Clock divided is based on nominal base clock rate of 250MHz
-	switch(_I2C_speed)
+	int I2COpenHandle = 0;
+
+	I2COpenHandle = lgI2cOpen(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
+	if (I2COpenHandle < 0 )
 	{
-		case 0:
-			// default or use set_baudrate instead of clockdivder 100k if zero passed
-			bcm2835_i2c_set_baudrate(I2CBaudRate);
-		break;
-		case BCM2835_I2C_CLOCK_DIVIDER_2500:// ~100K
-		case BCM2835_I2C_CLOCK_DIVIDER_626: // ~400k
-		case BCM2835_I2C_CLOCK_DIVIDER_150:
-		case BCM2835_I2C_CLOCK_DIVIDER_148:
-			bcm2835_i2c_setClockDivider(_I2C_speed);
-		break;
-		default:
-			// error message
-			if (_I2C_DebugFlag == true)
-			{
-				printf("Warning OLED_I2C_Settings 610: Invalid BCM2835_I2C_CLOCK_DIVIDER value : %u\n", _I2C_speed);
-				printf("	Must be 2500 626 150 or 148 \n");
-				printf("	Setting I2C baudrate to 100K with bcm2835_i2c_set_baudrate:\n");
-			}
-			bcm2835_i2c_set_baudrate(I2CBaudRate);
-		break;
+		printf("Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
+		return rpiDisplay_I2CbeginFail;
+	}
+	else
+	{
+		_OLEDI2CHandle = I2COpenHandle;
+		return rpiDisplay_Success;
 	}
 }
 
-/*!
-	@brief getter to read I2C bus speed
-	@return I2C bus speed see Readme for details
-*/
-uint16_t SH110X_RDL::getI2Cspeed(void){return _I2C_speed;}
 
 /*!
-	@brief setter to set I2C bus speed
-	@param I2CSpeed I2C bus speed see Readme for details
+	@brief  End I2C operations. This closes the I2C device.
+	@return in event of any error
+		-#  rpiDisplay_Success everything worked
+		-#  rpiDisplay_GpioPinClaim Cannot free the reset pin (if used)
+		-#  rpiDisplay_GpioChipDevice Cannot close the gpio handle for reset pin (if used)
+		-#  rpiDisplay_I2CcloseFail cannot close I2c bus device
 */
-void SH110X_RDL::setI2Cspeed(uint16_t I2CSpeed){_I2C_speed = I2CSpeed;}
+rpiDisplay_Return_Codes_e  SH110X_RDL::OLED_I2C_OFF(void)
+{
+	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
+	
+	// 1 Is reset pin being used?
+	if(_Display_RST >= 0) 
+	{
+		int GpioResetErrorStatus = 0;
+		int GpioCloseStatus = 0;
+		SH110X_RST_SetLow;
+		GpioResetErrorStatus = SH110X_GPIO_FREE_RST; // Free reset pin
+		if (GpioResetErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error:Can't Free Reset GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
+			ErrorFlag = 2;
+		}
+		// 2 close gpiochip
+		GpioCloseStatus = SH110X_CLOSE_GPIO_HANDLE; 
+		if ( GpioCloseStatus < 0)
+		{
+			fprintf(stderr,"Error:Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+			ErrorFlag = 3;
+		}
+	}
 
-/*!
-	@brief End I2C operations. I2C pins P1-03 (SDA) and P1-05 (SCL)
-	are returned to their default INPUT behaviour.
-*/
-void SH110X_RDL::OLED_I2C_OFF(void){bcm2835_i2c_end();}
+	// 3 close I2C device handle
+	int I2COpenHandleStatus = 0;
+	I2COpenHandleStatus = lgI2cClose(_OLEDI2CHandle);
+	if (I2COpenHandleStatus < 0 )
+	{
+		printf("Error: OLED_I2C_OFF : Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
+		ErrorFlag = 4;
+	}
+	
+		// 4 Check error flag ( we don't want to return early just for one failure)
+	switch (ErrorFlag)
+	{
+		case 0:return rpiDisplay_Success;break;
+		case 2:return rpiDisplay_GpioPinFree;break;
+		case 3:return rpiDisplay_GpioChipDevice;break;
+		case 4:return rpiDisplay_I2CcloseFail;break;
+		default:printf("Warning:Unknown error flag value inOLED_I2C_OFFn"); break;
+	}
+	return rpiDisplay_Success;
+}
 
 /*!
 	@brief Disables  OLED Call when powering down
@@ -166,12 +203,12 @@ void SH110X_RDL::OLEDReset(void)
 {
 	const uint8_t resetDelay = 10; /**< reset delay in miliseconds*/
 
-	Display_RST_SetDigitalOutput;
-	Display_RST_SetHigh;
+	SH110X_RST_SetDigitalOutput;
+	SH110X_RST_SetHigh;
 	delayMilliSecRDL(resetDelay);
-	Display_RST_SetLow;
+	SH110X_RST_SetLow;
 	delayMilliSecRDL(resetDelay);
-	Display_RST_SetHigh;
+	SH110X_RST_SetHigh;
 }
 
 /*!
@@ -179,7 +216,7 @@ void SH110X_RDL::OLEDReset(void)
 */
 void SH110X_RDL::SH1106_begin(void)
 {
-	const uint16_t SH110X_RDL_INITDELAY = 100; /**< Initialisation delay in mS */
+	const uint16_t _INITDELAY = 100; /**< Initialisation delay in mS */
 
 	if(_Display_RST >= 0)
 	{
@@ -221,7 +258,7 @@ void SH110X_RDL::SH1106_begin(void)
 	SH110X_RDL_command(0x10);
 	SH110X_RDL_command(SH110X_DISPLAYALLON_RESUME);
 
-	delayMilliSecRDL(SH110X_RDL_INITDELAY);
+	delayMilliSecRDL(_INITDELAY);
 	SH110X_RDL_command(SH110X_DISPLAYON);
 }
 
@@ -230,7 +267,7 @@ void SH110X_RDL::SH1106_begin(void)
 */
 void SH110X_RDL::SH1107_begin(void)
 {
-	const uint16_t SH110X_RDL_INITDELAY = 100; /**< Initialisation delay in mS */
+	const uint16_t _INITDELAY = 100; /**< Initialisation delay in mS */
 
 	if(_Display_RST >= 0)
 	{
@@ -268,7 +305,7 @@ void SH110X_RDL::SH1107_begin(void)
 		SH110X_RDL_command(0x7F);
 	}
 
-	delayMilliSecRDL(SH110X_RDL_INITDELAY);
+	delayMilliSecRDL(_INITDELAY);
 	SH110X_RDL_command(SH110X_DISPLAYON);
 }
 
@@ -278,7 +315,7 @@ void SH110X_RDL::SH1107_begin(void)
 */
 void SH110X_RDL::OLEDEnable(uint8_t bits)
 {
-	OLED_I2C_Settings();
+	
 	bits ? SH110X_RDL_command(SH110X_DISPLAYALLON ) : SH110X_RDL_command(SH110X_DISPLAYALLON_RESUME);
 }
 
@@ -288,7 +325,7 @@ void SH110X_RDL::OLEDEnable(uint8_t bits)
 */
 void SH110X_RDL::OLEDContrast(uint8_t contrast)
 {
-	OLED_I2C_Settings();
+	
 	SH110X_RDL_command(SH110X_SETCONTRAST);
 	SH110X_RDL_command(contrast);
 }
@@ -299,7 +336,7 @@ void SH110X_RDL::OLEDContrast(uint8_t contrast)
 */
 void SH110X_RDL::OLEDInvert(bool value)
 {
-	OLED_I2C_Settings();
+	
 	value ? SH110X_RDL_command(SH110X_INVERTDISPLAY) : SH110X_RDL_command(SH110X_NORMALDISPLAY);
 }
 
@@ -310,7 +347,7 @@ void SH110X_RDL::OLEDInvert(bool value)
 */
 void SH110X_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 {
-	OLED_I2C_Settings();
+	
 	for (uint8_t row = 0; row < _OLED_PAGE_NUM; row++)
 	{
 		SH110X_RDL_command( SH110X_SETPAGEADDR  | row);
@@ -332,7 +369,6 @@ void SH110X_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 */
 void SH110X_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay)
 {
-	OLED_I2C_Settings();
 	uint8_t Result =SH110X_SETPAGEADDR | page_num;
 	SH110X_RDL_command(Result);
 	SH110X_RDL_command(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F)); // SH110X_SETLOWCOLUMN   = 0x00
@@ -349,26 +385,25 @@ void SH110X_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t myde
 	@brief Writes a byte to I2C address,command or data, used internally
 	@param value write the value to be written
 	@param cmd command or data
-	@note In the event of an error will loop  _I2C_ErrorRetryNum times each time.with delay _I2C_ErrorDelay
-	Printing the error code , see bcm2835I2CReasonCodes in bcm2835 docs.
+	@note if _I2C_DebugFlag == true  ,will output data on I2C failures.
 */
 void SH110X_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 {
 	char ByteBuffer[2] = {cmd,value};
 	uint8_t attemptI2Cwrite = _I2C_ErrorRetryNum;
-	uint8_t ReasonCodes = 0;
-
-	ReasonCodes = bcm2835_i2c_write(ByteBuffer, 2);
-	while(ReasonCodes != 0)
+	int  ReasonCodes = 0;
+	
+	ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); 
+	while(ReasonCodes < 0)
 	{//failure to write I2C byte ,Error handling retransmit
-
+		
 		if (_I2C_DebugFlag == true)
 		{
-			printf("Error I2C_Write_Byte : Cannot Write byte attempt no :: %u\n", +attemptI2Cwrite);
-			printf("bcm2835I2CReasonCodes :: Error code :: %u\n", +ReasonCodes);
+			printf("Error 602 I2C Write : %s\n", lguErrorText(ReasonCodes));
+			printf("Attempt Count: %u\n", attemptI2Cwrite);
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
-		ReasonCodes  = bcm2835_i2c_write(ByteBuffer, 2); //retry
+		ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt
 		if (attemptI2Cwrite == 0) break;
@@ -395,8 +430,6 @@ void SH110X_RDL::OLEDclearBuffer()
 
 /*!
 	@brief Draw the buffer to screen directly to the screen
-	@param x x axis  offset 0-128
-	@param y y axis offset 0-64
 	@param w width 0-128
 	@param h height 0-64
 	@param data the buffer data
@@ -404,7 +437,6 @@ void SH110X_RDL::OLEDclearBuffer()
 */
 void SH110X_RDL::OLEDBufferScreen(uint8_t w, uint8_t h, uint8_t* data)
 {
-	OLED_I2C_Settings();
 	uint8_t page;
 
 	for (page = 0; page < (h/8); page++) 
@@ -481,13 +513,8 @@ bool SH110X_RDL::OLEDDebugGet(void) { return _I2C_DebugFlag;}
 
 /*!
 	@brief get I2C error Flag
-	@details bcm2835I2Creasoncode.
-		-# BCM2835_I2C_REASON_OK   	     = 0x00,Success
-		-# BCM2835_I2C_REASON_ERROR_NACK    = 0x01,Received a NACK
-		-# BCM2835_I2C_REASON_ERROR_CLKT    = 0x02,Received Clock Stretch Timeout
-		-# BCM2835_I2C_REASON_ERROR_DATA    = 0x04, Not all data is sent / receive
-		-# BCM2835_I2C_REASON_ERROR_TIMEOUT = 0x08 Time out occurred during sending
-	 @return I2C error flag = 0x00 no error , > 0 bcm2835I2Creasoncode.
+	@details See Error Codes at bottom of https://abyz.me.uk/lg/lgpio.html
+	@return error code stored in _I2C_ErrorFlag
 */
 uint8_t SH110X_RDL::OLEDI2CErrorGet(void) { return _I2C_ErrorFlag;}
 
@@ -527,15 +554,21 @@ void SH110X_RDL::OLEDI2CErrorRetryNumSet(uint8_t AttemptCount)
 
 /*!
 	@brief checks if OLED on I2C bus
-	@return bcm2835I2CReasonCodes , BCM2835_I2C_REASON_OK 0x00 = Success
+	@return lg Error codes, LG_OKAY   0x00 = Success
+	@note Error codes are here https://abyz.me.uk/lg/lgpio.html
 */
-uint8_t SH110X_RDL::OLEDCheckConnection(void)
+int  SH110X_RDL::OLEDCheckConnection(void)
 {
-	char rxdata[1]; //buffer to hold return byte
+	char rxdatabuf[1]; //buffer to hold return byte
+	int I2CReadStatus = 0;
 
-	bcm2835_i2c_setSlaveAddress(_I2C_address);  // set i2c address
-	_I2C_ErrorFlag = bcm2835_i2c_read(rxdata, 1); // returns reason code , 0 success
+	I2CReadStatus = lgI2cReadDevice(_OLEDI2CHandle, rxdatabuf, 1);
+	if (I2CReadStatus < 0 )
+	{
+		printf("Error:OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));
+	}
 
+	_I2C_ErrorFlag = I2CReadStatus;
 	return _I2C_ErrorFlag;
 }
 

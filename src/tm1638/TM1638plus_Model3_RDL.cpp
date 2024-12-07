@@ -11,8 +11,9 @@
 	@param strobe  GPIO STB pin
 	@param clock  GPIO CLK pin
 	@param data  GPIO DIO pin
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 */
-TM1638plus_Model3::TM1638plus_Model3(uint8_t strobe, uint8_t clock, uint8_t data) : TM1638plus_Model1(strobe, clock, data) {
+TM1638plus_Model3::TM1638plus_Model3(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev) : TM1638plus_Model1(strobe, clock, data, gpioDev) {
  // Blank constructor
 }
 
@@ -20,15 +21,25 @@ TM1638plus_Model3::TM1638plus_Model3(uint8_t strobe, uint8_t clock, uint8_t data
 	@brief Set one LED on or off Model  3
 	@param position  0-7  == L1-L8 on PCB
 	@param  value see enum TMLEDColors red = 0x02, green = 0x01, 0 is off
+	@return 
+		-# rpiDisplay_GpioPinClaim
+		-# rpiDisplay_Success
 */
-void TM1638plus_Model3::setLED(uint8_t position, uint8_t value)
+rpiDisplay_Return_Codes_e  TM1638plus_Model3::setLED(uint8_t position, uint8_t value)
 {
-	bcm2835_gpio_fsel(_DATA_IO, BCM2835_GPIO_FSEL_OUTP);
+	int GpioDataErrorstatus = 0;
+	GpioDataErrorstatus = TM1638_SET_OUTPUT_DATA;
+	if (GpioDataErrorstatus < 0 )
+	{
+		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
+		return rpiDisplay_GpioPinClaim;
+	}
 	sendCommand(TM_WRITE_LOC);
-	bcm2835_gpio_write(_STROBE_IO, LOW);
+	TM1638_STROBE_SetLow;
 	sendData(TM_LEDS_ADR + (position << 1));
 	sendData(value);
-	bcm2835_gpio_write(_STROBE_IO, HIGH);
+	TM1638_STROBE_SetHigh;
+	return rpiDisplay_Success;
 }
 
 /*!

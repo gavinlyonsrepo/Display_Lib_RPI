@@ -110,10 +110,10 @@ clean:
 .PHONY: help
 help:
 	@echo '[HELP!]'
-	@echo "make           - Cleans then builds Library"
-	@echo "make clean     - Removes object file folder and library folder(BIN & BUILD)"
+	@echo "make           - Cleans then builds library"
+	@echo "make clean     - Cleans, Removes object file folder and library folder(BIN & BUILD)"
 	@echo "make buildlib  - Builds library"
 	@echo "make install   - Installs library, may need sudo"
-	@echo "make uninstall - uninstalls library, may need sudo"
+	@echo "make uninstall - Uninstalls library, may need sudo"
 	@echo "make help      - Prints help message"
 	@echo '***************'

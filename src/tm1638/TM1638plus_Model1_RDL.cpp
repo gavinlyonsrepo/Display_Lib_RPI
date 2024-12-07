@@ -12,8 +12,9 @@
 	@param strobe  GPIO STB pin
 	@param clock  GPIO CLK pin
 	@param data  GPIO DIO pin
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 */
-TM1638plus_Model1::TM1638plus_Model1(uint8_t strobe, uint8_t clock, uint8_t data) : TM1638plus_common(strobe, clock, data) {
+TM1638plus_Model1::TM1638plus_Model1(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev) : TM1638plus_common(strobe, clock, data, gpioDev) {
  // Blank constructor
 }
 
@@ -21,15 +22,25 @@ TM1638plus_Model1::TM1638plus_Model1(uint8_t strobe, uint8_t clock, uint8_t data
 	@brief Set one LED on or off Model 1 & 3
 	@param position  0-7  == L1-L8 on PCB
 	@param  value  0 off 1 on
+	@return 
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioPinClaim
 */
-void TM1638plus_Model1::setLED(uint8_t position, uint8_t value)
+rpiDisplay_Return_Codes_e TM1638plus_Model1::setLED(uint8_t position, uint8_t value)
 {
-	bcm2835_gpio_fsel(_DATA_IO, BCM2835_GPIO_FSEL_OUTP);
+	int GpioDataErrorstatus = 0;
+	GpioDataErrorstatus = TM1638_SET_OUTPUT_DATA;
+	if (GpioDataErrorstatus < 0 )
+	{
+		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
+		return rpiDisplay_GpioPinClaim;
+	}
 	sendCommand(TM_WRITE_LOC);
-	bcm2835_gpio_write(_STROBE_IO, LOW);
+	TM1638_STROBE_SetLow;
 	sendData(TM_LEDS_ADR + (position << 1));
 	sendData(value);
-	bcm2835_gpio_write(_STROBE_IO, HIGH);
+	TM1638_STROBE_SetHigh;
+	return rpiDisplay_Success;
 }
 
 /*!
@@ -148,10 +159,10 @@ void TM1638plus_Model1::displayASCIIwDot(uint8_t position, uint8_t ascii) {
 */
 void TM1638plus_Model1::display7Seg(uint8_t position, uint8_t value) { // call 7-segment
 	sendCommand(TM_WRITE_LOC);
-	bcm2835_gpio_write(_STROBE_IO, LOW);
+	TM1638_STROBE_SetLow;
 	sendData(TM_SEG_ADR + (position << 1));
 	sendData(value);
-	bcm2835_gpio_write(_STROBE_IO, HIGH); 
+	TM1638_STROBE_SetHigh;
 }
 
 /*!
@@ -202,17 +213,26 @@ uint8_t TM1638plus_Model1::readButtons()
 {
 	uint8_t buttons = 0;
 	uint8_t v =0;
-	
-	bcm2835_gpio_write(_STROBE_IO, LOW);
+	int GpioDataErrorstatus = 0;
+
+	TM1638_STROBE_SetLow;
 	sendData(TM_BUTTONS_MODE); 
-	bcm2835_gpio_fsel(_DATA_IO, BCM2835_GPIO_FSEL_INPT);
+	GpioDataErrorstatus = TM1638_SET_INPUT_DATA;
+	if (GpioDataErrorstatus < 0 )
+	{
+		fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
+	}
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		v = HighFreqshiftin(_DATA_IO, _CLOCK_IO) << i;
+		v = HighFreqshiftin() << i;
 		buttons |= v;
 	}
 
-	bcm2835_gpio_fsel(_DATA_IO, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_write(_STROBE_IO, HIGH);
+	GpioDataErrorstatus = TM1638_SET_OUTPUT_DATA;
+	if (GpioDataErrorstatus < 0 )
+	{
+		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
+	}
+	TM1638_STROBE_SetHigh;
 	return buttons;
 }

@@ -7,7 +7,7 @@
 #pragma once
 
 // ** INCLUDES **
-#include <bcm2835.h>
+#include <lgpio.h>
 #include <cstdio>
 #include <cstdint>
 #include <cstdbool>
@@ -67,23 +67,38 @@
 #define UC1609_INIT_DELAY 100   /**<  mS init delay ,after init  */
 #define UC1609_INIT_DELAY2 3 /**<  mS init delay,  before reset called datasheet <3mS */
 
-// GPIO abstraction
-#define UC1609_CS_SetHigh bcm2835_gpio_write(_LCD_CS, HIGH)
-#define UC1609_CS_SetLow bcm2835_gpio_write(_LCD_CS, LOW)
-#define UC1609_CD_SetHigh bcm2835_gpio_write(_LCD_CD, HIGH)
-#define UC1609_CD_SetLow bcm2835_gpio_write(_LCD_CD, LOW)
-#define UC1609_RST_SetHigh bcm2835_gpio_write(_LCD_RST, HIGH)
-#define UC1609_RST_SetLow bcm2835_gpio_write(_LCD_RST, LOW)
-#define UC1609_SCLK_SetHigh bcm2835_gpio_write(_LCD_SCLK, HIGH)
-#define  UC1609_SCLK_SetLow bcm2835_gpio_write(_LCD_SCLK, LOW)
-#define  UC1609_SDA_SetHigh bcm2835_gpio_write(_LCD_DIN, HIGH)
-#define  UC1609_SDA_SetLow bcm2835_gpio_write(_LCD_DIN, LOW)
+// GPIO abstraction 
+#define UC1609_CD_SetHigh  lgGpioWrite(_GpioHandle, _LCD_CD, 1)
+#define UC1609_CD_SetLow  lgGpioWrite(_GpioHandle ,_LCD_CD, 0)
+#define UC1609_RST_SetHigh  lgGpioWrite(_GpioHandle, _LCD_RST, 1)
+#define UC1609_RST_SetLow  lgGpioWrite(_GpioHandle, _LCD_RST, 0)
+#define UC1609_CS_SetHigh lgGpioWrite(_GpioHandle ,_LCD_CS, 1) // SW SPI only last 6 lines
+#define UC1609_CS_SetLow lgGpioWrite(_GpioHandle, _LCD_CS, 0)
+#define UC1609_SCLK_SetHigh lgGpioWrite(_GpioHandle, _LCD_SCLK, 1)
+#define UC1609_SCLK_SetLow  lgGpioWrite(_GpioHandle, _LCD_SCLK, 0)
+#define UC1609_SDA_SetHigh lgGpioWrite(_GpioHandle, _LCD_SDA, 1)
+#define UC1609_SDA_SetLow  lgGpioWrite(_GpioHandle, _LCD_SDA,0)
 
-#define UC1609_RST_SetDigitalOutput bcm2835_gpio_fsel(_LCD_RST, BCM2835_GPIO_FSEL_OUTP);
-#define UC1609_CD_SetDigitalOutput bcm2835_gpio_fsel(_LCD_CD, BCM2835_GPIO_FSEL_OUTP);
-#define UC1609_CS_SetDigitalOutput bcm2835_gpio_fsel( _LCD_CS, BCM2835_GPIO_FSEL_OUTP); // SW SPI only last 3 lines
-#define UC1609_SCLK_SetDigitalOutput bcm2835_gpio_fsel(_LCD_SCLK, BCM2835_GPIO_FSEL_OUTP);
-#define UC1609_DIN_SetDigitalOutput bcm2835_gpio_fsel(_LCD_DIN, BCM2835_GPIO_FSEL_OUTP);
+#define UC1609_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_RST,  0);
+#define UC1609_CD_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_CD,  0);
+#define UC1609_CS_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_CS,  0); // SW SPI only last 3 lines
+#define UC1609_SCLK_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_SCLK,  0);
+#define UC1609_SDA_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_SDA,  0);
+
+// GPIO open and close
+#define UC1609_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
+#define UC1609_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
+// GPIO free modes
+#define UC1609_GPIO_FREE_CD lgGpioFree(_GpioHandle , _LCD_CD)
+#define UC1609_GPIO_FREE_RST lgGpioFree(_GpioHandle , _LCD_RST)
+#define UC1609_GPIO_FREE_CS lgGpioFree(_GpioHandle , _LCD_CS) // SW SPI only last 3 lines
+#define UC1609_GPIO_FREE_CLK lgGpioFree(_GpioHandle , _LCD_SCLK)
+#define UC1609_GPIO_FREE_DATA lgGpioFree(_GpioHandle , _LCD_SDA)
+
+//SPI 
+#define UC1609_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
+#define UC1609_CLOSE_SPI lgSpiClose(_spiHandle)
+#define UC1609_WRITE_SPI lgSpiWrite( _spiHandle, (const char*)TransmitBuffer, sizeof(TransmitBuffer))
 
 /*!
 	@brief class to drive the ERM19264 UC1609 LCD
@@ -102,7 +117,8 @@ public:
 	void LCDclearBuffer(void);
 	void LCDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data);
 	rpiDisplay_Return_Codes_e LCDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer);
-	rpiDisplay_Return_Codes_e LCDbegin(uint8_t AddressSet = UC1609_ADDRESS_SET, uint8_t VbiasPot = UC1609_DEFAULT_GN_PM, uint32_t _SPICLK_DIVIDER = 0, uint8_t _SPICE_Pin = 0  );
+	rpiDisplay_Return_Codes_e LCDbegin(uint8_t AddressSet, uint8_t VbiasPot, int device, int channel, int speed, int flags, int gpioDev ); // HW SPI
+	rpiDisplay_Return_Codes_e LCDbegin(uint8_t AddressSet, uint8_t VbiasPot, int gpioDev ); // SW SPI
 	void LCDinit(void);
 	void LCDEnable(uint8_t on);
 	void LCDFillScreen(uint8_t pixel);
@@ -114,8 +130,7 @@ public:
 	void LCDReset(void);
 	void LCDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data);
 	void LCDPowerDown(void);
-	void LCDSPIHWSettings(void);
-	void LCDSPIoff(void);
+	rpiDisplay_Return_Codes_e LCDSPIoff(void);
 	bool LCDIssleeping(void);
 
 	uint16_t LCD_HighFreqDelayGet(void);
@@ -126,29 +141,34 @@ public:
 	void send_data(uint8_t data);
 	void send_command(uint8_t command, uint8_t value);
 	int8_t GetCommMode(void);
-	void CustomshiftOut(uint8_t val);
+	void SoftwareSPIShiftOut(uint8_t val);
 
+	// GPIO related 
 	int8_t _LCD_CS;    /**< GPIO Chip select  line */
 	int8_t _LCD_CD;   /**< GPIO Data or command line */
 	int8_t _LCD_RST;  /**< GPIO Reset line */
 	int8_t _LCD_SCLK; /**< GPIO Clock Line Software SPI only*/
-	int8_t _LCD_DIN;  /**< GPIO MOSI Line Software SPI only*/
+	int8_t _LCD_SDA;  /**< GPIO MOSI Line Software SPI only*/
+	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _GpioHandle = 0; /** This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
-	uint8_t _VbiasPOT= 0x49;    /**< Contrast default 0x49 datasheet 00-FE */
-	uint8_t _AddressCtrl= 0x02; /**< Set AC [2:0] Program registers  for RAM address control. 0x00 to 0x07*/
-
-	// Display Size
+	// Display 
 	int16_t _LCD_WIDTH = 192;                 /**< Width of screen in pixels */
 	int16_t _LCD_HEIGHT = 64;                 /**< Height of screen in pixels */
 	int8_t _LCD_PAGE_NUM = (_LCD_HEIGHT/8); /**< Number of 8 bit screen pages*/
-
-	int8_t _LCD_mode = 2; /**< 2 = HW SPI 3 = SW SPI, other numbers reserved for future use*/
-	bool _sleep = true;   /**< False = awake/ON , true = sleep/OFF*/
-
-	uint32_t _SPICLK_DIVIDER = 0; /**<Spi clock divider , bcm2835SPIClockDivider enum bcm2835*/
-	uint8_t _SPICE_PIN = 0;       /**< which SPI_CE pin to use , 0 or 1*/
-
-	uint16_t  _LCD_HighFreqDelay = 0; /**< uS used in software SPI , option.*/
-
 	uint8_t* LCDbufferScreen = nullptr;/**< pointer to the screen buffer data array*/
+	bool _sleep = true;   /**< False = awake/ON , true = sleep/OFF*/
+	uint8_t _VbiasPOT= 0x49;    /**< Contrast default 0x49 datasheet 00-FE */
+	uint8_t _AddressCtrl= 0x02; /**< Set AC [2:0] Program registers  for RAM address control. 0x00 to 0x07*/
+
+	// SPI related 
+	int _spiHandle = 0; /**< Hold a handle for the SPI device on the channel.*/
+	int _spiDev = 0; /**< A SPI device, >= 0. */
+	int _spiChan = 0; /**< A SPI channel, >= 0. */
+	int _spiBaud = 50000;   /**< The speed of serial communication in bits per second. */
+	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode */ 
+	int8_t _LCD_mode = 2; /**< 2 = HW SPI 3 = SW SPI, other numbers reserved for future use*/
+	uint16_t  _LCD_HighFreqDelay = 0; /**< uS delay used in software SPI , option.*/
+
+
 };

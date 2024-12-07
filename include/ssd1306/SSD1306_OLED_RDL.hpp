@@ -13,7 +13,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstdbool>
-#include <bcm2835.h>
+#include <lgpio.h>
 #include "bicolor_graphics_RDL.hpp"
 
 //  SSD1306 Command Set
@@ -75,10 +75,10 @@
 /*!
 	@brief class to control OLED and define buffer
 */
-class SSD1306 : public bicolor_graphics  {
+class SSD1306_RDL : public bicolor_graphics  {
   public:
-	SSD1306(int16_t oledwidth, int16_t oledheight);
-	~SSD1306(){};
+	SSD1306_RDL(int16_t oledwidth, int16_t oledheight);
+	~SSD1306_RDL(){};
 
 	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) override;
 	void OLEDupdate(void);
@@ -87,7 +87,7 @@ class SSD1306 : public bicolor_graphics  {
 	void OLEDFillScreen(uint8_t pixel, uint8_t mircodelay);
 	void OLEDFillPage(uint8_t page_num, uint8_t pixels,uint8_t delay);
 
-	void OLEDbegin(uint16_t I2C_speed = 0, uint8_t I2c_address= SSD1306_ADDR , bool I2C_debug = false);
+	void OLEDbegin(bool I2C_debug);
 	rpiDisplay_Return_Codes_e OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer);
 	void OLEDinit(void);
 	void OLEDPowerDown(void);
@@ -102,13 +102,10 @@ class SSD1306 : public bicolor_graphics  {
 	void OLEDStartScrollDiagLeft(uint8_t start, uint8_t stop) ;
 	void OLEDStopScroll(void) ;
 
-	rpiDisplay_Return_Codes_e OLED_I2C_ON(void);
-	void OLED_I2C_Settings(void);
-	void OLED_I2C_OFF(void);
-	uint16_t getI2Cspeed(void);
-	void setI2Cspeed(uint16_t);
-	uint8_t OLEDCheckConnection(void);
-	uint8_t OLEDI2CErrorGet(void);
+	rpiDisplay_Return_Codes_e OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags);
+	rpiDisplay_Return_Codes_e OLED_I2C_OFF(void);
+	int OLEDCheckConnection(void);
+	int OLEDI2CErrorGet(void);
 	uint16_t OLEDI2CErrorTimeoutGet(void);
 	void OLEDI2CErrorTimeoutSet(uint16_t);
 	uint8_t OLEDI2CErrorRetryNumGet(void);
@@ -116,18 +113,18 @@ class SSD1306 : public bicolor_graphics  {
 	bool OLEDDebugGet(void);
 	void OLEDDebugSet(bool);
 
-
   private:
 
 	void I2C_Write_Byte(uint8_t value, uint8_t Cmd);
 
-	uint16_t _I2C_speed =  BCM2835_I2C_CLOCK_DIVIDER_626 ; /**< Speed of I2C bus interface */
-	uint8_t _I2C_address = SSD1306_ADDR ; /**< I2C address */
-	bool _I2C_DebugFlag = false; /**< I2C debug flag default false  */
+	int _OLEDI2CAddress = SSD1306_ADDR  ; /**< I2C address for I2C module PCF8574 backpack on OLED*/
+	int _OLEDI2CDevice = 1; /**< An I2C device number. */
+	int _OLEDI2CFlags =  0;   /**< Flags which modify an I2C open command. None are currently defined. */
+	int _OLEDI2CHandle = 0;  /**< A number referencing an object opened by one of lgI2cOpen */
 	uint16_t _I2C_ErrorDelay = 100; /**<I2C delay(in between retry attempts) in event of error in mS*/
 	uint8_t _I2C_ErrorRetryNum = 3; /**< In event of I2C error number of retry attempts*/
-	uint8_t _I2C_ErrorFlag = 0x00; /**< In event of I2C error holds bcm2835 I2C reason code 0x00 = success*/
-
+	int _I2C_ErrorFlag = 0; /**< In event of I2C error holds code*/
+	bool _I2C_DebugFlag = false; /**<I2C debug flag , print I2C debug messages if true*/
 
 	uint8_t _OLED_WIDTH=128;      /**< Width of OLED Screen in pixels */
 	uint8_t _OLED_HEIGHT=64;    /**< Height of OLED Screen in pixels */

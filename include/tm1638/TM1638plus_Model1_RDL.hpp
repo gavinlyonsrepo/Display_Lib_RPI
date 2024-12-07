@@ -15,7 +15,7 @@ class TM1638plus_Model1 : public TM1638plus_common  {
 
 public:
 
-	TM1638plus_Model1 (uint8_t strobe, uint8_t clock, uint8_t data) ;
+	TM1638plus_Model1 (uint8_t strobe, uint8_t clock, uint8_t data ,int gpioDev) ;
 	
 	uint8_t readButtons(void);
 	
@@ -29,6 +29,6 @@ public:
 	
 	// LED methods defined as overridden in sub-class for Model 3
 	virtual void setLEDs(uint16_t leds); 
-	virtual void setLED(uint8_t position, uint8_t value); 
+	virtual rpiDisplay_Return_Codes_e setLED(uint8_t position, uint8_t value); 
 	
 };

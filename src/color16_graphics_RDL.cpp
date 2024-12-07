@@ -23,8 +23,8 @@ void color16_graphics::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	if ((x >= _width) || (y >= _height))
 		return;
 	setAddrWindow(x, y, x + 1, y + 1);
-	writeData(color >> 8);
-	writeData(color & 0xFF);
+	uint8_t TransmitBuffer[2] {(uint8_t)(color >> 8), (uint8_t)(color & 0xFF)};
+	spiWriteDataBuffer(TransmitBuffer, 2);
 }
 
 
@@ -47,7 +47,7 @@ rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		std::cout << "Error fillRectangle 2: Out of screen bounds" << std::endl;
+		printf("Error: fillRectangle 2: Out of screen bounds");
 		return rpiDisplay_ShapeScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
@@ -61,7 +61,7 @@ rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y
 	uint8_t* buffer = (uint8_t*)malloc(w*h*sizeof(uint16_t));
 	if (buffer == nullptr) // check malloc
 	{
-		std::cout << "Error fillRectangle 3: MALLOC could not assign memory " << std::endl;
+		printf("Error: fillRectangle 3: MALLOC could not assign memory");
 		return rpiDisplay_MallocError;
 	}
 	for(uint32_t i = 0; i<w*h*sizeof(uint16_t);) {
@@ -459,13 +459,13 @@ rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uin
 	// Out of screen bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		std::cout << "Error drawIcon 2: Out of screen bounds" << std::endl;
+		printf("Error: drawIcon 2: Out of screen bounds");
 		return rpiDisplay_BitmapScreenBounds ;
 	}
 	// Check for null pointer
 	if(character == nullptr)
 	{
-		std::cout << "Error drawIcon 3: Icon array is not valid pointer object" << std::endl;
+		printf("Error: drawIcon 3: Icon array is not valid pointer object");
 		return rpiDisplay_BitmapNullptr;
 	}
 	uint8_t value;
@@ -511,17 +511,17 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 
 	if( pBmp == nullptr) //  Check for null pointer
 	{
-		std::cout << "Error drawBitmap 1: Bitmap array is nullptr" << std::endl;
+		printf("Error: drawBitmap 1: Bitmap array is nullptr" );
 		return rpiDisplay_BitmapNullptr;
 	}
 	if(w % 8 != 0) 	// check horizontal size
 	{
-		std::cout << ("Error drawBitmap 2 : Horizontal Bitmap size is incorrect:  Check Size = w % 8 != 0: ")<< w << std::endl;
+		printf("Error: drawBitmap 2 : Horizontal Bitmap size is incorrect: %u : Width must be divisible by 8 \n", w );
 		return rpiDisplay_BitmapHorizontalSize;
 	}
 	if ((x >= _width) || (y >= _height)) // Check bounds
 	{
-		std::cout << "Error drawBitmap 3: Out of screen bounds, check x & y" << std::endl;
+		printf("Error: drawBitmap 3: Out of screen bounds, check x & y" );
 		return rpiDisplay_BitmapScreenBounds;
 	}
 
@@ -532,7 +532,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	uint8_t* buffer = (uint8_t*)malloc(w * h * 2);
 	if (buffer == nullptr) // check malloc
 	{
-		std::cout << "Error drawBitmap 3: MALLOC could not assign memory " << std::endl;
+		printf("Error: drawBitmap 3: MALLOC could not assign memory " );
 		return rpiDisplay_MallocError;
 	}
 	ptr = 0;
@@ -580,13 +580,13 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 	// 1. Check for null pointer
 	if( pBmp == nullptr)
 	{
-		std::cout << "Error drawBitmap24 1: Bitmap array is nullptr" << std::endl;
+		printf("Error: drawBitmap24 1: Bitmap array is nullptr");
 		return rpiDisplay_BitmapNullptr;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		std::cout << "Error drawBitmap24 2: Out of screen bounds" << std::endl;
+		printf("Error: drawBitmap24 2: Out of screen bounds");
 		return rpiDisplay_BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
@@ -596,7 +596,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 	uint8_t* buffer = (uint8_t*)malloc(w * h * 2);
 	if (buffer == nullptr) // check malloc
 	{
-		std::cout << "Error drawBitmap24 3: MALLOC could not assign memory " << std::endl;
+		printf("Error: drawBitmap24 3: MALLOC could not assign memory ");
 		return rpiDisplay_MallocError;
 	}
 	ptr = 0;
@@ -641,13 +641,13 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 	// 1. Check for null pointer
 	if( pBmp == nullptr)
 	{
-		std::cout << "Error drawBitmap24 1: Bitmap array is nullptr" << std::endl;
+		printf("Error: drawBitmap16 1: Bitmap array is nullptr" );
 		return rpiDisplay_BitmapNullptr;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		std::cout << "Error drawBitmap16 2: Out of screen bounds" << std::endl;
+		printf("Error drawBitmap16 2: Out of screen bounds" );
 		return rpiDisplay_BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
@@ -657,7 +657,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 	uint8_t* buffer = (uint8_t*)malloc(w * h * 2);
 	if (buffer == nullptr) // check malloc
 	{
-		std::cout << "Error drawBitmap16 3 :MALLOC could not assign memory " << std::endl;
+		printf("Error drawBitmap16 3 :MALLOC could not assign memory " );
 		return rpiDisplay_MallocError;
 	}
 	ptr = 0;
@@ -734,78 +734,106 @@ void color16_graphics::writeData(uint8_t spidatabyte) {
 	@brief  Write a buffer to SPI, both Software and hardware SPI supported
 	@param spidata to send
 	@param len length of buffer
+	@note The maximum size of an SPI transaction by default in lgpio library
+	is 65536 or Display_SPI_BLK_SIZE. SO a buffer larger than this
+	must be sent in blocks of 65536 bytes. 3 buffer blocks writes are supported 
+	So largest buffer that can be sent is Display_SPI_BLK_SIZE*3= 196608.
+	The largest current expected size is for a full screen write to a 240x320 display currently
+	which is 240x320x2 = 153600 bytes. spidev.bufsiz must also be set to 65536 or higher see 
+	Readme for display for more details.
 */
-void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, uint32_t len) {
+void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 	Display_DC_SetHigh;
-	if (_hardwareSPI == false) {
+	if (_hardwareSPI == false) 
+	{
 		Display_CS_SetLow;
-		for(uint32_t i=0; i<len; i++) {spiWriteSoftware(spidata[i]);}
+		for(int i=0; i<len; i++) {spiWrite(spidata[i]);}
 		Display_CS_SetHigh;
-	} else {
-		bcm2835_spi_writenb((char*)spidata,len);
+	} else 
+	{
+
+		int spiErrorStatus = 0;
+		if ((len >= 1)  && len <= (Display_SPI_BLK_SIZE))
+		{
+			// buffer size 0-65536 1 write
+			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, len);
+			if (spiErrorStatus <0 ) 
+			{
+				fprintf(stderr, "Error: spiWriteDataBuffer 1: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+		}else if ((len > Display_SPI_BLK_SIZE) && (len <= (Display_SPI_BLK_SIZE*2)))
+		{
+			// buffer size  65537-131072 2 writes
+			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, Display_SPI_BLK_SIZE);
+			if (spiErrorStatus <0 ) 
+			{
+				fprintf(stderr, "Error : spiWriteDataBuffer 2A: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+			spidata = spidata + Display_SPI_BLK_SIZE;
+			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, len-Display_SPI_BLK_SIZE);
+			if (spiErrorStatus <0 ) 
+			{
+				fprintf(stderr, "Error : spiWriteDataBuffer 2B: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+		}else if ((len > (Display_SPI_BLK_SIZE*2)) && (len <= (Display_SPI_BLK_SIZE*3)))
+		{
+			// buffer size 131073-196608 3 writes
+			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, Display_SPI_BLK_SIZE);
+			if (spiErrorStatus <0 )
+			{
+				fprintf(stderr, "Error : spiWriteDataBuffer 3A: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+			spidata = spidata + Display_SPI_BLK_SIZE;
+			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, Display_SPI_BLK_SIZE);
+			if (spiErrorStatus <0 )
+			{
+				fprintf(stderr, "Error : spiWriteDataBuffer 3B: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+			spidata = spidata + Display_SPI_BLK_SIZE;
+			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, len-(Display_SPI_BLK_SIZE*2));
+			if (spiErrorStatus <0 )
+			{
+				fprintf(stderr, "Error : spiWriteDataBuffer 3C: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+		}else {
+			printf("Buffer wrong size to draw = %i . allowed size = 1<-> 196608 :: \n", len); 
+		}
 	}
 }
 
 /*!
 	@brief  Write byte to SPI
 	@param spidata byte to write
+	@note uses _HIGHFREQ_DELAY to slowdown software SPI if CPU frequency too fast
 */
 void color16_graphics::spiWrite(uint8_t spidata) {
 	if (_hardwareSPI == false)
 	{
-		spiWriteSoftware(spidata);
+		uint8_t i;
+		for (i = 0; i < 8; i++)
+		{
+			Display_SDATA_SetLow;
+			if (spidata & 0x80)
+				Display_SDATA_SetHigh; // b1000000 Mask with 0 & all zeros out.
+			Display_SCLK_SetHigh;
+			delayMicroSecRDL(_HighFreqDelay);
+			spidata <<= 1;
+			Display_SCLK_SetLow;
+			delayMicroSecRDL(_HighFreqDelay);
+		}
 	} else {
-		bcm2835_spi_transfer(spidata);
-	}
-}
-
-/*!
-	@brief Write a byte to SPI using software SPI
-	@param spidata byte to send
-	@note uses _HIGHFREQ_DELAY to slowdown software SPI if CPU frequency too fast
-*/
-void color16_graphics::spiWriteSoftware(uint8_t spidata) {
-	uint8_t i;
-	for (i = 0; i < 8; i++)
-	{
-		Display_SDATA_SetLow;
-		if (spidata & 0x80)
-			Display_SDATA_SetHigh; // b1000000 Mask with 0 & all zeros out.
-		Display_SCLK_SetHigh;
-		delayMicroSecRDL(_HighFreqDelay);
-		spidata <<= 1;
-		Display_SCLK_SetLow;
-		delayMicroSecRDL(_HighFreqDelay);
+		int spiErrorStatus = 0;
+		char TransmitBuffer[1];
+		TransmitBuffer[0] =  spidata;
+		spiErrorStatus = lgSpiWrite( _spiHandle, (const char*)TransmitBuffer, 1);
+		if (spiErrorStatus <0) 
+		{
+			fprintf(stderr, "Error: spiWrite :Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
+		}
 	}
 }
 
 
-//uint8_t color16_graphics::spiRead(uint8_t commandByte) {
-	//if (_hardwareSPI == false)
-	//{
-		//return spiReadSoftware(commandByte);
-	//} else {
-		//return bcm2835_spi_transfer(commandByte);
-	//}
-//}
-
-//uint8_t color16_graphics::spiReadSoftware(uint8_t commandByte) {
-
-	//wrietCommand(commandbyte);
-	//Display_MISO_SetDigitalInput;
-	//uint8_t value = 0;
-	//uint8_t i = 0;
-
-	//for(i = 0; i < 8; ++i) 
-	//{
-		//value |= Display_MISO_Read << i;
-		//Display_SCLK_SetHigh;
-		//delayMicroSecRDL(_HighFreqDelay);
-		//Display_SCLK_SetLow;
-		//delayMicroSecRDL(_HighFreqDelay);
-	//}
-	//return value;
-//}
 
 /*!
 	@brief Set the Cursor Position on screen
@@ -818,14 +846,17 @@ void color16_graphics::setCursor(int16_t x, int16_t y) {
 }
 
 /*!
-	@brief Write 1 character on OLED.
-	@param  x character starting position on x-axis. Valid values: 0..127
-	@param  y character starting position on x-axis. Valid values: 0..63
+	@brief Write 1 character on Display
+	@param  x character starting position on x-axis. Valid values
+	@param  y character starting position on x-axis. Valid values
 	@param  value Character to be written.
+	@note uses spiWriteDataBuffer method to write each character as a buffer for speed.
+			Much faster than pixel by pixel spi byte writes
 	@return Will return rpiDisplay_Return_Codes_e enum
 		-# rpiDisplay_Success  success
 		-# rpiDisplay_CharScreenBounds co-ords out of bounds check x and y
 		-# rpiDisplay_CharFontASCIIRange Character out of ASCII Font bounds, check Font range
+		-# rpiDisplay_MallocError Malloc could not assign memory for character buffer
  */
 rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char value) {
 
@@ -835,16 +866,23 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	((x + _Font_X_Size+1) < 0) || // Clip left
 	((y + _Font_Y_Size) < 0))   // Clip top
 	{
-		std::cout << "writeChar Error 1: Co-ordinates out of bounds" << std::endl;
+		printf("writeChar16 Error 1: Co-ordinates out of bounds\n");
 		return rpiDisplay_CharScreenBounds;
 	}
 	// 2. Check for character out of font range bounds
 	if ( value < _FontOffset || value >= (_FontOffset + _FontNumChars+1))
 	{
-		std::cout << "writeChar Error 2: Character out of Font bounds" << value << " :" << +_FontOffset << " <--> " << +(_FontOffset + _FontNumChars)<< std::endl;
+		printf("writeChar16 Error 2: Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (_FontOffset + _FontNumChars));
 		return rpiDisplay_CharFontASCIIRange;
 	}
-
+	
+	// Create bitmap buffer
+	uint8_t* buffer = (uint8_t*)malloc(_Font_X_Size * _Font_Y_Size * 2);
+	if (buffer == nullptr) // check malloc
+	{
+		printf("Error: writeChar16 3: MALLOC could not assign memory ");
+		return rpiDisplay_MallocError;
+	}
 	uint16_t ltextcolor = 0; 
 	uint16_t ltextbgcolor = 0; 
 	if (getInvertFont()== true)
@@ -857,66 +895,50 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 		ltextcolor = _textcolor;
 	}
 	uint16_t fontIndex = 0;
-
-	if (_Font_Y_Size % 8 == 0) // Is the font height divisible by 8
+	uint32_t bufferIndex = 0; // Index into the display buffer
+	int16_t colByte, cx, cy;
+	int16_t colbit;
+	fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
+	colByte = *(_FontSelect + fontIndex);
+	colbit = 7;
+	for (cx = 0; cx < _Font_X_Size; cx++)
 	{
-		uint16_t rowCount = 0;
-		uint16_t temp = 0;
-		uint16_t count;
-		uint8_t colIndex;
-		fontIndex = ((value - _FontOffset)*(_Font_X_Size * (_Font_Y_Size/ 8))) + 4;
-		for (rowCount = 0; rowCount < (_Font_Y_Size / 8); rowCount++)
+		for (cy = 0; cy < _Font_Y_Size; cy++)
 		{
-			for (count = 0; count < _Font_X_Size; count++)
-			{
-				temp = *(_FontSelect + fontIndex + count + (rowCount * _Font_X_Size));
-				for (colIndex = 0; colIndex < 8; colIndex++)
-				{
-					if (temp & (1 << colIndex)) {
-							drawPixel(x + count, y + (rowCount * 8) + colIndex, ltextcolor);
-					} else {
-							drawPixel(x + count, y + (rowCount * 8) + colIndex, ltextbgcolor);
-					}
-				}
+			if ((colByte & (1 << colbit)) != 0) {
+				buffer[bufferIndex++] = (ltextcolor >> 8) & 0xFF; // High byte
+				buffer[bufferIndex++] = ltextcolor & 0xFF;    // Low byte
+			} else {
+				buffer[bufferIndex++] = (ltextbgcolor >> 8) & 0xFF; // High byte
+				buffer[bufferIndex++] = ltextbgcolor & 0xFF;    // Low byte
 			}
-		}
-	} else
-	{
-		int16_t colByte, cx, cy;
-		int16_t colbit;
-		fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
-		colByte = *(_FontSelect + fontIndex);
-		colbit = 7;
-		for (cx = 0; cx < _Font_X_Size; cx++)
-		{
-			for (cy = 0; cy < _Font_Y_Size; cy++)
-			{
-				if ((colByte & (1 << colbit)) != 0) {
-					drawPixel(x + cx, y + cy, ltextcolor);
-				} else {
-					drawPixel(x + cx, y + cy, ltextbgcolor);
-				}
-				colbit--;
-				if (colbit < 0) {
-					colbit = 7;
-					fontIndex++;
-					colByte = *(_FontSelect + fontIndex);
-				}
+			colbit--;
+			if (colbit < 0) {
+				colbit = 7;
+				fontIndex++;
+				colByte = *(_FontSelect + fontIndex);
 			}
 		}
 	}
+
+	// Set window and write buffer
+	setAddrWindow(x, y, x + _Font_X_Size - 1, y +_Font_Y_Size - 1);
+	spiWriteDataBuffer(buffer, _Font_X_Size * _Font_Y_Size * 2);
+
+	free(buffer);
 	return rpiDisplay_Success ;
 }
 
+
 /*!
-	@brief Write Text character array on OLED.
+	@brief Write Text character array on display
 	@param  x character starting position on x-axis.
 	@param  y character starting position on y-axis.
 	@param  pText Pointer to the array of the text to be written.
 	@return Will return
 		-# rpiDisplay_Success Success
 		-# rpiDisplay_CharArrayNullptr  String pText Array invalid pointer object
-		-# Failure in writeChar method upstream
+		-# Failure code from  writeChar method upstream
  */
 rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
 	uint8_t count=0;
@@ -924,7 +946,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t 
 	// Check for null pointer
 	if(pText == nullptr)
 	{
-		std::cout << "writeCharString Error 1 :String array is not valid pointer" << std::endl;
+		printf("Error: writeCharString16 1 :String array is not valid pointer" );
 		return rpiDisplay_CharArrayNullptr;
 	}
 	rpiDisplay_Return_Codes_e DrawCharReturnCode;
@@ -951,7 +973,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t 
 	@param character the character to print
 	@return Will return
 		-# 1. success
-		-# rpiDisplay_Return_Codes_e enum error code An error in the writeChar method.
+		-# rpiDisplay_Return_Codes_e enum error code,  An error in the writeChar method.upstream
 */
 size_t color16_graphics::write(uint8_t character)
 {
@@ -1003,4 +1025,33 @@ void color16_graphics::setTextColor(uint16_t c) {
 void color16_graphics::setTextWrap(bool w) {
 	_textwrap = w;
 }
+
+ /* ================TODO read functions ========================
+uint8_t color16_graphics::spiRead(uint8_t commandByte) {
+	if (_hardwareSPI == false)
+	{
+		return spiReadSoftware(commandByte);
+	} else {
+		return_spi_transfer(commandByte);
+	}
+}
+
+uint8_t color16_graphics::spiReadSoftware(uint8_t commandByte) {
+
+	wrietCommand(commandbyte);
+	Display_MISO_SetDigitalInput;
+	uint8_t value = 0;
+	uint8_t i = 0;
+
+	for(i = 0; i < 8; ++i) 
+	{
+		value |= Display_MISO_Read << i;
+		Display_SCLK_SetHigh;
+		delayMicroSecRDL(_HighFreqDelay);
+		Display_SCLK_SetLow;
+		delayMicroSecRDL(_HighFreqDelay);
+	}
+	return value;
+}
+*/
 // **************** EOF *****************

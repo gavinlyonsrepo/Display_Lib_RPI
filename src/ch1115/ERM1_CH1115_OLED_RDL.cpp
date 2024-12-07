@@ -15,14 +15,14 @@
 	@param oledwidth width of oled in pixels
 	@param oledheight height of oled in pixels
 	@param rst GPIO reset
-	@param cd GPIO data or command
+	@param dc GPIO data or command
 	@note Hardware SPI version,  mode 2
  */
-ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight ,int8_t rst, int8_t cd) :bicolor_graphics(oledwidth, oledheight)
+ERMCH1115::ERMCH1115(int16_t oledwidth, int16_t oledheight ,int8_t rst, int8_t dc) :bicolor_graphics(oledwidth, oledheight)
 {
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
-	_OLED_CD = cd;
+	_OLED_DC = dc;
 	_OLED_RST= rst;
 	_OLED_mode = 2;
 }
@@ -32,17 +32,17 @@ ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight ,int8_t rst, int8_
 	@param oledwidth width of oled in pixels
 	@param oledheight height of oled in pixels
 	@param rst GPIO reset
-	@param cd GPIO data or command
+	@param dc GPIO data or command
 	@param cs GPIO Chip select
 	@param sclk GPIO SPI Clock
 	@param din GPIO MOSI
 	@note software SPI version, mode 3
  */
-ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8_t cd, int8_t cs, int8_t sclk, int8_t din) :bicolor_graphics(oledwidth, oledheight)
+ERMCH1115::ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8_t dc, int8_t cs, int8_t sclk, int8_t din) :bicolor_graphics(oledwidth, oledheight)
 {
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
-	_OLED_CD = cd;
+	_OLED_DC = dc;
 	_OLED_RST= rst;
 	_OLED_CS = cs;
 	_OLED_DIN = din;
@@ -53,37 +53,132 @@ ERMCH1115  :: ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8
 // Class Functions
 
 /*!
-	@brief begin Method initialise OLED Sets pinmodes and SPI setup
+	@brief begin Method initialise OLED for Hardware SPI
 	@param OLEDcontrast Contrast of the OLED display default = 0x80 , range 0x00 to 0xFE
-	@param OLED_spi_divider default = 64 ,see bcm2835SPIClockDivider enum , bcm2835
-	@param SPICE_Pin default = 0 , which SPI_CE pin to use , 0 or 1
-	@return Error on , HW SPI failure init(bcm2835_spi_begin) 
-	@details
-		If HW SPI: Start SPI operations. Forces RPi SPI0 pins P1-19 (MOSI), P1-21 (MISO),
-		P1-23 (CLK), P1-24 (CE0) and P1-26 (CE1) to alternate function ALT0, which enables those pins for SPI interface.
- */
-rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, uint32_t OLED_spi_divider, uint8_t SPICE_Pin)
+	@param device A SPI device, >= 0. 
+	@param channel A SPI channel, >= 0. 
+	@param speed The speed of serial communication in bits per second. 
+	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_WrongModeChosen
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioPinClaim
+		-# rpiDisplay_SPIOpenFailure
+*/
+rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device, int channel, int speed, int flags, int gpioDev)
 {
-	_OLEDcontrast  = OLEDcontrast ;
-	_OLED_SPICLK_DIVIDER  = OLED_spi_divider;
-	_OLED_SPICE_PIN = SPICE_Pin;
+	_OLEDcontrast  = OLEDcontrast;
+	_DeviceNumGpioChip = gpioDev;
+	_spiDev = device;
+	_spiChan = channel;
+	_spiBaud = speed;
+	_spiFlags = flags;
 
-	ERMCH1115_RST_SetDigitalOutput;
-	ERMCH1115_CD_SetDigitalOutput;
+	// 1. check communication mode being called, if user called wrong one.
 	if(GetCommMode() == 3)
 	{
-		ERMCH1115_CS_SetDigitalOutput;
-		ERMCH1115_SCLK_SetDigitalOutput;
-		ERMCH1115_DIN_SetDigitalOutput;
-	}else{
-		if(!bcm2835_spi_begin())
-			return rpiDisplay_SPIbeginFail;
+		printf("Wrong SPI mode chosen this method is for Hardware SPI : %i\n", _OLED_mode);
+		return rpiDisplay_WrongModeChosen;
+	}
+	// 2. setup gpioDev
+	_GpioHandle = ERMCH1115_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	if ( _GpioHandle < 0)	// open error
+	{
+		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
+	}
+
+	// 3. Claim 2 GPIO as outputs for RST and DC lines
+	int GpioResetErrorStatus = 0;
+	int GpioDCErrorStatus = 0;
+	GpioResetErrorStatus= ERMCH1115_RST_SetDigitalOutput;
+	GpioDCErrorStatus= ERMCH1115_DC_SetDigitalOutput;
+	if (GpioResetErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+	if (GpioDCErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+	//ERMCH1115_CS_SetHigh;
+	// 4. set up spi open
+	 _spiHandle  = ERMCH1115_OPEN_SPI;
+	if ( _spiHandle  < 0)
+	{
+		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
+		return rpiDisplay_SPIOpenFailure;
 	}
 
 	OLEDinit();
 	return rpiDisplay_Success;
 }
 
+/*!
+	@brief begin Method initialise OLED for software SPI
+	@param OLEDcontrast Contrast of the OLED display default = 0x80 , range 0x00 to 0xFE
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@return a rpiDisplay_Return_Codes_e  code
+		-# rpiDisplay_Success
+		-# rpiDisplay_WrongModeChosen
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioPinClaim
+ */
+rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDev)
+{
+	_OLEDcontrast  = OLEDcontrast;
+	_DeviceNumGpioChip = gpioDev;
+	bool ErrorFlag = true;
+
+	// 1. check communication mode being called, if user called wrong one.
+	if(GetCommMode() == 2)
+	{
+		printf("Wrong SPI mode chosen this method is for Software SPI : %i\n", _OLED_mode);
+		return rpiDisplay_WrongModeChosen;
+	}
+	// 2. setup gpioDev
+	_GpioHandle = ERMCH1115_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	if ( _GpioHandle < 0)	// open error
+	{
+		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
+	}
+
+	// 3. Claim 5 GPIO as outputs
+	int GpioResetErrorStatus = 0;
+	int GpioDCErrorStatus = 0;
+	int GpioCSErrorStatus = 0;
+	int GpioSCLKErrorStatus = 0;
+	int GpioDINErrorStatus = 0;
+
+	GpioResetErrorStatus= ERMCH1115_RST_SetDigitalOutput;
+	GpioDCErrorStatus= ERMCH1115_DC_SetDigitalOutput;
+	GpioCSErrorStatus= ERMCH1115_CS_SetDigitalOutput;
+	GpioSCLKErrorStatus= ERMCH1115_SCLK_SetDigitalOutput;
+	GpioDINErrorStatus= ERMCH1115_DIN_SetDigitalOutput;
+
+	if (GpioResetErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+	} else if (GpioDCErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
+	} else if (GpioCSErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim CS GPIO for output (%s)\n", lguErrorText(GpioCSErrorStatus));
+	} else if (GpioSCLKErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim SCLK GPIO for output (%s)\n", lguErrorText(GpioSCLKErrorStatus));
+	} else if (GpioDINErrorStatus < 0 ){
+		fprintf(stderr,"Error : Can't claim DIN GPIO for output (%s)\n", lguErrorText(GpioDINErrorStatus));
+	} else { ErrorFlag = false;}
+
+	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
+
+	ERMCH1115_CS_SetHigh;
+	OLEDinit();
+	return rpiDisplay_Success;
+}
 /*!
 	@brief sets the buffer pointer to the users screen data buffer
 	@param width width of buffer in pixels
@@ -111,58 +206,103 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSetBufferPtr(uint8_t width, uint8_t he
 	return rpiDisplay_Success;
 }
 
-/*!
-	@brief Sets HW SPI settings
-	@details sets bitmode bitorder, bus speed and CEX pin(1 or 0)
-	usually just called at initialization internally but If multiple devices on SPI bus with different SPI settings
-	can be called by user again before a tranche of OLED commands.
-	@note Sets SPI mode 0 , MSBFIRST ,  BCM2835_SPI_CLOCK_DIVIDER_64  and CE0 by default.
-*/
-void ERMCH1115::OLEDSPIHWSettings(void)
-{
-	bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
-	bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
-
-	if (_OLED_SPICLK_DIVIDER > 0)
-		bcm2835_spi_setClockDivider(_OLED_SPICLK_DIVIDER);
-	else // default BCM2835_SPI_CLOCK_DIVIDER_64 3.90MHz Rpi2, 6.250MHz RPI3
-		bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
-
-	if (_OLED_SPICE_PIN == 0)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
-	}else if (_OLED_SPICE_PIN  == 1)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS1);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS1, LOW);
-	}
-}
 
 /*!
 	@brief stops HW spi operations
-	@details End SPI operations. SPI0 pins P1-19 (MOSI), P1-21 (MISO), P1-23 (CLK),
-		P1-24 (CE0) and P1-26 (CE1) are returned to their default INPUT behaviour.
+	@details End SPI operations. 
+	@return
+		-#  rpiDisplay_Success
+		-#  rpiDisplay_GpioPinFree
+		-#  rpiDisplay_SPICloseFailure
+		-#  rpiDisplay_GpioChipDevice
 */
-void ERMCH1115::OLEDSPIoff(void)
+rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 {
-	if (GetCommMode() == 3) bcm2835_spi_end();
+	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
+	
+	// 1. Free Reset & DC GPIO lines
+	int GpioResetErrorStatus = 0;
+	int GpioDCErrorStatus = 0;
+	ERMCH1115_RST_SetLow;
+	ERMCH1115_DC_SetLow;
+	GpioResetErrorStatus = ERMCH1115_GPIO_FREE_RST;
+	GpioDCErrorStatus  =  ERMCH1115_GPIO_FREE_DC;
+
+	if (GpioResetErrorStatus < 0 ){
+		fprintf(stderr,"Error: Can't Free Reset GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
+		ErrorFlag = 2;
+	}else if (GpioDCErrorStatus  < 0 ){
+		fprintf(stderr,"Error: Can't Free DC GPIO (%s)\n", lguErrorText(GpioDCErrorStatus));
+		ErrorFlag = 2;
+	}
+	
+	// 2A Software SPI other 3 GPIO LINES, CLK DATA & CS.
+	if (GetCommMode() == 3) // software spi
+	{
+		int GpioCSErrorStatus = 0;
+		int GpioCLKErrorStatus = 0;
+		int GpioDINErrorStatus = 0;
+		ERMCH1115_CS_SetLow;
+		ERMCH1115_SCLK_SetLow;
+		ERMCH1115_DIN_SetLow;
+		GpioCSErrorStatus = ERMCH1115_GPIO_FREE_CS;
+		GpioCLKErrorStatus =  ERMCH1115_GPIO_FREE_CLK;
+		GpioDINErrorStatus =   ERMCH1115_GPIO_FREE_DATA;
+		if (GpioCSErrorStatus < 0 ){
+			fprintf(stderr,"Error: Can't Free CS GPIO (%s)\n", lguErrorText(GpioCSErrorStatus ));
+			ErrorFlag = 2;
+		}else if (GpioCLKErrorStatus< 0 ){
+			fprintf(stderr,"Error: Can't Free CLK GPIO (%s)\n", lguErrorText(GpioCLKErrorStatus));
+			ErrorFlag = 2;
+		}else if (GpioDINErrorStatus< 0 ){
+			fprintf(stderr, "Error: Can't free DATA GPIO (%s)\n", lguErrorText(GpioDINErrorStatus));
+			ErrorFlag = 2;
+		}
+	}else if (GetCommMode() == 2) // 2B hardware SPi Closes a SPI device 
+	{
+		int spiErrorStatus = 0;
+		spiErrorStatus =  ERMCH1115_CLOSE_SPI;
+		if (spiErrorStatus <0) 
+		{
+			fprintf(stderr, "Error: Cannot Close SPI device (%s)\n", lguErrorText(spiErrorStatus));
+			ErrorFlag = 3;
+		}
+	}
+	// 3 Closes the opened gpiochip device.
+	int GpioCloseStatus = 0;
+	GpioCloseStatus =ERMCH1115_CLOSE_GPIO_HANDLE;
+	if ( GpioCloseStatus < 0)
+	{
+		fprintf(stderr,"Error :: Failed to close lgGpioChipclose %d , error=  (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		ErrorFlag = 4;
+	}
+
+	// 4 Check error flag ( we don't want to return early just for one failure)
+	switch (ErrorFlag)
+	{
+		case 0:return rpiDisplay_Success;break;
+		case 2:return rpiDisplay_GpioPinFree;break;
+		case 3:return rpiDisplay_SPICloseFailure;break;
+		case 4:return rpiDisplay_GpioChipDevice;break;
+		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+	}
+	return rpiDisplay_Success;
 }
 
-/*! 
+/*!
 	@brief Power down function
 	@details Disables screen and sets all independent GPIO low.
-		call when powering down before end of operations 
+		call when powering down before end of operations
 */
 void ERMCH1115::OLEDPowerDown(void)
 {
 	OLEDEnable(0);
-	ERMCH1115_CD_SetLow;
+	ERMCH1115_DC_SetLow;
 	ERMCH1115_RST_SetLow;
 	if(GetCommMode()== 3)
 	{
 		ERMCH1115_SCLK_SetLow;
-		ERMCH1115_SDA_SetLow;
+		ERMCH1115_DIN_SetLow;
 		ERMCH1115_CS_SetLow;
 	}
 	_sleep= true;
@@ -186,7 +326,7 @@ void ERMCH1115::SoftwareSPIShiftOut(uint8_t value)
 
 	for (i = 0; i < 8; i++)
 	{
-		!!(value & (1 << (7 - i))) ? ERMCH1115_SDA_SetHigh : ERMCH1115_SDA_SetLow ;
+		!!(value & (1 << (7 - i))) ? ERMCH1115_DIN_SetHigh : ERMCH1115_DIN_SetLow ;
 
 		ERMCH1115_SCLK_SetHigh;
 		delayMicroSecRDL(_OLEDHighFreqDelay);
@@ -202,7 +342,6 @@ void ERMCH1115::OLEDinit()
  {
 	switch (GetCommMode())
 	{
-		case 2: OLEDSPIHWSettings(); break;
 		case 3: ERMCH1115_CS_SetLow; break;
 	}
 	OLEDReset();
@@ -212,9 +351,9 @@ void ERMCH1115::OLEDinit()
 	send_command(ERMCH1115_SET_COLADD_LSB, 0);
 	send_command(ERMCH1115_SET_COLADD_MSB, 0);
 	send_command(ERMCH1115_SET_PAGEADD, 0);
-	send_command(ERMCH115_SET_DISPLAY_START_LINE, 0);
+	send_command(ERMCH1115_SET_DISPLAY_START_LINE, 0);
 
-	send_command(ERMCH115_CONTRAST_CONTROL  ,0);
+	send_command(ERMCH1115_CONTRAST_CONTROL  ,0);
 	send_command(_OLEDcontrast, 0);
 
 	send_command(ERMCH1115_IREF_REG, 0);
@@ -242,7 +381,7 @@ void ERMCH1115::OLEDinit()
 	send_command(ERMCH1115_COM_LEVEL_MODE_SET, 0);
 	send_command(ERMCH1115_COM_LEVEL_DATA_SET, 0);
 
-	send_command(ERMCH1115_SET_PUMP_REG, ERMCH115_SET_PUMP_SET);
+	send_command(ERMCH1115_SET_PUMP_REG, ERMCH1115_SET_PUMP_SET);
 
 	send_command(ERMCH1115_DC_MODE_SET, 0);
 	send_command(ERMCH1115_DC_ONOFF_SET, 0);
@@ -264,9 +403,9 @@ void ERMCH1115::OLEDinit()
 */
 void ERMCH1115::send_command (uint8_t command,uint8_t value)
 {
-	ERMCH1115_CD_SetLow;
+	ERMCH1115_DC_SetLow;
 	send_data(command | value);
-	ERMCH1115_CD_SetHigh;
+	ERMCH1115_DC_SetHigh;
 }
 
 /*!
@@ -360,7 +499,7 @@ void ERMCH1115::OLEDContrast(uint8_t contrast)
 	if (GetCommMode() == 3)
 		ERMCH1115_CS_SetLow;
 
-	send_command(ERMCH115_CONTRAST_CONTROL  ,0);
+	send_command(ERMCH1115_CONTRAST_CONTROL  ,0);
 	send_command(contrast, 0);
 	if (GetCommMode() == 3)
 		ERMCH1115_CS_SetHigh ;
@@ -396,7 +535,7 @@ void ERMCH1115::OLEDfadeEffect(uint8_t bits)
 	if (GetCommMode() == 3)
 		ERMCH1115_CS_SetLow;
 
-	send_command(ERMCCH1115_BREATHEFFECT_SET,0);
+	send_command(ERMCH1115_BREATHEFFECT_SET,0);
 	send_command(bits,0);
 
 	if (GetCommMode() == 3)
@@ -432,13 +571,13 @@ void ERMCH1115::OLEDFillScreen(uint8_t dataPattern)
 
 /*!
 	 @brief Fill the chosen page(0-7)  with a datapattern
-	 @param pageNum  page 0-7 divides 64 pixel screen into 8 pages or blocks  64/8  
+	 @param pageNum  page 0-7 divides 64 pixel screen into 8 pages or blocks  64/8
 	 @param dataPattern can be set to 0 to FF (not buffer)
 */
 void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 {
 
-	if (pageNum >= 8) 
+	if (pageNum >= 8)
 	{
 		printf("Error OLEDFillPage 1 :page number must be between 0 and 7 \n");
 		return;
@@ -506,14 +645,23 @@ void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uin
 
 /*!
 	 @brief Send data byte with SPI to ERMCH1115
-	 @param byte the data byte to send 
+	 @param dataByte byte the data byte to send
 */
-void ERMCH1115::send_data(uint8_t byte)
+void ERMCH1115::send_data(uint8_t dataByte)
 {
+	int spiErrorStatus = 0;
+	char TransmitBuffer[1];
+	TransmitBuffer[0] = dataByte;
 	switch (GetCommMode())
 	{
-		case 2: bcm2835_spi_transfer(byte); break;
-		case 3: SoftwareSPIShiftOut(byte); break;
+		case 2: 
+			spiErrorStatus = ERMCH1115_WRITE_SPI;
+			if (spiErrorStatus <0) 
+			{
+				fprintf(stderr, "Error : Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			}
+		break;
+		case 3: SoftwareSPIShiftOut(dataByte); break;
 	}
 }
 
@@ -545,7 +693,7 @@ void ERMCH1115::OLEDclearBuffer()
 	 @param w width 0-128
 	 @param h height 0-64
 	 @param data pointer to the bitmap data array
-	 @note Called by OLEDupdate, used internally mostly 
+	 @note Called by OLEDupdate, used internally mostly
 */
 void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
 {
@@ -579,11 +727,11 @@ void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uin
 }
 
 /*!
-	@brief Draws a Pixel to the screen , overides the  graphics library 
+	@brief Draws a Pixel to the screen , overides the  graphics library
 	@param x x co-ord of pixel
 	@param y y co-ord of pixel
 	@param colour colour of  pixel
-	@note virtual function overides the  graphics library 
+	@note virtual function overides the  graphics library
 */
 void ERMCH1115::drawPixel(int16_t x, int16_t y, uint8_t colour)
 {

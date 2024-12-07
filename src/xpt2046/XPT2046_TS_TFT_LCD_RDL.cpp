@@ -29,39 +29,134 @@ XPT_2046_RDL::XPT_2046_RDL(){}
 
 /*! 
 	@brief Initialise the SPI interface
-	@param SPICEXPin The chip select pin to use 0 or 1
+	@param device A SPI device, >= 0. 
+	@param channel A SPI channel, >= 0. 
+	@param speed The speed of serial communication in bits per second. 
+	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
+	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@param IRQPin The GPIO to use for interrupt eg T_IRQ on ili9341 PCB 
-	@param begin issue spibegin command true or false only needed if SPI not already on by TFT
 	@param resPin GPIO for reset pin MOSI only needed if SPI not already on by TFT set to -1 normally
-	@return rpiDisplay_Return_Codes_e Will return error only if begin is false and spiBegin falls 
+	@return Returns a rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioChipDevice
+		-# rpiDisplay_GpioChipClaim
+		-# rpiDisplay_SPIOpenFailure
 */
-rpiDisplay_Return_Codes_e XPT_2046_RDL::XPTSPIInit(uint8_t SPICEXPin, uint8_t IRQPin , bool begin , int8_t resPin)
+rpiDisplay_Return_Codes_e XPT_2046_RDL::XPTSPIInit(int device, int channel, int speed, int flags, int gpioDev, uint8_t IRQPin , int8_t resPin)
 {
+	_DeviceNumGpioChip = gpioDev;
+	_spiDev = device;
+	_spiChan = channel;
+	_spiBaud = speed;
+	_spiFlags = flags;
+	_IRQ_PIN = IRQPin;
+
+	//  1. gpio Device open?
+	_GpioHandle =_XPT_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	if ( _GpioHandle < 0)	// open error
+	{
+		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rpiDisplay_GpioChipDevice;
+	}
+	
+	// 2. Setup Reset pin if accessible 
 	if (resPin != -1)
 	{
-		bcm2835_gpio_fsel(resPin,BCM2835_GPIO_FSEL_OUTP); // RES
-		bcm2835_gpio_write(resPin, LOW);
-		bcm2835_delay(100);
-		bcm2835_gpio_write(resPin, HIGH);
-		bcm2835_delay(100);
-	}
-	_TSSPICEX_pin = SPICEXPin;
-	_IRQ_pin = IRQPin;
-	bcm2835_gpio_fsel(_IRQ_pin,BCM2835_GPIO_FSEL_INPT);
-	if (begin == true)
-	{
-		if (!bcm2835_spi_begin())
+		_resetXPTPinOn = true;
+		// Claim GPIO as outputs for RST line
+		int GpioResetErrorStatus = 0;
+		GpioResetErrorStatus= _XPT_RST_SetDigitalOutput;
+		if (GpioResetErrorStatus < 0 )
 		{
-			return rpiDisplay_SPIbeginFail;
+			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+			return rpiDisplay_GpioPinClaim;
 		}
+		_XPT_RST_SetLow;
+		delayMilliSecRDL(100);
+		_XPT_RST_SetHigh;
+		delayMilliSecRDL(100);
+	}
+	// 3. Setup IRQ pin as input.
+	int GpioIRQErrorStatus = 0;
+	GpioIRQErrorStatus  = _XPT_IRQ_SetDigitalInput;
+	if (GpioIRQErrorStatus < 0 )
+	{
+		fprintf(stderr,"Error : Can't claim IRQ GPIO for input (%s)\n", lguErrorText(GpioIRQErrorStatus));
+		return rpiDisplay_GpioPinClaim;
+	}
+
+	// 4 Open SPI device
+	_spiHandle =_XPT_OPEN_SPI;
+	if ( _spiHandle  < 0)
+	{
+		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
+		return rpiDisplay_SPIOpenFailure;
 	}
 	return rpiDisplay_Success;
 }
 
 /*! 
 	@brief Stop the SPI interface
+	@return Returns a rpiDisplay_Return_Codes_e 
+		-# rpiDisplay_Success
+		-# rpiDisplay_GpioPinFree
+		-# rpiDisplay_SPICloseFailure
+		-# rpiDisplay_GpioChipDevice
 */
-void  XPT_2046_RDL::XPTSPIend(){bcm2835_spi_end();}
+rpiDisplay_Return_Codes_e   XPT_2046_RDL::XPTSPIend()
+{
+	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
+	// 1. free reset & IRQ GPIO lines
+	if (_resetXPTPinOn == true)
+	{
+		int GpioResetErrorStatus = 0;
+		_XPT_RST_SetLow;
+		GpioResetErrorStatus =_XPT_GPIO_FREE_RST;
+		if (GpioResetErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error :: Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
+			ErrorFlag = 2;
+		}
+	}
+
+	int GpioIRQErrorStatus = 0;
+	GpioIRQErrorStatus  = _XPT_GPIO_FREE_IRQ;
+	if (GpioIRQErrorStatus  < 0 )
+	{
+		fprintf(stderr,"Error :: Can't Free IRQ GPIO (%s)\n", lguErrorText(GpioIRQErrorStatus));
+		ErrorFlag = 2;
+	}
+
+	// 2 hardware SPi Closes a SPI device 
+	int spiErrorStatus = 0;
+	spiErrorStatus = _XPT_CLOSE_SPI;
+	if (spiErrorStatus <0) 
+	{
+		fprintf(stderr, "Error : Cannot Close SPI device :(%s)\n", lguErrorText(spiErrorStatus));
+		ErrorFlag = 3;
+	}
+
+	// 3 Closes the opened gpiochip device.
+	int GpioCloseStatus = 0;
+	GpioCloseStatus = _XPT_CLOSE_GPIO_HANDLE; // close gpiochip
+	if ( GpioCloseStatus < 0)
+	{
+		// open error
+		fprintf(stderr,"Error :: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		ErrorFlag = 4;
+	}
+
+	// 4 Check error flag (we don't want to return early for any failure)
+	switch (ErrorFlag)
+	{
+		case 0:return rpiDisplay_Success;break;
+		case 2:return rpiDisplay_GpioPinFree;break;
+		case 3:return rpiDisplay_SPICloseFailure;;break;
+		case 4:return rpiDisplay_GpioChipDevice;;break;
+		default:printf("Warning::Unknown error flag value in SPIEnd"); break;
+	}
+	return rpiDisplay_Success;
+}
 
 /*! 
 	@brief Poll the IRQ pin
@@ -69,11 +164,15 @@ void  XPT_2046_RDL::XPTSPIend(){bcm2835_spi_end();}
 */
 bool XPT_2046_RDL::XPTIRQIsPressed()
 {
-	uint8_t level=0;
-	level = bcm2835_gpio_lev(_IRQ_pin);
-	if (level == LOW)
+	int level=0;
+	level =_XPT_IRQ_Read;
+	if (level < 0)
+	{
+		fprintf(stderr,"Error :: Can't Read IRQ GPIO (%s)\n", lguErrorText(level));
+	}
+	if (level == 0)
 		return true; // pressed
-	else if (level == HIGH)
+	else if (level == 1)
 		return false; //not pressed
 
 	return false;
@@ -81,16 +180,20 @@ bool XPT_2046_RDL::XPTIRQIsPressed()
 
 /*! 
 	@brief Read the touch screen sensor Data
-	@return The readbuffer
+	@return The readbuffer data
 */
 int XPT_2046_RDL::XPTReadSensor(int Command){
 	char ReadBuffer[MAX_LEN_BUFFER];
 	char WriteBuffer[MAX_LEN_BUFFER];
-
+	int spiErrorStatus = 0;
 	memset(WriteBuffer, 0, sizeof(ReadBuffer));
 	memset(ReadBuffer, 0, sizeof(ReadBuffer));
 	WriteBuffer[0] = Command;
-	bcm2835_spi_transfernb(WriteBuffer, ReadBuffer, sizeof(WriteBuffer));
+	spiErrorStatus = lgSpiXfer(_spiHandle, (const char *)WriteBuffer,(char *)ReadBuffer, sizeof(WriteBuffer));
+	if (spiErrorStatus <0 ) 
+	{
+		fprintf(stderr, "Error : spiWriteDataBuffer 1: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+	}
 if( _DEBUGXPT_)printf("ReadBuffer[0]=%02x ReadBuffer[1]=%02x ReadBuffer[2]=%02x\n", ReadBuffer[0], ReadBuffer[1], ReadBuffer[2]);
 	return((ReadBuffer[1]<<4) + (ReadBuffer[2]>>4));
 }
@@ -101,19 +204,6 @@ if( _DEBUGXPT_)printf("ReadBuffer[0]=%02x ReadBuffer[1]=%02x ReadBuffer[2]=%02x\
 	@param yp the Y position 
 */
 void XPT_2046_RDL::XPTReadXY(int *xp, int *yp){
-
-	bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
-	bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_1024);
-	if (_TSSPICEX_pin == 0)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
-	}else if (_TSSPICEX_pin == 1)
-	{
-		bcm2835_spi_chipSelect(BCM2835_SPI_CS1);
-		bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS1, LOW);
-	}
-
 	*xp = XPTReadSensor(XPT_START | XPT_XPOS | XPT_SER);
 	*yp = XPTReadSensor(XPT_START | XPT_YPOS | XPT_SER);
 

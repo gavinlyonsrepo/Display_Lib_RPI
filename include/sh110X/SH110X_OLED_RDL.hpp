@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstdbool>
-#include <bcm2835.h>
+#include <lgpio.h>
 #include "bicolor_graphics_RDL.hpp"
 
 //  SH110X register command Set
@@ -52,13 +52,19 @@
 #define SH110X_DATA_BYTE         0X40
 #define SH110X_RDL_command(Reg)  I2C_Write_Byte(Reg, SH110X_COMMAND_BYTE)
 #define SH110X_RDL_data(Data)    I2C_Write_Byte(Data, SH110X_DATA_BYTE)
-#define  SH110X_RDL_ADDR         0x3C /**< I2C address */
+#define SH110X_RDL_ADDR         0x3C /**< I2C address */
 
 
-// GPIO abstraction( only needed for reset pin if present on device)
-#define Display_RST_SetHigh  bcm2835_gpio_write(_Display_RST, HIGH)
-#define Display_RST_SetLow   bcm2835_gpio_write(_Display_RST, LOW)
-#define Display_RST_SetDigitalOutput bcm2835_gpio_fsel(_Display_RST, BCM2835_GPIO_FSEL_OUTP)
+// GPIO abstraction( only needed for reset pin if present on device) _Display_RST
+#define SH110X_RST_SetHigh  lgGpioWrite(_GpioHandle, _Display_RST, 1)
+#define SH110X_RST_SetLow   lgGpioWrite(_GpioHandle,_Display_RST, 0)
+#define SH110X_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_RST, 0)
+
+// GPIO open and close
+#define SH110X_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
+#define SH110X_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
+// GPIO free modes
+#define SH110X_GPIO_FREE_RST lgGpioFree(_GpioHandle , _Display_RST)
 
 /*!
 	@brief class to control OLED and define buffer
@@ -82,7 +88,7 @@ class SH110X_RDL : public bicolor_graphics  {
 	void OLEDFillScreen(uint8_t pixel, uint8_t mircodelay);
 	void OLEDFillPage(uint8_t page_num, uint8_t pixels,uint8_t delay);
 
-	void OLEDbegin(OLED_IC_type_e = SH1106_IC, uint16_t I2C_speed = 0, uint8_t I2c_address= SH110X_RDL_ADDR , bool I2C_debug = false, int8_t ResetPin = -1);
+	rpiDisplay_Return_Codes_e OLEDbegin(OLED_IC_type_e = SH1106_IC, bool I2C_debug = false, int8_t ResetPin = -1, int gpioDev = 0);
 	rpiDisplay_Return_Codes_e OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer);
 	void OLEDinit(void);
 	void OLEDPowerDown(void);
@@ -92,12 +98,9 @@ class SH110X_RDL : public bicolor_graphics  {
 	void OLEDContrast(uint8_t OLEDcontrast);
 	void OLEDInvert(bool on);
 
-	rpiDisplay_Return_Codes_e OLED_I2C_ON(void);
-	void OLED_I2C_Settings(void);
-	void OLED_I2C_OFF(void);
-	uint16_t getI2Cspeed(void);
-	void setI2Cspeed(uint16_t);
-	uint8_t OLEDCheckConnection(void);
+	rpiDisplay_Return_Codes_e OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags);
+	rpiDisplay_Return_Codes_e OLED_I2C_OFF(void);
+	int OLEDCheckConnection(void);
 	uint8_t OLEDI2CErrorGet(void);
 	uint16_t OLEDI2CErrorTimeoutGet(void);
 	void OLEDI2CErrorTimeoutSet(uint16_t);
@@ -116,12 +119,14 @@ class SH110X_RDL : public bicolor_graphics  {
 	void SH1106_begin(void);
 	void SH1107_begin(void);
 
-	uint16_t _I2C_speed =  BCM2835_I2C_CLOCK_DIVIDER_626 ; /**< Speed of I2C bus interface */
-	uint8_t _I2C_address = SH110X_RDL_ADDR ; /**< I2C address */
+	int _OLEDI2CAddress = SH110X_RDL_ADDR; /**< I2C address for I2C module PCF8574 backpack on OLED*/
+	int _OLEDI2CDevice = 1; /**< An I2C device number. */
+	int _OLEDI2CFlags =  0;   /**< Flags which modify an I2C open command. None are currently defined. */
+	int _OLEDI2CHandle = 0;  /**< A number referencing an object opened by one of lgI2cOpen */
 	bool _I2C_DebugFlag = false; /**< I2C debug flag default false  */
 	uint16_t _I2C_ErrorDelay = 100; /**<I2C delay(in between retry attempts) in event of error in mS*/
 	uint8_t _I2C_ErrorRetryNum = 3; /**< In event of I2C error number of retry attempts*/
-	uint8_t _I2C_ErrorFlag = 0x00; /**< In event of I2C error holds bcm2835 I2C reason code 0x00 = success*/
+	int _I2C_ErrorFlag = 0; /**< In event of I2C error holds lgpio error code*/
 
 	uint8_t _OLED_WIDTH=128;      /**< Width of OLED Screen in pixels */
 	uint8_t _OLED_HEIGHT=64;    /**< Height of OLED Screen in pixels */
@@ -130,7 +135,10 @@ class SH110X_RDL : public bicolor_graphics  {
 	uint8_t* OLEDbuffer = nullptr; /**< pointer to buffer which holds screen data */
 
 	OLED_IC_type_e _OLED_IC_type = SH1106_IC;  /**< Enum to hold TFT type  */
-	int8_t _Display_RST = -1; /**< Reset pin only needed of reset pin is present on display*/
 
+	// If reset pin is present on device
+	int8_t _Display_RST = -1; /**< Reset pin only needed of reset pin is present on display*/
+	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _GpioHandle = 0; /** This returns a handle to a  device. */
 
 };

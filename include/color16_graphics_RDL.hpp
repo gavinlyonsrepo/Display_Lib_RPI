@@ -8,37 +8,50 @@
 #pragma once
 
 // Includes
-#include <iostream>
 #include <cstdio>
 #include <cstdint>
 #include <cstdbool>
-#include <bcm2835.h> // Dependency
+#include <lgpio.h>
 #include "print_data_RDL.hpp"
 #include "font_data_RDL.hpp"
 #include "common_data_RDL.hpp"
 
-// defines 
+// defines
 #define _swap_int16_t_RDL(a, b) { int16_t t; t = a; a = b; b = t;}
 
-// GPIO abstraction 
-#define Display_DC_SetHigh  bcm2835_gpio_write(_Display_DC, HIGH)
-#define Display_DC_SetLow  bcm2835_gpio_write(_Display_DC, LOW)
-#define Display_RST_SetHigh  bcm2835_gpio_write(_Display_RST, HIGH)
-#define Display_RST_SetLow  bcm2835_gpio_write(_Display_RST, LOW)
-#define Display_CS_SetHigh bcm2835_gpio_write(_Display_CS, HIGH)
-#define Display_CS_SetLow bcm2835_gpio_write(_Display_CS, LOW)
-#define Display_SCLK_SetHigh bcm2835_gpio_write(_Display_SCLK, HIGH)
-#define Display_SCLK_SetLow  bcm2835_gpio_write(_Display_SCLK, LOW)
-#define Display_SDATA_SetHigh bcm2835_gpio_write(_Display_SDATA, HIGH)
-#define Display_SDATA_SetLow  bcm2835_gpio_write(_Display_SDATA,LOW)
-#define Display_MISO_Read bcm2835_gpio_lev(_Display_MISO)
-
-#define Display_DC_SetDigitalOutput bcm2835_gpio_fsel(_Display_DC, BCM2835_GPIO_FSEL_OUTP)
-#define Display_RST_SetDigitalOutput bcm2835_gpio_fsel(_Display_RST, BCM2835_GPIO_FSEL_OUTP)
-#define Display_SCLK_SetDigitalOutput bcm2835_gpio_fsel(_Display_SCLK, BCM2835_GPIO_FSEL_OUTP)
-#define Display_SDATA_SetDigitalOutput bcm2835_gpio_fsel(_Display_SDATA, BCM2835_GPIO_FSEL_OUTP)
-#define Display_CS_SetDigitalOutput bcm2835_gpio_fsel(_Display_CS, BCM2835_GPIO_FSEL_OUTP)
-#define Display_MISO_SetDigitalInput bcm2835_gpio_fsel(_Display_MISO, BCM2835_GPIO_FSEL_INPT)
+// lgpio abstraction
+// GPIO levels
+#define Display_DC_SetHigh  lgGpioWrite(_GpioHandle, _Display_DC, 1)
+#define Display_DC_SetLow  lgGpioWrite(_GpioHandle ,_Display_DC, 0)
+#define Display_RST_SetHigh  lgGpioWrite(_GpioHandle, _Display_RST, 1)
+#define Display_RST_SetLow  lgGpioWrite(_GpioHandle, _Display_RST, 0)
+#define Display_CS_SetHigh  lgGpioWrite(_GpioHandle ,_Display_CS, 1)
+#define Display_CS_SetLow  lgGpioWrite(_GpioHandle, _Display_CS, 0)
+#define Display_SCLK_SetHigh  lgGpioWrite(_GpioHandle, _Display_SCLK, 1)
+#define Display_SCLK_SetLow  lgGpioWrite(_GpioHandle, _Display_SCLK, 0)
+#define Display_SDATA_SetHigh lgGpioWrite(_GpioHandle, _Display_SDATA, 1)
+#define Display_SDATA_SetLow  lgGpioWrite(_GpioHandle, _Display_SDATA,0)
+#define Display_MISO_Read  lgGpioRead(_GpioHandle, _Display_MISO)
+// GPIO Set IO
+#define Display_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_RST,  0);
+#define Display_DC_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_DC,  0);
+#define Display_CS_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_CS,  0);
+#define Display_SCLK_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_SCLK,  0);
+#define Display_SDATA_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_SDATA,  0);
+#define Display_MISO_SetDigitalInput lgGpioClaimInput(_GpioHandle, 0,_Display_MISO);
+// GPIO open and close
+#define Display_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
+#define Display_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
+// GPIO free modes
+#define Display_GPIO_FREE_DC lgGpioFree(_GpioHandle , _Display_DC)
+#define Display_GPIO_FREE_RST lgGpioFree(_GpioHandle , _Display_RST)
+#define Display_GPIO_FREE_CS lgGpioFree(_GpioHandle , _Display_CS)
+#define Display_GPIO_FREE_CLK lgGpioFree(_GpioHandle , _Display_SCLK)
+#define Display_GPIO_FREE_SDATA lgGpioFree(_GpioHandle , _Display_SDATA)
+//HW SPI  related
+#define Display_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
+#define Display_CLOSE_SPI lgSpiClose(_spiHandle)
+#define Display_SPI_BLK_SIZE 65536 /**< This is maximum block size of SPI Transaction that lgpio library handles by default*/
 
 // Color definitions 16-Bit Color Values R5G6B5
 #define RDLC_BLACK   0x0000
@@ -73,13 +86,13 @@ class color16_graphics:public display_Fonts, public Print  {
 
 	color16_graphics(); // Constructor
 	~color16_graphics(){};
-	
+
 	// Screen related
 	// Defined in the display sub class
 	virtual void setAddrWindow(uint16_t, uint16_t, uint16_t, uint16_t) = 0;
 	void fillScreen(uint16_t color);
 	void setCursor(int16_t x, int16_t y);
-	
+
 	// Shapes and lines
 	void drawPixel(uint16_t, uint16_t, uint16_t);
 	void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
@@ -92,21 +105,21 @@ class color16_graphics:public display_Fonts, public Print  {
 
 	void drawRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t color);
 	void fillRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t color);
-	
+
 	void drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 	void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
 	void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 	void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 
-	// Text related functions 
+	// Text related functions
 	virtual size_t write(uint8_t) override;
 	rpiDisplay_Return_Codes_e writeChar( int16_t x, int16_t y, char value );
 	rpiDisplay_Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
 	void setTextWrap(bool w);
 	void setTextColor(uint16_t c, uint16_t bg);
 	void setTextColor(uint16_t c);
-	
+
 	// Bitmap & Icon
 	rpiDisplay_Return_Codes_e drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t bgcolor, const unsigned char character[]);
 	rpiDisplay_Return_Codes_e drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const uint8_t *pBmp);
@@ -119,37 +132,39 @@ protected:
 	void pushColor(uint16_t color);
 	void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color);
 	void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color);
-	
+
 	void writeCommand(uint8_t);
 	void writeData(uint8_t);
 	void spiWrite(uint8_t);
-	void spiWriteSoftware(uint8_t spidata);
-	//uint8_t spiRead(uint8_t commandByte);
-	//uint8_t spiReadSoftware(uint8_t commandByte);
-	void spiWriteDataBuffer(uint8_t* spidata, uint32_t len);
+	void spiWriteDataBuffer(uint8_t* spidata, int len);
+	//uint8_t spiRead(uint8_t commandByte); // TODO
+	//uint8_t spiReadSoftware(uint8_t commandByte); // TODO
 
-	bool _hardwareSPI=true; /**< True for Hardware SPI on , false fpr Software SPI on*/
-	
-	bool _textwrap = true;              /**< wrap text around the screen on overflow*/
-	uint16_t _textcolor = 0xFFFF ;      /**< 16 bit ForeGround color for text*/
-	uint16_t _textbgcolor =0x0000 ;     /**< 16 bit BackGround color for text*/
+
+	bool _textwrap = true;           /**< wrap text around the screen on overflow*/
+	uint16_t _textcolor = 0xFFFF ;   /**< 16 bit ForeGround color for text*/
+	uint16_t _textbgcolor = 0x0000 ; /**< 16 bit BackGround color for text*/
 
 	int16_t _cursorX = 0; /**< Current X co-ord cursor position */
 	int16_t _cursorY = 0; /**< Current Y co-ord cursor position */
 	uint16_t _width;      /**< Display w as modified by current rotation*/
-	uint16_t _height;    /**< Display h as modified by current rotation*/
-	uint8_t _XStart= 0;     /**< Used to store _colstart changed by current rotation */
-	uint8_t _YStart= 0;     /**< Used to store _rowstart changed by current rotation */
+	uint16_t _height;     /**< Display h as modified by current rotation*/
+	uint8_t _XStart= 0;   /**< Used to store _colstart changed by current rotation */
+	uint8_t _YStart= 0;   /**< Used to store _rowstart changed by current rotation */
 
 	int8_t _Display_DC;    /**< GPIO for data or command line */
 	int8_t _Display_RST;   /**< GPIO for reset line */
 	int8_t _Display_CS;    /**< GPIO for chip select line,  Software SPI only */
 	int8_t _Display_SCLK;  /**< GPIO for Clock line,  Software SPI only */
 	int8_t _Display_SDATA; /**< GPIO for MOSI line,  Software SPI only */
-	int8_t _Display_MISO;  /**< GPIO for  MISO line,  Software SPI only */
-	
-	uint16_t _HighFreqDelay = 0; /**< uS GPIO Communications delay, SW SPI ONLY */
+	int8_t _Display_MISO;  /**< GPIO for  MISO line, Software SPI only*/
 
+	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _GpioHandle = 0;        /** This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
+
+	bool _hardwareSPI=true;      /**< True for Hardware SPI on , false fpr Software SPI on*/
+	uint16_t _HighFreqDelay = 0; /**< uS GPIO Communications delay, SW SPI ONLY */
+	int _spiHandle = 0;          /**< Hold a handle for the SPI device on the channel.*/
 private:
 
 };

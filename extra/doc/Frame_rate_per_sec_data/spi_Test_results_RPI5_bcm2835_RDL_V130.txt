@@ -1,0 +1,53 @@
+Spi FPS test resultsDisplay_Lib_RPi  Version 1.3.0 using bcm2835 library as low level interface
+
+CH1115 HW SPI
+	| test no | SPICLK_FREQ | BCM2835_SPI_CLOCK_DIVIDER | FPS result  | freq|
+	| ---- |  ---- |  ---- | ----  | ---- |
+	|1| 256| BCM2835_SPI_CLOCK_DIVIDER_256 |120 |  ~1.6 MHz RPI3 |
+	|2| 64 | BCM2835_SPI_CLOCK_DIVIDER_64 | 270 | ~6 MHZ RPI3 |
+	|3|  8 | BCM2835_SPI_CLOCK_DIVIDER_8 | 470 | ~50 MHZ RPI3 |
+CH1115 SW SPI
+	Speed test results measured frame rate 93 fps, 1:49s to count 10000
+
+SSD106 I2C
+	-# Pre Version 2.0 results data for test file, left in for reference
+	-# I2C_Speed = 0 Fps 7 bcm2835_i2c_set_baudrate(100000)
+	-# I2C_Speed = 2500 Fps 6 bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500)
+	-# I2C_Speed = 626 Fps 16 bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_626)
+	-# I2C_Speed = 150 Fps 24 bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_150)
+	-# I2C_Speed = 148 FPS 25 bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_148)
+
+ERM19264 HW SPI
+	Measured:: frame rate 214 fps at 64 clock divider on Rpi 3 v101
+	Measured:: frame rate 350 fps at 16 clock divider on Rpi 3 v101
+ERM19264 SW SPI
+	Measured frame rate = 66 fps, 1:49 min to 10000, v101, rpi3
+
+NOKIA 51110  Hardware SPI
+	Test results RPI3, Frame rate per Second, FPS.
+	FPS 780,  BCM2835_SPI_CLOCK_DIVIDER_64  SPICLK_FREQ = 64,  6.250Mhz
+	FPS 500,  BCM2835_SPI_CLOCK_DIVIDER_128 SPICLK_FREQ = 128, 3.125MHz
+	FPS 150,  BCM2835_SPI_CLOCK_DIVIDER_512 SPICLK_FREQ = 512, 781.25kHz
+NOKIA 51110  Software SPI
+	FPS 215 with _LCDHighFreqDelay set to 0uS
+	FPS  60 with _LCDHighFreqDelay set to 2uS
+
+St7789
+	BMP test
+		814 frames, 10 sec, 81.3904 fps  at 8Mhz SPI Baud rate, HW SPI
+	test graphics text
+		16 FPS recorded V 1.0.2 at 8MHz TFT SPI0
+		10 FPS recorded V 1.0.2 at 8MHz TFT SPI1
+		3 FPS recorded  V 1.0.2 at software SPI
+
+ili9341
+	bitmap test 601 811 frames, 10 sec, 81.0156 fps at 8Mhz SPI Baud rate, HW SPI
+	mandlebort set at SPI SPEED 25Mhz = Time Taken :: ~670 mS
+
+st7735
+	bitmap FPS
+		811 frames, 10 sec, 81.0156 fps at 8Mhz SPI Baud rate, HW SPI
+	bitmap text
+		58 FPS recorded V 1.0.1 at 8MHz
+
+

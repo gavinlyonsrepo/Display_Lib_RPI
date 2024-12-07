@@ -6,10 +6,10 @@
 #include "../include/common_data_RDL.hpp"
 
 /*!
-	@brief  get the library version number 
+	@brief  get the library version number
 	@return the library version number eg 120 = 1.2.0
 */
 uint16_t GetRDLibVersionNum(void)
 {
-	return 130;
+	return 200;
 }

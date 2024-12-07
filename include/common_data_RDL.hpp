@@ -8,11 +8,16 @@
 #pragma once
 
 #include <cstdint>
+#include <chrono>
+#include <thread>
+#include <lgpio.h>
 
 uint16_t GetRDLibVersionNum(void);
 
-#define delayMicroSecRDL bcm2835_delayMicroseconds /**< bcm2835 library Micro second delay abstraction */
-#define delayMilliSecRDL bcm2835_delay             /**< bcm2835 library Milli second delay abstraction */
+// Delay abstractions Macros  
+#define delaySecRDL lguSleep   /**<  second delay abstraction */
+#define delayMilliSecRDL(x) std::this_thread::sleep_for(std::chrono::milliseconds(x)) /**< milli second delay abstraction */
+#define delayMicroSecRDL(x) std::this_thread::sleep_for(std::chrono::microseconds(x)) /**<  micro second delay abstraction */
 
 /*! Enum to define a standard return code for most functions that return failures*/
 enum rpiDisplay_Return_Codes_e : uint8_t
@@ -33,12 +38,17 @@ enum rpiDisplay_Return_Codes_e : uint8_t
 	rpiDisplay_CustomCharLen = 13,         /**< CustomChar array must always be 5 bytes long*/
 	rpiDisplay_BufferSize = 14,            /**< Size of the Buffer is incorrect: BufferSize(vertical)!=(w*(h/8)*/
 	rpiDisplay_BufferNullptr = 15,         /**< The Buffer data array is an invalid pointer object*/
-	rpiDisplay_SPIbeginFail = 16,          /**< bcm2835_spi_begin() has failed, running as root?*/
-	rpiDisplay_SPICEXPin = 17,             /**< SPICE_PIN value incorrect must be 0 or 1 */
-	rpiDisplay_I2CbeginFail = 18,          /**< bcm2835_i2c_begin() has failed, running as root?*/
-	rpiDisplay_ShapeScreenBounds = 19,     /**< Shape is outside screen bounds, check x and y */
-	rpiDisplay_MallocError = 20,           /**< malloc could not assign memory*/
-	rpiDisplay_WrongInputPCBType = 21      /**< Wrong input PCB type chosen */
+	rpiDisplay_SPIOpenFailure = 16,        /**< Failed to open HW SPI , lgpio*/
+	rpiDisplay_SPICloseFailure = 17,       /**< Failed to close HW SPI , lgpio */
+	rpiDisplay_I2CbeginFail = 18,          /**< lgI2cOpen has failed, lgpio*/
+	rpiDisplay_I2CcloseFail = 19,          /**< lgI2cClose has failed, lgpio*/
+	rpiDisplay_ShapeScreenBounds = 20,     /**< Shape is outside screen bounds, check x and y */
+	rpiDisplay_MallocError = 21,           /**< malloc could not assign memory*/
+	rpiDisplay_WrongInputPCBType = 22,     /**< Wrong input PCB type chosen */
+	rpiDisplay_GpioChipDevice = 23,        /**< Failed to open or close Gpio chip device, lgpio*/
+	rpiDisplay_GpioPinClaim = 24,          /**< Failed to claim a GPIO for output or input, lgpio*/
+	rpiDisplay_GpioPinFree = 25,           /**< Failed to free a GPIO for output or input, lgpio*/
+	rpiDisplay_WrongModeChosen = 26        /**< Wrong SPI communication mode chosen by user */
 };
 
 

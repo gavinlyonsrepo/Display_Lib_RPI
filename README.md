@@ -17,7 +17,7 @@
     * [File-system](#file-system)
     * [Tool chain](#tool-chain)
   * [Notes](#notes)
-    * [Raspberry Pi five](#raspberry-pi-five)
+    * [Older versions](#older-versions)
 
 
 ## Overview
@@ -26,32 +26,43 @@
 * Author: Gavin Lyons.
 * Description:
 
-0. A C++ Library to connect electronic displays to Raspberry Pi single board computers.
-1. Dynamic install-able Raspberry Pi C++ library.
-2. 15 fonts included, new Fonts can easily be added by user
+0. A C++ Library to connect electronic displays to linux based single board computers.
+1. Dynamic install-able Linux C++ library.
+2. 16 fonts included, new Fonts can easily be added by user
 3. Common graphics + print class included
-4. Dependency: [bcm2835 Library](http://www.airspayce.com/mikem/bcm2835/), Provides SPI,I2C, system timer and GPIO control.
+4. Dependency: [lgpio C Library](https://abyz.me.uk/lg/lgpio.html), Provides SPI,I2C, and GPIO control.
 5. Mutiple displays supported, see supported-devices, new components can be added.
+6. Tested and developed on Raspberry Pis see tool chain for more details.
 
 ## Installation
 
-1. Install the dependency bcm2835 Library if not installed
-	* Install the C libraries of bcm2835, [Installation instructions here](http://www.airspayce.com/mikem/bcm2835/)
+1. Download & Install the dependency lgpio C Library, if not installed.
+	* lgpio is a C library for Linux Single Board Computers(SBC) which allows control of the General Purpose Input Output pins. 
+	* Install the lgpio, [Installation instructions here](https://abyz.me.uk/lg/download.html)
+
+```sh
+cd ~/Downloads
+wget http://abyz.me.uk/lg/lg.zip
+unzip lg.zip
+cd lg
+make
+sudo make install
+```
 
 2. Download the Display_Lib_RPI library
 	* Open a Terminal in a folder where you want to download,build & test library
 	* Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/1.3.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.0.0.tar.gz | tar xz
 ```
 
-3. Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
+3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
 	* It will be installed to usr/local/lib and usr/local/include by default. 
 	* You can run 'make help' here to see other make options(uninstall etc).
 
 ```sh
-cd Display_Lib_RPI-1.3.0
+cd Display_Lib_RPI-2.0.0
 make
 sudo make install
 ```
@@ -59,33 +70,22 @@ sudo make install
 
 ## Test
 
-1. Next step is to test your display and installed library with the included test example files, connect display.
+1. Next step is to test your display and installed library with the included test example files, connect up display.
 2. Enter the example folder.
-3. Enter the appropriate category sub-folder for your type of display.
-4. Edit the makefile in that folder to select the desired display and example file path.
+3. Edit the makefile in that folder to select the desired example file path for your Display.
 		Simply edit "SRC" variable at top of the makefile. In the "User SRC directory Option Section" at top of file.
 		Pick an example "SRC" directory path and One ONLY.
-5. Run 'make' commmand. This builds the examples file using the just installed library,
+4. Run 'make' commmand. This builds the examples file using the just installed library,
 		and creates a test executable file in "Bin".
-6. Run 'make run' to run that built executable file. 
-	This wraps "sudo" as the bcm2835 requires root permissions by default.
-7. User should now see the test routine in that file running on the display. Run 'make help' to see other options.
+5. Run 'make run' to run that built executable file. 
+6. User should now see the test routine in that file running on the display. Run 'make help' to see other options.
 
 ```sh
 cd examples
-cd <your display category name path here>
+// edit the makefile in examples folder by picking the "SRC" file path you want to run
 make
 make run
 ```
-
-Display category name path table:
-
-| # | Display category name path | Display types |
-| ------ | ------ |  ------ |
-| 1 | seven_segment_displays | LED segment displays |
-| 2 | color16_displays| 16-bit colour graphic displays|
-| 3 | bicolor_displays| 1-bit colour graphic displays |
-| 4 | character_displays | Character Displays |
 
 ## Documentation
 
@@ -118,19 +118,19 @@ The font system readme for the graphic displays [is here at link.](extra/doc/fon
 
 ### File system
 
-There are 5 makefiles.
+There are 2 makefiles.
 
 1. Root directory, builds and installs library at a system level.
-2. Example directory (4 off) , builds a chosen example file using installed library to an executable.
-which can then be run. There is one makefile in each of the four categories of components
-in example folder.
+2. Example directory, builds a chosen example file using installed library to an executable.
+which can then be run.  An editable list of file paths to examples can be found in makefile.
 
 Library naming :
 
 1. library name = librpidisplaygl
-2. Linker flags for complier = -lrpidisplaygl (also needs -lbcm2835 for bcm2835 library)
+2. Linker flags for complier = -lrpidisplaygl (also needs -llgpio for lgpio library)
 3. Library File suffix  = RDL
 4. Project name = Display_Lib_RPI
+5. Installed size = ~330 KiB
 
 Basic project overview, see API documentation for more detailed diagrams :
 
@@ -139,15 +139,20 @@ Basic project overview, see API documentation for more detailed diagrams :
 ### Tool chain
 
 * Development Tool chain.
-	1. Raspberry PI 3 model b
+	1. Raspberry PI 3 model b & Raspberry PI 5 
 	2. C++, g++ (Debian 12.2.0)
 	3. Raspbian , Debian 12 bookworm OS, 64 bit.
-	4. kernel : aarch64 Linux 6.1.0-rpi7-rpi-v8
-	5. bcm2835 Library v1.75 dependency.
+	4. lgpio library Version Number :: 131584
 
 ## Notes
 
-### Raspberry Pi five
+### Older versions
 
-Will not work on Raspberry 5 at present as the bcm2835 Library dependency is not updated
-to work yet on Rpi5.
+The last version of Display_lib_RPI (V1.3.0) which used the bcm2835 library as a dependency low level interface 
+is in releases and can still be downloaded and used. Version 1.3.0 will NOT work on raspberry pi 5 and uses direct register access.
+It is generally speaking faster than the lgpio.
+
+The lgpio library  works with linux device drivers like spidev.
+Using Linux device drivers allow the library to work on Raspberry 5 as well as other linux computers that lgpio can be installed on 
+This provides more Flexibility, portability, better API, user space access,better compatibility and other advantages.
+
