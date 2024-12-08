@@ -20,7 +20,7 @@
 * Description:
 
 0. C++ Library for a TFT SPI LCD, ST7735 Driver
-1. Dynamic install-able Raspberry Pi C++ library.
+1. Dynamic install-able Linux based Single Board ComputersC++ library.
 2. Inverse colour, rotate, sleep, idle  & vertical scroll modes supported.
 3. Graphics + print class included.
 4. 24 bit colour , 16 bit color & bi-color Bitmaps supported.

@@ -5,8 +5,8 @@
 		 This file contains the "main" function for project, I2C test
  		 to test the Display_Lib_RPI::HD44780_LCD library
 
-	@note 
-		-# Test 1001 :: I2c Test
+	@test 
+		-# Test 1003 :: I2c Test
 */
 
 // Section: Included library

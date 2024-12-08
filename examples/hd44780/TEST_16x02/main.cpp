@@ -4,7 +4,7 @@
 	@brief 
 		 This file contains the "main" function for  project, a set of test sequence
  		 to test the Display_Lib_RPI::HD44780_LCD library
-	@note 
+	@test
 		-# Test 1 :: Hello world
 		-# Test 2 :: Move the cursor test
 		-# Test 3 :: Scroll the display test

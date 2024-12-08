@@ -59,7 +59,6 @@ it was found that by default the baudrate was set to 100,000 baud. By modifying 
 
 ```sh
 param=i2c_arm=on,i2c_arm_baudrate=400000
-#dtparam=i2s=on
 ```
 
 3. In the event of an error writing a byte, debug info with error code will be written to console. 

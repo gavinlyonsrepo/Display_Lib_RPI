@@ -15,7 +15,7 @@
 * Description:
 
 0. C++ Library for Nokia 5110 LCD, PCD8544 Driver. 84 x 48 pixels.
-1. Dynamic install-able Raspberry Pi C++ library.
+1. Dynamic install-able Linux based Single Board Computers C++ library.
 2. Invert colour, rotate, sleep, contrast bias control supported.
 3. Bitmaps supported.
 4. Hardware and Software SPI
@@ -80,7 +80,7 @@ for chip select. In hardware SPI user can pick SPI bus speed. SPI must be turned
 | HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1|
 | HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.|
 | HWSPI_FLAGS | 0|  mode 0 for this device |
-| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls /dev/gpiochip |
 
 ### File system
 

@@ -93,7 +93,7 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 
 Tested and developed on:
 
-* Size 2.4" SPI Serial  IPS color TFT LCD
+* Size 2.4 inch SPI Serial  IPS color TFT LCD
 * Resolution: 240 (H) RGB x 320 (V)
 * Color Depth: 262K/65K (65K used)
 * Control chip:ILI9341

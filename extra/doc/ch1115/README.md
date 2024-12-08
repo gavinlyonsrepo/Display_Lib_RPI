@@ -20,8 +20,8 @@
 * Description :
 
 0. C++ Library to support the ER-OLEDM1.09-1 128X64 OLED Display Module
-   driven by the CH1115 controller for the Raspberry PI.
-1. Raspberry Pi C++ library.
+   driven by the CH1115 controller.
+1. Linux based Single Board Computers C++ library.
 2. Inverse colour, vertical rotate, sleep, fade effect, horizontal scroll and contrast control.
 3. Bitmaps supported.
 4. Hardware and Software SPI
@@ -36,12 +36,13 @@
 
 ## Hardware
 
-CH1115 is a single-chip CMOS OLED driver with controller for organic light emitting diode dot-matrix graphic display system. CH1115 consists of 128 segments, 64 commons that can support a maximum display resolution of 128 X 64. It is designed for Common Cathode type OLED panel. ER-OLEDM1.09-1W-SPI is a White 1.09" OLED Display Panel with Breakout Board. This module is a combination of the two.(controller and OLED)
+CH1115 is a single-chip CMOS OLED driver with controller for organic light emitting diode dot-matrix graphic display system. CH1115 consists of 128 segments, 64 commons that can support a maximum display resolution of 128 X 64. It is designed for Common Cathode type OLED panel. ER-OLEDM1.09-1W-SPI is a White 1.09 inch OLED Display Panel with Breakout Board. This module is a combination of the two.(controller and OLED)
 
 For SWSPI pick any GPIO you want for the 5 control lines.
 
-| pin no| GPIO HWSPI | pin name | pin desc |
-|---|---|---| ---|
+
+| pin no | GPIO HWSPI | pin name | pin desc |
+|-----|-----|-----|-----|
 | 1 | n/a |Gnd | Ground |
 | 2 | n/a |VCC | voltage supply |
 | 3 | SPISCLK GPIO 11 |SCL | Serial clock input |
@@ -49,6 +50,8 @@ For SWSPI pick any GPIO you want for the 5 control lines.
 | 5 | Any you want | RES | This pin is reset signal input.  |
 | 6 | Any you want | DC | This pin is Data or Command control pin. |
 | 7 | SPICEO GPIO 8 | CS | This pin is the chip select input.  |
+
+
 
 [![ wiring ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ch1115.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ch1115.png)
 
@@ -92,7 +95,7 @@ for chip select. In hardware SPI user can pick SPI bus speed. SPI must be turned
 | HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1|
 | HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.|
 | HWSPI_FLAGS | 0|  mode 0 for this device |
-| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls /dev/gpiochip* |
 
 ### Bitmaps
 

@@ -1,10 +1,10 @@
 /*! 
-	@file examples/st7735/Hello_world/main.cpp
+	@file examples/st7735/Multiple_displays/main.cpp
 	@brief Multiple displays on hardware  SPI one ST7735 lcd and One cH1115 oled test
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test 
-		-# 103 Hello World multiple displays Hardware SPI
+		-# 2001 multiple displays Hardware SPI
 */
 
 // Section ::  libraries 

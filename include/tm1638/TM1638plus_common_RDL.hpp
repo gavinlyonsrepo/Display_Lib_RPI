@@ -95,7 +95,7 @@ protected:
 	uint8_t _CLOCK_IO; /**<  GPIO connected to CLk on Tm1638  */
 	const uint8_t _TMDisplaySize = 8; /**< size of display in digts */
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
-	int _GpioHandle = 0; /** This returns a handle to a gpiochip device. */
+	int _GpioHandle = 0; /**< This returns a handle to a gpiochip device. */
 	const unsigned char * pFontSevenSegptr = SevenSeg; /**<  Pointer to the seven segment font data table */
 
 private:

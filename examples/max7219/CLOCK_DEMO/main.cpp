@@ -8,6 +8,8 @@
 			-# Hardware SPI Project Name: MAX7219_7SEG_RPI
 	
 	@note not fully tested as only one display available
+	@test
+		-# Test 34 Clock demonstration 
 */
 
 // Libraries

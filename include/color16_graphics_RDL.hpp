@@ -160,7 +160,7 @@ protected:
 	int8_t _Display_MISO;  /**< GPIO for  MISO line, Software SPI only*/
 
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
-	int _GpioHandle = 0;        /** This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
+	int _GpioHandle = 0;        /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
 	bool _hardwareSPI=true;      /**< True for Hardware SPI on , false fpr Software SPI on*/
 	uint16_t _HighFreqDelay = 0; /**< uS GPIO Communications delay, SW SPI ONLY */

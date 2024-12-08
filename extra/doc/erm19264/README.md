@@ -19,7 +19,7 @@
 * Title : Library for ERM19264-5 v3 LCD (UC1609C controller)
 * Description :
 
-1. Dynamic install-able system level Raspberry Pi C++ library.
+1. Dynamic install-able system level Linux based Single Board Computers C++ library.
 2. Inverse, Scroll, rotate and contrast control.
 3. Sleep mode.
 4. Bitmaps supported.
@@ -84,7 +84,7 @@ for chip select. In hardware SPI user can pick SPI bus speed. SPI must be turned
 | HWSPI_CHANNEL | 0 |A SPI channel, >= 0. Which Chip enable pin to use usually 0 or 1|
 | HWSPI_SPEED |  1000000| The speed of serial communication in bits per second.|
 | HWSPI_FLAGS | 0|  mode 0 for this device |
-| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls/dev/gpiochip |
+| GPIO_CHIP_DEVICE | 0| gpio chip device >= 0, check ls /dev/gpiochip |
 
 ### Bitmaps
 

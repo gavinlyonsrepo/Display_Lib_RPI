@@ -20,8 +20,8 @@
 * Description :
 
 0. Library to support the I2C 128X64 OLED Display Module
-   driven by the SSD1306 controller for the Raspberry PI.
-1. Dynamic install-able system level Raspberry Pi C++ library.
+   driven by the SSD1306 controller for Linux based SBC.
+1. Dynamic install-able system level C++ library.
 2. Inverse color, rotate, sleep, scroll and contrast control.
 3. Bitmaps supported.
 4. Hardware I2C
@@ -67,7 +67,6 @@ it was found that by default the baudrate was set to 100,000 baud. By modifying 
 
 ```sh
 param=i2c_arm=on,i2c_arm_baudrate=400000
-#dtparam=i2s=on
 ```
 
 3. In the event of an error writing a byte, debug info with error code will be written to console. 

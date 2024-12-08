@@ -1,6 +1,6 @@
 [![Website](https://img.shields.io/badge/Website-Link-blue.svg)](https://gavinlyonsrepo.github.io/)  [![Rss](https://img.shields.io/badge/Subscribe-RSS-yellow.svg)](https://gavinlyonsrepo.github.io//feed.xml)  [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
 
-# Raspberry PI Display Library
+# Display Library for Linux based Single Board Computers
 
 [![logo image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/logo.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/logo.png)
 
@@ -59,7 +59,6 @@ curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.0.0.tar.gz 
 
 3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
 	* It will be installed to usr/local/lib and usr/local/include by default. 
-	* You can run 'make help' here to see other make options(uninstall etc).
 
 ```sh
 cd Display_Lib_RPI-2.0.0
@@ -78,11 +77,11 @@ sudo make install
 4. Run 'make' commmand. This builds the examples file using the just installed library,
 		and creates a test executable file in "Bin".
 5. Run 'make run' to run that built executable file. 
-6. User should now see the test routine in that file running on the display. Run 'make help' to see other options.
+6. User should now see the test routine in that file running on the display.
 
 ```sh
 cd examples
-// edit the makefile in examples folder by picking the "SRC" file path you want to run
+# Edit the makefile in examples folder by picking the "SRC" file path you want to run
 make
 make run
 ```
@@ -112,7 +111,7 @@ make run
 
 ### Fonts
 
-The font system readme for the graphic displays [is here at link.](extra/doc/fonts/README.md)
+The font system readme for the graphic displays is in the 'doc' folder [at link.](extra/doc/fonts/README.md)
 
 ## Software
 
@@ -122,7 +121,8 @@ There are 2 makefiles.
 
 1. Root directory, builds and installs library at a system level.
 2. Example directory, builds a chosen example file using installed library to an executable.
-which can then be run.  An editable list of file paths to examples can be found in makefile.
+which can then be run.  A user editable list of file paths to examples can be found in makefile.
+3. Run 'make help' on these makefiles to see a menu of all options.(uninstall for example)
 
 Library naming :
 
@@ -134,12 +134,19 @@ Library naming :
 
 Basic project overview, see API documentation for more detailed diagrams :
 
+
 [![Overview image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/diagram.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/diagram.png)
+
+### Error Codes 
+
+Most functions that return a value, return a enum 'rpiDisplay_Return_Codes'. 
+Zero for success and a positive number for an error code. The error codes are listed in
+is in the 'doc' folder [at link.](extra/doc/errors/README.md)
 
 ### Tool chain
 
 * Development Tool chain.
-	1. Raspberry PI 3 model b & Raspberry PI 5 
+	1. Raspberry PI 5 & Raspberry PI 3 model b 
 	2. C++, g++ (Debian 12.2.0)
 	3. Raspbian , Debian 12 bookworm OS, 64 bit.
 	4. lgpio library Version Number :: 131584
@@ -148,10 +155,8 @@ Basic project overview, see API documentation for more detailed diagrams :
 
 ### Older versions
 
-The last version of Display_lib_RPI (V1.3.0) which used the bcm2835 library as a dependency low level interface 
-is in releases and can still be downloaded and used. Version 1.3.0 will NOT work on raspberry pi 5 and uses direct register access.
-It is generally speaking faster than the lgpio. The lgpio replaced it in version 2.0.0.
-The lgpio library works with linux device drivers like spidev.
-Using Linux device drivers allow the library to work on Raspberry 5 as well as other Linux Single Board Computers that lgpio can be installed on.
-This provides more Flexibility, portability, better API, user space access,better compatibility and other advantages.
+The last version of Display_lib_RPI (V1.3.0) which used the bcm2835 library as a low level interface 
+is in releases and can still be downloaded and used. 
+Version 1.3.0 will NOT work on raspberry pi 5 and uses direct register access.
+
 

@@ -1,5 +1,5 @@
 /*! 
-	@file examples/ili9341/Hello_world/main.cpp
+	@file examples/ili9341/Hello_world_SWSPI/main.cpp
 	@brief Hello World hardware and software SPI test
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function

@@ -5,7 +5,6 @@
 	Carries out tests on BCD decode mode 3. BCD mode uses the built in font Code B
 	this font has BCD code B (0-9, E, H, L, P, and -) 
 	Hardware SPI , Project Name: Display_Lib_RPI
-	
 
 	@test
 		-# Test 30 BCD character

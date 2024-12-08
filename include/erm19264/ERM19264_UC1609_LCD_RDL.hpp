@@ -150,7 +150,7 @@ public:
 	int8_t _LCD_SCLK; /**< GPIO Clock Line Software SPI only*/
 	int8_t _LCD_SDA;  /**< GPIO MOSI Line Software SPI only*/
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
-	int _GpioHandle = 0; /** This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
+	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
 	// Display 
 	int16_t _LCD_WIDTH = 192;                 /**< Width of screen in pixels */

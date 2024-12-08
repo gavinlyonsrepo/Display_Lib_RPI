@@ -5,7 +5,7 @@
 	Carries out series of tests demonstrating arduino library TM1638plus.
 	Project Name: Display_Lib_RPI
 	URL: https://github.com/gavinlyonsrepo/Display_Lib_RPI
-	@note
+	@test
 		-# Test 0 reset test
 		-# Test 1 decimal and float numbers
 		-# Test 2 Hexadecimal number

@@ -130,10 +130,10 @@ void ST7735_TFT::TFTSetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, int
 /*! 
 	@brief init the SPI
 	@return 
-		case 0:return rpiDisplay_Success
-		case 2:return rpiDisplay_GpioPinClaim
-		case 3:return rpiDisplay_SPIOpenFailure
-		case 4:return rpiDisplay_GpioChipDevice;
+		rpiDisplay_Success
+		rpiDisplay_GpioPinClaim
+		rpiDisplay_SPIOpenFailure
+		rpiDisplay_GpioChipDevice;
 */
 rpiDisplay_Return_Codes_e ST7735_TFT::TFTSPIInit(void)
 {

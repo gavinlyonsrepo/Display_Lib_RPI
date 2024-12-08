@@ -165,7 +165,7 @@ private:
 	uint8_t _NoDigits   = 8; /**<  Number of digits in display */
 
 	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
-	int _GpioHandle = 0; /** This holds a handle to a device opened by lgGpiochipOpen or lgSpiOpen( */
+	int _GpioHandle = 0; /**< This holds a handle to a device opened by lgGpiochipOpen or lgSpiOpen( */
 	int _spiDev = 0; /**< A SPI device, >= 0. */
 	int _spiChan = 0; /**< A SPI channel, >= 0. */
 	int _spiBaud = 50000;   /**< The speed of serial communication in bits per second. */

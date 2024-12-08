@@ -174,7 +174,7 @@ class ERMCH1115 : public bicolor_graphics   {
 	int8_t _OLED_SCLK; /**< GPIO Clock Line, Software SPI only*/
 	int8_t _OLED_DIN;   /**< GPIO MOSI Line, Software SPI only*/
 	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
-	int _GpioHandle = 0; /** This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
+	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
 	// SPI related 
 	int _spiHandle = 0; /**< Hold a handle for the SPI device on the channel.*/

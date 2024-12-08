@@ -1,5 +1,5 @@
 /*!
-	@file: examples/nokia5110/SPEEDTEST/main.cpp
+	@file examples/nokia5110/SPEEDTEST/main.cpp
 	@brief Description library test file,carries out FPS test  , HW SPI
 			PCD8544 Nokia 5110 SPI LCD display Library
 	@author Gavin Lyons.

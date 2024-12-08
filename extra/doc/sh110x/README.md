@@ -16,7 +16,7 @@
 * Description :
 
 0. Library to support the I2C 128X64 OLED Display Module
-   driven by the Sh1106 or Sh1107 controller for the Raspberry PI.
+   driven by the Sh1106 or Sh1107 controller for Linux SBC's
 1. Dynamic install-able system level Raspberry Pi C++ library.
 2. Inverse color, rotate, sleep, scroll and contrast control.
 3. Bitmaps supported.
@@ -47,10 +47,6 @@ Example files
 
 Hardware I2C.
 
-### I2C
-
-Hardware I2C.
-
 1. I2C Address is set by default to 0x3C(your module could be different, 
 user can change argument passed into OLED class constructor). 
 OLED_I2C_FLAGS No flags are currently defined. This parameter should be set to zero.
@@ -66,7 +62,6 @@ it was found that by default the baudrate was set to 100,000 baud. By modifying 
 
 ```sh
 param=i2c_arm=on,i2c_arm_baudrate=400000
-#dtparam=i2s=on
 ```
 
 3. In the event of an error writing a byte, debug info with error code will be written to console. 

@@ -1,10 +1,10 @@
 /*!
-	@file: examples/nokia5110/SPEEDTEST/main.cpp
+	@file examples/nokia5110/SPEEDTEST_SWSPI/main.cpp
 	@brief Description library test file,carries out FPS test  , HW SPI
 			PCD8544 Nokia 5110 SPI LCD display Library
 	@author Gavin Lyons.
 	@test
-		-# Test 601 FPS test (frame rate per second)
+		-# Test 602 SWSPI FPS test (frame rate per second)
 */
 
 

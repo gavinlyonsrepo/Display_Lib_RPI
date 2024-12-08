@@ -4,6 +4,8 @@
 	@brief  This file contains the "main" function for a clock demo (16x02 LCD)
 		to test the Display_Lib_RPI::HD44780_LCD
 	@note -# press ctrl + c to quit
+	@test 
+		-# 2000 Clock Demo
  */
 
 // Section: Included library
