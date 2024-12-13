@@ -34,10 +34,10 @@ Example file set up :
 
 | RPI pin(HW SPI) | RPI pin(SW SPI)| Nokia 5110 LCD |
 | ------ | ------ | ------ |
-| SPI_CLK | GPIO22 | LCD_CLK Pin 5 clock in |
-| SPI_MOSI | GPIO27 | LCD_DIN Pin 4 data in |
+| SPI_CLK | GPIO6 | LCD_CLK Pin 5 clock in |
+| SPI_MOSI | GPIO5 | LCD_DIN Pin 4 data in |
 | GPIO24 | GPIO24 | LCD_DC Pin 3 data/command|
-| SPI_CE0 or SPI_CE1 | GPIO 8 | LCD_CE Pin 2 chip enable |
+| SPI_CE0  | GPIO 21 | LCD_CE Pin 2 chip enable |
 | GPIO25 | GPIO25 | LCD_RST Pin 1 reset|
 
 Connect Nokia 5110 VCC(pin 6)to 3.3V.

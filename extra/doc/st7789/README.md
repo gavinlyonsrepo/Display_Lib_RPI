@@ -104,11 +104,11 @@ Connections as setup in main.cpp test file.
 | TFT PinNum | Pindesc | RPI HW SPI | RPI SW SPI |
 | --- | --- | --- | --- |
 | 1 | LED | VCC |  VCC |
-| 2 | SS/CS | SPI_CE0 | GPIO8 |
+| 2 | SS/CS | SPI_CE0 | GPIO21 |
 | 3 | DC | GPIO24 | GPIO24  |
 | 4 | RESET | GPI025  | GPIO25 |
-| 5 | SDA | SPI_MOSI | GPIO6 |
-| 6 | SCLK | SPI_CLK | GPIO5 |
+| 5 | SDA | SPI_MOSI | GPIO5 |
+| 6 | SCLK | SPI_CLK | GPIO6 |
 | 7 | VCC | VCC | VCC  |
 | 8 | GND | GND | GND |
 

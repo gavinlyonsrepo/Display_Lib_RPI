@@ -1,28 +1,20 @@
 
-====================================
+========================================
 Rpi 3b lgpio , Display_RPI_LIB version 2.0.0 
 =========================================
-(NOTE beta , before draw pixel to buffer change in wrtieChar will need to be retested, ) 
 
+SSD1306 I2C
+		* I2C_Speed = 11 Fps at I2C baud = 400,000
 
-ST7735
+ch1115 HW SPI text + graphics
+		* 130 Fps at 8 Mhz
+ch1115 SW SPI text + graphics
+		* 21 FPS
 
-Bitmap FPS test
-============
-1 Mhz 25 frames, 10 sec, 2.49 fps
-2 Mhz 58 frames, 10 sec, 5.78 fps
-4 Mhz  125 frames, 10 sec, 12.48 fps
-8 Mhz  206 frames, 10 sec, 20.49 fps
-16 Mhz 518 frames, 10 sec, 51.77 fps
-24 Mhz 650 frames, 10 sec, 64.10 fps
+St7789 240x280 HW SPI bitmap test(128 x 128 images)
+		* 215 frames, 10 sec, 21.5 fps at 8Mhz SPI Baud rate
+		* 444 frames, 10 sec, 44.4 fps at 16Mhz SPI Baud rate
 
-Text + Graphics FPS test
-====================
-1 Mhz  5 FPS
-2 Mhz  9 FPS
-4 Mhz  11 FPS
-8 Mhz  14 FPS
-16 Mhz 15 FPS
-24 Mhz 16 FPS
-
-
+ST7789 240x280 HW SPI text + graphics test
+		* 27 FPS at 8Mhz HW SPi
+		* 36 FPS at 16Mhz HW SPi

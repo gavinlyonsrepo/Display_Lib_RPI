@@ -123,11 +123,11 @@ Connections as setup in main.cpp test file.
 | TFT PinNum | Pindesc | RPI HW SPI | RPI SW SPI |
 | --- | --- | --- | --- |
 | 1 | LED | VCC |  VCC |
-| 2 | SCLK | SPI_CLK | GPIO5 |
-| 3 | SDA | SPI_MOSI | GPIO6 |
+| 2 | SCLK | SPI_CLK | GPIO6 |
+| 3 | SDA | SPI_MOSI | GPIO5 |
 | 4 | A0/DC | GPIO24 | GPIO24  |
 | 5 | RESET | GPI025  | GPIO25 |
-| 6 | SS/CS | SPI_CE0 | GPIO8 |
+| 6 | SS/CS | SPI_CE0 | GPI21 |
 | 7 | GND | GND | GND |
 | 8 | VCC | VCC | VCC  |
 
