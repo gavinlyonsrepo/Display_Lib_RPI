@@ -1,3 +1,4 @@
+# color definitions Readme
 
 Color definitions defined and used by 16-Bit Color class.
 
