@@ -111,7 +111,7 @@ Functions to support drawing bitmaps
 | drawBitmap | bi-colour array | 2 | Data horizontally  addressed |
 | drawBitmap16 | 16 bit color 565 BMP files or array |  32 | ------ |
 | drawBitmap24  | 24 bit color BMP files or array  | 48 | Converted by software to 16-bit color  |
-| drawSprite| 16 bit color 565 array | 32K max | Does not use a buffer , draws pixel by pixel , ignores background chosen color|
+| drawSprite| 16 bit color 565 array | 32 | Does not use a buffer , draws pixel by pixel , ignores background chosen color|
 
 1. Bitmap Size (in KiB)= Image Width×Image Height×Bits Per Pixel(8×1024)
 2. Pixel size column assumes 128 by 128 screen.
@@ -123,8 +123,7 @@ These class functions will return an error code in event of error see API for mo
 
 ###  Color codes 
 
-Functions that return accept a 16 bit color There are pre-defined colors listed here 
-is in the 'doc' folder [at link.](extra/doc/colors/README.md)
+For functions that accept a 16 bit color value. There is list of pre-defined colors in the 'colors' folder in doc.
 
 ## Hardware
 
