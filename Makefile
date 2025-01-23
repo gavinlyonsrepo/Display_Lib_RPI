@@ -93,7 +93,7 @@ uninstall:
 	@rm -vf  $(LIBHEADERDIR)*_data_RDL.hpp
 	@rm -vf  $(LIBHEADERDIR)*_graphics_RDL.hpp
 	@rm -vf  $(LIBHEADERDIR)MAX7219*_RDL.hpp
-	@rm -vf  $(LIBHEADERDIR)TM1638plus_*_RDL.hpp
+	@rm -vf  $(LIBHEADERDIR)TM163*plus_*_RDL.hpp
 	@rm -vf  $(LIBHEADERDIR)*_LCD_RDL.hpp
 	@rm -vf  $(LIBHEADERDIR)*_OLED_RDL.hpp
 	@echo "******************"

@@ -74,7 +74,7 @@ rpiDisplay_Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr 
 
 	int I2COpenHandle = 0;
 
-	I2COpenHandle = lgI2cOpen(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
+	I2COpenHandle = DISPLAY_RDL_I2C_OPEN(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
 	if (I2COpenHandle < 0 )
 	{
 		printf("Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
@@ -97,7 +97,7 @@ rpiDisplay_Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr 
 rpiDisplay_Return_Codes_e  SSD1306_RDL::OLED_I2C_OFF(void)
 {
 	int I2COpenHandleStatus = 0;
-	I2COpenHandleStatus = lgI2cClose(_OLEDI2CHandle);
+	I2COpenHandleStatus = DISPLAY_RDL_I2C_CLOSE(_OLEDI2CHandle);
 	if (I2COpenHandleStatus < 0 )
 	{
 		printf("Error OLED_I2C_OFF :: Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
@@ -251,7 +251,7 @@ void SSD1306_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 	uint8_t attemptI2Cwrite = _I2C_ErrorRetryNum;
 	int  ReasonCodes = 0;
 	
-	ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); 
+	ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); 
 	while(ReasonCodes < 0)
 	{//failure to write I2C byte ,Error handling retransmit
 		
@@ -261,7 +261,7 @@ void SSD1306_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 			printf("Attempt Count: %u\n", attemptI2Cwrite);
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
-		ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); //retry
+		ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt
 		if (attemptI2Cwrite == 0) break;
@@ -521,7 +521,7 @@ int  SSD1306_RDL::OLEDCheckConnection(void)
 	char rxdatabuf[1]; //buffer to hold return byte
 	int I2CReadStatus = 0;
 
-	I2CReadStatus = lgI2cReadDevice(_OLEDI2CHandle, rxdatabuf, 1);
+	I2CReadStatus = DISPLAY_RDL_I2C_READ(_OLEDI2CHandle, rxdatabuf, 1);
 	if (I2CReadStatus < 0 )
 	{
 		printf("Error :: OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));

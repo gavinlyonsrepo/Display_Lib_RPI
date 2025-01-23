@@ -39,15 +39,15 @@ void color16_graphics::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	@return enum rpiDisplay_Return_Codes_e 
 		-# rpiDisplay_Success for success
 		-# rpiDisplay_ShapeScreenBounds Error
-		-# rpiDisplay_MallocError Error
+		-# rpiDisplay_MemoryAError Error
 */
-rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
+rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) 
+{
 	uint8_t hi, lo;
 
 	// Check bounds
-	if ((x >= _width) || (y >= _height))
-	{
-		printf("Error: fillRectangle 2: Out of screen bounds");
+	if ((x >= _width) || (y >= _height)) {
+		printf("Error: fillRectangle 2: Out of screen bounds\n");
 		return rpiDisplay_ShapeScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
@@ -57,22 +57,28 @@ rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y
 	hi = color >> 8;
 	lo = color;
 
-	// Create bitmap buffer
-	uint8_t* buffer = (uint8_t*)malloc(w*h*sizeof(uint16_t));
-	if (buffer == nullptr) // check malloc
+	// Create bitmap buffer using std::vector
+	std::vector<uint8_t> buffer;
+	try
 	{
-		printf("Error: fillRectangle 3: MALLOC could not assign memory");
-		return rpiDisplay_MallocError;
+		// Allocate buffer
+		buffer = std::vector<uint8_t>(w * h * sizeof(uint16_t));
+	} catch (const std::bad_alloc&) {
+		printf("Error: fillRectangle 3: Memory allocation failed\n");
+		return rpiDisplay_MemoryAError;
 	}
-	for(uint32_t i = 0; i<w*h*sizeof(uint16_t);) {
+	
+	for (size_t i = 0; i < buffer.size(); ) 
+	{
 		buffer[i++] = hi;
 		buffer[i++] = lo;
 	}
+	
 
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
-	spiWriteDataBuffer(buffer, h*w*sizeof(uint16_t));
-	free(buffer);
+	spiWriteDataBuffer(buffer.data(), buffer.size());
+
 	return rpiDisplay_Success;
 }
 
@@ -459,13 +465,13 @@ rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uin
 	// Out of screen bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error: drawIcon 2: Out of screen bounds");
+		printf("Error: drawIcon 2: Out of screen bounds\n");
 		return rpiDisplay_BitmapScreenBounds ;
 	}
 	// Check for null pointer
 	if(character == nullptr)
 	{
-		printf("Error: drawIcon 3: Icon array is not valid pointer object");
+		printf("Error: drawIcon 3: Icon array is not valid pointer object\n");
 		return rpiDisplay_BitmapNullptr;
 	}
 	uint8_t value;
@@ -501,7 +507,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uin
 		-# rpiDisplay_BitmapScreenBounds Error
 		-# rpiDisplay_BitmapNullptr Error
 		-# rpiDisplay_BitmapHorizontalSize Error
-		-# rpiDisplay_MallocError Error
+		-# rpiDisplay_MemoryAError Error
 */
 rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const uint8_t* pBmp) {
 	int16_t byteWidth = (w + 7) / 8;
@@ -511,7 +517,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 
 	if( pBmp == nullptr) //  Check for null pointer
 	{
-		printf("Error: drawBitmap 1: Bitmap array is nullptr" );
+		printf("Error: drawBitmap 1: Bitmap array is nullptr\n" );
 		return rpiDisplay_BitmapNullptr;
 	}
 	if(w % 8 != 0) 	// check horizontal size
@@ -521,7 +527,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	}
 	if ((x >= _width) || (y >= _height)) // Check bounds
 	{
-		printf("Error: drawBitmap 3: Out of screen bounds, check x & y" );
+		printf("Error: drawBitmap 3: Out of screen bounds, check x & y\n" );
 		return rpiDisplay_BitmapScreenBounds;
 	}
 
@@ -529,14 +535,17 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	if ((y + h - 1) >= _height) h = _height - y;
 
 	// Create bitmap buffer
-	uint8_t* buffer = (uint8_t*)malloc(w * h * 2);
-	if (buffer == nullptr) // check malloc
+	std::vector<uint8_t> buffer;
+	try 
 	{
-		printf("Error: drawBitmap 3: MALLOC could not assign memory " );
-		return rpiDisplay_MallocError;
+		// Allocate buffer
+		buffer = std::vector<uint8_t>(w * h * 2);
+	} catch (const std::bad_alloc&) {
+		printf("Error: drawBitmap 3: Memory allocation failed \n" );
+		return  rpiDisplay_MemoryAError;
 	}
-	ptr = 0;
 
+	ptr = 0;
 	for (uint16_t j = 0; j < h; j++)
 	{
 		for (uint16_t i = 0; i < w; i++)
@@ -552,9 +561,8 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	}
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
-	spiWriteDataBuffer(buffer, h*w*sizeof(uint16_t));
+	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	free(buffer);
 	return rpiDisplay_Success;
 }
 
@@ -569,7 +577,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 		-# rpiDisplay_Success for success
 		-# rpiDisplay_BitmapScreenBounds Error
 		-# rpiDisplay_BitmapNullptr Error
-		-# rpiDisplay_MallocError Error
+		-# rpiDisplay_MemoryAError Error
 	@note 24 bit color converted to 16 bit color
 */
 rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h)
@@ -580,32 +588,36 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 	// 1. Check for null pointer
 	if( pBmp == nullptr)
 	{
-		printf("Error: drawBitmap24 1: Bitmap array is nullptr");
+		printf("Error: drawBitmap24 1: Bitmap array is nullptr\n");
 		return rpiDisplay_BitmapNullptr;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error: drawBitmap24 2: Out of screen bounds");
+		printf("Error: drawBitmap24 2: Out of screen bounds\n");
 		return rpiDisplay_BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-
 	// Create bitmap buffer
-	uint8_t* buffer = (uint8_t*)malloc(w * h * 2);
-	if (buffer == nullptr) // check malloc
+	std::vector<uint8_t> buffer;
+	try
 	{
-		printf("Error: drawBitmap24 3: MALLOC could not assign memory ");
-		return rpiDisplay_MallocError;
+		// Allocate buffer
+		buffer = std::vector<uint8_t>(w * h * 2);
+	} catch (const std::bad_alloc&) 
+	{
+		printf("Error:  drawBitmap24  3: Memory allocation failed\n");
+		return rpiDisplay_MemoryAError;
 	}
+
 	ptr = 0;
 	for(j = 0; j < h; j++)
 	{
 		for(i = 0; i < w ; i ++)
 		{
 			// Translate RBG24 to RGB565 bitmap
-			rgb = *(unsigned int*)(pBmp + i * 3 + (h-1-j) * 3 * w);
+			rgb = *(reinterpret_cast<unsigned int*>((pBmp + i * 3 + (h-1-j) * 3 * w)));
 			color = Color565(((rgb >> 16) & 0xFF), ((rgb >> 8) & 0xFF), (rgb & 0xFF));
 			buffer[ptr++] = color >> 8;
 			buffer[ptr++] = color;
@@ -614,9 +626,8 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
-	spiWriteDataBuffer(buffer, h*w*sizeof(uint16_t));
+	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	free(buffer);
 	return rpiDisplay_Success;
 }
 
@@ -632,7 +643,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 		-# rpiDisplay_Success for success
 		-# rpiDisplay_BitmapScreenBounds Error
 		-# rpiDisplay_BitmapNullptr Error
-		-# rpiDisplay_MallocError Error
+		-# rpiDisplay_MemoryAError Error
 */
 rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h) {
 	uint16_t i, j;
@@ -641,24 +652,28 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 	// 1. Check for null pointer
 	if( pBmp == nullptr)
 	{
-		printf("Error: drawBitmap16 1: Bitmap array is nullptr" );
+		printf("Error: drawBitmap16 1: Bitmap array is nullptr\n" );
 		return rpiDisplay_BitmapNullptr;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error drawBitmap16 2: Out of screen bounds" );
+		printf("Error: drawBitmap16 2: Out of screen bounds\n" );
 		return rpiDisplay_BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
 
 	// Create bitmap buffer
-	uint8_t* buffer = (uint8_t*)malloc(w * h * 2);
-	if (buffer == nullptr) // check malloc
+	std::vector<uint8_t> buffer;
+	try 
 	{
-		printf("Error drawBitmap16 3 :MALLOC could not assign memory " );
-		return rpiDisplay_MallocError;
+		// Allocate buffer
+		buffer = std::vector<uint8_t>(w * h * 2);
+	} catch (const std::bad_alloc&) 
+	{
+		printf("Error:  drawBitmap16  3: Memory allocation failed\n");
+		return rpiDisplay_MemoryAError;
 	}
 	ptr = 0;
 
@@ -666,7 +681,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 	{
 		for(i = 0; i < w; i ++)
 		{
-			color = *(unsigned int*)(pBmp + i * 2 + (h-1-j) * 2 * w);
+			color = * (reinterpret_cast<unsigned int*>((pBmp + i * 2 + (h-1-j) * 2 * w)));
 			buffer[ptr++] = color >> 8;
 			buffer[ptr++] = color;
 		}
@@ -674,9 +689,8 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
-	spiWriteDataBuffer(buffer, h*w*sizeof(uint16_t));
+	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	free(buffer);
 	return rpiDisplay_Success;
 }
 
@@ -736,8 +750,7 @@ void color16_graphics::writeData(uint8_t spidatabyte) {
 	@param len length of buffer
 	@note The maximum size of an SPI transaction by default in lgpio library
 	is 65536 or Display_SPI_BLK_SIZE. SO a buffer larger than this
-	must be sent in blocks of 65536 bytes. 3 buffer blocks writes are supported 
-	So largest buffer that can be sent is Display_SPI_BLK_SIZE*3= 196608.
+	must be sent in blocks of 65536 bytes. 
 	The largest current expected size is for a full screen write to a 240x320 display currently
 	which is 240x320x2 = 153600 bytes. spidev.bufsiz must also be set to 65536 or higher see 
 	Readme for display for more details.
@@ -751,52 +764,34 @@ void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 		Display_CS_SetHigh;
 	} else 
 	{
-
 		int spiErrorStatus = 0;
-		if ((len >= 1)  && len <= (Display_SPI_BLK_SIZE))
+		if (len >= 1) 
+		{ // Remove the upper limit constraint
+			int remainingLen = len;
+			const uint8_t* currentData = spidata;
+
+			while (remainingLen > 0) 
+			{
+				// Determine how much to write in this iteration
+				int writeSize = (remainingLen > Display_SPI_BLK_SIZE) ? Display_SPI_BLK_SIZE : remainingLen;
+
+				// Perform SPI write
+				spiErrorStatus = lgSpiWrite(_spiHandle, reinterpret_cast<const char*>(currentData), writeSize);
+				if (spiErrorStatus < 0) {
+					fprintf(stderr, "Error: spiWriteDataBuffer: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+					printf("The problem maybe: The spidev buf size setting must be set at 65536 bytes or higher.\n") ;
+					printf("See readme, note section, of relevant display at https://github.com/gavinlyonsrepo/Display_Lib_RPI for more details\n");
+					printf("spidev buf defines the number of bytes that the SPI driver will use as a buffer for data transfers.\n");
+					break; // Exit loop on error
+				}
+
+				// Update pointers and counters
+				currentData += writeSize;
+				remainingLen -= writeSize;
+			}
+		} else 
 		{
-			// buffer size 0-65536 1 write
-			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, len);
-			if (spiErrorStatus <0 ) 
-			{
-				fprintf(stderr, "Error: spiWriteDataBuffer 1: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-			}
-		}else if ((len > Display_SPI_BLK_SIZE) && (len <= (Display_SPI_BLK_SIZE*2)))
-		{
-			// buffer size  65537-131072 2 writes
-			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, Display_SPI_BLK_SIZE);
-			if (spiErrorStatus <0 ) 
-			{
-				fprintf(stderr, "Error : spiWriteDataBuffer 2A: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-			}
-			spidata = spidata + Display_SPI_BLK_SIZE;
-			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, len-Display_SPI_BLK_SIZE);
-			if (spiErrorStatus <0 ) 
-			{
-				fprintf(stderr, "Error : spiWriteDataBuffer 2B: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-			}
-		}else if ((len > (Display_SPI_BLK_SIZE*2)) && (len <= (Display_SPI_BLK_SIZE*3)))
-		{
-			// buffer size 131073-196608 3 writes
-			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, Display_SPI_BLK_SIZE);
-			if (spiErrorStatus <0 )
-			{
-				fprintf(stderr, "Error : spiWriteDataBuffer 3A: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-			}
-			spidata = spidata + Display_SPI_BLK_SIZE;
-			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, Display_SPI_BLK_SIZE);
-			if (spiErrorStatus <0 )
-			{
-				fprintf(stderr, "Error : spiWriteDataBuffer 3B: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-			}
-			spidata = spidata + Display_SPI_BLK_SIZE;
-			spiErrorStatus = lgSpiWrite( _spiHandle, (const char *)spidata, len-(Display_SPI_BLK_SIZE*2));
-			if (spiErrorStatus <0 )
-			{
-				fprintf(stderr, "Error : spiWriteDataBuffer 3C: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-			}
-		}else {
-			printf("Buffer wrong size to draw = %i . allowed size = 1<-> 196608 :: \n", len); 
+			printf("Buffer wrong size to draw = %i. Allowed size = 1 or greater.\n", len);
 		}
 	}
 }
@@ -825,7 +820,7 @@ void color16_graphics::spiWrite(uint8_t spidata) {
 		int spiErrorStatus = 0;
 		char TransmitBuffer[1];
 		TransmitBuffer[0] =  spidata;
-		spiErrorStatus = lgSpiWrite( _spiHandle, (const char*)TransmitBuffer, 1);
+		spiErrorStatus = lgSpiWrite( _spiHandle, static_cast<const char*>(TransmitBuffer), 1);
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error: spiWrite :Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -856,7 +851,7 @@ void color16_graphics::setCursor(int16_t x, int16_t y) {
 		-# rpiDisplay_Success  success
 		-# rpiDisplay_CharScreenBounds co-ords out of bounds check x and y
 		-# rpiDisplay_CharFontASCIIRange Character out of ASCII Font bounds, check Font range
-		-# rpiDisplay_MallocError Malloc could not assign memory for character buffer
+		-# rpiDisplay_MemoryAError Could not assign memory for character buffer
  */
 rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char value) {
 
@@ -872,17 +867,22 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	// 2. Check for character out of font range bounds
 	if ( value < _FontOffset || value >= (_FontOffset + _FontNumChars+1))
 	{
-		printf("writeChar16 Error 2: Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (_FontOffset + _FontNumChars));
+		printf("writeChar16 Error 2: Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (unsigned int)(_FontOffset + _FontNumChars));
 		return rpiDisplay_CharFontASCIIRange;
 	}
-	
+
 	// Create bitmap buffer
-	uint8_t* buffer = (uint8_t*)malloc(_Font_X_Size * _Font_Y_Size * 2);
-	if (buffer == nullptr) // check malloc
+	std::vector<uint8_t> buffer;
+	try
 	{
-		printf("Error: writeChar16 3: MALLOC could not assign memory ");
-		return rpiDisplay_MallocError;
+		// Allocate buffer
+		buffer = std::vector<uint8_t>(_Font_X_Size * _Font_Y_Size * 2);
+	} catch (const std::bad_alloc&) 
+	{
+		printf("Error: writeChar16 3: Memory allocation failed\n");
+		return rpiDisplay_MemoryAError;
 	}
+
 	uint16_t ltextcolor = 0; 
 	uint16_t ltextbgcolor = 0; 
 	if (getInvertFont()== true)
@@ -922,10 +922,9 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	}
 
 	// Set window and write buffer
-	setAddrWindow(x, y, x + _Font_X_Size - 1, y +_Font_Y_Size - 1);
-	spiWriteDataBuffer(buffer, _Font_X_Size * _Font_Y_Size * 2);
+	setAddrWindow(x, y, x + _Font_X_Size - 1, y +_Font_Y_Size - 1);;
+	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	free(buffer);
 	return rpiDisplay_Success ;
 }
 
@@ -963,7 +962,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t 
 		if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
 		count++;
 		MaxLength++;
-		if (MaxLength >= 150) break; // 2nd way out of loop, safety check
+		if (MaxLength >= 250) break; // 2nd way out of loop, safety check
 	}
 	return rpiDisplay_Success;
 }
@@ -977,7 +976,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t 
 */
 size_t color16_graphics::write(uint8_t character)
 {
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+	rpiDisplay_Return_Codes_e DrawCharReturnCode = rpiDisplay_Success;;
 	switch (character)
 	{
 		case '\n':
@@ -987,7 +986,12 @@ size_t color16_graphics::write(uint8_t character)
 		case '\r': break;
 		default:
 			DrawCharReturnCode = writeChar(_cursorX, _cursorY, character);
-			if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+			if (DrawCharReturnCode != rpiDisplay_Success) 
+			{
+				// Set the write error based on the result of the drawing operation
+				setWriteError(DrawCharReturnCode); // Set error flag to non-zero value}
+				break;
+			}
 			_cursorX += (_Font_X_Size);
 			if (_textwrap && (_cursorX  > (_width - (_Font_X_Size))))
 			{
@@ -1026,32 +1030,54 @@ void color16_graphics::setTextWrap(bool w) {
 	_textwrap = w;
 }
 
- /* ================TODO read functions ========================
-uint8_t color16_graphics::spiRead(uint8_t commandByte) {
-	if (_hardwareSPI == false)
-	{
-		return spiReadSoftware(commandByte);
-	} else {
-		return_spi_transfer(commandByte);
-	}
-}
-
-uint8_t color16_graphics::spiReadSoftware(uint8_t commandByte) {
-
-	wrietCommand(commandbyte);
-	Display_MISO_SetDigitalInput;
-	uint8_t value = 0;
-	uint8_t i = 0;
-
-	for(i = 0; i < 8; ++i) 
-	{
-		value |= Display_MISO_Read << i;
-		Display_SCLK_SetHigh;
-		delayMicroSecRDL(_HighFreqDelay);
-		Display_SCLK_SetLow;
-		delayMicroSecRDL(_HighFreqDelay);
-	}
-	return value;
-}
+/*!
+	@brief: Draws an 16 bit color sprite bitmap to screen from a data array with transparent background
+	@param x X coordinate
+	@param y Y coordinate
+	@param pBmp pointer to data array
+	@param w width of the sprite in pixels
+	@param h height of the sprite in pixels
+	@param backgroundColor the background color of sprite (16 bit 565) this will be made transparent
+	@note  Does not use buffer, just draw pixel
+	@return
+		-# Display_Success=success
+		-# Display_BitmapNullptr=invalid pointer object
+		-# Display_BitmapScreenBounds=Co-ordinates out of bounds
 */
+rpiDisplay_Return_Codes_e  color16_graphics::drawSprite(uint16_t x, uint16_t y, const uint8_t *pBmp, uint16_t w, uint16_t h, uint16_t backgroundColor)
+{
+	uint8_t i, j;
+	uint16_t colour;
+	// 1. Check for null pointer
+	if (pBmp == nullptr)
+	{
+		printf("Error: drawSprite 1: Sprite array is nullptr\r\n");
+		return rpiDisplay_BitmapNullptr;
+	}
+	// Check bounds
+	if ((x >= _width) || (y >= _height))
+	{
+		printf("Error: drawSprite 2: Sprite out of screen bounds\r\n");
+		return rpiDisplay_BitmapScreenBounds;
+	}
+	if ((x + w - 1) >= _width)
+		w = _width - x;
+	if ((y + h - 1) >= _height)
+		h = _height - y;
+
+	for(j = 0; j < h; j++)
+	{
+		for(i = 0; i < w; i ++)
+		{
+			colour = (pBmp[0] << 8) | pBmp[1];
+			pBmp += 2;
+			if (colour != backgroundColor){
+				drawPixel(x+i-1, y + j-1, colour);
+			}
+		}
+	}
+	return rpiDisplay_Success;
+}
+
+
 // **************** EOF *****************

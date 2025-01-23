@@ -8,7 +8,8 @@
   * [Software](#software)
       * [User Options](#user-options)
       * [File system](#file-system)
-      * [Bitmap](#bitmap)  
+      * [Bitmap](#bitmap)
+      * [Color codes](#color-codes)
   * [Hardware](#hardware)
   * [Output](#output)
   * [Notes](#notes)
@@ -23,7 +24,7 @@
 1. Dynamic install-able Linux based Single Board ComputersC++ library.
 2. Inverse colour, rotate, sleep, idle  & vertical scroll modes supported.
 3. Graphics + print class included.
-4. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
+4. 24 bit colour , 16 bit color, bi-color Bitmaps & sprites supported.
 5. Hardware and Software SPI
 6. Dependency: lgpio Library
 7. NB 'spidev.bufsiz' setting must be 65536 or greater see Notes section. 
@@ -102,19 +103,28 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 
 ### Bitmap
 
-There are four class functions to support drawing bitmaps
+Functions to support drawing bitmaps
 
-| Function Name | Colour support | Pixel size |  Note |
+| Function Name | Colour support | Pixel size KiB |  Note |
 | ------ | ------ | ------ | ------ |
-| drawIcon | bi-colour | (0-127) X 8  | Data vertically addressed |
-| drawBitmap | bi-colour |  2048 bytes max | Data horizontally  addressed |
-| drawBitmap16 | 16 bit color 565 BMP files |  32K max | ------ |
-| drawBitmap24  | 24 bit color BMP files | 48K max | Converted by software to 16-bit color  |
+| drawIcon | bi-colour array | (0-127) X 8  | Data vertically addressed |
+| drawBitmap | bi-colour array | 2 | Data horizontally  addressed |
+| drawBitmap16 | 16 bit color 565 BMP files or array |  32 | ------ |
+| drawBitmap24  | 24 bit color BMP files or array  | 48 | Converted by software to 16-bit color  |
+| drawSprite| 16 bit color 565 array | 32K max | Does not use a buffer , draws pixel by pixel , ignores background chosen color|
 
-1. Bitmap size in kiloBytes = (screenWidth * screenHeight * bitsPerPixel)/(1024 * 8)
+1. Bitmap Size (in KiB)= Image Width×Image Height×Bits Per Pixel(8×1024)
 2. Pixel size column assumes 128 by 128 screen.
+3. The data array for 1 and 2 is created from image files using file data conversion tool [link](https://javl.github.io/image2cpp/)
+4. The data array for 3 - 5  is created from BMP files using file data conversion tool [link](https://notisrac.github.io/FileToCArray/)
+5. For 3 and 4 better just to use bmp files direct from file system see examples.
 
 These class functions will return an error code in event of error see API for more details.
+
+###  Color codes 
+
+Functions that return accept a 16 bit color There are pre-defined colors listed here 
+is in the 'doc' folder [at link.](extra/doc/colors/README.md)
 
 ## Hardware
 

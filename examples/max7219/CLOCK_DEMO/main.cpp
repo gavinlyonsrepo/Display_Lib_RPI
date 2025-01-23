@@ -9,7 +9,7 @@
 	
 	@note not fully tested as only one display available
 	@test
-		-# Test 34 Clock demonstration 
+		-# Test 403 Clock demonstration 
 */
 
 // Libraries

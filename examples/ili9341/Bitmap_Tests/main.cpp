@@ -8,6 +8,7 @@
 		10 seconds to calculate FPS. 
 		289 frames, 10 sec, 28.8396 fps  at 8Mhz SPI Baud rate, HW SPI
 	@test
+	-# Test 300 Sprites demo, small bitmap
 	-# Test 301 "clock demo" , icons, small bitmap
 	-# Test 302 bi-color image 128x128
 	-# Test 303A 24 bit 240by280 color image bitmap from the file system
@@ -15,6 +16,7 @@
 	-# Test 304A 16 bit 128by128 color image bitmaps from the file system
 	-# Test 304B 16 bit 240by320 color image bitmap from the file system
 	-# Test 601 Frame rate per second (FPS) test. 24 bit bitmaps.
+	-# Test 802 Error checking bitmap functions, results to console
 */
 
 // Section ::  libraries
@@ -36,9 +38,9 @@
 uint8_t numberOfFilesFPS = 5;
 
 
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int8_t RST_TFT  = 25; // GPIO reset pin
+int8_t DC_TFT   = 24; // GPIO data or command 
+int  GPIO_CHIP_DEVICE = 0;//A GPIO chip device, >= 0.
 
 uint16_t TFT_WIDTH = 240;// Screen width in pixels
 uint16_t TFT_HEIGHT = 320; // Screen height in pixels
@@ -54,6 +56,7 @@ ILI9341_TFT myTFT;
 //  Section ::  Function Headers
 uint8_t Setup(void); // setup + user options
 
+void Test300(void); // Sprite
 void Test301(void); // "clock demo" icons, small bi-color bitmaps
 void Test302(void); // 2 color bitmap
 void Test303A(void); // 24 color bitmap
@@ -63,7 +66,8 @@ void Test304B(void); // 16 color bitmap
 std::string UTC_string(void); // for clock demo
 void TestFPS(void); // Frames per second 24 color bitmap test,
 int64_t getTime(); // Utility for FPS test
-uint8_t* loadImage(char* name); // Utility for FPS test
+std::unique_ptr<uint8_t[]> loadImage(const char* name); // Utility for FPS test
+void Test802(void); //error checking
 
 void EndTests(void);
 
@@ -74,12 +78,14 @@ int main(void)
 
 	if(Setup() != 0)return -1;
 	myTFT.fillScreen(RDLC_BLACK);
+	Test300();
 	Test301();
 	Test302();
 	Test303A();
 	Test303B();
 	Test304A();
 	Test304B();
+	Test802(); 
 	TestFPS();
 	EndTests();
 	return 0;
@@ -111,6 +117,30 @@ uint8_t Setup(void)
 //*****************************
 	delayMilliSecRDL(100);
 	return 0;
+}
+
+void Test300(void)
+{
+	std::cout << "Test 300: Sprites demo" << std::endl;
+	// Test 300-A test 16-bit color Sprite 
+	// Draw as sprite, without background , 32 X 32 .background color = RDLC_LBLUE
+	// Green background screen
+	myTFT.fillScreen(RDLC_GREEN);
+	delayMilliSecRDL(TEST_DELAY1);
+	myTFT.drawSprite(80, 100, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(RDLC_BLACK);
+	// Test 300-B test 16-bit color Sprite 
+	// Draw as sprite, without background , 32 X 32 .background color =RDLC_LBLUE
+	// Bitmap background screen
+	if(myTFT.drawBitmap(40, 40, 128 , 128, RDLC_WHITE , RDLC_RED, pBackupMenuBitmap) != rpiDisplay_Success)
+		return;
+	delayMilliSecRDL(TEST_DELAY5);
+
+	myTFT.drawSprite(80, 30, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	myTFT.drawSprite(60, 60, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(RDLC_BLACK);
 }
 
 void Test301(void)
@@ -211,37 +241,38 @@ void Test303A(void)
 	FILE *pFile ;
 	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
-	uint8_t* bmpBuffer = nullptr;
 	uint16_t widthBitmap = 220;
 	uint16_t heightBitmap = 240;
-	bmpBuffer = (uint8_t*)malloc(( widthBitmap * heightBitmap) * pixelSize);
-	
-	if (bmpBuffer == nullptr)
+
+	// Use std::vector for safer memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
 	{
-		std::cout << "Error Test 303-A : MALLOC could not assign memory " << std::endl;
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize(( widthBitmap * heightBitmap) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 303-A: Memory allocation failed for bmpBuffer" << std::endl;
 		return;
 	}
-	
+
 	pFile = fopen("bitmap/bitmap24images/24pic7_220X240.bmp", "r"); 
 	if (pFile == nullptr)  // Check file exists
 	{
 		std::cout << "Error Test 303-A: File does not exist" << std::endl;
-		free(bmpBuffer);
 		return;
 	}
 	fseek(pFile, FileHeaderOffset, 0); // Put file in Buffer
-	fread(bmpBuffer, pixelSize, widthBitmap *heightBitmap, pFile);
+	fread(bmpBuffer.data(), pixelSize, widthBitmap *heightBitmap, pFile);
 	fclose(pFile);
 
-	if(myTFT.drawBitmap24(10, 20, bmpBuffer,widthBitmap ,heightBitmap) != rpiDisplay_Success)
+	if(myTFT.drawBitmap24(10, 20, bmpBuffer.data(),widthBitmap ,heightBitmap) != rpiDisplay_Success)
 	{// Check for success 0x00
 		std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
-		free(bmpBuffer);
 		return;
 	}
 
 	delayMilliSecRDL(TEST_DELAY5);
-	free(bmpBuffer);  // Free Up Buffer
 }
 
 // bitmap 24 colour , All files format = Windows BITMAPINFOHEADER offset 54
@@ -259,15 +290,20 @@ void Test303B(void)
 	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
 	uint8_t NumberOfFiles  = 5;
-	uint8_t* bmpBuffer = nullptr;
 	uint16_t widthBitmap = 128;
 	uint16_t heightBitmap =128;
-	bmpBuffer = (uint8_t*)malloc((widthBitmap * heightBitmap) * pixelSize);
-	if (bmpBuffer == nullptr)
+	// Use std::vector for safer memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
 	{
-		std::cout << "Error Test 303-B : MALLOC could not assign memory " << std::endl;
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize(( widthBitmap * heightBitmap) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 303-B: Memory allocation failed for bmpBuffer" << std::endl;
 		return;
 	}
+	
 	for (uint8_t i = 0 ; i < NumberOfFiles ; i++)
 	{
 		switch (i) // select file
@@ -282,23 +318,20 @@ void Test303B(void)
 		if (pFile == nullptr)  // Check file exists
 		{
 			std::cout << "Error Test 303-B: File does not exist" << std::endl;
-			free(bmpBuffer);
 			return;
 		}
 
 		fseek(pFile, FileHeaderOffset, 0); // Put file in Buffer
-		fread(bmpBuffer, pixelSize,widthBitmap * heightBitmap, pFile);
+		fread(bmpBuffer.data(), pixelSize,widthBitmap * heightBitmap, pFile);
 		fclose(pFile);
 
-		if(myTFT.drawBitmap24(20, 29, bmpBuffer,widthBitmap, heightBitmap) != rpiDisplay_Success)
+		if(myTFT.drawBitmap24(20, 29, bmpBuffer.data(),widthBitmap, heightBitmap) != rpiDisplay_Success)
 		{// Check for success 0x00
 			std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
-			free(bmpBuffer);
 			return;
 		}
 		delayMilliSecRDL(TEST_DELAY5);
 	}
-	free(bmpBuffer);  // Free Up Buffer
 }
 
 // test function for 16 bit color bitmaps made in GIMP (RGB 565 16 bit color)
@@ -323,14 +356,17 @@ void Test304A(void)
 	uint8_t offsetBMPHeader = 0;
 	uint8_t offsetNoColSpace = 72;
 	uint8_t offsetColSpace = 132;
-	uint8_t bitmapWidth = 128;
-	uint8_t bitmapHeight = 128;
-	uint8_t* bmpBuffer1 = nullptr;
-	bmpBuffer1 = (uint8_t*)malloc((bitmapWidth * bitmapHeight) * pixelSize);
-
-	if (bmpBuffer1 == nullptr)
+	uint16_t bitmapWidth = 128;
+	uint16_t bitmapHeight = 128;
+	// Use std::vector for safer memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
 	{
-		std::cout << "Error Test 304-A : MALLOC could not assign memory " << std::endl;
+		// Attempt to allocate memory for the vector
+	bmpBuffer.resize(( bitmapWidth *  bitmapHeight ) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 304-A: Memory allocation failed for bmpBuffer" << std::endl;
 		return;
 	}
 
@@ -352,23 +388,20 @@ void Test304A(void)
 		if (pFile == nullptr)
 		{
 			std::cout << "Error Test 304-A : File does not exist" << std::endl;
-			free(bmpBuffer1);
 			return;
 		}
 		fseek(pFile, offsetBMPHeader, 0);
-		fread(bmpBuffer1, pixelSize, bitmapWidth * bitmapHeight, pFile);
+		fread(bmpBuffer.data(), pixelSize, bitmapWidth * bitmapHeight, pFile);
 		fclose(pFile);
 
-		if (myTFT.drawBitmap16(40, 40, bmpBuffer1, bitmapWidth, bitmapHeight) != rpiDisplay_Success)
+		if (myTFT.drawBitmap16(40, 40, bmpBuffer.data(), bitmapWidth, bitmapHeight) != rpiDisplay_Success)
 		{
 			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
-			free(bmpBuffer1);
 			return;
 		}
 		delayMilliSecRDL(TEST_DELAY5);
 	} // end of for loop
 
-	free(bmpBuffer1); // Free Up Buffer
 	myTFT.fillScreen(RDLC_BLACK);
 } // end of test 
 
@@ -390,12 +423,15 @@ void Test304B(void)
 	uint8_t offsetBMPHeader = 132;
 	uint16_t bitmapWidth = 240;
 	uint16_t bitmapHeight = 320;
-	uint8_t* bmpBuffer1 = nullptr;
-	bmpBuffer1 = (uint8_t*)malloc((bitmapWidth * bitmapHeight) * pixelSize);
-
-	if (bmpBuffer1 == nullptr)
+	// Use std::vector for safer memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
 	{
-		std::cout << "Error Test 304-B : MALLOC could not assign memory " << std::endl;
+		// Attempt to allocate memory for the vector
+	bmpBuffer.resize(( bitmapWidth *  bitmapHeight ) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 304-B: Memory allocation failed for bmpBuffer" << std::endl;
 		return;
 	}
 
@@ -410,24 +446,21 @@ void Test304B(void)
 		if (pFile == nullptr)
 		{
 			std::cout << "Error Test 304-B : File does not exist" << std::endl;
-			free(bmpBuffer1);
 			return;
 		}
 		fseek(pFile, offsetBMPHeader, 0);
-		fread(bmpBuffer1, pixelSize, bitmapWidth * bitmapHeight, pFile);
+		fread(bmpBuffer.data(), pixelSize, bitmapWidth * bitmapHeight, pFile);
 		fclose(pFile);
 
-		if (myTFT.drawBitmap16(0, 0, bmpBuffer1, bitmapWidth, bitmapHeight) != rpiDisplay_Success)
+		if (myTFT.drawBitmap16(0, 0, bmpBuffer.data(), bitmapWidth, bitmapHeight) != rpiDisplay_Success)
 		{
 			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
-			free(bmpBuffer1);
 			return;
 		}
 		delayMilliSecRDL(TEST_DELAY5);
 		delayMilliSecRDL(TEST_DELAY5);
 	} // end of for loop
 
-	free(bmpBuffer1); // Free Up Buffer
 	myTFT.fillScreen(RDLC_BLACK);
 } // end of test 
 
@@ -441,6 +474,87 @@ std::string UTC_string()
 	return timeString;
 }
 
+
+void Test802(void)
+{
+	// === Setup tests ===
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rpiDisplay_Success,
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //icon
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //sprite
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, rpiDisplay_BitmapHorizontalSize, //1-bit bitmap
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //16-bit bitmap
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr  //24-bit bitmap
+	};
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
+	// test variables
+	char testString5[] = "Error Check Test 802, results to console";
+	bool errorFlag = false;
+
+	// === Tests===
+	printf("=== START Error checking. Expecting errors ===\r\n");
+	// Perform function calls and store return values
+
+	// Print message + sanity check for success
+	myTFT.setFont(font_default);
+	returnValues.push_back(myTFT.writeCharString(5, 55, testString5)); 
+	delayMilliSecRDL(TEST_DELAY1);
+	myTFT.fillScreen(RDLC_BLACK);
+	//TFTdrawIcon
+	returnValues.push_back(myTFT.drawIcon(350, 40, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon));
+	returnValues.push_back(myTFT.drawIcon(180, 350, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon));
+	returnValues.push_back(myTFT.drawIcon(40, 40, 16, RDLC_BLACK, RDLC_WHITE, nullptr));
+	//TFTdrawSprite
+	returnValues.push_back(myTFT.drawSprite(350, 50,pSpriteTest16, 32, 32, RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 350,pSpriteTest16, 32, 32, RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 180, nullptr, 32, 32, RDLC_LBLUE));
+	//TFTdrawBitmap
+	returnValues.push_back(myTFT.drawBitmap(350, 65, 128, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(50, 350, 128, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(50, 65, 128, 128, RDLC_WHITE, RDLC_GREEN, nullptr));
+	returnValues.push_back(myTFT.drawBitmap(20, 20, 70, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	//TFTdrawBitmap16 , We use const cast for testing only
+	returnValues.push_back(myTFT.drawBitmap16(350, 50, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 350, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 180, nullptr, 32, 32));
+	//TFTdrawBitmap24 , We use const cast for testing only
+	returnValues.push_back(myTFT.drawBitmap24(340, 50, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 330, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 180, nullptr, 32, 32));
+	
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+
+	// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
+}
+
 /*!
  *@brief Frames per second test , 24 color bitmap test, 
 */
@@ -449,18 +563,17 @@ void TestFPS(void) {
 	myTFT.fillScreen(RDLC_RED);
 	
 	// Load images into buffers
-	uint8_t* img[5] = { 
-		loadImage((char*)"bitmap/bitmap24images/24pic1.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic2.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic3.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic4.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic5.bmp")
+	std::unique_ptr<uint8_t[]> img[5] = {
+		loadImage("bitmap/bitmap24images/24pic1.bmp"),
+		loadImage("bitmap/bitmap24images/24pic2.bmp"),
+		loadImage("bitmap/bitmap24images/24pic3.bmp"),
+		loadImage("bitmap/bitmap24images/24pic4.bmp"),
+		loadImage("bitmap/bitmap24images/24pic5.bmp")
 	};
-	for (uint8_t i=0; i< numberOfFilesFPS ;i++) // Did any loadImage call return nullptr
-	{
-		if (img[i] == nullptr){ 
-			for(uint8_t j=0; j< numberOfFilesFPS; j++) free(img[j]); // Free Up Buffer if set
-			delayMilliSecRDL(TEST_DELAY1);
+	// Check if any loadImage call failed
+	for (size_t i = 0; i < 5; ++i) {
+		if (!img[i]) {
+			std::cout << "Error: Image " << i + 1 << " failed to load." << std::endl;
 			return;
 		}
 	}
@@ -470,7 +583,7 @@ void TestFPS(void) {
 
 	// Run for ~10sec
 	while(duration < 10000000) {
-		myTFT.drawBitmap24(25, 50, img[frames % numberOfFilesFPS], myBMPWidth, myBMPHeight);
+		myTFT.drawBitmap24(25, 50, img[frames % 5].get(), myBMPWidth, myBMPHeight);
 
 		duration = getTime() - start;
 
@@ -485,35 +598,39 @@ void TestFPS(void) {
 	fps = (double)frames / ((double)duration / 1000000);
 	std::cout << frames << " frames, " << duration / 1000000 << " sec, " << fps << " fps" << std::endl;
 
-	// Free Up Buffers
-	for(int i=0; i< numberOfFilesFPS; i++) free(img[i]);
 }
 
 /*!
  *@brief used in FPS 24 color bitmap test, 
 */
-uint8_t* loadImage(char* name) {
-	FILE *pFile ;
-	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
-	uint8_t* bmpBuffer1 = nullptr;
+std::unique_ptr<uint8_t[]> loadImage(const char* name) 
+{
+	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
-	pFile = fopen(name, "r");
-	if (pFile == nullptr) {
-		std::cout << "Error TestFPS : File does not exist" << std::endl;
+
+	FILE *pFile = fopen(name, "r");
+	if (pFile == nullptr) 
+	{
+		std::cout << "Error: File does not exist" << std::endl;
 		return nullptr;
-	} else {
-		bmpBuffer1 = (uint8_t*)malloc((myBMPWidth * myBMPHeight) * pixelSize);
-		if (bmpBuffer1 == nullptr)
-		{
-			std::cout << "Error TestFPS : MALLOC could not assign memory " << std::endl;
-			return nullptr;
-		}
-		fseek(pFile,  FileHeaderOffset, 0);
-		fread(bmpBuffer1, pixelSize, myBMPWidth * myBMPHeight, pFile);
-		fclose(pFile);
 	}
-	
-	return bmpBuffer1;
+
+	std::unique_ptr<uint8_t[]> bmpBuffer;
+	try 
+	{
+		bmpBuffer = std::make_unique<uint8_t[]>(myBMPWidth * myBMPHeight * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error: Could not allocate memory" << std::endl;
+		fclose(pFile);
+		return nullptr;
+	}
+
+	fseek(pFile, FileHeaderOffset, SEEK_SET);
+	fread(bmpBuffer.get(), pixelSize, myBMPWidth * myBMPHeight, pFile);
+	fclose(pFile);
+
+	return bmpBuffer; // Transfer ownership to the caller
 }
 
 /*!

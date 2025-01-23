@@ -75,39 +75,6 @@
 #define ERMCH1115_ACTIVATE_SCROLL   0x2F /**<active Scroll mode */
 
 
-// GPIO abstraction 
-#define ERMCH1115_DC_SetHigh  lgGpioWrite(_GpioHandle, _OLED_DC, 1)
-#define ERMCH1115_DC_SetLow  lgGpioWrite(_GpioHandle ,_OLED_DC, 0)
-#define ERMCH1115_RST_SetHigh  lgGpioWrite(_GpioHandle, _OLED_RST, 1)
-#define ERMCH1115_RST_SetLow  lgGpioWrite(_GpioHandle, _OLED_RST, 0)
-#define ERMCH1115_CS_SetHigh lgGpioWrite(_GpioHandle ,_OLED_CS, 1) // SW SPI only last 6 lines
-#define ERMCH1115_CS_SetLow lgGpioWrite(_GpioHandle, _OLED_CS, 0)
-#define ERMCH1115_SCLK_SetHigh lgGpioWrite(_GpioHandle, _OLED_SCLK, 1)
-#define ERMCH1115_SCLK_SetLow  lgGpioWrite(_GpioHandle, _OLED_SCLK, 0)
-#define ERMCH1115_DIN_SetHigh lgGpioWrite(_GpioHandle, _OLED_DIN, 1)
-#define ERMCH1115_DIN_SetLow  lgGpioWrite(_GpioHandle, _OLED_DIN,0)
-
-#define ERMCH1115_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _OLED_RST,  0);
-#define ERMCH1115_DC_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _OLED_DC,  0);
-#define ERMCH1115_CS_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _OLED_CS,  0); // SW SPI only last 3 lines
-#define ERMCH1115_SCLK_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _OLED_SCLK,  0);
-#define ERMCH1115_DIN_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _OLED_DIN,  0);
-
-// GPIO open and close
-#define ERMCH1115_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define ERMCH1115_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define ERMCH1115_GPIO_FREE_DC lgGpioFree(_GpioHandle , _OLED_DC)
-#define ERMCH1115_GPIO_FREE_RST lgGpioFree(_GpioHandle , _OLED_RST)
-#define ERMCH1115_GPIO_FREE_CS lgGpioFree(_GpioHandle , _OLED_CS) // SW SPI only last 3 lines
-#define ERMCH1115_GPIO_FREE_CLK lgGpioFree(_GpioHandle , _OLED_SCLK)
-#define ERMCH1115_GPIO_FREE_DATA lgGpioFree(_GpioHandle , _OLED_DIN)
-
-//SPI Operations 
-#define ERMCH1115_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
-#define ERMCH1115_CLOSE_SPI lgSpiClose(_spiHandle)
-#define ERMCH1115_WRITE_SPI lgSpiWrite( _spiHandle, (const char*)TransmitBuffer, sizeof(TransmitBuffer))
-
 // Delays
 #define ERMCH1115_INITDELAY 100 /**< Init delay mS */
 #define ERMCH1115_HIGHFREQ_DELAY 0 /**< uS GPIO SPI SW Delay, default 0uS */
@@ -168,11 +135,11 @@ class ERMCH1115 : public bicolor_graphics   {
 	void SoftwareSPIShiftOut(uint8_t val);
 
 	// GPIO related
-	int8_t _OLED_CS;   /**< GPIO Chip select line, Software SPI only*/
-	int8_t _OLED_DC;   /**< GPIO Data or command line */
-	int8_t _OLED_RST;  /**< GPIO Reset line */
-	int8_t _OLED_SCLK; /**< GPIO Clock Line, Software SPI only*/
-	int8_t _OLED_DIN;   /**< GPIO MOSI Line, Software SPI only*/
+	int8_t _Display_CS;   /**< GPIO Chip select line, Software SPI only*/
+	int8_t _Display_DC;   /**< GPIO Data or command line */
+	int8_t _Display_RST;  /**< GPIO Reset line */
+	int8_t _Display_SCLK; /**< GPIO Clock Line, Software SPI only*/
+	int8_t _Display_SDATA;   /**< GPIO MOSI Line, Software SPI only*/
 	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 

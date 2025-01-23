@@ -22,8 +22,8 @@ ERMCH1115::ERMCH1115(int16_t oledwidth, int16_t oledheight ,int8_t rst, int8_t d
 {
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
-	_OLED_DC = dc;
-	_OLED_RST= rst;
+	_Display_DC = dc;
+	_Display_RST = rst;
 	_OLED_mode = 2;
 }
 
@@ -42,11 +42,11 @@ ERMCH1115::ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8_t 
 {
 	_OLED_HEIGHT = oledheight;
 	_OLED_WIDTH = oledwidth;
-	_OLED_DC = dc;
-	_OLED_RST= rst;
-	_OLED_CS = cs;
-	_OLED_DIN = din;
-	_OLED_SCLK = sclk;
+	_Display_DC = dc;
+	_Display_RST= rst;
+	_Display_CS = cs;
+	_Display_SDATA = din;
+	_Display_SCLK = sclk;
 	_OLED_mode = 3;
 }
 
@@ -83,7 +83,7 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device
 		return rpiDisplay_WrongModeChosen;
 	}
 	// 2. setup gpioDev
-	_GpioHandle = ERMCH1115_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -93,8 +93,8 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device
 	// 3. Claim 2 GPIO as outputs for RST and DC lines
 	int GpioResetErrorStatus = 0;
 	int GpioDCErrorStatus = 0;
-	GpioResetErrorStatus= ERMCH1115_RST_SetDigitalOutput;
-	GpioDCErrorStatus= ERMCH1115_DC_SetDigitalOutput;
+	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -105,9 +105,9 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device
 		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
 		return rpiDisplay_GpioPinClaim;
 	}
-	//ERMCH1115_CS_SetHigh;
+	//Display_CS_SetHigh;
 	// 4. set up spi open
-	 _spiHandle  = ERMCH1115_OPEN_SPI;
+	 _spiHandle  = Display_OPEN_SPI;
 	if ( _spiHandle  < 0)
 	{
 		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
@@ -141,7 +141,7 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDe
 		return rpiDisplay_WrongModeChosen;
 	}
 	// 2. setup gpioDev
-	_GpioHandle = ERMCH1115_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -155,11 +155,11 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDe
 	int GpioSCLKErrorStatus = 0;
 	int GpioDINErrorStatus = 0;
 
-	GpioResetErrorStatus= ERMCH1115_RST_SetDigitalOutput;
-	GpioDCErrorStatus= ERMCH1115_DC_SetDigitalOutput;
-	GpioCSErrorStatus= ERMCH1115_CS_SetDigitalOutput;
-	GpioSCLKErrorStatus= ERMCH1115_SCLK_SetDigitalOutput;
-	GpioDINErrorStatus= ERMCH1115_DIN_SetDigitalOutput;
+	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
+	GpioCSErrorStatus= Display_CS_SetDigitalOutput;
+	GpioSCLKErrorStatus= Display_SCLK_SetDigitalOutput;
+	GpioDINErrorStatus= Display_SDATA_SetDigitalOutput;
 
 	if (GpioResetErrorStatus < 0 ){
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -175,7 +175,7 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDe
 
 	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
 
-	ERMCH1115_CS_SetHigh;
+	Display_CS_SetHigh;
 	OLEDinit();
 	return rpiDisplay_Success;
 }
@@ -223,10 +223,10 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 	// 1. Free Reset & DC GPIO lines
 	int GpioResetErrorStatus = 0;
 	int GpioDCErrorStatus = 0;
-	ERMCH1115_RST_SetLow;
-	ERMCH1115_DC_SetLow;
-	GpioResetErrorStatus = ERMCH1115_GPIO_FREE_RST;
-	GpioDCErrorStatus  =  ERMCH1115_GPIO_FREE_DC;
+	Display_RST_SetLow;
+	Display_DC_SetLow;
+	GpioResetErrorStatus = Display_GPIO_FREE_RST;
+	GpioDCErrorStatus  =  Display_GPIO_FREE_DC;
 
 	if (GpioResetErrorStatus < 0 ){
 		fprintf(stderr,"Error: Can't Free Reset GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -242,12 +242,12 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 		int GpioCSErrorStatus = 0;
 		int GpioCLKErrorStatus = 0;
 		int GpioDINErrorStatus = 0;
-		ERMCH1115_CS_SetLow;
-		ERMCH1115_SCLK_SetLow;
-		ERMCH1115_DIN_SetLow;
-		GpioCSErrorStatus = ERMCH1115_GPIO_FREE_CS;
-		GpioCLKErrorStatus =  ERMCH1115_GPIO_FREE_CLK;
-		GpioDINErrorStatus =   ERMCH1115_GPIO_FREE_DATA;
+		Display_CS_SetLow;
+		Display_SCLK_SetLow;
+		Display_SDATA_SetLow;
+		GpioCSErrorStatus = Display_GPIO_FREE_CS;
+		GpioCLKErrorStatus = Display_GPIO_FREE_CLK;
+		GpioDINErrorStatus = Display_GPIO_FREE_SDATA;
 		if (GpioCSErrorStatus < 0 ){
 			fprintf(stderr,"Error: Can't Free CS GPIO (%s)\n", lguErrorText(GpioCSErrorStatus ));
 			ErrorFlag = 2;
@@ -261,7 +261,7 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 	}else if (GetCommMode() == 2) // 2B hardware SPi Closes a SPI device 
 	{
 		int spiErrorStatus = 0;
-		spiErrorStatus =  ERMCH1115_CLOSE_SPI;
+		spiErrorStatus = Display_CLOSE_SPI;
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error: Cannot Close SPI device (%s)\n", lguErrorText(spiErrorStatus));
@@ -270,7 +270,7 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 	}
 	// 3 Closes the opened gpiochip device.
 	int GpioCloseStatus = 0;
-	GpioCloseStatus =ERMCH1115_CLOSE_GPIO_HANDLE;
+	GpioCloseStatus = Display_CLOSE_GPIO_HANDLE;
 	if ( GpioCloseStatus < 0)
 	{
 		fprintf(stderr,"Error :: Failed to close lgGpioChipclose %d , error=  (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -297,13 +297,13 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 void ERMCH1115::OLEDPowerDown(void)
 {
 	OLEDEnable(0);
-	ERMCH1115_DC_SetLow;
-	ERMCH1115_RST_SetLow;
+	Display_DC_SetLow;
+	Display_RST_SetLow;
 	if(GetCommMode()== 3)
 	{
-		ERMCH1115_SCLK_SetLow;
-		ERMCH1115_DIN_SetLow;
-		ERMCH1115_CS_SetLow;
+		Display_SCLK_SetLow;
+		Display_SDATA_SetLow;
+		Display_CS_SetLow;
 	}
 	_sleep= true;
 }
@@ -326,11 +326,11 @@ void ERMCH1115::SoftwareSPIShiftOut(uint8_t value)
 
 	for (i = 0; i < 8; i++)
 	{
-		!!(value & (1 << (7 - i))) ? ERMCH1115_DIN_SetHigh : ERMCH1115_DIN_SetLow ;
+		!!(value & (1 << (7 - i))) ? Display_SDATA_SetHigh : Display_SDATA_SetLow ;
 
-		ERMCH1115_SCLK_SetHigh;
+		Display_SCLK_SetHigh;
 		delayMicroSecRDL(_OLEDHighFreqDelay);
-		ERMCH1115_SCLK_SetLow;
+		Display_SCLK_SetLow;
 		delayMicroSecRDL(_OLEDHighFreqDelay);
 	}
 }
@@ -342,7 +342,7 @@ void ERMCH1115::OLEDinit()
  {
 	switch (GetCommMode())
 	{
-		case 3: ERMCH1115_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 	OLEDReset();
 
@@ -390,7 +390,7 @@ void ERMCH1115::OLEDinit()
 	_sleep= false;
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 
 	delayMilliSecRDL(ERMCH1115_INITDELAY);
 }
@@ -403,9 +403,9 @@ void ERMCH1115::OLEDinit()
 */
 void ERMCH1115::send_command (uint8_t command,uint8_t value)
 {
-	ERMCH1115_DC_SetLow;
+	Display_DC_SetLow;
 	send_data(command | value);
-	ERMCH1115_DC_SetHigh;
+	Display_DC_SetHigh;
 }
 
 /*!
@@ -413,11 +413,11 @@ void ERMCH1115::send_command (uint8_t command,uint8_t value)
 */
 void ERMCH1115::OLEDReset ()
 {
-	ERMCH1115_RST_SetHigh;
+	Display_RST_SetHigh;
 	delayMilliSecRDL(ERMCH1115_RST_DELAY1);
-	ERMCH1115_RST_SetLow;
+	Display_RST_SetLow;
 	delayMilliSecRDL(ERMCH1115_RST_DELAY1);
-	ERMCH1115_RST_SetHigh ;
+	Display_RST_SetHigh ;
 	delayMilliSecRDL(ERMCH1115_RST_DELAY2);
 }
 
@@ -428,7 +428,7 @@ void ERMCH1115::OLEDReset ()
 void ERMCH1115::OLEDEnable (uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	if (bits)
 	{
@@ -441,7 +441,7 @@ void ERMCH1115::OLEDEnable (uint8_t bits)
 	}
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -459,7 +459,7 @@ bool ERMCH1115::OLEDIsSleeping() { return  _sleep ;}
 void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t mode)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SETUP, 0);
 	send_command(ERMCH1115_HORIZONTAL_A_SCROLL_SET_SCOL, 0);
@@ -471,7 +471,7 @@ void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t
 	send_command(mode, 0);
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -482,12 +482,12 @@ void ERMCH1115::OLEDscrollSetup(uint8_t Timeinterval, uint8_t Direction, uint8_t
 void ERMCH1115::OLEDscroll(uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	bits ? send_command(ERMCH1115_ACTIVATE_SCROLL , 0) :   send_command(ERMCH1115_DEACTIVATE_SCROLL, 0);
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -497,12 +497,12 @@ void ERMCH1115::OLEDscroll(uint8_t bits)
 void ERMCH1115::OLEDContrast(uint8_t contrast)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	send_command(ERMCH1115_CONTRAST_CONTROL  ,0);
 	send_command(contrast, 0);
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -512,12 +512,12 @@ void ERMCH1115::OLEDContrast(uint8_t contrast)
 void ERMCH1115::OLEDFlip(uint8_t  bits)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	bits ? send_command(ERMCH1115_COMMON_SCAN_DIR, 0x08):send_command(ERMCH1115_COMMON_SCAN_DIR, 0x00)  ; // C0H - C8H
 	bits ? send_command(ERMCH1115_SEG_SET_REMAP, 0x01):   send_command(ERMCH1115_SEG_SET_REMAP, 0x00); //(A0H - A1H)
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -533,13 +533,13 @@ void ERMCH1115::OLEDFlip(uint8_t  bits)
 void ERMCH1115::OLEDfadeEffect(uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	send_command(ERMCH1115_BREATHEFFECT_SET,0);
 	send_command(bits,0);
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -549,12 +549,12 @@ void ERMCH1115::OLEDfadeEffect(uint8_t bits)
 void ERMCH1115::OLEDInvert(uint8_t bits)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	bits ? send_command(ERMCH1115_DISPLAY_INVERT, 0) :   send_command(ERMCH1115_DISPLAY_NORMAL, 0);
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -583,27 +583,27 @@ void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 		return;
 	}
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	// Commands
 	send_command(ERMCH1115_SET_COLADD_LSB, 0);
 	send_command(ERMCH1115_SET_COLADD_MSB, 0);
 	send_command(ERMCH1115_SET_PAGEADD, pageNum);
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 
 	delayMicroSecRDL(5);
 
 	// Data
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	for (uint8_t i = 0; i < _OLED_WIDTH; i++)
 	{
 		send_data(dataPattern);
 	}
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -618,7 +618,7 @@ void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data)
 {
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	uint8_t tx, ty;
 	uint16_t offset = 0;
@@ -640,7 +640,7 @@ void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uin
 		}
 	}
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!
@@ -655,7 +655,7 @@ void ERMCH1115::send_data(uint8_t dataByte)
 	switch (GetCommMode())
 	{
 		case 2: 
-			spiErrorStatus = ERMCH1115_WRITE_SPI;
+			spiErrorStatus = Display_SPI_WRITE(_spiHandle, static_cast<const char*>(TransmitBuffer), sizeof(TransmitBuffer));
 			if (spiErrorStatus <0) 
 			{
 				fprintf(stderr, "Error : Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -699,7 +699,7 @@ void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uin
 {
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetLow;
+		Display_CS_SetLow;
 
 	uint8_t tx, ty;
 	uint16_t offset = 0;
@@ -723,7 +723,7 @@ void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uin
 	}
 
 	if (GetCommMode() == 3)
-		ERMCH1115_CS_SetHigh ;
+		Display_CS_SetHigh ;
 }
 
 /*!

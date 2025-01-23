@@ -21,7 +21,7 @@ int8_t SCLK_TFT = 6;
 int8_t SDIN_TFT = 5;
 int8_t CS_TFT   = 21;
 int8_t MISO_TFT = 19;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0;
 
 uint16_t TFT_WIDTH = 240;// Screen width in pixels
 uint16_t TFT_HEIGHT = 320; // Screen height in pixels

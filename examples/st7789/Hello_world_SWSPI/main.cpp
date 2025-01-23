@@ -20,7 +20,7 @@ int8_t DC_TFT   = 24;
 int8_t SCLK_TFT = 6;
 int8_t SDIN_TFT = 5;
 int8_t CS_TFT   = 21;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; 
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display

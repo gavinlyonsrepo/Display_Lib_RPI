@@ -141,7 +141,6 @@ if (_hardwareSPI == false)
 		// open error
 		fprintf(stderr,"Error:Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
 		ErrorFlag = 4;
-		return rpiDisplay_GpioChipDevice;
 	}
 
 	// 4 Check error flag (we don't want to return early for any failure)
@@ -330,7 +329,6 @@ void ST7789_TFT::TFTsetScrollDefinition(uint16_t top_fix_heightTFT, uint16_t bot
 	writeData(scroll_heightTFT & 0xFF);
 	writeData(bottom_fix_heightTFT >> 8);
 	writeData(bottom_fix_heightTFT & 0xFF);
-	writeCommand(ST7789_MADCTL);
 
 	if (_scroll_direction) {
 		writeData(ST7789_SRLBTT); //bottom to top

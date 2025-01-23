@@ -54,14 +54,14 @@ sudo make install
 	* Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.0.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.1.0.tar.gz | tar xz
 ```
 
 3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
 	* It will be installed to usr/local/lib and usr/local/include by default. 
 
 ```sh
-cd Display_Lib_RPI-2.0.0
+cd Display_Lib_RPI-2.1.0
 make
 sudo make install
 ```
@@ -102,6 +102,7 @@ make run
 | SH1106 SH1107| Bi colour Graphic OLED | I2C | [Readme](extra/doc/sh110x/README.md) |
 | HD44780_PCF8574 | Character LCD | I2C | [Readme](extra/doc/hd44780/README.md) |
 | TM1638 | LED 7 segment display| ~SPI SW | [Readme](extra/doc/tm1638/README.md) |
+| TM1637 | LED 7 segment display| ~SPI SW | [Readme](extra/doc/tm1637/README.md) |
 | MAX7219 | LED 7 segment display | SPI HW & SW| [Readme](extra/doc/max7219/README.md) |
 
 ### API Documentation
@@ -155,8 +156,9 @@ is in the 'doc' folder [at link.](extra/doc/errors/README.md)
 
 ### Older versions
 
-The last version of Display_lib_RPI (V1.3.0) which used the bcm2835 library as a low level interface 
+A previous version of Display_lib_RPI (V1.3.0) which used the bcm2835 library as a low level interface 
 is in releases and can still be downloaded and used. 
-Version 1.3.0 will NOT work on raspberry pi 5 and uses direct register access.
+Version 1.3.0 will NOT work on raspberry pi 5 and uses direct register access. 
+It will only work on raspberry pi < 5.
 
 

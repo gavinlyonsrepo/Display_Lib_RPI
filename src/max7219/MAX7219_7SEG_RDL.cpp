@@ -18,9 +18,9 @@
 */
 MAX7219_SS_RPI::MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect , uint8_t data, int gpioDev)
 {
-	_MAX7219_CLK_IO = clock;
-	_MAX7219_CS_IO  = chipSelect;
-	_MAX7219_DIN_IO = data;
+	_Display_SCLK = clock;
+	_Display_CS  = chipSelect;
+	_Display_SDATA = data;
 	_HardwareSPI = false;
 	_DeviceNumGpioChip = gpioDev;
 }
@@ -61,13 +61,13 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::DisplayEndOperations(void)
 		int GpioClockErrorstatus = 0;
 		int GpioDataErrorstatus = 0;
 
-		MAX7219_CS_SetLow;
-		MAX7219_CLK_SetLow;
-		MAX7219_DIN_SetLow;
+		Display_CS_SetLow;
+		Display_SCLK_SetLow;
+		Display_SDATA_SetLow;
 
-		GpioStrobeErrorstatus = MAX7219_GPIO_FREE_CS;
-		GpioClockErrorstatus =  MAX7219_GPIO_FREE_CLOCK;
-		GpioDataErrorstatus =   MAX7219_GPIO_FREE_DATA;
+		GpioStrobeErrorstatus = Display_GPIO_FREE_CS;
+		GpioClockErrorstatus =  Display_GPIO_FREE_CLK;
+		GpioDataErrorstatus =   Display_GPIO_FREE_SDATA;
 	
 		if (GpioStrobeErrorstatus < 0 )
 		{
@@ -86,7 +86,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::DisplayEndOperations(void)
 		}
 		 // 2 close gpio chip device
 		int GpioCloseStatus = 0;
-		GpioCloseStatus = MAX7219_CLOSE_GPIO_HANDLE;
+		GpioCloseStatus = Display_CLOSE_GPIO_HANDLE;
 		if ( GpioCloseStatus < 0)
 		{
 			fprintf(stderr,"Error: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -95,7 +95,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::DisplayEndOperations(void)
 	}else
 	{// 1B Close SPI device 
 		int spiErrorStatus = 0;
-		spiErrorStatus = lgSpiClose(_GpioHandle);
+		spiErrorStatus = Display_CLOSE_SPI;
 		if (spiErrorStatus <0)
 		{
 			fprintf(stderr, "Error: Cannot Close SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -143,7 +143,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 			int GpioClockErrorstatus = 0;
 			int GpioDataErrorstatus = 0;
 
-			_GpioHandle = MAX7219_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+			_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 			if ( _GpioHandle < 0)	// open error
 			{
 				fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -151,9 +151,9 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 			}
 
 			// Clain GPIO as outputs
-			GpioStrobeErrorstatus = MAX7219_CS_SetDigitalOutput;
-			GpioClockErrorstatus = MAX7219_CLK_SetDigitalOutput;
-			GpioDataErrorstatus = MAX7219_DIN_SetDigitalOutput ;
+			GpioStrobeErrorstatus = Display_CS_SetDigitalOutput;
+			GpioClockErrorstatus =  Display_SCLK_SetDigitalOutput;
+			GpioDataErrorstatus =   Display_SDATA_SetDigitalOutput ;
 
 			if (GpioStrobeErrorstatus < 0 )
 			{
@@ -170,13 +170,13 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 				fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
 				return rpiDisplay_GpioPinClaim;
 			}
-			MAX7219_CS_SetHigh;
+			Display_CS_SetHigh;
 		}else
 		{
-			_GpioHandle = lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags);
-			if (_GpioHandle < 0)
+			_spiHandle = Display_OPEN_SPI;
+			if (_spiHandle < 0)
 			{
-				fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText(_GpioHandle));
+				fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText(_spiHandle));
 				return rpiDisplay_SPIOpenFailure;
 			}
 			delayMilliSecRDL(50); // small init delay before commencing transmissions
@@ -279,7 +279,7 @@ void MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e TextAlignment){
 	char pos =0;
 
 	// We need the length of the string - no of decimal points set
-	uint8_t LengthOfStr = (_NoDigits);
+	uint8_t LengthOfStr;
 	LengthOfStr=strlen(text);
 	for(uint8_t index =0; text[index]; index++)
 	{
@@ -524,10 +524,10 @@ void MAX7219_SS_RPI::HighFreqshiftOut(uint8_t value)
 
 	for (uint8_t bit = 0; bit < 8; bit++)
 	{
-		!!(value & (1 << (7 - bit))) ? MAX7219_DIN_SetHigh: MAX7219_DIN_SetLow; // MSBFIRST
-		MAX7219_CLK_SetHigh;
+		!!(value & (1 << (7 - bit))) ? Display_SDATA_SetHigh: Display_SDATA_SetLow; // MSBFIRST
+		Display_SCLK_SetHigh;
 		delayMicroSecRDL(_CommDelay);
-		MAX7219_CLK_SetLow;
+		Display_SCLK_SetLow;
 		delayMicroSecRDL(_CommDelay);
 	}
 }
@@ -541,24 +541,22 @@ void MAX7219_SS_RPI::HighFreqshiftOut(uint8_t value)
 */
 uint8_t MAX7219_SS_RPI::ASCIIFetch(uint8_t character, DecimalPoint_e decimalPoint)
 {
-	if (character<=31 || character>=123) {return 0;} // check ASCII font bounds
+	if (character<=31 || character>=123)
+	{
+		printf("Error : AsciiFetch : ASCII character is outside font range %u, \n", character);
+		return 0;
+	} // check ASCII font bounds
 
 	const uint8_t  AsciiOffset = 0x20; // The font starts at ASCII 0x20 . space
 	uint8_t returnCharValue =0;
-
+	returnCharValue = flipBitsPreserveMSB(pFontSevenSegptr[character - AsciiOffset]);
 	switch (decimalPoint)
 	{
-		case DecPointOn :
-			returnCharValue  = pSevenSegASCIIFont[character - AsciiOffset];
-			returnCharValue |= (1<<7);
-			return (returnCharValue);
-		break;
-		case DecPointOff :
-			return pSevenSegASCIIFont[character - AsciiOffset];
-		break;
+		case DecPointOn  :  returnCharValue |= (1<<7); break;
+		case DecPointOff :  break;
 	}
 
-	return 0;
+	return returnCharValue;
 }
 
 /*!
@@ -571,7 +569,7 @@ void MAX7219_SS_RPI::WriteDisplay( uint8_t RegisterCode, uint8_t data)
 
 	if (_HardwareSPI == false)
 	{
-		MAX7219_CS_SetLow;
+		Display_CS_SetLow;
 		HighFreqshiftOut(RegisterCode);
 		HighFreqshiftOut(data);
 		if (_CurrentDisplayNumber  > 1)
@@ -582,7 +580,7 @@ void MAX7219_SS_RPI::WriteDisplay( uint8_t RegisterCode, uint8_t data)
 				HighFreqshiftOut(0x00);
 			}
 		}
-		MAX7219_CS_SetHigh;
+		Display_CS_SetHigh;
 	}else
 	{
 		char TransmitBuffer[_CurrentDisplayNumber*2];
@@ -596,7 +594,7 @@ void MAX7219_SS_RPI::WriteDisplay( uint8_t RegisterCode, uint8_t data)
 			}
 		}
 		int spiErrorStatus = 0;
-		spiErrorStatus = lgSpiWrite(_GpioHandle, (const char*)TransmitBuffer, sizeof(TransmitBuffer));
+		spiErrorStatus = Display_SPI_WRITE(_spiHandle, static_cast<const char*>(TransmitBuffer), sizeof(TransmitBuffer));
 		if (spiErrorStatus <0)
 		{
 			fprintf(stderr, "Error : Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -624,5 +622,31 @@ void MAX7219_SS_RPI::SetScanLimit(ScanLimit_e numDigits)
 	WriteDisplay(MAX7219_REG_ScanLimit, numDigits);
 }
 
+/*!
+	@brief Flips the positions of bits in a byte while preserving the MSB bit
+	@param byte A byte of data, ASCII character
+	@return A byte from font representing LED segment data with bits positions flipped and MSB bit value preserved 
+	@details The reason for this function is that the MAX7219 requires ASCII segment data
+	in following order : dp-abcdefg but the font we use is dp-gfedcba where
+	letters represent seven segment LEDS, and dp represents decimal point.. 
+	We flip the bits in the code rather than change the font data in font file because
+	the font data is used by other modules(TM1638 + TM1637) and they use dp-gfedcba order.
+	Thus we can share same font file between all seven segment modules.
+*/
+uint8_t MAX7219_SS_RPI::flipBitsPreserveMSB(uint8_t byte) 
+{
+	uint8_t msb = byte & 0x80; // Extract the most significant bit (MSB)
+	uint8_t flipped = 0;       // Variable to store the flipped result
 
+	for (int i = 0; i < 7; ++i) 
+	{
+		// Shift the i-th bit from the rightmost 7 bits to the new position
+		if (byte & (1 << i)) 
+		{
+			flipped |= (1 << (6 - i));
+		}
+	}
+
+	return msb | flipped; // Combine the MSB with the flipped bits
+}
 // == EOF ==

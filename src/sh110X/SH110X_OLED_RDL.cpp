@@ -40,14 +40,14 @@ rpiDisplay_Return_Codes_e SH110X_RDL::OLEDbegin(OLED_IC_type_e OLEDtype, bool I2
 	if(_Display_RST >= 0)
 	{
 		int GpioResetErrorstatus = 0;
-		_GpioHandle = SH110X_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+		_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 		if ( _GpioHandle < 0)	// open error
 		{
 			fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
 			return rpiDisplay_GpioChipDevice;
 		}
 		// Clain GPIO as outputs
-		GpioResetErrorstatus = SH110X_RST_SetDigitalOutput;
+		GpioResetErrorstatus = Display_RST_SetDigitalOutput;
 		if (GpioResetErrorstatus < 0 )
 		{
 			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorstatus));
@@ -99,7 +99,7 @@ rpiDisplay_Return_Codes_e SH110X_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr ,
 
 	int I2COpenHandle = 0;
 
-	I2COpenHandle = lgI2cOpen(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
+	I2COpenHandle = DISPLAY_RDL_I2C_OPEN(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
 	if (I2COpenHandle < 0 )
 	{
 		printf("Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
@@ -130,15 +130,15 @@ rpiDisplay_Return_Codes_e  SH110X_RDL::OLED_I2C_OFF(void)
 	{
 		int GpioResetErrorStatus = 0;
 		int GpioCloseStatus = 0;
-		SH110X_RST_SetLow;
-		GpioResetErrorStatus = SH110X_GPIO_FREE_RST; // Free reset pin
+		Display_RST_SetLow ;
+		GpioResetErrorStatus =  Display_GPIO_FREE_RST; // Free reset pin
 		if (GpioResetErrorStatus < 0 )
 		{
 			fprintf(stderr,"Error:Can't Free Reset GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
 			ErrorFlag = 2;
 		}
 		// 2 close gpiochip
-		GpioCloseStatus = SH110X_CLOSE_GPIO_HANDLE; 
+		GpioCloseStatus = Display_CLOSE_GPIO_HANDLE; 
 		if ( GpioCloseStatus < 0)
 		{
 			fprintf(stderr,"Error:Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -148,7 +148,7 @@ rpiDisplay_Return_Codes_e  SH110X_RDL::OLED_I2C_OFF(void)
 
 	// 3 close I2C device handle
 	int I2COpenHandleStatus = 0;
-	I2COpenHandleStatus = lgI2cClose(_OLEDI2CHandle);
+	I2COpenHandleStatus = DISPLAY_RDL_I2C_CLOSE (_OLEDI2CHandle);
 	if (I2COpenHandleStatus < 0 )
 	{
 		printf("Error: OLED_I2C_OFF : Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
@@ -203,12 +203,12 @@ void SH110X_RDL::OLEDReset(void)
 {
 	const uint8_t resetDelay = 10; /**< reset delay in miliseconds*/
 
-	SH110X_RST_SetDigitalOutput;
-	SH110X_RST_SetHigh;
+	Display_RST_SetDigitalOutput;
+	Display_RST_SetHigh;
 	delayMilliSecRDL(resetDelay);
-	SH110X_RST_SetLow;
+	Display_RST_SetLow;
 	delayMilliSecRDL(resetDelay);
-	SH110X_RST_SetHigh;
+	Display_RST_SetHigh;
 }
 
 /*!
@@ -316,7 +316,7 @@ void SH110X_RDL::SH1107_begin(void)
 void SH110X_RDL::OLEDEnable(uint8_t bits)
 {
 	
-	bits ? SH110X_RDL_command(SH110X_DISPLAYALLON ) : SH110X_RDL_command(SH110X_DISPLAYALLON_RESUME);
+	bits ? SH110X_RDL_command(SH110X_DISPLAYALLON ) : SH110X_RDL_command(SH110X_DISPLAYOFF);
 }
 
 /*!
@@ -393,7 +393,7 @@ void SH110X_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 	uint8_t attemptI2Cwrite = _I2C_ErrorRetryNum;
 	int  ReasonCodes = 0;
 	
-	ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); 
+	ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); 
 	while(ReasonCodes < 0)
 	{//failure to write I2C byte ,Error handling retransmit
 		
@@ -403,7 +403,7 @@ void SH110X_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 			printf("Attempt Count: %u\n", attemptI2Cwrite);
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
-		ReasonCodes =lgI2cWriteDevice(_OLEDI2CHandle, ByteBuffer, 2); //retry
+		ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt
 		if (attemptI2Cwrite == 0) break;
@@ -562,7 +562,7 @@ int  SH110X_RDL::OLEDCheckConnection(void)
 	char rxdatabuf[1]; //buffer to hold return byte
 	int I2CReadStatus = 0;
 
-	I2CReadStatus = lgI2cReadDevice(_OLEDI2CHandle, rxdatabuf, 1);
+	I2CReadStatus = DISPLAY_RDL_I2C_READ(_OLEDI2CHandle, rxdatabuf, 1);
 	if (I2CReadStatus < 0 )
 	{
 		printf("Error:OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));

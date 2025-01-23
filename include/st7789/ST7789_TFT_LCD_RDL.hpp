@@ -77,7 +77,7 @@ private:
 	uint8_t _colstart2 = 0;         /**< Offset from the right for ST7789*/
 	uint8_t _rowstart2 = 0;         /**< Offset from the bottom for ST7789*/
 	uint16_t _widthStartTFT = 240;  /**<  never change after first init */
-	uint16_t _heightStartTFT = 280; /**< never change after first init */
+	uint16_t _heightStartTFT = 320; /**< never change after first init */
 
 	// SPI related 
 	int _spiDev = 0;       /**< A SPI device, >= 0. */

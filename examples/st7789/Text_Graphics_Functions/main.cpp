@@ -8,7 +8,9 @@
 	-# Test 502 Rotate
 	-# Test 503 change modes test -> Invert, display on/off and Sleep.
 	-# Test 705 print method all fonts
-	-# Test 706 Misc print class tests (string object, println invert, wrap, base nums etc)
+	-# Test 706 Misc print class tests (string object, println invert, wrap, base nums)
+	-# Test 707 Vectors with print class
+	-# Test 808 Error Checking text
 	-# Test 902 rectangles
 	-# Test 903 Circle
 	-# Test 904 Triangles
@@ -50,10 +52,14 @@ void DisplayReset(void);
 void Test500(void); // Color RGB
 void Test502(void); // Rotate
 void Test503(void); // change modes test -> Invert, display on/off and Sleep.
+void Test504(void); // Scroll
 
 void Test701(void);
 void Test705(void);
 void Test706(void);
+void Test707(void);
+
+void Test808(void);
 
 void Test902(void);  // rectangles
 void Test903(void);  // Circle
@@ -68,9 +74,12 @@ int main(void)
 	Test500();
 	Test502();
 	Test503();
+	Test504();
 	Test701();
 	Test705();
 	Test706();
+	Test707();
+	Test808();
 	Test902();
 	Test903();
 	Test904();
@@ -197,9 +206,39 @@ void Test503()
 	delayMilliSecRDL(TEST_DELAY2);
 }
 
+void Test504(void)
+{
+	DisplayReset();
+	printf("Test 504: Scroll\r\n");
+	myTFT.setFont(font_default);
+	const uint8_t LINES = 10, LINE_SIZE = 10, LINE_OFFSET = 3, TOP_FIXED = 0, BOTTOM_FIXED = 0;
+	char teststr1[] = "Scroll test";
+	
+	for (uint8_t i = 0; i < LINES; i++)
+	{
+	myTFT.writeCharString(5, LINE_OFFSET+i*LINE_SIZE,teststr1);
+	}
+	myTFT.TFTsetScrollDefinition(TOP_FIXED,BOTTOM_FIXED,1);  // bottom-to-top
+	uint8_t pos = LINE_OFFSET;
+	for (uint8_t i = 0; i < LINES; i++) 
+	{
+		for (uint8_t j = 0; j < LINE_SIZE; j++) 
+		{
+			myTFT.TFTVerticalScroll(pos + TOP_FIXED);
+			pos++;
+			// check pos if necessary: must be < tftTFT_HEIGHT - TOP_FIXED - BOTTOM_FIXED 
+		}
+	delayMilliSecRDL(1000);
+	}
+	myTFT.TFTNormalMode();
+	myTFT.fillScreen(RDLC_BLACK);
+	DisplayReset();
+
+}
+
 void Test701(void) {
 
-	std::cout << "Test 701: Print out some fonts with writeCharString" << std::endl;
+	std::cout << "Test 701: Print out all fonts with writeCharString" << std::endl;
 	char teststr1[] = "Default ";
 	char teststr2[] = "GLL ";
 	char teststr3[] = "Pico ";
@@ -427,8 +466,136 @@ void Test706(void)
 	myTFT.setCursor(5,70);
 	myTFT.print("12345678901234567890ABCDEFGHIJ");
 	DisplayReset();
+	
+	// test a vector
 }
 
+void Test707(void)
+{
+	std::cout << "Test 708: print class -: vectors" << std::endl;
+	myTFT.setFont(font_mega);
+	// For a vector of floats
+	myTFT.setCursor(5, 40);
+	std::vector<float> floatVec = {1.0, 22.004, -3.149823, 478.55434};
+	myTFT.println(floatVec, 1); // Output 1 decimal places
+	//myTFT.setCursor(5, 80);
+	myTFT.println(floatVec);    // Output 2 decimal places(default)
+	//myTFT.setCursor(5, 120);
+	myTFT.print(floatVec, 3); // Output 3 decimal places
+	DisplayReset();
+	// For a vector of integers
+	std::vector<int> intVec = {47, 11, 34};
+	myTFT.setCursor(0, 40);
+	myTFT.println( intVec[0]);  // print 47 
+	myTFT.println( intVec[0], RDL_HEX);  // print 2F
+	myTFT.println( intVec[0] ,RDL_OCT); //print 57
+	myTFT.println( intVec[0], RDL_BIN); // print 101111
+	DisplayReset();
+
+	myTFT.setCursor(0, 60);
+	myTFT.print( intVec); // 47 11 34
+
+	//For a vector of strings
+	myTFT.setCursor(0, 100);
+	std::vector<std::string> stringVec = {"HELLO", "VECTOR"};
+	myTFT.println(stringVec); // Output: "HELLO VECTOR"
+	myTFT.println(stringVec[0]); // Output: "HELLO "
+	myTFT.print(stringVec[1]); // Output: "VECTOR"
+	DisplayReset();
+}
+
+void Test808(void)
+{
+	// Error checking
+	printf("==== Test 808 Start Error checking ====\n");
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_Success, rpiDisplay_CharArrayNullptr,
+		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
+		rpiDisplay_CharFontASCIIRange, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
+		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharArrayNullptr
+	};
+	
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
+
+	char testlowercase[] = "ZA[ab";
+	char testNonNumExtend[] = "-;A";
+	bool errorFlag = false;
+	myTFT.setFont(font_gll);
+
+	// (1) Print statement test, gll font lower case letters
+	// We check print class error flag as print statement does not return errors it returns num of characters
+	// it attempted to print. Always clear error flag before checking getWriteError after new print
+	myTFT.setCursor(40,40);
+	myTFT.print("ABc"); // Print AB , return 3 (num of characters)
+	returnValues.push_back(myTFT.getWriteError()); // return error
+	myTFT.clearWriteError(); // Reset error flag
+	myTFT.print("abC");  // print C , return 3 (num of characters)
+	returnValues.push_back(myTFT.getWriteError()); // return error
+	myTFT.clearWriteError(); // Reset error flag
+	myTFT.print("12345"); // print 12345 , return 5 (num of characters)
+	returnValues.push_back(myTFT.getWriteError()); // return pass
+	myTFT.clearWriteError(); // Reset error flag
+	myTFT.print(nullptr);  // return 0 (num of characters)
+	returnValues.push_back(myTFT.getWriteError());  // return error
+	myTFT.clearWriteError(); // Reset error flag
+	DisplayReset();
+	printf("========\r\n");
+	// (2) writeChar + writeCharString
+	// gll lower case + ] character out of font bounds
+	returnValues.push_back(myTFT.writeChar(32, 0, '!')); //success
+	returnValues.push_back(myTFT.writeCharString(5,  5, testlowercase)); //throw gll font error 2
+	DisplayReset();
+	// Numeric extended bounds ; , A errors
+	myTFT.setFont(font_sixteenSeg);
+	returnValues.push_back(myTFT.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
+	returnValues.push_back(myTFT.writeChar(32, 0, ',')); //throw error 2
+	DisplayReset();
+	printf("========\r\n");
+	// screen out of bounds
+	myTFT.setFont(font_default);
+	returnValues.push_back(myTFT.writeChar(0, 400, 'e')); //throw error 1
+	returnValues.push_back(myTFT.writeChar(400, 0, 'f')); //throw error 1
+	DisplayReset();
+	myTFT.setFont(font_orla);
+	returnValues.push_back(myTFT.writeChar(0, 400, 'A')); //throw error 1
+	returnValues.push_back(myTFT.writeChar(400, 0, 'B')); //throw error 1
+	DisplayReset();
+	
+	returnValues.push_back(myTFT.writeCharString(5, 5, nullptr)); //throw error 
+	
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+
+	// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
+
+}
 
 void Test902(void) {
 	std::cout << "Test 902: rectangles " << std::endl;

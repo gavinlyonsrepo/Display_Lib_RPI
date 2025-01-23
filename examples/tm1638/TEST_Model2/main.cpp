@@ -32,7 +32,7 @@
 #define  STROBE_TM 21 // strobe = GPIO connected to strobe line of module
 #define  CLOCK_TM 20  // clock = GPIO connected to clock line of module
 #define  DIO_TM 16 // data = GPIO connected to data line of module
-#define  GPIO_CHIP_DEVICE 4 // Rpi5 = 4 , others = 0
+#define  GPIO_CHIP_DEVICE 0 // Gpio Chip device number see ->ls /dev/gpio*
 bool swap_nibbles = false; //Default is false if left out, see note in readme at URL
 
 // Constructor object

@@ -19,40 +19,6 @@
 // defines
 #define _swap_int16_t_RDL(a, b) { int16_t t; t = a; a = b; b = t;}
 
-// lgpio abstraction
-// GPIO levels
-#define Display_DC_SetHigh  lgGpioWrite(_GpioHandle, _Display_DC, 1)
-#define Display_DC_SetLow  lgGpioWrite(_GpioHandle ,_Display_DC, 0)
-#define Display_RST_SetHigh  lgGpioWrite(_GpioHandle, _Display_RST, 1)
-#define Display_RST_SetLow  lgGpioWrite(_GpioHandle, _Display_RST, 0)
-#define Display_CS_SetHigh  lgGpioWrite(_GpioHandle ,_Display_CS, 1)
-#define Display_CS_SetLow  lgGpioWrite(_GpioHandle, _Display_CS, 0)
-#define Display_SCLK_SetHigh  lgGpioWrite(_GpioHandle, _Display_SCLK, 1)
-#define Display_SCLK_SetLow  lgGpioWrite(_GpioHandle, _Display_SCLK, 0)
-#define Display_SDATA_SetHigh lgGpioWrite(_GpioHandle, _Display_SDATA, 1)
-#define Display_SDATA_SetLow  lgGpioWrite(_GpioHandle, _Display_SDATA,0)
-#define Display_MISO_Read  lgGpioRead(_GpioHandle, _Display_MISO)
-// GPIO Set IO
-#define Display_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_RST,  0);
-#define Display_DC_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_DC,  0);
-#define Display_CS_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_CS,  0);
-#define Display_SCLK_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_SCLK,  0);
-#define Display_SDATA_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_SDATA,  0);
-#define Display_MISO_SetDigitalInput lgGpioClaimInput(_GpioHandle, 0,_Display_MISO);
-// GPIO open and close
-#define Display_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define Display_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define Display_GPIO_FREE_DC lgGpioFree(_GpioHandle , _Display_DC)
-#define Display_GPIO_FREE_RST lgGpioFree(_GpioHandle , _Display_RST)
-#define Display_GPIO_FREE_CS lgGpioFree(_GpioHandle , _Display_CS)
-#define Display_GPIO_FREE_CLK lgGpioFree(_GpioHandle , _Display_SCLK)
-#define Display_GPIO_FREE_SDATA lgGpioFree(_GpioHandle , _Display_SDATA)
-//HW SPI  related
-#define Display_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
-#define Display_CLOSE_SPI lgSpiClose(_spiHandle)
-#define Display_SPI_BLK_SIZE 65536 /**< This is maximum block size of SPI Transaction that lgpio library handles by default*/
-
 // Color definitions 16-Bit Color Values R5G6B5
 #define RDLC_BLACK   0x0000
 #define RDLC_BLUE    0x001F
@@ -76,6 +42,8 @@
 #define RDLC_DGREY   0x7BEF
 #define RDLC_GYELLOW 0xAFE5
 #define RDLC_PINK    0xFC18
+#define RDLC_LBLUE   0x7E5F
+#define RDLC_BEIGE   0xB5D2
 
 /*!
 	@brief Class to handle fonts and graphics of color 16 bit display
@@ -125,8 +93,10 @@ class color16_graphics:public display_Fonts, public Print  {
 	rpiDisplay_Return_Codes_e drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const uint8_t *pBmp);
 	rpiDisplay_Return_Codes_e drawBitmap24(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h);
 	rpiDisplay_Return_Codes_e drawBitmap16(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h);
+	rpiDisplay_Return_Codes_e drawSprite(uint16_t x, uint16_t y, const uint8_t *pBmp, uint16_t w, uint16_t h, uint16_t backgroundColor);
 	// RGB to 565
 	int16_t Color565(int16_t ,int16_t , int16_t );
+
 protected:
 
 	void pushColor(uint16_t color);
@@ -137,9 +107,6 @@ protected:
 	void writeData(uint8_t);
 	void spiWrite(uint8_t);
 	void spiWriteDataBuffer(uint8_t* spidata, int len);
-	//uint8_t spiRead(uint8_t commandByte); // TODO
-	//uint8_t spiReadSoftware(uint8_t commandByte); // TODO
-
 
 	bool _textwrap = true;           /**< wrap text around the screen on overflow*/
 	uint16_t _textcolor = 0xFFFF ;   /**< 16 bit ForeGround color for text*/

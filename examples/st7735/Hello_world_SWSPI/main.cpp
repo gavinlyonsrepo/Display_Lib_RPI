@@ -21,7 +21,7 @@ int8_t DC_TFT   = 24;
 int8_t SCLK_TFT = 6;
 int8_t SDIN_TFT = 5;
 int8_t CS_TFT   = 21;
-int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEV = 0; // Gpio chip device number
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
@@ -54,7 +54,7 @@ int main()
 // Software SPI setup
 uint8_t SetupSWSPI(void)
 {
-	std::cout << "TFT Start Test 101 HWSPI" << std::endl;
+	std::cout << "TFT Start Test 102 SW SPI" << std::endl;
 	std::cout << "Display_Lib_RPI library version : " << GetRDLibVersionNum()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 // ** USER OPTION 1 GPIO/SPI TYPE SW **

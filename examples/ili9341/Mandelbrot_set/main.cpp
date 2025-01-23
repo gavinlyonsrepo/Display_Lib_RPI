@@ -3,7 +3,7 @@
 	@brief  Speed test using drawPixel to draw a mandelbrot set
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test
-		-# 2000 Mandelbro set test
+		-# 400 Mandelbro set test
 */
 
 // Section ::  libraries
@@ -15,7 +15,7 @@
 ILI9341_TFT myTFT;
 int8_t RST_TFT  = 25;
 int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0;
 
 uint16_t TFT_WIDTH = 240;// Screen width in pixels
 uint16_t TFT_HEIGHT = 320; // Screen height in pixels

@@ -4,18 +4,19 @@
 # Run make help for options 
 
 # === SUPPORTED DISPLAY LIST  ===
-# Display 1 = MAX7219
-# Display 2 = TM1638
-# Display 3 = HD44780 LCD I2C
-# Display 4 = SSD1306 OLED I2C
-# Display 5 = ERM19264 LCD SPI
-# Display 6 = NOKIA5110 LCD SPI
-# Display 7 = CH1115 OLED I2C
-# Display 8 = Sh1106 OLED I2C
-# Display 9 = Sh1107 OLED I2C
-# Display 10 = ST7735X  TFT LCD SPI
-# Display 11 = ST7789   TFT LCD SPI
-# Display 12 = ILI9341  TFT LCD SPI
+# Display 1 =  MAX7219
+# Display 2 =  TM1638
+# Display 3 =  TM1637
+# Display 4 =  HD44780 LCD I2C
+# Display 5 =  SSD1306 OLED I2C
+# Display 6 =  ERM19264 LCD SPI
+# Display 7 =  NOKIA5110 LCD SPI
+# Display 8 =  CH1115 OLED I2C
+# Display 9 =  Sh1106 OLED I2C
+# Display 10 = Sh1107 OLED I2C
+# Display 11 = ST7735X  TFT LCD SPI
+# Display 12 = ST7789   TFT LCD SPI
+# Display 13 = ILI9341  TFT LCD SPI
 # ==================================
 
 # ***********************************************
@@ -35,6 +36,10 @@
 # ================= TM1638 ======================
 #SRC=tm1638/TEST_Model_1_3
 #SRC=tm1638/TEST_Model2
+# ================================================
+
+# ================= TM1637 ======================
+#SRC=tm1637/TEST_Model4
 # ================================================
 
 # ================= HD44780 LCD I2C ==============

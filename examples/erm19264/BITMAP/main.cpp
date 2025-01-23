@@ -7,6 +7,7 @@
 		-#  303 LCD update init method
 		-#  304 Drawbitmap to buffer method, vertical addressing
 		-#  305 Drawbitmap to buffer method, horizontal addressing
+		-#  803 Bitmap error checking
 */
 
 #include <lgpio.h>
@@ -146,6 +147,7 @@ void Test301(void);
 void Test303(void);
 void Test304(void);
 void Test305(void);
+void Test803(void);
 bool setup(void);
 void myLoop(void);
 void EndTest(void);
@@ -196,6 +198,7 @@ void myLoop()
 	Test303();
 	Test304();
 	Test305();
+	Test803();
 }
 
 void Test301(void)
@@ -244,4 +247,74 @@ void Test305(void)
 
 	myLCD.LCDupdate();
 	delayMilliSecRDL(5000);
+}
+
+/*!
+	@brief  Bitmap error checking test
+*/
+void Test803(void)
+{
+	myLCD.LCDFillScreen(0x00);
+	myLCD.LCDclearBuffer();
+
+	// === Setup tests ===
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rpiDisplay_Success,
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds,
+		rpiDisplay_BitmapLargerThanScreen, rpiDisplay_BitmapNullptr,
+		rpiDisplay_BitmapSize, rpiDisplay_BitmapSize, rpiDisplay_BitmapSize
+	};
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
+	// test variables
+	char testString5[] = "Error Check Test 803";
+	bool errorFlag = false;
+
+	// === Tests, Perform function calls and store return values ===
+	printf("=== START Error checking. Expecting errors ===\r\n");
+	// Print message + sanity check for success
+	myLCD.setFont(font_default);
+	returnValues.push_back(myLCD.writeCharString(5, 5, testString5)); 
+	myLCD.LCDupdate();
+	delayMilliSecRDL(2000);
+	myLCD.LCDFillScreen(0x00);
+
+	returnValues.push_back(myLCD.drawBitmap(200, 0, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
+	returnValues.push_back(myLCD.drawBitmap(0, 100, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
+	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconHa, 180, 80, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
+	returnValues.push_back(myLCD.drawBitmap(0, 0, nullptr, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
+	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconHa, 16, 9, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
+	myLCD.setDrawBitmapAddr(true);
+	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconVa, 17, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconVa)));
+	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconVa, 16, 8, RDL_BLACK, RDL_WHITE, 200));
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+
+	// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
 }

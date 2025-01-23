@@ -48,7 +48,7 @@ rpiDisplay_Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char
 
 	// 2. Check for character out of font range bounds
 	if (value < _FontOffset || value >= (_FontOffset + _FontNumChars + 1)) {
-		printf("writeChar Error 2: Character out of Font bounds  %c : %u<->%u \r\n", value, _FontOffset, _FontOffset + _FontNumChars);
+		printf("writeChar Error 2: Character out of Font bounds  %c : %u<->%u \r\n", value, _FontOffset,(unsigned int)(_FontOffset + _FontNumChars));
 		return rpiDisplay_CharFontASCIIRange;
 	}
 
@@ -138,7 +138,12 @@ size_t bicolor_graphics::write(uint8_t character)
 		case '\r': break;
 		default:
 			DrawCharReturnCode = writeChar(_cursor_x, _cursor_y, character);
-			if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+			if (DrawCharReturnCode != rpiDisplay_Success) 
+			{
+				// Set the write error based on the result of the drawing operation
+				setWriteError(DrawCharReturnCode); // Set error flag to non-zero value}
+				break;
+			}
 			_cursor_x += (_Font_X_Size);
 			if (_textwrap && (_cursor_x  > (_width - (_Font_X_Size))))
 			{
@@ -148,7 +153,7 @@ size_t bicolor_graphics::write(uint8_t character)
 		break;
 	} // end of switch
 
-  return 1;
+	return 1;
 }
 
 /*!
@@ -600,19 +605,19 @@ rpiDisplay_Return_Codes_e bicolor_graphics::drawBitmap(int16_t x, int16_t y,
 	// 1. User error check : Completely out of bounds?
 	if (x > _width || y > _height)
 	{
-		printf("drawBitmap Error 1 : Bitmap co-ord out of bounds, check x and y\n");
+		printf("Error 1 : drawBitmap : Bitmap co-ord out of bounds, check x and y\n");
 		return rpiDisplay_BitmapScreenBounds ;
 	}
 	// 2. User error check  bitmap weight and height
 	if (w > _width || h > _height)
 	{
-		printf("Error 2 : Bitmap is larger than screen, check w and h\n");
+		printf("Error 2 : drawBitmap : Bitmap is larger than screen, check w and h\n");
 		return rpiDisplay_BitmapLargerThanScreen ;
 	}
 	// 3. User error check  bitmap is null
 	if(bitmap == nullptr)
 	{
-		printf("drawBitmap Error3 : Bitmap is is not valid pointer\n");
+		printf("Error 3 : drawBitmap : Bitmap is is not valid pointer\n");
 		return rpiDisplay_BitmapNullptr ;
 	}
 
@@ -620,7 +625,7 @@ if (_drawBitmapAddr== true)
 {
 	if((sizeOfBitmap != (w * (h/8))) || (h % 8 != 0) ) 	// 4A.check vertical bitmap size
 	{
-		printf("Error drawBitmap 4A : vertical Bitmap size is incorrect:   %u  %i  %i \n", sizeOfBitmap , w , h);
+		printf("Error 4A : drawBitmap : vertical Bitmap size is incorrect:   %u  %i  %i \n", sizeOfBitmap , w , h);
 		printf("Check size =  (w*(h/8) or Is bitmap height  divisible evenly by eight or is all bitmap data there or too much \n");
 		return rpiDisplay_BitmapSize;
 	}
@@ -651,7 +656,7 @@ if (_drawBitmapAddr== true)
 } else if (_drawBitmapAddr == false) {
 	if((sizeOfBitmap != ((w/8) * h)) || (w % 8 != 0)) // 4B.check Horizontal bitmap size
 	{
-		printf("Error drawBitmap 4B : Horizontal Bitmap size is incorrect:  Check Size =  (w/8 * h): %u  %i  %i \n", sizeOfBitmap , w , h);
+		printf("Error 4B: drawBitmap : Horizontal Bitmap size is incorrect:  Check Size =  (w/8 * h): %u  %i  %i \n", sizeOfBitmap , w , h);
 		printf("Check size = (w/8 *h) or Is bitmap width divisible evenly by eight or is all bitmap data there or too much \n");
 		return rpiDisplay_BitmapSize;
 	}

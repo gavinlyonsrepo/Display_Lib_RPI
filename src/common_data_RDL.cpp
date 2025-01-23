@@ -11,5 +11,5 @@
 */
 uint16_t GetRDLibVersionNum(void)
 {
-	return 200;
+	return 210;
 }

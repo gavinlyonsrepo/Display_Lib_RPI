@@ -29,7 +29,7 @@
 		-# Test 716 print method String object
 		-# Test 717 print method numbers
 		-# Test 718 Fonts grotesk big , inconsola, mint and seven segment
-		-# Test 720 Text methods error Checking
+		-# Test 808 Text methods error Checking
 */
 
 #include <lgpio.h>
@@ -366,7 +366,6 @@ void Test713()
 	// Print first 127 chars of font
 	for (char i = 32; i < 126; i++)
 	{
-		if (i == '\n' || i == '\r') continue;
 		myLCD.print(i);
 	}
 	TestReset();
@@ -406,7 +405,7 @@ void Test715(void)
 
 void Test716(void)
 {
-	printf("LCD Test 716 print method + string objects \r\n");
+	printf("LCD Test 716-a print method + string objects \r\n");
 	// Test print a string object with print
 	std::string timeInfo = "12:45";
 	std::string newLine = "new l";
@@ -417,6 +416,18 @@ void Test716(void)
 	myLCD.setCursor(5,40);
 	myLCD.println(newLine); // print a new line feed with println
 	myLCD.print(newLine);
+	TestReset();
+	
+	printf("LCD Test 716-b  print vectors\r\n");
+	// For a vector of integers
+	myLCD.setCursor(10, 20);
+	std::vector<int> intVec = {1, 2, 3, 4};
+	myLCD.print(intVec[1]); // Output: "2 "
+	
+	// For a vector of strings
+	myLCD.setCursor(10, 40);
+	std::vector<std::string> stringVec = {"HELLO", "VECTOR"};
+	myLCD.print(stringVec); // Output: "HELLO VECTOR"
 	TestReset();
 }
 
@@ -460,33 +471,74 @@ void Test718(void){
 void testErrorCheck(void)
 {
 	// Error checking
-	printf("==== Test 720 Start Error checking ====\r\n");
-	printf("Result = 2 2 2 1 1 1 1 ===\r\n");
+	printf("==== Test 808 Start Error checking ====\r\n");
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
+		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
+		rpiDisplay_CharArrayNullptr
+	};
+	
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
+
 	char testlowercase[] = "ZA[ab";
 	char testNonNumExtend[] = "-:;A";
-
+	bool errorFlag = false;
+	
 	// character out of font bounds
 	// gll lower case + ]
 	myLCD.setFont(font_gll);
-	myLCD.writeCharString(5,  5, testlowercase); //throw gll font error 2
-	myLCD.writeChar(32, 0, '!');
+	returnValues.push_back(myLCD.writeChar(32, 0, '!')); //success
+	returnValues.push_back(myLCD.writeCharString(5,  5, testlowercase)); //throw gll font error 2
 	TestReset();
 	// Numeric extended bounds ; , A errors
 	myLCD.setFont(font_sixteenSeg);
-	myLCD.writeCharString(0, 0, testNonNumExtend); //throw font error 2
-	myLCD.writeChar(32, 0, ','); //throw error 2
+	returnValues.push_back(myLCD.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
+	returnValues.push_back(myLCD.writeChar(32, 0, ',')); //throw error 2
 	TestReset();
 	printf("========\r\n");
 	// screen out of bounds
 	myLCD.setFont(font_default);
-	myLCD.writeChar(0, 100, 'e'); //throw error 1
-	myLCD.writeChar(200, 0, 'f'); //throw error 1
+	returnValues.push_back(myLCD.writeChar(0, 100, 'e')); //throw error 1
+	returnValues.push_back(myLCD.writeChar(200, 0, 'f')); //throw error 1
 	TestReset();
 	myLCD.setFont(font_orla);
-	myLCD.writeChar(0, 100, 'A'); //throw error 1
-	myLCD.writeChar(200, 0, 'B'); //throw error 1
+	returnValues.push_back(myLCD.writeChar(0, 100, 'A')); //throw error 1
+	returnValues.push_back(myLCD.writeChar(200, 0, 'B')); //throw error 1
 	TestReset();
-	printf("==== Stop Error checking ====\r\n");
+	
+	returnValues.push_back(myLCD.writeCharString(5, 5, nullptr)); //throw error 
+	
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+
+	// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
 }
 
 // Function to display Graphics test 901

@@ -16,6 +16,7 @@
 #define ILI9341_RDIMGFMT   0x0D /**< Read image format */
 #define ILI9341_RDSELFDIAG 0x0F /**< Read self-diagnostic result */
 
+
 /*!
 @brief Class to interface with ILI9341 LCD display
 */
@@ -58,6 +59,7 @@ public:
 	void setScrollMargins(uint16_t top, uint16_t bottom);
 	void NormalMode(void);
 	rpiDisplay_Return_Codes_e TFTResetPin(void);
+	void PrintDiagnostic(void);
 
 protected:
 

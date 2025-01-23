@@ -15,9 +15,9 @@
 // Section :: Globals 
 
 ST7735_TFT myTFT;
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+int8_t RST_TFT  = 25; // Reset GPIO
+int8_t DC_TFT   = 24; // DC GPIO
+int  GPIO_CHIP_DEV = 0; // GPIO chip device number
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display

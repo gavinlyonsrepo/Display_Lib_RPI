@@ -14,13 +14,15 @@
 		-# Test 7 :: Text entry mode (4 off) if screen is reset the entry mode will be reset to default
 		-# Test 8 :: Print numerical data using print() method
 		-# Test 9 :: Custom character's from the CGRAM test
-		-# Test 10 :: Backlight test.
+		-# Test 10 :: Test vectors using print() method
+		-# Test 11 :: Backlight test.
 */
 
 // Section: Included library
 #include <iostream>
 #include <lgpio.h>
 #include "HD44780_LCD_RDL.hpp"
+#include <vector>
 
 // Section: Defines
 #define DISPLAY_DELAY_1 1000
@@ -46,6 +48,7 @@ void cursorTest(void);
 void entryModeTest(void);
 void writeNumTest(void);
 void customChar(void);
+void vectorTest(void);
 void backLightTest(void);
 void endTest(void);
 
@@ -63,6 +66,7 @@ int main()
 	entryModeTest();
 	writeNumTest();
 	customChar();
+	vectorTest();
 	backLightTest();
 
 	endTest();
@@ -233,6 +237,22 @@ void customChar(void) {
 		delayMilliSecRDL(500);
 	}
 
+	delayMilliSecRDL(DISPLAY_DELAY);
+	myLCD.LCDClearScreen();
+}
+
+void vectorTest(void)
+{
+	// For a vector of integers
+	std::vector<int> intVec = {1, 2, 3, 4};
+	myLCD.LCDGOTO(myLCD.LCDLineNumberOne, 0);
+	myLCD.print(intVec); // Output: "1 2 3 4"
+	delayMilliSecRDL(DISPLAY_DELAY);
+	
+	// For a vector of strings
+	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 0);
+	std::vector<std::string> stringVec = {"Hello", "World"};
+	myLCD.print(stringVec); // Output: "Hello World"
 	delayMilliSecRDL(DISPLAY_DELAY);
 	myLCD.LCDClearScreen();
 }

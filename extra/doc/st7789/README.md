@@ -7,7 +7,9 @@
   * [Overview](#overview)
   * [Software](#software)
       * [User Options](#user-options)
-      * [File system](#file-system) 
+      * [File system](#file-system)
+      * [Bitmap](#bitmap)
+      * [Color codes](#color-codes)
   * [Hardware](#hardware)
   * [Output](#output)
   * [Notes](#notes)
@@ -23,7 +25,7 @@
 1. Dynamic install-able Raspberry Pi C++ library.
 2. Inverse colour, rotate, sleep modes supported.
 3. Graphics + print class included.
-4. 24 bit colour , 16 bit color & bi-color Bitmaps supported.
+4. 24 bit colour , 16 bit color, bi-color Bitmaps & sprites supported.
 5. Hardware and Software SPI
 6. Dependency: lgpio Library
 7. NB 'spidev.bufsiz' setting must be 65536 or greater see Notes section. 
@@ -87,6 +89,26 @@ The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit im
 | 4 | Frame_rate_test_bmp | Frame rate per second (FPS) bitmaps |
 | 5 | Frame_rate_test_two | rame rate per second (FPS) text |
 | 6 | Hello_world_SWSPI | Basic use case software SPI |
+
+### Bitmap
+
+Functions to support drawing bitmaps
+
+| Function Name | Colour support | Pixel size KiB|  Note |
+| ------ | ------ | ------ | ------ |
+| drawIcon | bi-colour array | (0-240) X 8  | Data vertically addressed |
+| drawBitmap | bi-colour array |  16.4 | Data horizontally  addressed |
+| drawBitmap16 | 16 bit color 565 BMP files or array |131 | ------ |
+| drawBitmap24  | 24 bit color BMP files or array  | 196  | Converted by software to 16-bit color  |
+| drawSprite| 16 bit color 565 array | 32K max | Does not use a buffer , draws pixel by pixel , ignores background chosen color|
+
+1. Bitmap size in kiloBytes = (screenWidth * screenHeight * bitsPerPixel)/(1024 * 8)
+2. Pixel size column assumes 240 by 280 bitmap.
+3. The data array for 1 and 2 is created from image files using file data conversion tool [link](https://javl.github.io/image2cpp/)
+4. The data array for 3 - 5  is created from BMP files using file data conversion tool [link](https://notisrac.github.io/FileToCArray/)
+5. For 3 and 4 better just to use bmp files direct from file system see examples.
+
+These class functions will return an error code in event of error see API for more details.
 
 ## Hardware
 

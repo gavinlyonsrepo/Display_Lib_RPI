@@ -67,38 +67,6 @@
 #define UC1609_INIT_DELAY 100   /**<  mS init delay ,after init  */
 #define UC1609_INIT_DELAY2 3 /**<  mS init delay,  before reset called datasheet <3mS */
 
-// GPIO abstraction 
-#define UC1609_CD_SetHigh  lgGpioWrite(_GpioHandle, _LCD_CD, 1)
-#define UC1609_CD_SetLow  lgGpioWrite(_GpioHandle ,_LCD_CD, 0)
-#define UC1609_RST_SetHigh  lgGpioWrite(_GpioHandle, _LCD_RST, 1)
-#define UC1609_RST_SetLow  lgGpioWrite(_GpioHandle, _LCD_RST, 0)
-#define UC1609_CS_SetHigh lgGpioWrite(_GpioHandle ,_LCD_CS, 1) // SW SPI only last 6 lines
-#define UC1609_CS_SetLow lgGpioWrite(_GpioHandle, _LCD_CS, 0)
-#define UC1609_SCLK_SetHigh lgGpioWrite(_GpioHandle, _LCD_SCLK, 1)
-#define UC1609_SCLK_SetLow  lgGpioWrite(_GpioHandle, _LCD_SCLK, 0)
-#define UC1609_SDA_SetHigh lgGpioWrite(_GpioHandle, _LCD_SDA, 1)
-#define UC1609_SDA_SetLow  lgGpioWrite(_GpioHandle, _LCD_SDA,0)
-
-#define UC1609_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_RST,  0);
-#define UC1609_CD_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_CD,  0);
-#define UC1609_CS_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_CS,  0); // SW SPI only last 3 lines
-#define UC1609_SCLK_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_SCLK,  0);
-#define UC1609_SDA_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_SDA,  0);
-
-// GPIO open and close
-#define UC1609_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define UC1609_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define UC1609_GPIO_FREE_CD lgGpioFree(_GpioHandle , _LCD_CD)
-#define UC1609_GPIO_FREE_RST lgGpioFree(_GpioHandle , _LCD_RST)
-#define UC1609_GPIO_FREE_CS lgGpioFree(_GpioHandle , _LCD_CS) // SW SPI only last 3 lines
-#define UC1609_GPIO_FREE_CLK lgGpioFree(_GpioHandle , _LCD_SCLK)
-#define UC1609_GPIO_FREE_DATA lgGpioFree(_GpioHandle , _LCD_SDA)
-
-//SPI 
-#define UC1609_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
-#define UC1609_CLOSE_SPI lgSpiClose(_spiHandle)
-#define UC1609_WRITE_SPI lgSpiWrite( _spiHandle, (const char*)TransmitBuffer, sizeof(TransmitBuffer))
 
 /*!
 	@brief class to drive the ERM19264 UC1609 LCD
@@ -144,11 +112,11 @@ public:
 	void SoftwareSPIShiftOut(uint8_t val);
 
 	// GPIO related 
-	int8_t _LCD_CS;    /**< GPIO Chip select  line */
-	int8_t _LCD_CD;   /**< GPIO Data or command line */
-	int8_t _LCD_RST;  /**< GPIO Reset line */
-	int8_t _LCD_SCLK; /**< GPIO Clock Line Software SPI only*/
-	int8_t _LCD_SDA;  /**< GPIO MOSI Line Software SPI only*/
+	int8_t _Display_CS;   /**< GPIO Chip select  line */
+	int8_t _Display_DC;   /**< GPIO Data or command line */
+	int8_t _Display_RST;  /**< GPIO Reset line */
+	int8_t _Display_SCLK; /**< GPIO Clock Line Software SPI only*/
+	int8_t _Display_SDATA;  /**< GPIO MOSI Line Software SPI only*/
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 

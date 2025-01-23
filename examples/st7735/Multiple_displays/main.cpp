@@ -4,7 +4,7 @@
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test 
-		-# 2001 multiple displays Hardware SPI
+		-# 1050 multiple displays Hardware SPI
 */
 
 // Section ::  libraries 
@@ -39,7 +39,7 @@ uint16_t TFT_HEIGHT = 128; // Screen height in pixels
 
 // Common  to both displays
 int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
-int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEV = 0; // Gpio chip device number
 int SPI_SPEED =  8000000; // The speed of serial communication in bits per second.
 int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 

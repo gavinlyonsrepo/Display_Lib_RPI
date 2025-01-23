@@ -55,17 +55,6 @@
 #define SH110X_RDL_ADDR         0x3C /**< I2C address */
 
 
-// GPIO abstraction( only needed for reset pin if present on device) _Display_RST
-#define SH110X_RST_SetHigh  lgGpioWrite(_GpioHandle, _Display_RST, 1)
-#define SH110X_RST_SetLow   lgGpioWrite(_GpioHandle,_Display_RST, 0)
-#define SH110X_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_RST, 0)
-
-// GPIO open and close
-#define SH110X_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define SH110X_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define SH110X_GPIO_FREE_RST lgGpioFree(_GpioHandle , _Display_RST)
-
 /*!
 	@brief class to control OLED and define buffer
 */

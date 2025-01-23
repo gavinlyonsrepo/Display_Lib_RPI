@@ -20,11 +20,11 @@
 */
 NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_RST, uint8_t LCD_DC, uint8_t LCD_CE, int8_t LCD_DIN, int8_t LCD_CLK) :bicolor_graphics(lcdwidth, lcdheight)
 {
-	_LCD_RST = LCD_RST;
-	_LCD_DC  = LCD_DC;
-	_LCD_CE = LCD_CE;
-	_LCD_DIN  = LCD_DIN;
-	_LCD_CLK  = LCD_CLK;
+	_Display_RST = LCD_RST;
+	_Display_DC  = LCD_DC;
+	_Display_CS = LCD_CE;
+	_Display_SDATA  = LCD_DIN;
+	_Display_SCLK  = LCD_CLK;
 	_LCD_WIDTH = lcdwidth;
 	_LCD_HEIGHT = lcdheight;
 	_LCDHardwareSPI = false;
@@ -42,8 +42,8 @@ NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_
 NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_RST, uint8_t LCD_DC) : bicolor_graphics(lcdwidth, lcdheight)
 
 {
-	_LCD_RST = LCD_RST;
-	_LCD_DC  = LCD_DC;
+	_Display_RST = LCD_RST;
+	_Display_DC  = LCD_DC;
 	_LCD_WIDTH = lcdwidth;
 	_LCD_HEIGHT = lcdheight;
 	_LCDHardwareSPI = true;
@@ -87,7 +87,7 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	}
 
 	// 2. setup gpioDev
-	_GpioHandle = LCD_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -97,8 +97,8 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	// 3. Claim 2 GPIO as outputs for RST and CD lines
 	int GpioResetErrorStatus = 0;
 	int GpioDCErrorStatus = 0;
-	GpioResetErrorStatus= LCD_RST_SetDigitalOutput;
-	GpioDCErrorStatus= LCD_DC_SetDigitalOutput;
+	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -111,7 +111,7 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	}
 
 	// 4. set up spi open
-	 _spiHandle  = LCD_OPEN_SPI;
+	 _spiHandle  = Display_OPEN_SPI;
 	if ( _spiHandle  < 0)
 	{
 		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
@@ -151,7 +151,7 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	}
 
 	// 2. setup gpioDev
-	_GpioHandle = LCD_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -165,11 +165,11 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	int GpioCLKErrorStatus = 0;
 	int GpioDINErrorStatus = 0;
 
-	GpioResetErrorStatus= LCD_RST_SetDigitalOutput;
-	GpioDCErrorStatus= LCD_DC_SetDigitalOutput;
-	GpioCEErrorStatus= LCD_CE_SetDigitalOutput;
-	GpioCLKErrorStatus= LCD_CLK_SetDigitalOutput;
-	GpioDINErrorStatus= LCD_DIN_SetDigitalOutput;
+	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
+	GpioCEErrorStatus= Display_CS_SetDigitalOutput;
+	GpioCLKErrorStatus= Display_SCLK_SetDigitalOutput;
+	GpioDINErrorStatus= Display_SDATA_SetDigitalOutput;
 
 	if (GpioResetErrorStatus < 0 ){
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -185,7 +185,7 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 
 	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
 
-	LCD_CE_SetHigh;
+	Display_CS_SetHigh;
 	LCDInit();
 	return rpiDisplay_Success;
 }
@@ -196,10 +196,10 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 void  NOKIA_5110_RPI::LCDInit(void)
 {
 	delayMilliSecRDL(100);
-	LCD_RST_SetHigh;
-	LCD_RST_SetLow;
+	Display_RST_SetHigh;
+	Display_RST_SetLow;
 	delayMilliSecRDL(50);
-	LCD_RST_SetHigh;
+	Display_RST_SetHigh;
 	// get into the EXTENDED mode
 	LCDWriteCommand(LCD_FUNCTIONSET | LCD_EXTENDEDINSTRUCTION );
 	LCDWriteCommand(_bias);
@@ -228,10 +228,10 @@ rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 	// 1. free rst & DC GPIO lines
 	int GpioResetErrorStatus = 0;
 	int GpioDCErrorStatus = 0;
-	LCD_RST_SetLow;
-	LCD_DC_SetLow;
-	GpioResetErrorStatus = LCD_GPIO_FREE_RST;
-	GpioDCErrorStatus  =  LCD_GPIO_FREE_DC;
+	Display_RST_SetLow;
+	Display_DC_SetLow;
+	GpioResetErrorStatus = Display_GPIO_FREE_RST;
+	GpioDCErrorStatus  =  Display_GPIO_FREE_DC;
 
 	if (GpioResetErrorStatus < 0 ){
 		fprintf(stderr,"Error: Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -245,12 +245,12 @@ rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 		int GpioCEErrorStatus = 0;
 		int GpioCLKErrorStatus = 0;
 		int GpioDINErrorStatus = 0;
-		LCD_CE_SetLow;
-		LCD_CLK_SetLow;
-		LCD_DIN_SetLow;
-		GpioCEErrorStatus = LCD_GPIO_FREE_CE;
-		GpioCLKErrorStatus =  LCD_GPIO_FREE_CLK;
-		GpioDINErrorStatus =   LCD_GPIO_FREE_DIN;
+		Display_CS_SetLow;
+		Display_SCLK_SetLow;
+		Display_SDATA_SetLow;
+		GpioCEErrorStatus = Display_GPIO_FREE_CS;
+		GpioCLKErrorStatus =  Display_GPIO_FREE_CLK;
+		GpioDINErrorStatus =   Display_GPIO_FREE_SDATA;
 		if (GpioCEErrorStatus < 0 ){
 			fprintf(stderr,"Error: Can't Free CE GPIO (%s)\n", lguErrorText(GpioCEErrorStatus ));
 			ErrorFlag = 2;
@@ -265,7 +265,7 @@ rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 	}else
 	{
 		int spiErrorStatus = 0;
-		spiErrorStatus =  LCD_CLOSE_SPI;
+		spiErrorStatus =  Display_CLOSE_SPI;
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error : Cannot Close SPI device :(%s)\n", lguErrorText(spiErrorStatus));
@@ -274,7 +274,7 @@ rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 	}
 	// 3 Closes the opened gpiochip device.
 	int GpioCloseStatus = 0;
-	GpioCloseStatus =LCD_CLOSE_GPIO_HANDLE; // close gpiochip
+	GpioCloseStatus =Display_CLOSE_GPIO_HANDLE; // close gpiochip
 	if ( GpioCloseStatus < 0)
 	{
 		fprintf(stderr,"Error: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -298,14 +298,14 @@ rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 */
 void NOKIA_5110_RPI::LCDPowerDown(void)
 {
-	LCD_DC_SetLow;
-	LCD_RST_SetLow;
+	Display_DC_SetLow;
+	Display_RST_SetLow;
 
 	if(isHardwareSPI() == false)
 	{
-		LCD_CE_SetLow;
-		LCD_CLK_SetLow;
-		LCD_DIN_SetLow;
+		Display_CS_SetLow;
+		Display_SCLK_SetLow;
+		Display_SDATA_SetLow;
 	}
 }
 
@@ -320,20 +320,20 @@ void NOKIA_5110_RPI::LCDWriteData(uint8_t dataByte)
 		uint8_t bit_n;
 		for (bit_n = 0x80; bit_n; bit_n >>= 1)
 		{
-			LCD_CLK_SetLow;
+			Display_SCLK_SetLow;
 			delayMicroSecRDL(_LCDHighFreqDelay);
 			if (dataByte & bit_n)
-				LCD_DIN_SetHigh;
+				Display_SDATA_SetHigh;
 			else
-				LCD_DIN_SetLow;
-			LCD_CLK_SetHigh;
+				Display_SDATA_SetLow;
+			Display_SCLK_SetHigh;
 			delayMicroSecRDL(_LCDHighFreqDelay);
 		}
 	}else{
 			int spiErrorStatus = 0;
 			char TransmitBuffer[1];
 			TransmitBuffer[0] = dataByte;
-			spiErrorStatus = LCD_WRITE_SPI;
+			spiErrorStatus = Display_SPI_WRITE( _spiHandle, static_cast<const char*>(TransmitBuffer), sizeof(TransmitBuffer));
 			if (spiErrorStatus <0) 
 			{
 				fprintf(stderr, "Error : Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -346,10 +346,10 @@ void NOKIA_5110_RPI::LCDWriteData(uint8_t dataByte)
 	@param command The command byte to send
 */
 void NOKIA_5110_RPI::LCDWriteCommand(uint8_t command) {
-	LCD_DC_SetLow;
-	if (isHardwareSPI() == false)LCD_CE_SetLow;
+	Display_DC_SetLow;
+	if (isHardwareSPI() == false)Display_CS_SetLow;
 	LCDWriteData(command);
-	if (isHardwareSPI() == false)LCD_CE_SetHigh;
+	if (isHardwareSPI() == false)Display_CS_SetHigh;
 }
 
 /*!
@@ -371,13 +371,13 @@ void NOKIA_5110_RPI::LCDdisplayUpdate(void) {
 	LCDWriteCommand(LCD_SETYADDR);  // set y = 0
 	LCDWriteCommand(LCD_SETXADDR);  // set x = 0
 
-	LCD_DC_SetHigh; //Data send
-	if (isHardwareSPI() == false)LCD_CE_SetLow;
+	Display_DC_SetHigh; //Data send
+	if (isHardwareSPI() == false) Display_CS_SetLow;
 
 	for(i = 0; i < _LCD_Display_size; i++)  
 	LCDWriteData( LCDDisplayBuffer[i] );
 
-	if (isHardwareSPI() == false)LCD_CE_SetHigh;
+	if (isHardwareSPI() == false)Display_CS_SetHigh;
 }
 
 

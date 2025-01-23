@@ -26,7 +26,7 @@ const uint8_t CD = 24;
 const uint8_t DIN = 5;
 const uint8_t SCLK = 6;
 const uint8_t CS = 21;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0;
 
 // software SPI constructor
 ERM19264_UC1609 myLCD(MY_LCD_WIDTH ,MY_LCD_HEIGHT , RST, CD, CS, SCLK,DIN);
@@ -131,13 +131,13 @@ void displayData(long currentFramerate, int count)
 	myLCD.setCursor(0, 50);
 	myLCD.print(GetRDLibVersionNum());
 	myLCD.drawFastVLine(92, 0, 63, RDL_BLACK);
-	
+
 
 	myLCD.fillRect(97, 10, 20, 20, colour);
 	myLCD.fillCircle(137, 20, 10, RDL_BLACK);
 	myLCD.fillTriangle(157, 30, 167, 10, 177, 30, !colour);
 	myLCD.drawRoundRect(107, 40, 60, 20, 10, RDL_BLACK);
-	
+
 	myLCD.LCDupdate();
 }
 
@@ -146,7 +146,7 @@ void displayData(long currentFramerate, int count)
 //The actual resolution looks like microseconds. returns nanoseconds
 static uint64_t counter( void )
 {
-  struct timespec now;
-  clock_gettime( CLOCK_MONOTONIC, &now );
-  return  ((uint64_t)now.tv_sec * 1000000000U) + (uint64_t)now.tv_nsec;
+	struct timespec now;
+	clock_gettime( CLOCK_MONOTONIC, &now );
+	return  ((uint64_t)now.tv_sec * 1000000000U) + (uint64_t)now.tv_nsec;
 }

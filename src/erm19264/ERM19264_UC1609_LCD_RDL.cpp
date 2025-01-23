@@ -24,8 +24,8 @@ ERM19264_UC1609 :: ERM19264_UC1609(int16_t lcdwidth, int16_t lcdheight ,int8_t r
 {
 	_LCD_HEIGHT = lcdheight;
 	_LCD_WIDTH = lcdwidth;
-	_LCD_CD = cd;
-	_LCD_RST= rst;
+	_Display_DC = cd;
+	_Display_RST= rst;
 	_LCD_mode = 2;
 }
 
@@ -44,11 +44,11 @@ ERM19264_UC1609 :: ERM19264_UC1609(int16_t lcdwidth, int16_t lcdheight , int8_t 
 {
 	_LCD_HEIGHT = lcdheight;
 	_LCD_WIDTH = lcdwidth;
-	_LCD_CD = cd;
-	_LCD_RST= rst;
-	_LCD_CS = cs;
-	_LCD_SDA = din;
-	_LCD_SCLK = sclk;
+	_Display_DC = cd;
+	_Display_RST= rst;
+	_Display_CS = cs;
+	_Display_SDATA = din;
+	_Display_SCLK = sclk;
 	_LCD_mode = 3;
 }
 
@@ -88,7 +88,7 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	}
 
 	// 2. setup gpioDev
-	_GpioHandle = UC1609_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -98,8 +98,8 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	// 3. Claim 2 GPIO as outputs for RST and CD lines
 	int GpioResetErrorStatus = 0;
 	int GpioDCErrorStatus = 0;
-	GpioResetErrorStatus= UC1609_RST_SetDigitalOutput;
-	GpioDCErrorStatus= UC1609_CD_SetDigitalOutput;
+	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -112,7 +112,7 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	}
 
 	// 4. set up spi open
-	 _spiHandle  = UC1609_OPEN_SPI;
+	 _spiHandle  = Display_OPEN_SPI;
 	if ( _spiHandle  < 0)
 	{
 		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
@@ -149,7 +149,7 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 		return rpiDisplay_WrongModeChosen;
 	}
 	// 2. setup gpioDev
-	_GpioHandle = UC1609_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -163,11 +163,11 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	int GpioSCLKErrorStatus = 0;
 	int GpioDINErrorStatus = 0;
 
-	GpioResetErrorStatus= UC1609_RST_SetDigitalOutput;
-	GpioDCErrorStatus= UC1609_CD_SetDigitalOutput;
-	GpioCSErrorStatus= UC1609_CS_SetDigitalOutput;
-	GpioSCLKErrorStatus= UC1609_SCLK_SetDigitalOutput;
-	GpioDINErrorStatus= UC1609_SDA_SetDigitalOutput;
+	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
+	GpioCSErrorStatus= Display_CS_SetDigitalOutput;
+	GpioSCLKErrorStatus= Display_SCLK_SetDigitalOutput;
+	GpioDINErrorStatus= Display_SDATA_SetDigitalOutput;
 
 	if (GpioResetErrorStatus < 0 ){
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -183,7 +183,7 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 
 	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
 
-	UC1609_CS_SetHigh;
+	Display_CS_SetHigh;
 	LCDinit();
 	return rpiDisplay_Success;
 }
@@ -203,10 +203,10 @@ rpiDisplay_Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
 	// 1. Free reset & DC GPIO lines
 	int GpioResetErrorStatus = 0;
 	int GpioDCErrorStatus = 0;
-	UC1609_RST_SetLow;
-	UC1609_CD_SetLow;
-	GpioResetErrorStatus = UC1609_GPIO_FREE_RST;
-	GpioDCErrorStatus  =  UC1609_GPIO_FREE_CD;
+	Display_RST_SetLow;
+	Display_DC_SetLow;
+	GpioResetErrorStatus = Display_GPIO_FREE_RST;
+	GpioDCErrorStatus  =  Display_GPIO_FREE_DC;
 
 	if (GpioResetErrorStatus < 0 ){
 		fprintf(stderr,"Error: Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
@@ -222,12 +222,12 @@ rpiDisplay_Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
 		int GpioCSErrorStatus = 0;
 		int GpioCLKErrorStatus = 0;
 		int GpioSDAErrorStatus = 0;
-		UC1609_CS_SetLow;
-		UC1609_SCLK_SetLow;
-		UC1609_SDA_SetLow;
-		GpioCSErrorStatus = UC1609_GPIO_FREE_CS;
-		GpioCLKErrorStatus =  UC1609_GPIO_FREE_CLK;
-		GpioSDAErrorStatus =   UC1609_GPIO_FREE_DATA;
+		Display_CS_SetLow;
+		Display_SCLK_SetLow;
+		Display_SDATA_SetLow;
+		GpioCSErrorStatus = Display_GPIO_FREE_CS;
+		GpioCLKErrorStatus =  Display_GPIO_FREE_CLK;
+		GpioSDAErrorStatus =   Display_GPIO_FREE_SDATA;
 		if (GpioCSErrorStatus < 0 ){
 			fprintf(stderr,"Error: Can't Free CS GPIO (%s)\n", lguErrorText(GpioCSErrorStatus ));
 			ErrorFlag = 2;
@@ -242,7 +242,7 @@ rpiDisplay_Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
 	}else if (GetCommMode() == 2)
 	{
 		int spiErrorStatus = 0;
-		spiErrorStatus =  UC1609_CLOSE_SPI;
+		spiErrorStatus =  Display_CLOSE_SPI;
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error : Cannot Close SPI device :(%s)\n", lguErrorText(spiErrorStatus));
@@ -251,7 +251,7 @@ rpiDisplay_Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
 	}
 	// 3 Closes the opened gpiochip device.
 	int GpioCloseStatus = 0;
-	GpioCloseStatus =UC1609_CLOSE_GPIO_HANDLE; // close gpiochip
+	GpioCloseStatus = Display_CLOSE_GPIO_HANDLE; // close gpiochip
 	if ( GpioCloseStatus < 0)
 	{
 		fprintf(stderr,"Error: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -278,8 +278,8 @@ void ERM19264_UC1609::LCDPowerDown(void)
 {
 	LCDReset();
 	LCDEnable(0);
-	UC1609_CD_SetLow ;
-	UC1609_RST_SetLow ;
+	Display_DC_SetLow ;
+	Display_RST_SetLow ;
 	_sleep= true;
 }
 
@@ -292,10 +292,10 @@ void ERM19264_UC1609::LCDinit()
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
-	UC1609_CD_SetHigh;
+	Display_DC_SetHigh;
 
 	delayMilliSecRDL(UC1609_INIT_DELAY2);
 
@@ -318,7 +318,7 @@ void ERM19264_UC1609::LCDinit()
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -331,9 +331,9 @@ void ERM19264_UC1609::LCDinit()
 */
 void ERM19264_UC1609::send_command (uint8_t command, uint8_t value)
 {
-	UC1609_CD_SetLow;
+	Display_DC_SetLow;
 	send_data(command | value);
-	UC1609_CD_SetHigh;
+	Display_DC_SetHigh;
 }
 
 /*!
@@ -342,9 +342,9 @@ void ERM19264_UC1609::send_command (uint8_t command, uint8_t value)
 */
 void ERM19264_UC1609::LCDReset ()
 {
-	UC1609_RST_SetLow;
+	Display_RST_SetLow;
 	delayMilliSecRDL(UC1609_RESET_DELAY);
-	UC1609_RST_SetHigh;
+	Display_RST_SetHigh;
 	delayMilliSecRDL(UC1609_RESET_DELAY2);
 }
 
@@ -357,7 +357,7 @@ void ERM19264_UC1609::LCDEnable (uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	bits ? _sleep = false: _sleep = true;
@@ -366,7 +366,7 @@ void ERM19264_UC1609::LCDEnable (uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -387,7 +387,7 @@ void ERM19264_UC1609::LCDscroll (uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	send_command(UC1609_SCROLL, bits);
@@ -395,7 +395,7 @@ void ERM19264_UC1609::LCDscroll (uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -410,7 +410,7 @@ void ERM19264_UC1609::LCDrotate(uint8_t rotatevalue)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	switch (rotatevalue)
@@ -426,7 +426,7 @@ void ERM19264_UC1609::LCDrotate(uint8_t rotatevalue)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -439,7 +439,7 @@ void ERM19264_UC1609::LCDinvert (uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	send_command(UC1609_INVERSE_DISPLAY, bits);
@@ -447,7 +447,7 @@ void ERM19264_UC1609::LCDinvert (uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -461,7 +461,7 @@ void ERM19264_UC1609::LCDallpixelsOn(uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	send_command(UC1609_ALL_PIXEL_ON, bits);
@@ -469,7 +469,7 @@ void ERM19264_UC1609::LCDallpixelsOn(uint8_t bits)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -483,7 +483,7 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 	send_command(UC1609_SET_COLADD_LSB, 0);
 	send_command(UC1609_SET_COLADD_MSB, 0);
@@ -491,7 +491,7 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 
 	delayMicroSecRDL(5);
@@ -499,7 +499,7 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	for (uint8_t i = 0; i < _LCD_WIDTH; i++)
@@ -509,7 +509,7 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -538,7 +538,7 @@ void ERM19264_UC1609::LCDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, cons
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	uint8_t tx, ty;
@@ -564,7 +564,7 @@ void ERM19264_UC1609::LCDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, cons
 	switch (GetCommMode())
 	{
 		case 2:  break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 
@@ -583,11 +583,11 @@ void ERM19264_UC1609::SoftwareSPIShiftOut(uint8_t value)
 {
 	for (uint8_t  i = 0; i < 8; i++)
 	{
-	 	!!(value & (1 << (7 - i))) ? UC1609_SDA_SetHigh : UC1609_SDA_SetLow ;
+	 	!!(value & (1 << (7 - i))) ? Display_SDATA_SetHigh : Display_SDATA_SetLow ;
 
-		UC1609_SCLK_SetHigh;
+		Display_SCLK_SetHigh;
 		delayMicroSecRDL(_LCD_HighFreqDelay);
-		UC1609_SCLK_SetLow;
+		Display_SCLK_SetLow;
 		delayMicroSecRDL(_LCD_HighFreqDelay);
 	}
 }
@@ -604,7 +604,7 @@ void ERM19264_UC1609::send_data(uint8_t dataByte)
 	switch (GetCommMode())
 	{
 		case 2: 
-			spiErrorStatus = UC1609_WRITE_SPI;
+			spiErrorStatus = Display_SPI_WRITE( _spiHandle, static_cast<const char*>(TransmitBuffer), sizeof(TransmitBuffer));
 			if (spiErrorStatus <0) 
 			{
 				fprintf(stderr, "Error : Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -648,7 +648,7 @@ void ERM19264_UC1609::LCDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint
 	switch (GetCommMode())
 	{
 		case 2: ; break;
-		case 3: UC1609_CS_SetLow; break;
+		case 3: Display_CS_SetLow; break;
 	}
 
 	uint8_t tx, ty;
@@ -675,7 +675,7 @@ void ERM19264_UC1609::LCDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint
 	switch (GetCommMode())
 	{
 		case 2: break;
-		case 3: UC1609_CS_SetHigh; break;
+		case 3: Display_CS_SetHigh; break;
 	}
 }
 

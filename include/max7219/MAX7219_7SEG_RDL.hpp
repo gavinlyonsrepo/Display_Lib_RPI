@@ -12,28 +12,8 @@
 #include <cstring>
 #include <cstdio> //snprintf
 #include <lgpio.h>
-#include "MAX7219_7SEG_Font_RDL.hpp"
+#include "tm163X_font_data_RDL.hpp"
 #include "common_data_RDL.hpp"
-
-// GPIO abstraction for lg library
-// GPIO Write
-#define MAX7219_CS_SetHigh lgGpioWrite(_GpioHandle, _MAX7219_CS_IO, 1)
-#define MAX7219_CS_SetLow  lgGpioWrite(_GpioHandle, _MAX7219_CS_IO, 0)
-#define MAX7219_CLK_SetHigh  lgGpioWrite(_GpioHandle, _MAX7219_CLK_IO, 1)
-#define MAX7219_CLK_SetLow   lgGpioWrite(_GpioHandle, _MAX7219_CLK_IO, 0)
-#define MAX7219_DIN_SetHigh  lgGpioWrite(_GpioHandle,_MAX7219_DIN_IO, 1)
-#define MAX7219_DIN_SetLow  lgGpioWrite(_GpioHandle, _MAX7219_DIN_IO, 0)
-// GPIO claim modes 
-#define MAX7219_CS_SetDigitalOutput  lgGpioClaimOutput(_GpioHandle, 0, _MAX7219_CS_IO, 0)
-#define MAX7219_CLK_SetDigitalOutput   lgGpioClaimOutput(_GpioHandle, 0, _MAX7219_CLK_IO, 0)
-#define MAX7219_DIN_SetDigitalOutput  lgGpioClaimOutput(_GpioHandle, 0, _MAX7219_DIN_IO, 0)
-// GPIO open and close
-#define MAX7219_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define MAX7219_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define MAX7219_GPIO_FREE_CS lgGpioFree(_GpioHandle , _MAX7219_CS_IO)
-#define MAX7219_GPIO_FREE_CLOCK lgGpioFree(_GpioHandle , _MAX7219_CLK_IO)
-#define MAX7219_GPIO_FREE_DATA lgGpioFree(_GpioHandle , _MAX7219_DIN_IO)
 
 
 /*!
@@ -157,15 +137,16 @@ protected:
 
 private:
 
-	uint8_t _MAX7219_CS_IO;   /**<  GPIO connected to  CS on MAX7219,  SW SPI only */
-	uint8_t _MAX7219_DIN_IO;  /**<  GPIO connected to DIO on MAX7219,  SW SPI only */
-	uint8_t _MAX7219_CLK_IO;  /**<  GPIO connected to CLK on MAX7219,  SW SPI only */
+	uint8_t _Display_CS;     /**<  GPIO connected to  CS on MAX7219,  SW SPI only */
+	uint8_t _Display_SDATA;  /**<  GPIO connected to DIO on MAX7219,  SW SPI only */
+	uint8_t _Display_SCLK;   /**<  GPIO connected to CLK on MAX7219,  SW SPI only */
 
 	uint16_t _CommDelay = 0; /**<  uS delay used in communications SW SPI, User adjust */
 	uint8_t _NoDigits   = 8; /**<  Number of digits in display */
 
 	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
-	int _GpioHandle = 0; /**< This holds a handle to a device opened by lgGpiochipOpen or lgSpiOpen( */
+	int _GpioHandle = 0; /**< This holds a handle to a device opened by lgGpiochipOpen */
+	int _spiHandle = 0; /**< Hold a handle for the SPI device on the channel lgSpiOpen(*/
 	int _spiDev = 0; /**< A SPI device, >= 0. */
 	int _spiChan = 0; /**< A SPI channel, >= 0. */
 	int _spiBaud = 50000;   /**< The speed of serial communication in bits per second. */
@@ -181,5 +162,6 @@ private:
 	uint8_t ASCIIFetch(uint8_t character,DecimalPoint_e decimalPoint);
 	void SetDecodeMode(DecodeMode_e mode);
 	void SetScanLimit(ScanLimit_e numDigits);
+	uint8_t flipBitsPreserveMSB(uint8_t byte);
 };
 

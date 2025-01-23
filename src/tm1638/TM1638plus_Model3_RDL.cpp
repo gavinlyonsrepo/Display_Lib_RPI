@@ -28,17 +28,17 @@ TM1638plus_Model3::TM1638plus_Model3(uint8_t strobe, uint8_t clock, uint8_t data
 rpiDisplay_Return_Codes_e  TM1638plus_Model3::setLED(uint8_t position, uint8_t value)
 {
 	int GpioDataErrorstatus = 0;
-	GpioDataErrorstatus = TM1638_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
 		return rpiDisplay_GpioPinClaim;
 	}
 	sendCommand(TM_WRITE_LOC);
-	TM1638_STROBE_SetLow;
+	TM163X_STROBE_SetLow;
 	sendData(TM_LEDS_ADR + (position << 1));
 	sendData(value);
-	TM1638_STROBE_SetHigh;
+	TM163X_STROBE_SetHigh;
 	return rpiDisplay_Success;
 }
 

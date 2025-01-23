@@ -26,7 +26,7 @@
 		-# Test 715 println + print & textwrap
 		-# Test 716 print method String object
 		-# Test 717 print method numbers
-		-# Test 720 Text methods error Checking
+		-# Test 808 Text methods error Checking
 		-# Test 902 Draw pixel
 		-# Test 903 Draw lines
 		-# Test 904 Draw shapes
@@ -362,7 +362,7 @@ void Test712(void)
 
 void Test713()
 {
-	std::cout << "Test 713-a print ASCII font 32-90 "<< std::endl;
+	std::cout << "Test 713 print ASCII font 32-90 "<< std::endl;
 	char i;
 	myLCD.setFont(font_default);
 	myLCD.setInvertFont(false);
@@ -370,7 +370,6 @@ void Test713()
 	// Print out the full ASCII font for default font
 	for (i = 32; i < 90; i++)
 	{
-		if (i == '\n' || i == '\r') continue;
 		myLCD.print(i);
 	}
 	screenReset();
@@ -426,7 +425,7 @@ void Test716(void)
 
 void Test717(void)
 {
-	std::cout << "Test 717 print method numbers" << std::endl;
+	std::cout << "Test 717-a print method numbers" << std::endl;
 	myLCD.setCursor(0, 0);
 	myLCD.println(3.986,2 ); //print 3.99
 	myLCD.println(4001);
@@ -435,39 +434,117 @@ void Test717(void)
 	myLCD.println("hello");
 	myLCD.setInvertFont(true);
 	myLCD.print('P');
+	myLCD.setInvertFont(false);
+	screenReset();
+
+	printf("Test 717-b print vectors\r\n");
+	myLCD.setFont(font_gll);
+	// For a vector of floats
+	myLCD.setCursor(0, 0);
+	std::vector<float> floatVec = {1.0, 22.004, -3.149823, 478.55434};
+	myLCD.print(floatVec);     // Output 2 decimal places
+	screenReset();
+	myLCD.setCursor(0, 0);
+	myLCD.print(floatVec, 2); // Output 2 decimal places
+	screenReset();
+	myLCD.setCursor(0, 0);
+	myLCD.print(floatVec, 1); // Output 1 decimal places
+	screenReset();
+	// For a vector of integers
+	std::vector<int> intVec = {47, 11, 34};
+	myLCD.setCursor(0, 0);
+	myLCD.print( intVec[0]);  // print 47
+	myLCD.setCursor(0, 9);  
+	myLCD.print( intVec[0], RDL_HEX);  // print 2F
+	myLCD.setCursor(0, 20);
+	myLCD.print( intVec[0] ,RDL_OCT); //print 57
+	myLCD.setCursor(0, 30);
+	myLCD.print( intVec[0], RDL_BIN); // print 101111
+	screenReset();
+
+	myLCD.setCursor(0, 0);
+	myLCD.print( intVec); // 47 11 34
+	screenReset();
+
+	//For a vector of strings
+	myLCD.setCursor(0, 0);
+	std::vector<std::string> stringVec = {"HELLO", "VECTOR"};
+	myLCD.print(stringVec); // Output: "HELLO VECTOR"
 	screenReset();
 }
 
 void testErrorCheck(void)
 {
 	// Error checking
-	std::cout << "==== Test 720 Start Error checking ====" << std::endl;
-	std::cout << "Result = 2 2 2 1 1 1 1 ===" << std::endl;
-	char testlowercase[] = "ZA[ab";
-	char testNonNumExtend[] = ":;A";
+	printf("==== Test 808 Start Error checking ====\r\n");
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
+		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
+		rpiDisplay_CharArrayNullptr
+	};
+	
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
 
+	char testlowercase[] = "ZA[ab";
+	char testNonNumExtend[] = "-;A";
+	bool errorFlag = false;
+	
 	// character out of font bounds
 	// gll lower case + ]
 	myLCD.setFont(font_gll);
-	myLCD.writeCharString(5,  5, testlowercase); //throw  font error 2
-	myLCD.writeChar(32, 0, '!');
+	returnValues.push_back(myLCD.writeChar(32, 0, '!')); //success
+	returnValues.push_back(myLCD.writeCharString(5,  5, testlowercase)); //throw gll font error 2
 	screenReset();
 	// Numeric extended bounds ; , A errors
 	myLCD.setFont(font_sixteenSeg);
-	myLCD.writeCharString(0, 0, testNonNumExtend); //throw font error 2
-	myLCD.writeChar(32, 0, ','); //throw error 2
+	returnValues.push_back(myLCD.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
+	returnValues.push_back(myLCD.writeChar(32, 0, ',')); //throw error 2
 	screenReset();
-	std::cout << "======== " << std::endl;
+	printf("========\r\n");
 	// screen out of bounds
 	myLCD.setFont(font_default);
-	myLCD.writeChar(0, 100, 'e'); //throw error 1
-	myLCD.writeChar(150, 0, 'f'); //throw error 1
+	returnValues.push_back(myLCD.writeChar(0, 100, 'e')); //throw error 1
+	returnValues.push_back(myLCD.writeChar(200, 0, 'f')); //throw error 1
 	screenReset();
 	myLCD.setFont(font_orla);
-	myLCD.writeChar(0, 100, 'A'); //throw error 1
-	myLCD.writeChar(150, 0, 'B'); //throw error 1
+	returnValues.push_back(myLCD.writeChar(0, 100, 'A')); //throw error 1
+	returnValues.push_back(myLCD.writeChar(200, 0, 'B')); //throw error 1
 	screenReset();
-	std::cout << "==== Stop Error checking ====" << std::endl;
+	
+	returnValues.push_back(myLCD.writeCharString(5, 5, nullptr)); //throw error 
+	
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+
+	// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
+
 }
 
 void textDrawPixel(void) {

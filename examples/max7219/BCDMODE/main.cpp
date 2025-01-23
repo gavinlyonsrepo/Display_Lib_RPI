@@ -7,8 +7,8 @@
 	Hardware SPI , Project Name: Display_Lib_RPI
 
 	@test
-		-# Test 30 BCD character
-		-# Test 31 BCD string
+		-# Test 1000 BCD character
+		-# Test 1001 BCD string
 */
 
 // Libraries 

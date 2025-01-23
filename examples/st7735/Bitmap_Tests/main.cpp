@@ -4,11 +4,12 @@
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test
+	-# Test 300 Sprites demo, small bitmap
 	-# Test 301 "clock demo" , icons, small bitmap
 	-# Test 302 bi-color full screen image 128x128
 	-# Test 303 24 bit color image bitmaps from the file system
 	-# Test 304 16 bit colorimage bitmaps from the file system
-
+	-# Test 802 Error checking bitmap functions, results to console
 */
 
 // Section ::  libraries
@@ -27,9 +28,9 @@
 
 // Section :: Globals
 ST7735_TFT myTFT;
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+int8_t RST_TFT  = 25; // Reset GPIO
+int8_t DC_TFT   = 24; // DC GPIO
+int  GPIO_CHIP_DEV = 0; // GPIO chip device number
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
@@ -44,10 +45,12 @@ int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for th
 //  Section ::  Function Headers
 
 uint8_t Setup(void); // setup + user options
+void Test300(void); // Sprite 
 void Test301(void); // "clock demo" icons, small bi-color bitmaps
 void Test302(void); // 2 color bitmap
 void Test303(void); // 24 color bitmap
 void Test304(void); // 16 color bitmap
+void Test802(void); // error checking 
 std::string UTC_string(void); // clock dmeo 
 void EndTests(void);
 
@@ -58,11 +61,12 @@ int main(void)
 
 	if(Setup() != 0)return -1;
 	myTFT.fillScreen(RDLC_BLACK);
+	Test300();
 	Test301();
 	Test302();
 	Test303();
 	Test304();
-
+	Test802();
 	EndTests();
 	return 0;
 }
@@ -96,6 +100,29 @@ uint8_t Setup(void)
 	return 0;
 }
 
+void Test300(void)
+{
+	std::cout << "Test 300: Sprites demo" << std::endl;
+	// Test 300-A test 16-bit color Sprite 
+	// Draw as sprite, without background , 32 X 32 .background color = RDLC_LBLUE
+	// Green background screen
+	myTFT.fillScreen(RDLC_GREEN);
+	delayMilliSecRDL(TEST_DELAY1);
+	myTFT.drawSprite(20, 20, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(RDLC_BLACK);
+	// Test 300-B test 16-bit color Sprite 
+	// Draw as sprite, without background , 32 X 32 .background color =RDLC_LBLUE
+	// Bitmap background screen
+	if(myTFT.drawBitmap(0, 0, 128 , 128, RDLC_WHITE , RDLC_RED, pBackupMenuBitmap) != rpiDisplay_Success)
+		return;
+	delayMilliSecRDL(TEST_DELAY5);
+
+	myTFT.drawSprite(20, 30, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	myTFT.drawSprite(30, 60, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(RDLC_BLACK);
+}
 
 void Test301(void)
 {
@@ -191,13 +218,19 @@ void Test303(void)
 	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
 	uint8_t NumberOfFiles  = 5;
-	uint8_t* bmpBuffer = nullptr;
-	bmpBuffer = (uint8_t*)malloc((MY_TFT_WIDTH * MY_TFT_HEIGHT) * pixelSize);
-	if (bmpBuffer == nullptr)
+	
+	// Use std::vector for safe memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
 	{
-		std::cout << "Error Test 303 : MALLOC could not assign memory " << std::endl;
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize((MY_TFT_WIDTH * MY_TFT_HEIGHT) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 303: Memory allocation failed for bmpBuffer" << std::endl;
 		return;
 	}
+
 	for (uint8_t i = 0 ; i < NumberOfFiles ; i++)
 	{
 		switch (i) // select file
@@ -212,23 +245,20 @@ void Test303(void)
 		if (pFile == nullptr)  // Check file exists
 		{
 			std::cout << "Error Test 303: File does not exist" << std::endl;
-			free(bmpBuffer);
 			return;
 		}
 
 		fseek(pFile, FileHeaderOffset, 0); // Put file in Buffer
-		fread(bmpBuffer, pixelSize, MY_TFT_WIDTH * MY_TFT_HEIGHT, pFile);
+		fread(bmpBuffer.data(), pixelSize, MY_TFT_WIDTH * MY_TFT_HEIGHT, pFile);
 		fclose(pFile);
 
-		if(myTFT.drawBitmap24(0, 0, bmpBuffer, MY_TFT_WIDTH, MY_TFT_HEIGHT) != rpiDisplay_Success)
+		if(myTFT.drawBitmap24(0, 0, bmpBuffer.data(), MY_TFT_WIDTH, MY_TFT_HEIGHT) != rpiDisplay_Success)
 		{// Check for success 0x00
 			std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
-			free(bmpBuffer);
 			return;
 		}
 		delayMilliSecRDL(TEST_DELAY5);
 	}
-	free(bmpBuffer);  // Free Up Buffer
 }
 
 // test function for 16 bit color bitmaps made in GIMP (RGB 565 16 bit color)
@@ -253,12 +283,15 @@ void Test304(void)
 	uint8_t offsetBMPHeader = 0;
 	uint8_t offsetNoColSpace = 72;
 	uint8_t offsetColSpace = 132;
-	uint8_t* bmpBuffer1 = nullptr;
-	bmpBuffer1 = (uint8_t*)malloc((MY_TFT_WIDTH * MY_TFT_HEIGHT) * pixelSize);
-
-	if (bmpBuffer1 == nullptr)
+	// Use std::vector for safe memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
 	{
-		std::cout << "Error Test 304 : MALLOC could not assign memory " << std::endl;
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize((MY_TFT_WIDTH * MY_TFT_HEIGHT) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 304: Memory allocation failed for bmpBuffer" << std::endl;
 		return;
 	}
 
@@ -280,26 +313,103 @@ void Test304(void)
 		if (pFile == nullptr)
 		{
 			std::cout << "Error Test 404 : File does not exist" << std::endl;
-			free(bmpBuffer1);
 			return;
 		}
 		fseek(pFile, offsetBMPHeader, 0);
-		fread(bmpBuffer1, pixelSize, MY_TFT_WIDTH * MY_TFT_HEIGHT, pFile);
+		fread(bmpBuffer.data(), pixelSize, MY_TFT_WIDTH * MY_TFT_HEIGHT, pFile);
 		fclose(pFile);
 
-		if (myTFT.drawBitmap16(0, 0, bmpBuffer1, MY_TFT_WIDTH, MY_TFT_HEIGHT) != rpiDisplay_Success)
+		if (myTFT.drawBitmap16(0, 0, bmpBuffer.data(), MY_TFT_WIDTH, MY_TFT_HEIGHT) != rpiDisplay_Success)
 		{
 		// Check for success 0x00
 			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
-			free(bmpBuffer1);
 			return;
 		}
 		delayMilliSecRDL(TEST_DELAY5);
 	} // end of for loop
 
-	free(bmpBuffer1); // Free Up Buffer
 	myTFT.fillScreen(RDLC_BLACK);
 } // end of test 
+
+void Test802(void)
+{
+	// === Setup tests ===
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rpiDisplay_Success,
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //icon
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //sprite
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, rpiDisplay_BitmapHorizontalSize, //1-bit bitmap
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //16-bit bitmap
+		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr  //24-bit bitmap
+	};
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
+	// test variables
+	char testString5[] = "Error Check, results to console";
+	bool errorFlag = false;
+
+	// === Tests===
+	printf("\n=== START Error checking. Expecting errors ===\r\n");
+	// Perform function calls and store return values
+
+	// Print message + sanity check for success
+	myTFT.setFont(font_default);
+	returnValues.push_back(myTFT.writeCharString(5, 55, testString5)); 
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(RDLC_BLACK);
+	//TFTdrawIcon
+	returnValues.push_back(myTFT.drawIcon(350, 40, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon));
+	returnValues.push_back(myTFT.drawIcon(180, 350, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon));
+	returnValues.push_back(myTFT.drawIcon(40, 40, 16, RDLC_BLACK, RDLC_WHITE, nullptr));
+	//TFTdrawSprite
+	returnValues.push_back(myTFT.drawSprite(350, 50,pSpriteTest16, 32, 32, RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 350,pSpriteTest16, 32, 32, RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 180, nullptr, 32, 32, RDLC_LBLUE));
+	//TFTdrawBitmap
+	returnValues.push_back(myTFT.drawBitmap(350, 65, 128, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(50, 350, 128, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(50, 65, 128, 128, RDLC_WHITE, RDLC_GREEN, nullptr));
+	returnValues.push_back(myTFT.drawBitmap(20, 20, 70, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	//TFTdrawBitmap16 , We use const cast for testing only
+	returnValues.push_back(myTFT.drawBitmap16(350, 50, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 350, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 180, nullptr, 32, 32));
+	//TFTdrawBitmap24 , We use const cast for testing only
+	returnValues.push_back(myTFT.drawBitmap24(340, 50, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 310, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 180, nullptr, 32, 32));
+	
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+
+	// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
+}
 
 
 void EndTests(void)

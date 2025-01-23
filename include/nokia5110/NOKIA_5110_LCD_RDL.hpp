@@ -37,39 +37,6 @@
 #define LCD_CONTRAST 0xB0  /**< default value set LCD VOP contrast range 0xB1-BF */
 #define LCD_BIAS 0x13      /**< LCD Bias mode 1:48 0x12 to 0x14 */
 
-// lgpio bstraction 
-// GPIO
-#define LCD_DC_SetHigh  lgGpioWrite(_GpioHandle, _LCD_DC, 1)
-#define LCD_DC_SetLow  lgGpioWrite(_GpioHandle ,_LCD_DC, 0)
-#define LCD_RST_SetHigh  lgGpioWrite(_GpioHandle, _LCD_RST, 1)
-#define LCD_RST_SetLow  lgGpioWrite(_GpioHandle, _LCD_RST, 0)
-#define LCD_CE_SetHigh lgGpioWrite(_GpioHandle ,_LCD_CE, 1) // SW SPI only last 6 lines
-#define LCD_CE_SetLow lgGpioWrite(_GpioHandle, _LCD_CE, 0)
-#define LCD_CLK_SetHigh lgGpioWrite(_GpioHandle, _LCD_CLK, 1)
-#define LCD_CLK_SetLow  lgGpioWrite(_GpioHandle, _LCD_CLK, 0)
-#define LCD_DIN_SetHigh lgGpioWrite(_GpioHandle, _LCD_DIN, 1)
-#define LCD_DIN_SetLow  lgGpioWrite(_GpioHandle, _LCD_DIN,0)
-
-#define LCD_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_RST,  0);
-#define LCD_DC_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_DC,  0);
-#define LCD_CE_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_CE,  0); // SW SPI only last 3 lines
-#define LCD_CLK_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_CLK,  0);
-#define LCD_DIN_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _LCD_DIN,  0);
-
-// GPIO open and close
-#define LCD_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define LCD_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define LCD_GPIO_FREE_DC lgGpioFree(_GpioHandle , _LCD_DC)
-#define LCD_GPIO_FREE_RST lgGpioFree(_GpioHandle , _LCD_RST)
-#define LCD_GPIO_FREE_CE lgGpioFree(_GpioHandle , _LCD_CE) // SW SPI only last 3 lines
-#define LCD_GPIO_FREE_CLK lgGpioFree(_GpioHandle , _LCD_CLK)
-#define LCD_GPIO_FREE_DIN lgGpioFree(_GpioHandle , _LCD_DIN)
-
-//SPI 
-#define LCD_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
-#define LCD_CLOSE_SPI lgSpiClose(_spiHandle)
-#define LCD_WRITE_SPI lgSpiWrite( _spiHandle, (const char*)TransmitBuffer, sizeof(TransmitBuffer))
 
 #define LCD_Rotate_swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
 
@@ -129,11 +96,11 @@ private:
 	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode */ 
 
 	// GPIO
-	int8_t _LCD_DC;  /**< Data or command GPIO */
-	int8_t _LCD_RST; /**< Reset GPIO */
-	int8_t _LCD_CE;  /**< Chip enable,  Software SPI only */
-	int8_t _LCD_CLK; /**< Clock GPIO, Software SPI only*/
-	int8_t _LCD_DIN; /**< Data GPIO ,Software SPI only */
+	int8_t _Display_DC;    /**< Data or command GPIO */
+	int8_t _Display_RST;   /**< Reset GPIO */
+	int8_t _Display_CS;    /**< Chip enable,  Software SPI only */
+	int8_t _Display_SCLK;  /**< Clock GPIO, Software SPI only*/
+	int8_t _Display_SDATA; /**< Data GPIO ,Software SPI only */
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 

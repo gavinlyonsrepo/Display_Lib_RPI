@@ -48,7 +48,7 @@ void HD44780PCF8574LCD::LCDSendData(unsigned char data) {
 	dataBufferI2C[2] = dataNibbleLower | (LCDDataByteOn & _LCDBackLight); //enable=1 and rs =1 1101  YYYY-X-en-X-rs
 	dataBufferI2C[3] = dataNibbleLower | (LCDDataByteOff &  _LCDBackLight); //enable=0 and rs =1 1001 YYYY-X-en-X-rs
 
-	int ErrorCode = lgI2cWriteDevice(_LCDI2CHandle, dataBufferI2C, 4);
+	int ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, dataBufferI2C, 4);
 	// Error handling retransmit
 	while(ErrorCode < 0)
 	{
@@ -58,7 +58,7 @@ void HD44780PCF8574LCD::LCDSendData(unsigned char data) {
 			printf("Attempt Count: %u \n", AttemptCount );
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay );
-		ErrorCode = lgI2cWriteDevice(_LCDI2CHandle, dataBufferI2C, 4); // retransmit
+		ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, dataBufferI2C, 4); // retransmit
 		_I2C_ErrorFlag = ErrorCode;
 		AttemptCount--;
 		if (AttemptCount == 0) break;
@@ -89,7 +89,7 @@ void HD44780PCF8574LCD::LCDSendCmd(unsigned char cmd) {
 	cmdBufferI2C[2] = cmdNibbleLower | (LCDCmdByteOn & _LCDBackLight); // YYYY-1100 YYYY-led-en-rw-rs ,enable=1 and rs =0
 	cmdBufferI2C[3] = cmdNibbleLower | (LCDCmdByteOff & _LCDBackLight); // YYYY-1000 YYYY-led-en-rw-rs ,enable=0 and rs =0
 
-	int ErrorCode = lgI2cWriteDevice(_LCDI2CHandle, cmdBufferI2C, 4);
+	int ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, cmdBufferI2C, 4);
 	// Error handling retransmit
 	while(ErrorCode < 0)
 	{
@@ -99,7 +99,7 @@ void HD44780PCF8574LCD::LCDSendCmd(unsigned char cmd) {
 			printf("Attempt Count: %u \n", AttemptCount );
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay );
-		ErrorCode = lgI2cWriteDevice(_LCDI2CHandle, cmdBufferI2C, 4); // retransmit
+		ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, cmdBufferI2C, 4); // retransmit
 		_I2C_ErrorFlag = ErrorCode;
 		AttemptCount--;
 		if (AttemptCount == 0) break;
@@ -353,7 +353,7 @@ rpiDisplay_Return_Codes_e HD44780PCF8574LCD::LCD_I2C_ON(void)
 {
 	int I2COpenHandle = 0;
 
-	I2COpenHandle = lgI2cOpen(_LCDI2CDevice, _LCDI2CAddress, _LCDI2CFlags);
+	I2COpenHandle = DISPLAY_RDL_I2C_OPEN(_LCDI2CDevice, _LCDI2CAddress, _LCDI2CFlags);
 	if (I2COpenHandle < 0 )
 	{
 		printf("Error: LCD_I2C_ON: Can't open I2C (%s) \n", lguErrorText(I2COpenHandle));
@@ -377,7 +377,7 @@ rpiDisplay_Return_Codes_e HD44780PCF8574LCD::LCD_I2C_OFF(void)
 {
 	int I2CCloseHandleStatus = 0;
 
-	I2CCloseHandleStatus = lgI2cClose(_LCDI2CHandle);
+	I2CCloseHandleStatus = DISPLAY_RDL_I2C_CLOSE(_LCDI2CHandle);
 	if (I2CCloseHandleStatus < 0 )
 	{
 		printf( "Error:  LCD_I2C_OFF : Can't Close I2C (%s) \n", lguErrorText(I2CCloseHandleStatus));
@@ -504,7 +504,7 @@ int HD44780PCF8574LCD::LCDCheckConnection(void)
 	char rxdatabuf[1]; //buffer to hold return byte
 	int I2CReadStatus = 0;
 
-	I2CReadStatus = lgI2cReadDevice(_LCDI2CHandle, rxdatabuf, 1);
+	I2CReadStatus = DISPLAY_RDL_I2C_READ(_LCDI2CHandle, rxdatabuf, 1);
 	if (I2CReadStatus < 0 )
 	{
 		printf( "Error: LCDCheckConnection :Cannot read device (%s)\n",lguErrorText(I2CReadStatus));

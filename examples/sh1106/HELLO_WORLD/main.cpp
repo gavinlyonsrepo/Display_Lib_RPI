@@ -26,7 +26,7 @@ bool I2C_debug = false;
 
 // Reset only needed if Hardware reset pin is present on device and used
 int OLED_RESET_PIN = -1; // set to -1 if not used
-int GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0, only needed for reset
+int GPIO_CHIP_DEVICE = 4; // only needed for reset pin if used
 
 
 // =============== Function prototype ================

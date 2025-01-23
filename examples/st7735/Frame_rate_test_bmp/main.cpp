@@ -23,9 +23,9 @@ uint8_t numberOfFiles = 5;
 
 // Section :: Globals 
 ST7735_TFT myTFT;
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+int8_t RST_TFT  = 25; // Reset GPIO
+int8_t DC_TFT   = 24; // DC GPIO
+int  GPIO_CHIP_DEV = 0; // GPIO chip device number
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
@@ -44,7 +44,7 @@ void TestFPS(void); // Frames per second 24 color bitmap test,
 void EndTests(void);
 
 int64_t getTime(); // Utility for FPS test
-uint8_t* loadImage(char* name); // Utility for FPS test
+std::unique_ptr<uint8_t[]> loadImage(const char* name); // Utility for FPS test
 
 //  Section ::  MAIN loop
 
@@ -85,49 +85,49 @@ int8_t Setup(void)
 	return 0;
 }
 
-/*!
- *@brief Frames per second test , 24 color bitmap test, 
-*/
-void TestFPS(void) {
 
+void TestFPS(void) 
+{
 	myTFT.fillScreen(RDLC_RED);
-	
+
 	// Load images into buffers
-	uint8_t* img[5] = { 
-		loadImage((char*)"bitmap/bitmap24images/24pic1.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic2.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic3.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic4.bmp"),
-		loadImage((char*)"bitmap/bitmap24images/24pic5.bmp")
+	std::unique_ptr<uint8_t[]> img[5] = {
+		loadImage("bitmap/bitmap24images/24pic1.bmp"),
+		loadImage("bitmap/bitmap24images/24pic2.bmp"),
+		loadImage("bitmap/bitmap24images/24pic3.bmp"),
+		loadImage("bitmap/bitmap24images/24pic4.bmp"),
+		loadImage("bitmap/bitmap24images/24pic5.bmp")
 	};
-	for (uint8_t i=0; i< numberOfFiles ;i++) // Did any loadImage call return nullptr
-	{
-		if (img[i] == nullptr){ 
-			for(uint8_t j=0; j< numberOfFiles; j++) free(img[j]); // Free Up Buffer if set
-			delayMilliSecRDL(TEST_DELAY1);
+
+	// Check if any loadImage call failed
+	for (size_t i = 0; i < 5; ++i) {
+		if (!img[i]) {
+			std::cout << "Error: Image " << i + 1 << " failed to load." << std::endl;
 			return;
 		}
 	}
+
 	int64_t start = getTime(), duration = 0;
 	uint32_t frames = 0;
 	double fps = 0;
-	// Run for ~10sec
-	while(duration < 10000000) {
-		myTFT.drawBitmap24(0, 0, img[frames % numberOfFiles], MY_TFT_WIDTH, MY_TFT_HEIGHT);
+
+	// Run for ~10 seconds
+	while (duration < 10000000) {
+		// Use .get() to pass the raw pointer
+		myTFT.drawBitmap24(0, 0, img[frames % 5].get(), MY_TFT_WIDTH, MY_TFT_HEIGHT);
+
 		duration = getTime() - start;
-		if((++frames % 50) == 0) {
+
+		if ((++frames % 50) == 0) {
 			fps = (double)frames / ((double)duration / 1000000);
 			std::cout << fps << std::endl;
 		}
 	}
 
-	// Get final Stats and print
+	// Get final stats and print
 	duration = getTime() - start;
 	fps = (double)frames / ((double)duration / 1000000);
 	std::cout << frames << " frames, " << duration / 1000000 << " sec, " << fps << " fps" << std::endl;
-
-	// Free Up Buffers
-	for(int i=0; i< numberOfFiles; i++) free(img[i]);
 }
 
 
@@ -151,28 +151,30 @@ int64_t getTime() {
 	return micros;
 }
 
-uint8_t* loadImage(char* name) {
-	FILE *pFile ;
-	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
-	uint8_t* bmpBuffer1 = nullptr;
+std::unique_ptr<uint8_t[]> loadImage(const char* name) {
+	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
-	pFile = fopen(name, "r");
+
+	FILE *pFile = fopen(name, "r");
 	if (pFile == nullptr) {
-		std::cout << "Error TestFPS : File does not exist" << std::endl;
+		std::cout << "Error: File does not exist" << std::endl;
 		return nullptr;
-	} else {
-		bmpBuffer1 = (uint8_t*)malloc((MY_TFT_WIDTH * MY_TFT_HEIGHT) * pixelSize);
-		if (bmpBuffer1 == nullptr)
-		{
-			std::cout << "Error TestFPS : MALLOC could not assign memory " << std::endl;
-			return nullptr;
-		}
-		fseek(pFile,  FileHeaderOffset, 0);
-		fread(bmpBuffer1, pixelSize, MY_TFT_WIDTH * MY_TFT_HEIGHT, pFile);
-		fclose(pFile);
 	}
-	
-	return bmpBuffer1;
+
+	std::unique_ptr<uint8_t[]> bmpBuffer;
+	try {
+		bmpBuffer = std::make_unique<uint8_t[]>(MY_TFT_WIDTH *  MY_TFT_HEIGHT * pixelSize);
+	} catch (const std::bad_alloc&) {
+		std::cout << "Error: Could not allocate memory" << std::endl;
+		fclose(pFile);
+		return nullptr;
+	}
+
+	fseek(pFile, FileHeaderOffset, SEEK_SET);
+	fread(bmpBuffer.get(), pixelSize, MY_TFT_WIDTH *  MY_TFT_HEIGHT, pFile);
+	fclose(pFile);
+
+	return bmpBuffer; // Transfer ownership to the caller
 }
 
 // *************** EOF ****************

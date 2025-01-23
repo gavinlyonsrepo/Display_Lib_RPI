@@ -29,17 +29,17 @@ TM1638plus_Model1::TM1638plus_Model1(uint8_t strobe, uint8_t clock, uint8_t data
 rpiDisplay_Return_Codes_e TM1638plus_Model1::setLED(uint8_t position, uint8_t value)
 {
 	int GpioDataErrorstatus = 0;
-	GpioDataErrorstatus = TM1638_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
 		return rpiDisplay_GpioPinClaim;
 	}
 	sendCommand(TM_WRITE_LOC);
-	TM1638_STROBE_SetLow;
+	TM163X_STROBE_SetLow;
 	sendData(TM_LEDS_ADR + (position << 1));
 	sendData(value);
-	TM1638_STROBE_SetHigh;
+	TM163X_STROBE_SetHigh;
 	return rpiDisplay_Success;
 }
 
@@ -159,10 +159,10 @@ void TM1638plus_Model1::displayASCIIwDot(uint8_t position, uint8_t ascii) {
 */
 void TM1638plus_Model1::display7Seg(uint8_t position, uint8_t value) { // call 7-segment
 	sendCommand(TM_WRITE_LOC);
-	TM1638_STROBE_SetLow;
+	TM163X_STROBE_SetLow;
 	sendData(TM_SEG_ADR + (position << 1));
 	sendData(value);
-	TM1638_STROBE_SetHigh;
+	TM163X_STROBE_SetHigh;
 }
 
 /*!
@@ -215,9 +215,9 @@ uint8_t TM1638plus_Model1::readButtons()
 	uint8_t v =0;
 	int GpioDataErrorstatus = 0;
 
-	TM1638_STROBE_SetLow;
+	TM163X_STROBE_SetLow;
 	sendData(TM_BUTTONS_MODE); 
-	GpioDataErrorstatus = TM1638_SET_INPUT_DATA;
+	GpioDataErrorstatus = TM163X_SET_INPUT_DATA;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -228,11 +228,11 @@ uint8_t TM1638plus_Model1::readButtons()
 		buttons |= v;
 	}
 
-	GpioDataErrorstatus = TM1638_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
 	}
-	TM1638_STROBE_SetHigh;
+	TM163X_STROBE_SetHigh;
 	return buttons;
 }

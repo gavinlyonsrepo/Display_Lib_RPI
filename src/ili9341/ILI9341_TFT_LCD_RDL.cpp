@@ -602,3 +602,45 @@ rpiDisplay_Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
 	Display_SDATA_SetLow;
 	return rpiDisplay_Success;
 }
+
+/*!
+	@brief: Print out diagnostics
+	@note not working TODO
+	@todo Not working, v 2.1.0, reading back 00 and 255 instead of valid values.
+*/
+void  ILI9341_TFT::PrintDiagnostic(void) 
+{
+	if (_hardwareSPI == false)
+	{
+		// Software SPI
+	} else 
+	{
+		// List of command bytes
+		uint8_t commandList[] = {
+			ILI9341_RDMODE,     // 0x0A
+			ILI9341_RDMADCTL,   // 0x0B
+			ILI9341_RDPIXFMT,   // 0x0C
+			ILI9341_RDIMGFMT,   // 0x0D
+			ILI9341_RDSELFDIAG  // 0x0F
+		};
+
+		// Iterate over each command
+		for (int i = 0; i < 5; i++) 
+		{
+			uint8_t commandByte = commandList[i];
+			int SPINumOfBytes = 0;
+			char RxBuffer[1] = {0x00};
+			// Send the sequence of commands and data
+			writeCommand(0xD9);    //  register access
+			writeData(0x10);       // Set index
+			writeCommand(commandByte); // Send the command byte
+			// Read the response
+			Display_DC_SetHigh;    // Set DC to high for reading data
+			SPINumOfBytes = lgSpiRead(_spiHandle, RxBuffer, 1);
+			// Print the results
+			printf("Command Sent: 0x%X\n", commandByte);
+			printf("SPI Number of bytes received: %d\n", SPINumOfBytes);
+			printf("Byte received 0x%0X\n", RxBuffer[0]);
+		}
+	}
+}
