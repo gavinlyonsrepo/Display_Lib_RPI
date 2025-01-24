@@ -86,9 +86,7 @@ int8_t Setup(void)
 	return 0;
 }
 
-/*!
- *@brief Frames per second test , 24 color bitmap test, 
-*/
+// Frames per second test , 24 color bitmap test, 
 void TestFPS(void) {
 	myTFT.fillScreen(RDLC_RED);
 

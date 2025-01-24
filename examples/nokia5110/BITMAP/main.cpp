@@ -134,9 +134,8 @@ void testSmallBitmapHa(void)
 	screenReset();
 }
 
-/*!
-	@brief  Bitmap error checking test
-*/
+
+//  Bitmap error checking test
 void Test803(void)
 {
 

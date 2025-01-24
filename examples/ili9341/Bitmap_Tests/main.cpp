@@ -555,9 +555,7 @@ void Test802(void)
 	printf("\n=== STOP Error checking. ===\r\n");
 }
 
-/*!
- *@brief Frames per second test , 24 color bitmap test, 
-*/
+//  Frames per second test , 24 color bitmap test, 
 void TestFPS(void) {
 
 	myTFT.fillScreen(RDLC_RED);
@@ -600,9 +598,8 @@ void TestFPS(void) {
 
 }
 
-/*!
- *@brief used in FPS 24 color bitmap test, 
-*/
+
+// brief used in FPS 24 color bitmap test, 
 std::unique_ptr<uint8_t[]> loadImage(const char* name) 
 {
 	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
@@ -633,9 +630,8 @@ std::unique_ptr<uint8_t[]> loadImage(const char* name)
 	return bmpBuffer; // Transfer ownership to the caller
 }
 
-/*!
- *@brief used in FPS 24 color bitmap test, 
-*/
+
+// used in FPS 24 color bitmap test, 
 int64_t getTime() {
 	struct timespec tms;
 	if (clock_gettime(CLOCK_REALTIME,&tms)) return -1;

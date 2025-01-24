@@ -19,31 +19,33 @@
 // defines
 #define _swap_int16_t_RDL(a, b) { int16_t t; t = a; a = b; b = t;}
 
-// Color definitions 16-Bit Color Values R5G6B5
-#define RDLC_BLACK   0x0000
-#define RDLC_BLUE    0x001F
-#define RDLC_RED     0xF800
-#define RDLC_GREEN   0x07E0
-#define RDLC_CYAN    0x07FF
-#define RDLC_MAGENTA 0xF81F
-#define RDLC_YELLOW  0xFFE0
-#define RDLC_WHITE   0xFFFF
-#define RDLC_TAN     0xED01
-#define RDLC_GREY    0x9CD1
-#define RDLC_BROWN   0x6201
-#define RDLC_DGREEN  0x01C0
-#define RDLC_ORANGE  0xFC00
-#define RDLC_NAVY    0x000F
-#define RDLC_DCYAN   0x03EF
-#define RDLC_MAROON  0x7800
-#define RDLC_PURPLE  0x780F
-#define RDLC_OLIVE   0x7BE0
-#define RDLC_LGREY   0xC618
-#define RDLC_DGREY   0x7BEF
-#define RDLC_GYELLOW 0xAFE5
-#define RDLC_PINK    0xFC18
-#define RDLC_LBLUE   0x7E5F
-#define RDLC_BEIGE   0xB5D2
+/**
+ * @brief 16-bit color definitions (RGB565 format).
+ */
+#define RDLC_BLACK   0x0000 /**< Black 16-bit color 565 code */
+#define RDLC_BLUE    0x001F /**< Blue 16-bit color 565 code */
+#define RDLC_RED     0xF800 /**< Red 16-bit color 565 code */
+#define RDLC_GREEN   0x07E0 /**< Green 16-bit color 565 code */
+#define RDLC_CYAN    0x07FF /**< Cyan 16-bit color 565 code */
+#define RDLC_MAGENTA 0xF81F /**< Magenta 16-bit color 565 code */
+#define RDLC_YELLOW  0xFFE0 /**< Yellow 16-bit color 565 code */
+#define RDLC_WHITE   0xFFFF /**< White 16-bit color 565 code */
+#define RDLC_TAN     0xED01 /**< Tan 16-bit color 565 code */
+#define RDLC_GREY    0x9CD1 /**< Grey 16-bit color 565 code */
+#define RDLC_BROWN   0x6201 /**< Brown 16-bit color 565 code */
+#define RDLC_DGREEN  0x01C0 /**< Dark Green 16-bit color 565 code */
+#define RDLC_ORANGE  0xFC00 /**< Orange 16-bit color 565 code */
+#define RDLC_NAVY    0x000F /**< Navy 16-bit color 565 code */
+#define RDLC_DCYAN   0x03EF /**< Dark Cyan 16-bit color 565 code */
+#define RDLC_MAROON  0x7800 /**< Maroon 16-bit color 565 code */
+#define RDLC_PURPLE  0x780F /**< Purple 16-bit color 565 code */
+#define RDLC_OLIVE   0x7BE0 /**< Olive 16-bit color 565 code */
+#define RDLC_LGREY   0xC618 /**< Light Grey 16-bit color 565 code */
+#define RDLC_DGREY   0x7BEF /**< Dark Grey 16-bit color 565 code */
+#define RDLC_GYELLOW 0xAFE5 /**< Greenish Yellow 16-bit color 565 code */
+#define RDLC_PINK    0xFC18 /**< Pink 16-bit color 565 code */
+#define RDLC_LBLUE   0x7E5F /**< Light Blue 16-bit color 565 code */
+#define RDLC_BEIGE   0xB5D2 /**< Beige 16-bit color 565 code */
 
 /*!
 	@brief Class to handle fonts and graphics of color 16 bit display

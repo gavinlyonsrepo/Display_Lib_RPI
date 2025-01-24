@@ -3,11 +3,11 @@
 	@brief Example file for ERM19264_LCD display,  showing how to display bitmaps.
 			Project Name: Display_Lib_RPI
 	@test
-		-#  301 LCD bitmap method
-		-#  303 LCD update init method
-		-#  304 Drawbitmap to buffer method, vertical addressing
-		-#  305 Drawbitmap to buffer method, horizontal addressing
-		-#  803 Bitmap error checking
+		-#  Test 301 LCD bitmap method
+		-#  Test 303 LCD update init method
+		-#  Test 304 Drawbitmap to buffer method, vertical addressing
+		-#  Test 305 Drawbitmap to buffer method, horizontal addressing
+		-#  Test 803 Bitmap error checking
 */
 
 #include <lgpio.h>
@@ -249,9 +249,8 @@ void Test305(void)
 	delayMilliSecRDL(5000);
 }
 
-/*!
-	@brief  Bitmap error checking test
-*/
+
+//  Bitmap error checking test
 void Test803(void)
 {
 	myLCD.LCDFillScreen(0x00);

@@ -15,14 +15,14 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include <bitset>
+#include <bitset>  // required for Binary conversion
 #include <iomanip> // required for std::setprecision 
 #include <sstream> // Required for std::ostringstream
 
-#define RDL_DEC 10
-#define RDL_HEX 16
-#define RDL_OCT 8
-#define RDL_BIN 2
+#define RDL_DEC 10 /**< Format the passed integer in Decimal format */
+#define RDL_HEX 16 /**< Format the passed integer in Hexadecimal format  */
+#define RDL_OCT 8  /**< Format the passed integer in Octal format  */
+#define RDL_BIN 2  /**< Format the passed integer in Binary format  */
 
 /*!
 	@brief Polymorphic print class to print many data types by wrapping write function in the graphics class's
@@ -131,7 +131,7 @@ protected:
 
 private:
 
-	int write_error; /*! class Error flag */
+	int write_error; /**< class Error flag */
 	size_t printNumber(unsigned long, uint8_t);
 	size_t printFloat(double, uint8_t);
 

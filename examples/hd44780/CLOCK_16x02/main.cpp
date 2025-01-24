@@ -5,7 +5,7 @@
 		to test the Display_Lib_RPI::HD44780_LCD
 	@note -# press ctrl + c to quit
 	@test 
-		-# 2000 Clock Demo
+		-# Test 409 Clock Demo
  */
 
 // Section: Included library
