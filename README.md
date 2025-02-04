@@ -120,10 +120,11 @@ The font system readme for the graphic displays is in the 'doc' folder [at link.
 
 There are 2 makefiles.
 
-1. Root directory, builds and installs library at a system level.
-2. Example directory, builds a chosen example file using installed library to an executable.
+1. Root directory makefile, builds and installs library at a system level.
+2. Example directory makefile, builds a chosen example file using installed library to an executable.
 which can then be run.  A user editable list of file paths to examples can be found in makefile.
-3. Run 'make help' on these makefiles to see a menu of all options.(uninstall for example)
+
+Run 'make help' on these makefiles to see a menu of all options.(uninstall library for example)
 
 Library naming :
 
