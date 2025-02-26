@@ -15,7 +15,7 @@
 ILI9341_TFT myTFT;
 int8_t RST_TFT  = 25;
 int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 uint16_t TFT_WIDTH = 240;// Screen width in pixels
 uint16_t TFT_HEIGHT = 320; // Screen height in pixels
@@ -49,7 +49,7 @@ int main()
 uint8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start Test 101 HWSPI" << std::endl;
-	std::cout << "ili9341 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ili9341 library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO  **
@@ -61,7 +61,7 @@ uint8_t SetupHWSPI(void)
 // ***********************************
 
 // ** USER OPTION 3 SPI **
-	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -74,8 +74,8 @@ uint8_t SetupHWSPI(void)
 void HelloWorld(void) 
 {
 	std::cout << "Hello World" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.setTextColor(RDLC_GREEN, RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
 	myTFT.setFont(font_inconsola);
 	myTFT.setCursor(0,60);
 	myTFT.println(" Hello ");
@@ -85,7 +85,7 @@ void HelloWorld(void)
 
 void EndTests(void)
 {
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.PowerDown(); // Power down device
 	std::cout << "TFT End" << std::endl;
 }

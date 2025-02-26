@@ -36,19 +36,19 @@ void color16_graphics::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	@param h height of the rectangle
 	@param color color to fill  rectangle 565 16-bit
 	@note  uses spiWriteDataBuffer method
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_ShapeScreenBounds Error
-		-# rpiDisplay_MemoryAError Error
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::ShapeScreenBounds Error
+		-# rdlib::MemoryAError Error
 */
-rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) 
+rdlib::Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) 
 {
 	uint8_t hi, lo;
 
 	// Check bounds
 	if ((x >= _width) || (y >= _height)) {
-		printf("Error: fillRectangle 2: Out of screen bounds\n");
-		return rpiDisplay_ShapeScreenBounds;
+		fprintf(stderr, "Error: fillRectangle 2: Out of screen bounds\n");
+		return rdlib::ShapeScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
@@ -64,8 +64,9 @@ rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y
 		// Allocate buffer
 		buffer = std::vector<uint8_t>(w * h * sizeof(uint16_t));
 	} catch (const std::bad_alloc&) {
-		printf("Error: fillRectangle 3: Memory allocation failed\n");
-		return rpiDisplay_MemoryAError;
+		fprintf(stderr, "Error: fillRectangle 3: Memory allocation failed\n");
+		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * sizeof(uint16_t)));
+		return rdlib::MemoryAError;
 	}
 	
 	for (size_t i = 0; i < buffer.size(); ) 
@@ -79,7 +80,7 @@ rpiDisplay_Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -96,14 +97,14 @@ void color16_graphics::fillScreen(uint16_t color) {
 	@param y The starting y coordinate
 	@param h The height of the line
 	@param color The color of the line 565 16 Bit color
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_ShapeScreenBounds Error
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::ShapeScreenBounds Error
 */
-rpiDisplay_Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color) {
+rdlib::Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color) {
 	uint8_t hi, lo;
 	if ((x >= _width) || (y >= _height))
-		return rpiDisplay_ShapeScreenBounds;
+		return rdlib::ShapeScreenBounds;
 	if ((y + h - 1) >= _height)
 		h = _height - y;
 	hi = color >> 8;
@@ -117,7 +118,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y
 		spiWrite(lo);
 	}
 	if (_hardwareSPI == false){Display_CS_SetHigh;}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -126,14 +127,14 @@ rpiDisplay_Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y
 	@param y The starting y coordinate
 	@param w The width of the line
 	@param color The color of the line 565 16 Bit color
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_ShapeScreenBounds Error
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::ShapeScreenBounds Error
 */
-rpiDisplay_Return_Codes_e color16_graphics::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color) {
+rdlib::Return_Codes_e color16_graphics::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color) {
 	uint8_t hi, lo;
 	if ((x >= _width) || (y >= _height))
-		return rpiDisplay_ShapeScreenBounds;
+		return rdlib::ShapeScreenBounds;
 	if ((x + w - 1) >= _width)
 		w = _width - x;
 	hi = color >> 8;
@@ -146,7 +147,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawFastHLine(uint16_t x, uint16_t y
 		spiWrite(lo);
 	}
 	if (_hardwareSPI == false){Display_CS_SetHigh;}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -283,12 +284,12 @@ void color16_graphics::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, 
 	int16_t steep, dx, dy, err, ystep;
 	steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
-		_swap_int16_t_RDL(x0, y0);
-		_swap_int16_t_RDL(x1, y1);
+		swapint16t(x0, y0);
+		swapint16t(x1, y1);
 	}
 	if (x0 > x1) {
-		_swap_int16_t_RDL(x0, x1);
-		_swap_int16_t_RDL(y0, y1);
+		swapint16t(x0, x1);
+		swapint16t(y0, y1);
 	}
 	dx = x1 - x0;
 	dy = abs(y1 - y0);
@@ -395,16 +396,16 @@ void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t 
 	int16_t a, b, y, last, dx01, dy01, dx02, dy02, dx12, dy12, sa, sb;
 	// Sort coordinates by Y order (y2 >= y1 >= y0)
 	if (y0 > y1) {
-		_swap_int16_t_RDL(y0, y1);
-		_swap_int16_t_RDL(x0, x1);
+		swapint16t(y0, y1);
+		swapint16t(x0, x1);
 	}
 	if (y1 > y2) {
-		_swap_int16_t_RDL(y2, y1);
-		_swap_int16_t_RDL(x2, x1);
+		swapint16t(y2, y1);
+		swapint16t(x2, x1);
 	}
 	if (y0 > y1) {
-		_swap_int16_t_RDL(y0, y1);
-		_swap_int16_t_RDL(x0, x1);
+		swapint16t(y0, y1);
+		swapint16t(x0, x1);
 	}
 	if (y0 == y2) {
 		a = b = x0;
@@ -430,7 +431,7 @@ void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t 
 		b = x0 + sb / dy02;
 		sa += dx01;
 		sb += dx02;
-		if (a > b) _swap_int16_t_RDL(a, b);
+		if (a > b) swapint16t(a, b);
 		drawFastHLine(a, y, b - a + 1, color);
 	}
 
@@ -441,7 +442,7 @@ void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t 
 		b = x0 + sb / dy02;
 		sa += dx12;
 		sb += dx02;
-		if (a > b) _swap_int16_t_RDL(a, b);
+		if (a > b) swapint16t(a, b);
 		drawFastHLine(a, y, b - a + 1, color);
 	}
 }
@@ -455,24 +456,24 @@ void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t 
 	@param w 0-MAX_Y possible values width of icon in pixels , height is fixed at 8 pixels
 	@param color icon foreground colors ,is bi-color
 	@param backcolor icon background colors ,is bi-color
-	@param character  An array of unsigned chars containing icon data vertically addressed.
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_BitmapScreenBounds Error
-		-# rpiDisplay_BitmapNullptr Error
+	@param character icon data vertically addressed.
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::BitmapScreenBounds Error
+		-# rdlib::BitmapDataEmpty Error
 */
-rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t backcolor, const unsigned char character[]) {
+rdlib::Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t backcolor, const std::span<const uint8_t> character) {
 	// Out of screen bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error: drawIcon 2: Out of screen bounds\n");
-		return rpiDisplay_BitmapScreenBounds ;
+		fprintf(stderr , "Error: drawIcon 2: Out of screen bounds\n");
+		return rdlib::BitmapScreenBounds ;
 	}
 	// Check for null pointer
-	if(character == nullptr)
+	if(character.empty())
 	{
-		printf("Error: drawIcon 3: Icon array is not valid pointer object\n");
-		return rpiDisplay_BitmapNullptr;
+		fprintf(stderr ,"Error: drawIcon 3: Icon array is an empty object\n");
+		return rdlib::BitmapDataEmpty;
 	}
 	uint8_t value;
 	for (uint8_t byte = 0; byte < w; byte++)
@@ -490,7 +491,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uin
 			value = 0;
 		}
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -501,34 +502,34 @@ rpiDisplay_Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uin
 	@param h height of the bitmap in pixels
 	@param color bitmap foreground colors ,is bi-color
 	@param bgcolor bitmap background colors ,is bi-color
-	@param pBmp  an array of unsigned chars containing bitmap data horizontally addressed.
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_BitmapScreenBounds Error
-		-# rpiDisplay_BitmapNullptr Error
-		-# rpiDisplay_BitmapHorizontalSize Error
-		-# rpiDisplay_MemoryAError Error
+	@param bitmap  bitmap data, horizontally addressed.
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::BitmapScreenBounds Error
+		-# rdlib::BitmapDataEmpty Error
+		-# rdlib::BitmapHorizontalSize Error
+		-# rdlib::MemoryAError Error
 */
-rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const uint8_t* pBmp) {
+rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const std::span<const uint8_t> bitmap) {
 	int16_t byteWidth = (w + 7) / 8;
 	uint8_t byte = 0;
 	uint16_t mycolor = 0;
 	uint32_t ptr;
 
-	if( pBmp == nullptr) //  Check for null pointer
+	if( bitmap.empty()) //  Check for empty bitmap
 	{
-		printf("Error: drawBitmap 1: Bitmap array is nullptr\n" );
-		return rpiDisplay_BitmapNullptr;
+		fprintf(stderr, "Error: drawBitmap 1: Bitmap span is empty\n" );
+		return rdlib::BitmapDataEmpty;
 	}
 	if(w % 8 != 0) 	// check horizontal size
 	{
-		printf("Error: drawBitmap 2 : Horizontal Bitmap size is incorrect: %u : Width must be divisible by 8 \n", w );
-		return rpiDisplay_BitmapHorizontalSize;
+		fprintf(stderr, "Error: drawBitmap 2 : Horizontal Bitmap size is incorrect: %u : Width must be divisible by 8 \n", w );
+		return rdlib::BitmapHorizontalSize;
 	}
 	if ((x >= _width) || (y >= _height)) // Check bounds
 	{
-		printf("Error: drawBitmap 3: Out of screen bounds, check x & y\n" );
-		return rpiDisplay_BitmapScreenBounds;
+		fprintf(stderr, "Error: drawBitmap 3: Out of screen bounds, check x & y\n" );
+		return rdlib::BitmapScreenBounds;
 	}
 
 	if ((x + w - 1) >= _width) w = _width - x;
@@ -541,8 +542,9 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 		// Allocate buffer
 		buffer = std::vector<uint8_t>(w * h * 2);
 	} catch (const std::bad_alloc&) {
-		printf("Error: drawBitmap 3: Memory allocation failed \n" );
-		return  rpiDisplay_MemoryAError;
+		fprintf(stderr, "Error: drawBitmap 3: Memory allocation failed \n" );
+		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * 2));
+		return  rdlib::MemoryAError;
 	}
 
 	ptr = 0;
@@ -553,7 +555,7 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 			if (i & 7)
 				byte <<= 1;
 			else
-				byte = (pBmp[j * byteWidth + i / 8]);
+				byte = (bitmap[j * byteWidth + i / 8]);
 			mycolor = (byte & 0x80) ? color : bgcolor;
 			buffer[ptr++] = mycolor >> 8;
 			buffer[ptr++] = mycolor;
@@ -563,39 +565,39 @@ rpiDisplay_Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, u
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief Draws an 24 bit color bitmap to screen from a data array
 	@param x X coordinate
 	@param y Y coordinate
-	@param pBmp A pointer to the databuffer containing Bitmap data
+	@param bitmap A span to the data buffer containing Bitmap data
 	@param w width of the bitmap in pixels
 	@param h height of the bitmap in pixels
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_BitmapScreenBounds Error
-		-# rpiDisplay_BitmapNullptr Error
-		-# rpiDisplay_MemoryAError Error
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::BitmapScreenBounds Error
+		-# rdlib::BitmapDataEmpty Error
+		-# rdlib::MemoryAError Error
 	@note 24 bit color converted to 16 bit color
 */
-rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h)
+rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, const std::span<const uint8_t> bitmap, uint16_t w, uint16_t h)
 {
 	uint16_t i, j;
 	uint16_t color;
 	uint32_t rgb, ptr;
 	// 1. Check for null pointer
-	if( pBmp == nullptr)
+	if( bitmap.empty())
 	{
-		printf("Error: drawBitmap24 1: Bitmap array is nullptr\n");
-		return rpiDisplay_BitmapNullptr;
+		fprintf(stderr, "Error: drawBitmap24 1: Bitmap array is an empty object\n");
+		return rdlib::BitmapDataEmpty;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error: drawBitmap24 2: Out of screen bounds\n");
-		return rpiDisplay_BitmapScreenBounds;
+		fprintf(stderr, "Error: drawBitmap24 2: Out of screen bounds\n");
+		return rdlib::BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
@@ -607,8 +609,9 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 		buffer = std::vector<uint8_t>(w * h * 2);
 	} catch (const std::bad_alloc&) 
 	{
-		printf("Error:  drawBitmap24  3: Memory allocation failed\n");
-		return rpiDisplay_MemoryAError;
+		fprintf(stderr, "Error:  drawBitmap24  3: Memory allocation failed\n");
+		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * 2));
+		return rdlib::MemoryAError;
 	}
 
 	ptr = 0;
@@ -617,7 +620,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 		for(i = 0; i < w ; i ++)
 		{
 			// Translate RBG24 to RGB565 bitmap
-			rgb = *(reinterpret_cast<unsigned int*>((pBmp + i * 3 + (h-1-j) * 3 * w)));
+			rgb = *reinterpret_cast<const uint32_t*>(&bitmap[i * 3 + (h - 1 - j) * 3 * w]);
 			color = Color565(((rgb >> 16) & 0xFF), ((rgb >> 8) & 0xFF), (rgb & 0xFF));
 			buffer[ptr++] = color >> 8;
 			buffer[ptr++] = color;
@@ -628,7 +631,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
@@ -636,30 +639,30 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y
 	@brief: Draws an 16 bit color bitmap to screen from a data array
 	@param x X coordinate
 	@param y Y coordinate
-	@param pBmp A pointer to the databuffer containing Bitmap data
+	@param bitmap databuffer containing Bitmap data
 	@param w width of the bitmap in pixels
 	@param h height of the bitmap in pixels
-	@return enum rpiDisplay_Return_Codes_e 
-		-# rpiDisplay_Success for success
-		-# rpiDisplay_BitmapScreenBounds Error
-		-# rpiDisplay_BitmapNullptr Error
-		-# rpiDisplay_MemoryAError Error
+	@return enum rdlib::Return_Codes_e 
+		-# rdlib::Success for success
+		-# rdlib::BitmapScreenBounds Error
+		-# rdlib::BitmapDataEmpty Error
+		-# rdlib::MemoryAError Error
 */
-rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h) {
+rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, const std::span<const uint8_t> bitmap, uint16_t w, uint16_t h) {
 	uint16_t i, j;
 	uint16_t color;
 	uint32_t ptr;
 	// 1. Check for null pointer
-	if( pBmp == nullptr)
+	if( bitmap.empty())
 	{
-		printf("Error: drawBitmap16 1: Bitmap array is nullptr\n" );
-		return rpiDisplay_BitmapNullptr;
+		fprintf(stderr, "Error: drawBitmap16 1: Bitmap array is an empty object\n" );
+		return rdlib::BitmapDataEmpty;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error: drawBitmap16 2: Out of screen bounds\n" );
-		return rpiDisplay_BitmapScreenBounds;
+		fprintf(stderr, "Error: drawBitmap16 2: Out of screen bounds\n" );
+		return rdlib::BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
@@ -672,8 +675,9 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 		buffer = std::vector<uint8_t>(w * h * 2);
 	} catch (const std::bad_alloc&) 
 	{
-		printf("Error:  drawBitmap16  3: Memory allocation failed\n");
-		return rpiDisplay_MemoryAError;
+		fprintf(stderr ,"Error:  drawBitmap16  3: Memory allocation failed\n");
+		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * 2));
+		return rdlib::MemoryAError;
 	}
 	ptr = 0;
 
@@ -681,7 +685,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 	{
 		for(i = 0; i < w; i ++)
 		{
-			color = * (reinterpret_cast<unsigned int*>((pBmp + i * 2 + (h-1-j) * 2 * w)));
+			color = *reinterpret_cast<const uint16_t*>(&bitmap[i * 2 + (h - 1 - j) * 2 * w]);
 			buffer[ptr++] = color >> 8;
 			buffer[ptr++] = color;
 		}
@@ -691,7 +695,7 @@ rpiDisplay_Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -776,12 +780,12 @@ void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 				int writeSize = (remainingLen > Display_SPI_BLK_SIZE) ? Display_SPI_BLK_SIZE : remainingLen;
 
 				// Perform SPI write
-				spiErrorStatus = lgSpiWrite(_spiHandle, reinterpret_cast<const char*>(currentData), writeSize);
+				spiErrorStatus = Display_SPI_WRITE(_spiHandle, reinterpret_cast<const char*>(currentData), writeSize);
 				if (spiErrorStatus < 0) {
 					fprintf(stderr, "Error: spiWriteDataBuffer: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-					printf("The problem maybe: The spidev buf size setting must be set at 65536 bytes or higher.\n") ;
-					printf("See readme, note section, of relevant display at https://github.com/gavinlyonsrepo/Display_Lib_RPI for more details\n");
-					printf("spidev buf defines the number of bytes that the SPI driver will use as a buffer for data transfers.\n");
+					fprintf(stderr, "The problem maybe: The spidev buf size setting must be set at 65536 bytes or higher.\n") ;
+					fprintf(stderr, "See readme, note section, of relevant display at https://github.com/gavinlyonsrepo/Display_Lib_RPI for more details\n");
+					fprintf(stderr, "spidev buf defines the number of bytes that the SPI driver will use as a buffer for data transfers.\n");
 					break; // Exit loop on error
 				}
 
@@ -791,7 +795,7 @@ void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 			}
 		} else 
 		{
-			printf("Buffer wrong size to draw = %i. Allowed size = 1 or greater.\n", len);
+			fprintf(stderr, "Buffer wrong size to draw = %i. Allowed size = 1 or greater.\n", len);
 		}
 	}
 }
@@ -820,7 +824,7 @@ void color16_graphics::spiWrite(uint8_t spidata) {
 		int spiErrorStatus = 0;
 		char TransmitBuffer[1];
 		TransmitBuffer[0] =  spidata;
-		spiErrorStatus = lgSpiWrite( _spiHandle, static_cast<const char*>(TransmitBuffer), 1);
+		spiErrorStatus = Display_SPI_WRITE( _spiHandle, static_cast<const char*>(TransmitBuffer), 1);
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error: spiWrite :Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -847,13 +851,13 @@ void color16_graphics::setCursor(int16_t x, int16_t y) {
 	@param  value Character to be written.
 	@note uses spiWriteDataBuffer method to write each character as a buffer for speed.
 			Much faster than pixel by pixel spi byte writes
-	@return Will return rpiDisplay_Return_Codes_e enum
-		-# rpiDisplay_Success  success
-		-# rpiDisplay_CharScreenBounds co-ords out of bounds check x and y
-		-# rpiDisplay_CharFontASCIIRange Character out of ASCII Font bounds, check Font range
-		-# rpiDisplay_MemoryAError Could not assign memory for character buffer
+	@return Will return rdlib::Return_Codes_e enum
+		-# rdlib::Success  success
+		-# rdlib::CharScreenBounds co-ords out of bounds check x and y
+		-# rdlib::CharFontASCIIRange Character out of ASCII Font bounds, check Font range
+		-# rdlib::MemoryAError Could not assign memory for character buffer
  */
-rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char value) {
+rdlib::Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char value) {
 
 	// 1. Check for screen out of  bounds
 	if((x >= _width)            || // Clip right
@@ -861,14 +865,14 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	((x + _Font_X_Size+1) < 0) || // Clip left
 	((y + _Font_Y_Size) < 0))   // Clip top
 	{
-		printf("writeChar16 Error 1: Co-ordinates out of bounds\n");
-		return rpiDisplay_CharScreenBounds;
+		fprintf(stderr, "Error 1: writeChar16 : Co-ordinates out of bounds\n");
+		return rdlib::CharScreenBounds;
 	}
 	// 2. Check for character out of font range bounds
 	if ( value < _FontOffset || value >= (_FontOffset + _FontNumChars+1))
 	{
-		printf("writeChar16 Error 2: Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (unsigned int)(_FontOffset + _FontNumChars));
-		return rpiDisplay_CharFontASCIIRange;
+		fprintf(stderr, "Error 2: writeChar16 : Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (unsigned int)(_FontOffset + _FontNumChars));
+		return rdlib::CharFontASCIIRange;
 	}
 
 	// Create bitmap buffer
@@ -879,8 +883,9 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 		buffer = std::vector<uint8_t>(_Font_X_Size * _Font_Y_Size * 2);
 	} catch (const std::bad_alloc&) 
 	{
-		printf("Error: writeChar16 3: Memory allocation failed\n");
-		return rpiDisplay_MemoryAError;
+		fprintf(stderr, "Error: writeChar16 3: Memory allocation failed\n");
+		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(_Font_X_Size * _Font_Y_Size * 2));
+		return rdlib::MemoryAError;
 	}
 
 	uint16_t ltextcolor = 0; 
@@ -899,7 +904,7 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	int16_t colByte, cx, cy;
 	int16_t colbit;
 	fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
-	colByte = *(_FontSelect + fontIndex);
+	colByte = _FontSelect[fontIndex];
 	colbit = 7;
 	for (cx = 0; cx < _Font_X_Size; cx++)
 	{
@@ -916,7 +921,7 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 			if (colbit < 0) {
 				colbit = 7;
 				fontIndex++;
-				colByte = *(_FontSelect + fontIndex);
+				colByte = _FontSelect[fontIndex];
 			}
 		}
 	}
@@ -925,7 +930,7 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	setAddrWindow(x, y, x + _Font_X_Size - 1, y +_Font_Y_Size - 1);;
 	spiWriteDataBuffer(buffer.data(), buffer.size());
 
-	return rpiDisplay_Success ;
+	return rdlib::Success ;
 }
 
 
@@ -935,20 +940,20 @@ rpiDisplay_Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char
 	@param  y character starting position on y-axis.
 	@param  pText Pointer to the array of the text to be written.
 	@return Will return
-		-# rpiDisplay_Success Success
-		-# rpiDisplay_CharArrayNullptr  String pText Array invalid pointer object
+		-# rdlib::Success Success
+		-# rdlib::CharArrayNullptr  String pText Array invalid pointer object
 		-# Failure code from  writeChar method upstream
  */
-rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
+rdlib::Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
 	uint8_t count=0;
 	uint8_t MaxLength=0;
 	// Check for null pointer
 	if(pText == nullptr)
 	{
-		printf("Error: writeCharString16 1 :String array is not valid pointer" );
-		return rpiDisplay_CharArrayNullptr;
+		fprintf(stderr ,"Error: writeCharString16 1 :String array is not valid pointer" );
+		return rdlib::CharArrayNullptr;
 	}
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	while(*pText != '\0')
 	{
 		// check if text has reached end of screen
@@ -959,12 +964,12 @@ rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t 
 			count = 0;
 		}
 		DrawCharReturnCode = writeChar(x + (count * (_Font_X_Size)), y, *pText++);
-		if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+		if(DrawCharReturnCode  != rdlib::Success) return DrawCharReturnCode;
 		count++;
 		MaxLength++;
 		if (MaxLength >= 250) break; // 2nd way out of loop, safety check
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -972,11 +977,11 @@ rpiDisplay_Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t 
 	@param character the character to print
 	@return Will return
 		-# 1. success
-		-# rpiDisplay_Return_Codes_e enum error code,  An error in the writeChar method.upstream
+		-# rdlib::Return_Codes_e enum error code,  An error in the writeChar method.upstream
 */
 size_t color16_graphics::write(uint8_t character)
 {
-	rpiDisplay_Return_Codes_e DrawCharReturnCode = rpiDisplay_Success;;
+	rdlib::Return_Codes_e DrawCharReturnCode = rdlib::Success;;
 	switch (character)
 	{
 		case '\n':
@@ -986,7 +991,7 @@ size_t color16_graphics::write(uint8_t character)
 		case '\r': break;
 		default:
 			DrawCharReturnCode = writeChar(_cursorX, _cursorY, character);
-			if (DrawCharReturnCode != rpiDisplay_Success) 
+			if (DrawCharReturnCode != rdlib::Success) 
 			{
 				// Set the write error based on the result of the drawing operation
 				setWriteError(DrawCharReturnCode); // Set error flag to non-zero value}
@@ -1031,52 +1036,62 @@ void color16_graphics::setTextWrap(bool w) {
 }
 
 /*!
-	@brief: Draws an 16 bit color sprite bitmap to screen from a data array with transparent background
+	@brief: Draws an 16 bit color sprite bitmap to screen with transparent background
 	@param x X coordinate
 	@param y Y coordinate
-	@param pBmp pointer to data array
+	@param sprite span to sprite data
 	@param w width of the sprite in pixels
 	@param h height of the sprite in pixels
 	@param backgroundColor the background color of sprite (16 bit 565) this will be made transparent
 	@note  Does not use buffer, just draw pixel
 	@return
-		-# Display_Success=success
-		-# Display_BitmapNullptr=invalid pointer object
-		-# Display_BitmapScreenBounds=Co-ordinates out of bounds
+		-# Success=success
+		-# BitmapDataEmpty=invalid pointer object
+		-# BitmapScreenBounds=Co-ordinates out of bounds
+		-# BitmapSize=Sprite data out of bounds
 */
-rpiDisplay_Return_Codes_e  color16_graphics::drawSprite(uint16_t x, uint16_t y, const uint8_t *pBmp, uint16_t w, uint16_t h, uint16_t backgroundColor)
+rdlib::Return_Codes_e  color16_graphics::drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> sprite, uint16_t w, uint16_t h, uint16_t backgroundColor)
 {
 	uint8_t i, j;
 	uint16_t colour;
 	// 1. Check for null pointer
-	if (pBmp == nullptr)
+	if (sprite.empty())
 	{
-		printf("Error: drawSprite 1: Sprite array is nullptr\r\n");
-		return rpiDisplay_BitmapNullptr;
+		fprintf(stderr, "Error: drawSprite 1: Sprite array is empty object\n");
+		return rdlib::BitmapDataEmpty;
 	}
 	// Check bounds
 	if ((x >= _width) || (y >= _height))
 	{
-		printf("Error: drawSprite 2: Sprite out of screen bounds\r\n");
-		return rpiDisplay_BitmapScreenBounds;
+		fprintf(stderr, "Error: drawSprite 2: Sprite out of screen bounds\r\n");
+		return rdlib::BitmapScreenBounds;
 	}
 	if ((x + w - 1) >= _width)
 		w = _width - x;
 	if ((y + h - 1) >= _height)
 		h = _height - y;
 
-	for(j = 0; j < h; j++)
+	size_t index = 0;
+	for (j = 0; j < h; j++)
 	{
-		for(i = 0; i < w; i ++)
+		for (i = 0; i < w; i++)
 		{
-			colour = (pBmp[0] << 8) | pBmp[1];
-			pBmp += 2;
-			if (colour != backgroundColor){
-				drawPixel(x+i-1, y + j-1, colour);
+			// Ensure index does not exceed span size
+			if (index + 1 >= sprite.size()) 
+			{
+				fprintf(stderr, "Error: drawSprite 3: Sprite data out of bounds (index: %zu, size: %zu)\n", index, sprite.size());
+				return rdlib::BitmapSize;
+			}
+			// Read 16-bit color value from sprite
+			colour = (sprite[index] << 8) | sprite[index + 1];
+			index += 2;
+			if (colour != backgroundColor)
+			{
+				drawPixel(x + i - 1, y + j - 1, colour);
 			}
 		}
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 

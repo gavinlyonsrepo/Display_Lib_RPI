@@ -22,7 +22,7 @@
 ST7789_TFT myTFT;
 int8_t RST_TFT  = 25;
 int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
@@ -62,7 +62,7 @@ int main()
 int8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start" << std::endl;
-	std::cout << "ST7789 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ST7789 library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -74,7 +74,7 @@ int8_t SetupHWSPI(void)
 // ***********************************
 
 // ** USER OPTION 3 SPI **
-	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -86,18 +86,18 @@ int8_t SetupHWSPI(void)
 void EndTests(void)
 {
 	char teststr1[] = "Tests over";
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.writeCharString(25, 50, teststr1);
 	delayMilliSecRDL(2500);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.TFTPowerDown(); // Power down device
 	std::cout << "TFT End" << std::endl;
 }
 
 
 void TestFPS() {
-	myTFT.TFTsetRotation(myTFT.TFT_Degrees_90);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.TFTsetRotation(myTFT.Degrees_90);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.setFont(font_orla);
 	
 	std::cout << "FPS test: text + graphics ends at :: " << countLimit << std::endl;
@@ -138,12 +138,12 @@ void display(long currentFramerate, int count)
 	myTFT.print(fps);
 	myTFT.print(" fps");
 	myTFT.setCursor(25, 150);
-	myTFT.print(GetRDLibVersionNum());
+	myTFT.print(rdlib::LibraryVersion());
 
-	myTFT.drawFastVLine(160, 20, 200, RDLC_BLUE);
-	myTFT.fillRect(200, 70, 20, 20, RDLC_RED);
-	myTFT.fillCircle(200, 30, 10, RDLC_GREEN);
-	myTFT.fillTriangle(180,200, 200, 180 , 220, 200, RDLC_YELLOW);
+	myTFT.drawFastVLine(160, 20, 200, myTFT.RDLC_BLUE);
+	myTFT.fillRect(200, 70, 20, 20, myTFT.RDLC_RED);
+	myTFT.fillCircle(200, 30, 10, myTFT.RDLC_GREEN);
+	myTFT.fillTriangle(180,200, 200, 180 , 220, 200, myTFT.RDLC_YELLOW);
 
 }
 

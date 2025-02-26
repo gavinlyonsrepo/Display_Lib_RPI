@@ -25,25 +25,27 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <span>
+#include <array>
 #include "common_data_RDL.hpp" //error enum
 
-// Font data is in the cpp file accessed thru extern pointers.
-extern const uint8_t * pFontDefault;
-extern const uint8_t * pFontPico;
-extern const uint8_t * pFontGll;
-extern const uint8_t * pFontSinclairS;
-extern const uint8_t * pFontRetro;
-extern const uint8_t * pFontMega;
-extern const uint8_t * pFontArialBold;
-extern const uint8_t * pFontHallfetica;
-extern const uint8_t * pFontOrla;
-extern const uint8_t * pFontArialRound;
-extern const uint8_t * pFontGroTesk;
-extern const uint8_t * pFontInconsola; 
-extern const uint8_t * pFontMint;
-extern const uint8_t * pFontSixteenSeg;
-extern const uint8_t * pFontSevenSeg;
-extern const uint8_t * pFontGroTeskBig;
+// Font data is in the cpp file accessed thru extern.
+extern const std::span<const uint8_t> pFontDefault;
+extern const std::span<const uint8_t> pFontPico;
+extern const std::span<const uint8_t> pFontGll;
+extern const std::span<const uint8_t> pFontSinclairS;
+extern const std::span<const uint8_t> pFontRetro;
+extern const std::span<const uint8_t> pFontMega;
+extern const std::span<const uint8_t> pFontArialBold;
+extern const std::span<const uint8_t> pFontHallfetica;
+extern const std::span<const uint8_t> pFontOrla;
+extern const std::span<const uint8_t> pFontArialRound;
+extern const std::span<const uint8_t> pFontGroTesk;
+extern const std::span<const uint8_t> pFontInconsola; 
+extern const std::span<const uint8_t> pFontMint;
+extern const std::span<const uint8_t> pFontSixteenSeg;
+extern const std::span<const uint8_t> pFontSevenSeg;
+extern const std::span<const uint8_t> pFontGroTeskBig;
 
 
 /*! Enum to define current font type selected  */
@@ -74,12 +76,12 @@ class display_Fonts
 		display_Fonts();
 		~display_Fonts(){};
 		
-		rpiDisplay_Return_Codes_e setFont(display_Font_name_e);
+		rdlib::Return_Codes_e setFont(display_Font_name_e);
 		void setInvertFont(bool invertStatus);
 		bool getInvertFont(void);
 
 	protected:
-		const uint8_t *_FontSelect = pFontDefault; /**< Pointer to the active font, Fonts Stored are Const */
+		std::span<const uint8_t> _FontSelect = pFontDefault;  /**< Span to the active font,  Fonts Stored are Const */
 		uint8_t _Font_X_Size = 0x08; /**< Width Size of a Font character */
 		uint8_t _Font_Y_Size = 0x08; /**< Height Size of a Font character */
 		uint8_t _FontOffset = 0x20; /**< Offset in the ASCII table 0x00 to 0xFF, where font begins */

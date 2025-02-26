@@ -29,7 +29,7 @@ const uint8_t DC_LCD = 24;
 const uint8_t DIN_LCD = 5;
 const uint8_t CLK_LCD = 6;
 const uint8_t CE_LCD = 21;
-int  GPIO_CHIP_DEV = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEV = 0; // GPIO chip device number usually 0
 
 //  LCD
 #define MY_LCD_WIDTH 84
@@ -62,9 +62,9 @@ bool Setup(void)
 {
 	std::cout << "LCD Start"  << std::endl;
 	std::cout<< "lgpio library version : " << lguVersion() << std::endl;
-	std::cout<< "Nokia 5110 library version : " << GetRDLibVersionNum() << std::endl;
+	std::cout<< "Nokia 5110 library version : " << rdlib::LibraryVersion() << std::endl;
 	delayMilliSecRDL(250);
-	if(myLCD.LCDBegin(LCD_INV, LCD_CST, LCD_BIAS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myLCD.LCDBegin(LCD_INV, LCD_CST, LCD_BIAS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		std::cout<< "Error 1202: Setup :Cannot start spi" << std::endl;
 		return false;
@@ -126,7 +126,7 @@ void display_buffer(long currentFramerate, int count)
 	myLCD.print(fps);
 	myLCD.print(" fps");
 	myLCD.setCursor(0, 40);
-	myLCD.print(GetRDLibVersionNum());
+	myLCD.print(rdlib::LibraryVersion());
 
 	myLCD.fillRect(60, 1, 20, 20, colour);
 	myLCD.fillCircle(60, 35, 10, !colour);

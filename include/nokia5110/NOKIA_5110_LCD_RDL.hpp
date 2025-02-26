@@ -9,38 +9,14 @@
 
 #pragma once
 
-// ************ libraries ************
+// libraries 
 #include <cstdint>
 #include <cstdbool>
-#include <stdarg.h>
 #include <cstdio>
 #include <lgpio.h>
 #include "bicolor_graphics_RDL.hpp"
 
-//*********** Definitions **************
-
-#define LCD_FUNCTIONSET          0x20 /** LCD function set*/
-#define LCD_POWERDOWN            0x04 /**< LCD power off */
-#define LCD_ENTRYMODE            0x02 /**< LCD entry mode */
-#define LCD_EXTENDEDINSTRUCTION  0x01 /**< LCD get into the EXTENDED mode when combined with Function set*/
-
-#define LCD_DISPLAYCONTROL       0x08 /**< Set display control */
-#define LCD_DISPLAYBLANK         0x00 /**< Blank display */
-#define LCD_DISPLAYNORMAL        0x04 /**< normal mode display */
-#define LCD_DISPLAYALLON         0x01 /**< all pixels on */
-#define LCD_DISPLAYINVERTED      0x05 /**< display inverted */
-
-#define LCD_SETYADDR             0x40
-#define LCD_SETXADDR             0x80
-
-#define LCD_SETTEMP  0x04  /**< set temperature coefficient */ 
-#define LCD_CONTRAST 0xB0  /**< default value set LCD VOP contrast range 0xB1-BF */
-#define LCD_BIAS 0x13      /**< LCD Bias mode 1:48 0x12 to 0x14 */
-
-
-#define LCD_Rotate_swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
-
-// Section :: Classes
+// Classes
 
 /*!
 	@brief Class Controls SPI comms and LCD functionality
@@ -57,14 +33,14 @@ public:
 	~NOKIA_5110_RPI(){};
 
 	// SW SPI 
-	rpiDisplay_Return_Codes_e LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int gpioDev);
+	rdlib::Return_Codes_e LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int gpioDev);
 	// HW SPI
-	rpiDisplay_Return_Codes_e LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int device, int channel, int speed, int flags, int gpioDev);
+	rdlib::Return_Codes_e LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int device, int channel, int speed, int flags, int gpioDev);
 	void LCDenableSleep(void);
 	void LCDdisableSleep(void);
 	bool LCDIsSleeping(void);
 
-	rpiDisplay_Return_Codes_e LCDSPIoff(void);
+	rdlib::Return_Codes_e LCDSPIoff(void);
 	void LCDPowerDown(void);
 
 	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) override;
@@ -86,6 +62,33 @@ private:
 	void LCDWriteCommand(uint8_t command);
 	void LCDInit(void);
 
+
+	inline void LCDRotateswapint16t(int16_t& a, int16_t& b) 
+	{
+		int16_t t = a;
+		a = b;
+		b = t;
+	}
+
+	// LCD Commands & registers list
+	static constexpr uint8_t LCD_FUNCTIONSET           = 0x20; /**<LCD function set*/
+	static constexpr uint8_t LCD_POWERDOWN             = 0x04; /**<LCD power off */
+	static constexpr uint8_t LCD_ENTRYMODE             = 0x02; /**<LCD entry mode */
+	static constexpr uint8_t LCD_EXTENDEDINSTRUCTION   = 0x01; /**<LCD get into the EXTENDED mode when combined with Function set*/
+
+	static constexpr uint8_t LCD_DISPLAYCONTROL        = 0x08; /**<Set display control */
+	static constexpr uint8_t LCD_DISPLAYBLANK          = 0x00; /**<Blank display */
+	static constexpr uint8_t LCD_DISPLAYNORMAL         = 0x04; /**<normal mode display */
+	static constexpr uint8_t LCD_DISPLAYALLON          = 0x01; /**<all pixels on */
+	static constexpr uint8_t LCD_DISPLAYINVERTED       = 0x05; /**<display inverted */
+
+	static constexpr uint8_t LCD_SETYADDR =  0x40; /**<Y axis address setting */
+	static constexpr uint8_t LCD_SETXADDR =  0x80; /**<X axis address setting */
+
+	static constexpr uint8_t LCD_SETTEMP   = 0x04; /**<set temperature coefficient */ 
+	static constexpr uint8_t LCD_CONTRAST  = 0xB0; /**<default value set LCD VOP contrast range 0xB1-BF */
+	static constexpr uint8_t LCD_BIAS      = 0x13; /**<LCD Bias mode 1:48 0x12 to 0x14 */
+
 	// SPI
 	bool _LCDHardwareSPI = true;      /**< Hardware SPI true on , false off*/
 	uint16_t _LCDHighFreqDelay = 0;  /**< uS GPIO Communications delay ,used in SW SPI ONLY */
@@ -101,7 +104,7 @@ private:
 	int8_t _Display_CS;    /**< Chip enable,  Software SPI only */
 	int8_t _Display_SCLK;  /**< Clock GPIO, Software SPI only*/
 	int8_t _Display_SDATA; /**< Data GPIO ,Software SPI only */
-	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
 	// Display
@@ -109,8 +112,8 @@ private:
 	uint8_t  _bias;         /**< LCD bias*/
 	bool _inverse = false;  /**< LCD inverted , false for off*/
 	bool _sleep;            /**< LCD sleep mode*/
-	int16_t _LCD_HEIGHT=48; /**< height of LCD in pixels*/
-	int16_t _LCD_WIDTH=84; /**< width of LCD in pixels*/
+	int16_t _LCD_HEIGHT = 48; /**< height of LCD in pixels*/
+	int16_t _LCD_WIDTH = 84; /**< width of LCD in pixels*/
 	uint16_t _LCD_Display_size = _LCD_WIDTH * (_LCD_HEIGHT/8);/**< size of display in pixels 504 (LCDWIDTH*(LCDHEIGHT / 8)*/
 	uint8_t LCDDisplayBuffer[504]; /**< buffer which holds screen data */
 }; //end of class

@@ -22,11 +22,9 @@ SSD1306_RDL::SSD1306_RDL(int16_t oledwidth, int16_t oledheight) :bicolor_graphic
 
 /*!
 	@brief  begin Method initialise OLED
-	@param I2c_debug default false
 */
-void  SSD1306_RDL::OLEDbegin(bool I2c_debug)
+void  SSD1306_RDL::OLEDbegin()
 {
-	_I2C_DebugFlag = I2c_debug;
 	OLEDinit();
 }
 
@@ -34,27 +32,26 @@ void  SSD1306_RDL::OLEDbegin(bool I2c_debug)
 	@brief sets the buffer pointer to the users screen data buffer
 	@param width width of buffer in pixels
 	@param height height of buffer in pixels
-	@param pBuffer the buffer array which decays to pointer
-	@param sizeOfBuffer size of buffer
-	@return Will return rpiDisplay_Return_Codes_e enum
-		-# Success rpiDisplay_Success
-		-# Error 1 rpiDisplay_BufferSize
-		-# Error 2 rpiDisplay_BUfferNullptr
+	@param buffer the buffer span
+	@return Will return rdlib::Return_Codes_e enum
+		-# Success rdlib::Success
+		-# Error 1 rdlib::BufferSize
+		-# Error 2 rdlib::BufferEmpty
 */
-rpiDisplay_Return_Codes_e SSD1306_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
+rdlib::Return_Codes_e SSD1306_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t height , std::span<uint8_t> buffer)
 {
-	if(sizeOfBuffer !=  width * (height/8))
+	if(buffer.size() != static_cast<size_t>(width * (height / 8)))
 	{
-		printf("OLEDSetBufferPtr Error 1: buffer size does not equal : width * (height/8))\n");
-		return rpiDisplay_BufferSize;
+		fprintf(stderr, "Error 1: OLEDSetBufferPtr: buffer size does not equal : width * (height/8))\n");
+		return rdlib::BufferSize;
 	}
-	OLEDbuffer = pBuffer;
-	if(OLEDbuffer ==  nullptr)
+	if(buffer.empty())
 	{
-		printf("OLEDSetBufferPtr Error 2: Problem assigning buffer pointer, not a valid pointer object\r\n");
-		return rpiDisplay_BufferNullptr;
+		fprintf(stderr, "Error 2: OLEDSetBufferPtr: Problem assigning buffer pointer, empty object\r\n");
+		return rdlib::BufferEmpty;
 	}
-	return rpiDisplay_Success;
+	_OLEDbuffer = buffer;
+	return rdlib::Success;
 }
 
 /*!
@@ -63,10 +60,10 @@ rpiDisplay_Return_Codes_e SSD1306_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t h
 	@param I2C_addr  The address of a device on the I2C bus. PCF8574  default is 0x3C
 	@param I2C_flags Flags which modify an I2C open command. None are currently defined.
 	@return
-		-#  rpiDisplay_Success everything worked
-		-#  rpiDisplay_I2CbeginFail Cannot open I2C device
+		-#  rdlib::Success everything worked
+		-#  rdlib::I2CbeginFail Cannot open I2C device
 */
-rpiDisplay_Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags)
+rdlib::Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags)
 {
 	_OLEDI2CDevice = I2C_device;
 	_OLEDI2CAddress = I2C_addr;
@@ -74,16 +71,16 @@ rpiDisplay_Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr 
 
 	int I2COpenHandle = 0;
 
-	I2COpenHandle = DISPLAY_RDL_I2C_OPEN(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
+	I2COpenHandle = Display_RDL_I2C_OPEN(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
 	if (I2COpenHandle < 0 )
 	{
-		printf("Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
-		return rpiDisplay_I2CbeginFail;
+		fprintf(stderr, "Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
+		return rdlib::I2CbeginFail;
 	}
 	else
 	{
 		_OLEDI2CHandle = I2COpenHandle;
-		return rpiDisplay_Success;
+		return rdlib::Success;
 	}
 }
 
@@ -91,19 +88,19 @@ rpiDisplay_Return_Codes_e SSD1306_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr 
 /*!
 	@brief End I2C operations. This closes the I2C device. 
 	@return in event of any error
-		-#  rpiDisplay_Success everything worked
-		-#  rpiDisplay_I2CcloseFail cannot close I2c bus device
+		-#  rdlib::Success everything worked
+		-#  rdlib::I2CcloseFail cannot close I2c bus device
 */
-rpiDisplay_Return_Codes_e  SSD1306_RDL::OLED_I2C_OFF(void)
+rdlib::Return_Codes_e  SSD1306_RDL::OLED_I2C_OFF(void)
 {
 	int I2COpenHandleStatus = 0;
-	I2COpenHandleStatus = DISPLAY_RDL_I2C_CLOSE(_OLEDI2CHandle);
+	I2COpenHandleStatus = Display_RDL_I2C_CLOSE(_OLEDI2CHandle);
 	if (I2COpenHandleStatus < 0 )
 	{
-		printf("Error OLED_I2C_OFF :: Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
-		return rpiDisplay_I2CcloseFail;
+		fprintf(stderr, "Error OLED_I2C_OFF :: Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
+		return rdlib::I2CcloseFail;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*! 
@@ -121,52 +118,53 @@ void SSD1306_RDL::OLEDPowerDown(void)
 void SSD1306_RDL::OLEDinit()
  {
 
+	const uint8_t  SSD1306_INITDELAY = 100 ;/**< Initialisation delay in mS */
 	delayMilliSecRDL(SSD1306_INITDELAY);
-	SSD1306_command( SSD1306_DISPLAY_OFF);
-	SSD1306_command( SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO);
-	SSD1306_command( 0x80);
-	SSD1306_command( SSD1306_SET_MULTIPLEX_RATIO );
-	SSD1306_command( _OLED_HEIGHT - 1 );
-	SSD1306_command( SSD1306_SET_DISPLAY_OFFSET );
-	SSD1306_command(0x00);
-	SSD1306_command( SSD1306_SET_START_LINE);
-	SSD1306_command( SSD1306_CHARGE_PUMP );
-	SSD1306_command(0x14);
-	SSD1306_command( SSD1306_MEMORY_ADDR_MODE );
-	SSD1306_command(0x00);  //Horizontal Addressing Mode is Used
-	SSD1306_command( SSD1306_SET_SEGMENT_REMAP| 0x01);
-	SSD1306_command( SSD1306_COM_SCAN_DIR_DEC );
+	I2CWriteByte( SSD1306_DISPLAY_OFF);
+	I2CWriteByte( SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO);
+	I2CWriteByte( 0x80);
+	I2CWriteByte( SSD1306_SET_MULTIPLEX_RATIO );
+	I2CWriteByte( _OLED_HEIGHT - 1 );
+	I2CWriteByte( SSD1306_SET_DISPLAY_OFFSET );
+	I2CWriteByte(0x00);
+	I2CWriteByte( SSD1306_SET_START_LINE);
+	I2CWriteByte( SSD1306_CHARGE_PUMP );
+	I2CWriteByte(0x14);
+	I2CWriteByte( SSD1306_MEMORY_ADDR_MODE );
+	I2CWriteByte(0x00);  //Horizontal Addressing Mode is Used
+	I2CWriteByte( SSD1306_SET_SEGMENT_REMAP| 0x01);
+	I2CWriteByte( SSD1306_COM_SCAN_DIR_DEC );
 
 switch (_OLED_HEIGHT)
 {
 	case 64: 
-		SSD1306_command( SSD1306_SET_COM_PINS );
-		SSD1306_command( 0x12 );
-		SSD1306_command( SSD1306_SET_CONTRAST_CONTROL );
-		SSD1306_command(0xCF);
+		I2CWriteByte( SSD1306_SET_COM_PINS );
+		I2CWriteByte( 0x12 );
+		I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+		I2CWriteByte(0xCF);
 	break;
 	case 32: 
-		SSD1306_command( SSD1306_SET_COM_PINS );
-		SSD1306_command( 0x02 );
-		SSD1306_command( SSD1306_SET_CONTRAST_CONTROL );
-		SSD1306_command(0x8F);
+		I2CWriteByte( SSD1306_SET_COM_PINS );
+		I2CWriteByte( 0x02 );
+		I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+		I2CWriteByte(0x8F);
 	break;
 	case 16: // NOTE: not tested, lacking part.
-		SSD1306_command( SSD1306_SET_COM_PINS );
-		SSD1306_command( 0x2 );
-		SSD1306_command( SSD1306_SET_CONTRAST_CONTROL );
-		SSD1306_command(0xAF);
+		I2CWriteByte( SSD1306_SET_COM_PINS );
+		I2CWriteByte( 0x2 );
+		I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+		I2CWriteByte(0xAF);
 	break;
 }
 
-	SSD1306_command( SSD1306_SET_PRECHARGE_PERIOD );
-	SSD1306_command( 0xF1 );
-	SSD1306_command( SSD1306_SET_VCOM_DESELECT );
-	SSD1306_command( 0x40 );
-	SSD1306_command( SSD1306_DISPLAY_ALL_ON_RESUME );
-	SSD1306_command( SSD1306_NORMAL_DISPLAY );
-	SSD1306_command( SSD1306_DEACTIVATE_SCROLL );
-	SSD1306_command( SSD1306_DISPLAY_ON );
+	I2CWriteByte( SSD1306_SET_PRECHARGE_PERIOD );
+	I2CWriteByte( 0xF1 );
+	I2CWriteByte( SSD1306_SET_VCOM_DESELECT );
+	I2CWriteByte( 0x40 );
+	I2CWriteByte( SSD1306_DISPLAY_ALL_ON_RESUME );
+	I2CWriteByte( SSD1306_NORMAL_DISPLAY );
+	I2CWriteByte( SSD1306_DEACTIVATE_SCROLL );
+	I2CWriteByte( SSD1306_DISPLAY_ON );
 
 	delayMilliSecRDL(SSD1306_INITDELAY);
 }
@@ -177,7 +175,7 @@ switch (_OLED_HEIGHT)
 */
 void SSD1306_RDL::OLEDEnable(uint8_t bits)
 {
-	bits ? SSD1306_command(SSD1306_DISPLAY_ON) : SSD1306_command(SSD1306_DISPLAY_OFF);
+	bits ? I2CWriteByte(SSD1306_DISPLAY_ON) : I2CWriteByte(SSD1306_DISPLAY_OFF);
 }
 
 /*!
@@ -186,8 +184,8 @@ void SSD1306_RDL::OLEDEnable(uint8_t bits)
 */
 void SSD1306_RDL::OLEDContrast(uint8_t contrast)
 {
-	SSD1306_command( SSD1306_SET_CONTRAST_CONTROL );
-	SSD1306_command(contrast);
+	I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+	I2CWriteByte(contrast);
 }
 
 /*!
@@ -196,7 +194,7 @@ void SSD1306_RDL::OLEDContrast(uint8_t contrast)
 */
 void SSD1306_RDL::OLEDInvert(bool value)
 {
-	value ? SSD1306_command( SSD1306_INVERT_DISPLAY ) : SSD1306_command( SSD1306_NORMAL_DISPLAY );
+	value ? I2CWriteByte( SSD1306_INVERT_DISPLAY ) : I2CWriteByte( SSD1306_NORMAL_DISPLAY );
 }
 
 /*!
@@ -208,12 +206,12 @@ void SSD1306_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 {
 	for (uint8_t row = 0; row < _OLED_PAGE_NUM; row++)
 	{
-		SSD1306_command( 0xB0 | row);
-		SSD1306_command(SSD1306_SET_LOWER_COLUMN);
-		SSD1306_command(SSD1306_SET_HIGHER_COLUMN);
+		I2CWriteByte( 0xB0 | row);
+		I2CWriteByte(SSD1306_SET_LOWER_COLUMN);
+		I2CWriteByte(SSD1306_SET_HIGHER_COLUMN);
 		for (uint8_t col = 0; col < _OLED_WIDTH; col++)
 		{
-			SSD1306_data(dataPattern);
+			I2CWriteByte(dataPattern, SSD1306_DATA_CONTINUE);
 			delayMilliSecRDL(delay);
 		}
 	}
@@ -228,13 +226,13 @@ void SSD1306_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 void SSD1306_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay)
 {
 	uint8_t Result =0xB0 | page_num; 
-	SSD1306_command(Result);
-	SSD1306_command(SSD1306_SET_LOWER_COLUMN);
-	SSD1306_command(SSD1306_SET_HIGHER_COLUMN);
+	I2CWriteByte(Result);
+	I2CWriteByte(SSD1306_SET_LOWER_COLUMN);
+	I2CWriteByte(SSD1306_SET_HIGHER_COLUMN);
 	uint8_t numofbytes = _OLED_WIDTH;
 	for (uint8_t i = 0; i < numofbytes; i++)
 	{
-		SSD1306_data(dataPattern);
+		I2CWriteByte(dataPattern, SSD1306_DATA_CONTINUE);
 		delayMilliSecRDL(mydelay);
 	}
 }
@@ -243,25 +241,25 @@ void SSD1306_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t myd
 	@brief Writes a byte to I2C address,command or data, used internally
 	@param value write the value to be written
 	@param cmd command or data
-	@note if _I2C_DebugFlag == true  ,will output data on I2C failures.
+	@note isDebugEnabled()  ,will output data on I2C failures.
 */
-void SSD1306_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
+void SSD1306_RDL::I2CWriteByte(uint8_t value, uint8_t cmd)
 {
 	char ByteBuffer[2] = {cmd,value};
 	uint8_t attemptI2Cwrite = _I2C_ErrorRetryNum;
 	int  ReasonCodes = 0;
 	
-	ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); 
+	ReasonCodes =Display_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); 
 	while(ReasonCodes < 0)
 	{//failure to write I2C byte ,Error handling retransmit
 		
-		if (_I2C_DebugFlag == true)
+		if (rdlib_config::isDebugEnabled())
 		{
-			printf("Error 602 I2C Command : %s\n", lguErrorText(ReasonCodes));
-			printf("Attempt Count: %u\n", attemptI2Cwrite);
+			fprintf(stderr, "Error 602 I2C Command : %s\n", lguErrorText(ReasonCodes));
+			fprintf(stderr, "Attempt Count: %u\n", attemptI2Cwrite);
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
-		ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); //retry
+		ReasonCodes =Display_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt
 		if (attemptI2Cwrite == 0) break;
@@ -271,48 +269,70 @@ void SSD1306_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 
 /*!
 	@brief updates the buffer i.e. writes it to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty if buffer is empty object
 */
-void SSD1306_RDL::OLEDupdate()
+rdlib::Return_Codes_e SSD1306_RDL::OLEDupdate()
 {
-	uint8_t x = 0; uint8_t y = 0; uint8_t w = this->_OLED_WIDTH; uint8_t h = this->_OLED_HEIGHT;
-	OLEDBufferScreen( x,  y,  w,  h, this->OLEDbuffer);
+	if (_OLEDbuffer.empty())
+	{
+		fprintf(stderr, "Error: OLEDupdate: Buffer is empty, cannot update screen\r\n");
+		return rdlib::BufferEmpty;
+	}
+	uint8_t x = 0; 
+	uint8_t y = 0; 
+	uint8_t w = this->_OLED_WIDTH; 
+	uint8_t h = this->_OLED_HEIGHT;
+	OLEDBufferScreen( x,  y,  w,  h, this->_OLEDbuffer);
+	return rdlib::Success;
 }
 
 /*!
 	@brief clears the buffer memory i.e. does NOT write to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty is buffer empty object
 */
-void SSD1306_RDL::OLEDclearBuffer()
+rdlib::Return_Codes_e SSD1306_RDL::OLEDclearBuffer()
 {
-	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH* (this->_OLED_HEIGHT /8)));
+	if (_OLEDbuffer.empty())
+	{
+		fprintf(stderr, "Error: OLEDclearBuffer: Buffer is empty, cannot clear\r\n");
+		return rdlib::BufferEmpty;
+	}
+
+	std::fill(_OLEDbuffer.begin(), _OLEDbuffer.end(), 0x00);
+	return rdlib::Success;
 }
 
 /*!
 	@brief Draw the buffer directly to the screen
-	@param x x axis  offset 0-128
-	@param y y axis offset 0-64
-	@param w width 0-128
-	@param h height 0-64
-	@param data the buffer data
+	@param x x axis  offset
+	@param y y axis offset
+	@param w width
+	@param h height
+	@param data the span of the buffer data
 	@note Called by OLEDupdate internally 
 */
-void SSD1306_RDL::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
+void SSD1306_RDL::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h,  std::span<uint8_t> data)
 {
 	
 	uint8_t tx, ty;
 	uint16_t offset = 0;
 		
-	SSD1306_command( SSD1306_SET_COLUMN_ADDR );
-	SSD1306_command(0);   // Column start address (0 = reset)
-	SSD1306_command( _OLED_WIDTH-1 ); // Column end address (127 = reset)
+	I2CWriteByte( SSD1306_SET_COLUMN_ADDR );
+	I2CWriteByte(0);   // Column start address (0 = reset)
+	I2CWriteByte( _OLED_WIDTH-1 ); // Column end address (127 = reset)
 
-	SSD1306_command( SSD1306_SET_PAGE_ADDR );
-	SSD1306_command(0); // Page start address (0 = reset)
+	I2CWriteByte( SSD1306_SET_PAGE_ADDR );
+	I2CWriteByte(0); // Page start address (0 = reset)
 	
 	switch (_OLED_HEIGHT)
 	{
-		case 64: SSD1306_command(7); break;
-		case 32: SSD1306_command(3); break;
-		case 16: SSD1306_command(1); break;
+		case 64: I2CWriteByte(7); break;
+		case 32: I2CWriteByte(3); break;
+		case 16: I2CWriteByte(1); break;
 	}
 	
 	for (ty = 0; ty < h; ty = ty + 8)
@@ -323,7 +343,7 @@ void SSD1306_RDL::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, u
 
 			if (x + tx < 0 || x + tx >= _OLED_WIDTH) {continue;}
 			offset = (w * (ty /8)) + tx;
-			SSD1306_data(data[offset++]);
+			I2CWriteByte(data[offset++], SSD1306_DATA_CONTINUE);
 		}
 	}
 
@@ -362,9 +382,9 @@ void SSD1306_RDL::drawPixel(int16_t x, int16_t y, uint8_t color)
 	uint16_t tc = (_OLED_WIDTH * (y /8)) + x;
 	switch (color)
 	{
-		case RDL_WHITE:  this->OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
-		case RDL_BLACK:  this->OLEDbuffer[tc] |= (1 << (y & 7)); break;
-		case RDL_INVERSE: this->OLEDbuffer[tc] ^= (1 << (y & 7)); break;
+		case WHITE:  this->_OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
+		case BLACK:  this->_OLEDbuffer[tc] |= (1 << (y & 7)); break;
+		case INVERSE: this->_OLEDbuffer[tc] ^= (1 << (y & 7)); break;
 	}
 }
 
@@ -376,14 +396,14 @@ void SSD1306_RDL::drawPixel(int16_t x, int16_t y, uint8_t color)
 void SSD1306_RDL::OLEDStartScrollRight(uint8_t start, uint8_t stop) 
 {
 	
-	SSD1306_command(SSD1306_RIGHT_HORIZONTAL_SCROLL);
-	SSD1306_command(0X00);
-	SSD1306_command(start);  // start page
-	SSD1306_command(0X00);
-	SSD1306_command(stop);   // end page
-	SSD1306_command(0X00);
-	SSD1306_command(0XFF);
-	SSD1306_command(SSD1306_ACTIVATE_SCROLL);
+	I2CWriteByte(SSD1306_RIGHT_HORIZONTAL_SCROLL);
+	I2CWriteByte(0X00);
+	I2CWriteByte(start);  // start page
+	I2CWriteByte(0X00);
+	I2CWriteByte(stop);   // end page
+	I2CWriteByte(0X00);
+	I2CWriteByte(0XFF);
+	I2CWriteByte(SSD1306_ACTIVATE_SCROLL);
 }
 
 /*!
@@ -394,14 +414,14 @@ void SSD1306_RDL::OLEDStartScrollRight(uint8_t start, uint8_t stop)
 void SSD1306_RDL::OLEDStartScrollLeft(uint8_t start, uint8_t stop) 
 {
 	
-	SSD1306_command(SSD1306_LEFT_HORIZONTAL_SCROLL);
-	SSD1306_command(0X00);
-	SSD1306_command(start);
-	SSD1306_command(0X00);
-	SSD1306_command(stop);
-	SSD1306_command(0X00);
-	SSD1306_command(0XFF);
-	SSD1306_command(SSD1306_ACTIVATE_SCROLL);
+	I2CWriteByte(SSD1306_LEFT_HORIZONTAL_SCROLL);
+	I2CWriteByte(0X00);
+	I2CWriteByte(start);
+	I2CWriteByte(0X00);
+	I2CWriteByte(stop);
+	I2CWriteByte(0X00);
+	I2CWriteByte(0XFF);
+	I2CWriteByte(SSD1306_ACTIVATE_SCROLL);
 }
 
 /*!
@@ -412,16 +432,16 @@ void SSD1306_RDL::OLEDStartScrollLeft(uint8_t start, uint8_t stop)
 void SSD1306_RDL::OLEDStartScrollDiagRight(uint8_t start, uint8_t stop) 
 {
 	
-	SSD1306_command(SSD1306_SET_VERTICAL_SCROLL_AREA);
-	SSD1306_command(0X00);
-	SSD1306_command(_OLED_HEIGHT);
-	SSD1306_command(SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL);
-	SSD1306_command(0X00);
-	SSD1306_command(start);
-	SSD1306_command(0X00);
-	SSD1306_command(stop);
-	SSD1306_command(0X01);
-	SSD1306_command(SSD1306_ACTIVATE_SCROLL);
+	I2CWriteByte(SSD1306_SET_VERTICAL_SCROLL_AREA);
+	I2CWriteByte(0X00);
+	I2CWriteByte(_OLED_HEIGHT);
+	I2CWriteByte(SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL);
+	I2CWriteByte(0X00);
+	I2CWriteByte(start);
+	I2CWriteByte(0X00);
+	I2CWriteByte(stop);
+	I2CWriteByte(0X01);
+	I2CWriteByte(SSD1306_ACTIVATE_SCROLL);
 }
 
 /*!
@@ -432,16 +452,16 @@ void SSD1306_RDL::OLEDStartScrollDiagRight(uint8_t start, uint8_t stop)
 void SSD1306_RDL::OLEDStartScrollDiagLeft(uint8_t start, uint8_t stop) 
 {
 	
-	SSD1306_command(SSD1306_SET_VERTICAL_SCROLL_AREA);
-	SSD1306_command(0X00);
-	SSD1306_command(_OLED_HEIGHT);
-	SSD1306_command(SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL);
-	SSD1306_command(0X00);
-	SSD1306_command(start);
-	SSD1306_command(0X00);
-	SSD1306_command(stop);
-	SSD1306_command(0X01);
-	SSD1306_command(SSD1306_ACTIVATE_SCROLL);
+	I2CWriteByte(SSD1306_SET_VERTICAL_SCROLL_AREA);
+	I2CWriteByte(0X00);
+	I2CWriteByte(_OLED_HEIGHT);
+	I2CWriteByte(SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL);
+	I2CWriteByte(0X00);
+	I2CWriteByte(start);
+	I2CWriteByte(0X00);
+	I2CWriteByte(stop);
+	I2CWriteByte(0X01);
+	I2CWriteByte(SSD1306_ACTIVATE_SCROLL);
 }
 
 /*!
@@ -450,25 +470,8 @@ void SSD1306_RDL::OLEDStartScrollDiagLeft(uint8_t start, uint8_t stop)
 void SSD1306_RDL::OLEDStopScroll(void) 
 {
 	
-	SSD1306_command(SSD1306_DEACTIVATE_SCROLL);
+	I2CWriteByte(SSD1306_DEACTIVATE_SCROLL);
 }
-
-
-/*!
-	 @brief Turn DEBUG mode on or off setter
-	 @param OnOff passed bool True = debug on , false = debug off
-	 @note prints out statements, if ON and if errors occur
-*/
-void SSD1306_RDL::OLEDDebugSet(bool OnOff)
-{
-	 OnOff ? (_I2C_DebugFlag  = true) : (_I2C_DebugFlag = false);
-}
-
-/*!
-	 @brief get DEBUG mode status
-	 @return debug mode status flag
-*/
-bool SSD1306_RDL::OLEDDebugGet(void) { return _I2C_DebugFlag;}
 
 
 /*!
@@ -521,10 +524,11 @@ int  SSD1306_RDL::OLEDCheckConnection(void)
 	char rxdatabuf[1]; //buffer to hold return byte
 	int I2CReadStatus = 0;
 
-	I2CReadStatus = DISPLAY_RDL_I2C_READ(_OLEDI2CHandle, rxdatabuf, 1);
+	I2CReadStatus = Display_RDL_I2C_READ(_OLEDI2CHandle, rxdatabuf, 1);
 	if (I2CReadStatus < 0 )
 	{
-		printf("Error :: OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));
+		fprintf(stderr, "Error :: OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));
+		rdlib_log::logData<int> error1("Error Cannot read device", I2CReadStatus);
 	}
 
 	_I2C_ErrorFlag = I2CReadStatus;

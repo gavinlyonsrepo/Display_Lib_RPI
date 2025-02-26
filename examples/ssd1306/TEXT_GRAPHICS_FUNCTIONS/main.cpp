@@ -27,14 +27,13 @@
 		-# Test 714 Base number systems using print method
 		-# Test 715 println + print & textwrap
 		-# Test 716 print method String object
-		-# Test 717 print method numbers + vectors
-		-# Test 808 Text methods error Checking
+		-# Test 717 print method numbers + vectors + std:arrays
+		-# Test 808 Error Checking Text bi-color library
 		-# Test 901 Graphics test
 */
 
 #include <lgpio.h>
 #include <cstdio>
-#include <vector> // for error checking test 808
 #include "SSD1306_OLED_RDL.hpp"
 
 // Screen related
@@ -50,7 +49,6 @@ SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate  an object
 uint8_t graphicsCountLimit = 25;
 
 // I2C related
-bool I2C_debug = false;
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
@@ -80,7 +78,7 @@ void Test714(void);
 void Test715(void);
 void Test716(void);
 void Test717(void);
-void testErrorCheck(void);
+void Test808(void);
 void DisplayGraphics(void);
 
 // ======================= Main ===================
@@ -98,10 +96,10 @@ int main(void)
 bool SetupTest()
 {
 	printf("OLED Test Begin\r\n");
-	printf("SSD1306 library Version Number :: %u\r\n",GetRDLibVersionNum());
+	printf("SSD1306 library Version Number :: %u\r\n",rdlib::LibraryVersion());
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
 	// Open  on I2C device
-	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rpiDisplay_Success)
+	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rdlib::Success)
 	{
 		printf("Error 1201:Cannot open I2C device bus\n");
 		return false;
@@ -114,7 +112,7 @@ bool SetupTest()
 	}
 
 	delayMilliSecRDL(500);
-	myOLED.OLEDbegin(I2C_debug); // initialize the OLED
+	myOLED.OLEDbegin(); // initialize the OLED
 	myOLED.OLEDFillScreen(0xF0, 0); // splash screen bars, optional just for effect
 	delayMilliSecRDL(1000);
 	return true;
@@ -130,7 +128,7 @@ void EndTests()
 
 void myTests()
 {
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer ) != rdlib::Success) return;
 	myOLED.OLEDclearBuffer();
 
 	Test500();
@@ -152,8 +150,8 @@ void myTests()
 	Test715();
 	Test716();
 	Test717();
-	testErrorCheck();
 	DisplayGraphics();
+	Test808();
 }
 
 void TestReset(void){
@@ -376,13 +374,13 @@ void Test714(void)
 	printf("OLED Test 714 Base number systems using print \r\n");
 	myOLED.setFont(font_default);
 	myOLED.setCursor(0, 0);
-	myOLED.print(47 , RDL_DEC);
+	myOLED.print(47 , myOLED.RDL_DEC);
 	myOLED.setCursor(0, 16);
-	myOLED.print(47 , RDL_HEX);
+	myOLED.print(47 , myOLED.RDL_HEX);
 	myOLED.setCursor(0, 32);
-	myOLED.print(47, RDL_BIN);
+	myOLED.print(47, myOLED.RDL_BIN);
 	myOLED.setCursor(0, 48);
-	myOLED.print(47 , RDL_OCT);
+	myOLED.print(47 , myOLED.RDL_OCT);
 	TestReset();
 }
 
@@ -420,7 +418,7 @@ void Test716(void)
 
 void Test717(void)
 {
-	printf("OLED Test 717-a  print method numbers\r\n");
+	printf("OLED Test 717-a print method numbers\r\n");
 	myOLED.setCursor(0, 0);
 	myOLED.println(3.986,2 ); //print 3.99
 	myOLED.println(4001);
@@ -433,7 +431,7 @@ void Test717(void)
 	TestReset();
 	
 	
-	printf("OLED Test 717-b  print vectors\r\n");
+	printf("OLED Test 717-b print vectors\r\n");
 	// For a vector of integers
 	myOLED.setCursor(0, 0);
 	std::vector<int> intVec = {1, 2, 3, 4};
@@ -444,6 +442,18 @@ void Test717(void)
 	std::vector<std::string> stringVec = {"Hello", "Vector"};
 	myOLED.print(stringVec); // Output: "Hello Vector"
 	TestReset();
+
+	printf("OLED Test 717-c print C++ std::arrays\r\n");
+	// For a array of integers
+	myOLED.setCursor(0, 0);
+	std::array<int, 2> intArray = {16, 254};
+	myOLED.print(intArray, myOLED.RDL_HEX); // Output: "10 FE"
+
+	// For a array of floats
+	myOLED.setCursor(0, 20);
+	std::array<float, 2> floatArray = {3.14986, 22.043 };
+	myOLED.print(floatArray); // Output: "3.15 22.04"
+
 }
 
 
@@ -470,9 +480,9 @@ void  DisplayGraphics()
 		myOLED.print(colour);
 
 		// Draw the X
-		myOLED.drawLine(64,  0, 64, 64, RDL_BLACK);
-		myOLED.drawFastVLine(62, 0, 64, RDL_BLACK);
-		myOLED.drawFastHLine(0, 32, 128, RDL_BLACK);
+		myOLED.drawLine(64,  0, 64, 64, myOLED.BLACK);
+		myOLED.drawFastVLine(62, 0, 64, myOLED.BLACK);
+		myOLED.drawFastHLine(0, 32, 128, myOLED.BLACK);
 
 		// Q1
 		myOLED.fillRect(0, 10, 20, 20, colour);
@@ -481,7 +491,7 @@ void  DisplayGraphics()
 		// Q2
 		myOLED.fillTriangle(80, 25, 90, 5, 100, 25, !colour);
 		myOLED.drawTriangle(80, 25, 90, 5, 100, 25, colour);
-		myOLED.drawRect(105, 10, 15, 15, RDL_BLACK);
+		myOLED.drawRect(105, 10, 15, 15, myOLED.BLACK);
 		// Q3
 		myOLED.fillRoundRect(0, 40, 40, 20, 10, !colour);
 		myOLED.drawRoundRect(0, 40, 40, 20, 10, colour);
@@ -489,7 +499,7 @@ void  DisplayGraphics()
 		char i;
 		for (i = 0; i < 10; i ++)
 		{
-			myOLED.drawRect(70 + i, 40 + i, 50 - i * 2, 20 - i * 2, RDL_BLACK);
+			myOLED.drawRect(70 + i, 40 + i, 50 - i * 2, 20 - i * 2, myOLED.BLACK);
 			myOLED.OLEDupdate();
 			delayMilliSecRDL(50);
 		}
@@ -498,80 +508,6 @@ void  DisplayGraphics()
 	}
 }
 
-
-void testErrorCheck(void)
-{
-	// Error checking
-	printf("==== Test 808 Start Error checking ====\r\n");
-	// Define the expected return values
-	std::vector<uint8_t> expectedErrors = 
-	{
-		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
-		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
-		rpiDisplay_CharArrayNullptr
-	};
-	
-	// Vector to store return values
-	std::vector<uint8_t> returnValues; 
-
-	char testlowercase[] = "ZA[ab";
-	char testNonNumExtend[] = "-:;A";
-	bool errorFlag = false;
-	
-	// character out of font bounds
-	// gll lower case + ]
-	myOLED.setFont(font_gll);
-	returnValues.push_back(myOLED.writeChar(32, 0, '!')); //success
-	returnValues.push_back(myOLED.writeCharString(5,  5, testlowercase)); //throw gll font error 2
-	TestReset();
-	// Numeric extended bounds ; , A errors
-	myOLED.setFont(font_sixteenSeg);
-	returnValues.push_back(myOLED.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
-	returnValues.push_back(myOLED.writeChar(32, 0, ',')); //throw error 2
-	TestReset();
-	printf("========\r\n");
-	// screen out of bounds
-	myOLED.setFont(font_default);
-	returnValues.push_back(myOLED.writeChar(0, 100, 'e')); //throw error 1
-	returnValues.push_back(myOLED.writeChar(150, 0, 'f')); //throw error 1
-	TestReset();
-	myOLED.setFont(font_orla);
-	returnValues.push_back(myOLED.writeChar(0, 100, 'A')); //throw error 1
-	returnValues.push_back(myOLED.writeChar(150, 0, 'B')); //throw error 1
-	TestReset();
-	
-	returnValues.push_back(myOLED.writeCharString(5, 5, nullptr)); //throw error 
-	
-	//== SUMMARY SECTION===
-	printf("\nError Checking Summary.\n");
-	// Check return values against expected errors
-	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
-			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
-		}
-	}
-
-	// Print all expectedErrors for summary
-	for (uint8_t value : expectedErrors ) 
-	{
-		printf("%d ", value);
-	}
-	printf("\n");
-	// Print all returnValues for summary
-	for (uint8_t value : returnValues) 
-	{
-		printf("%d ", value);
-	}
-	if (errorFlag == true ){
-		printf("\nError Checking has FAILED.\n");
-	}else{
-		printf("\nError Checking has PASSED.\n");
-	}
-	printf("\n=== STOP Error checking. ===\r\n");
-
-}
 
 void Test500()
 {
@@ -648,7 +584,7 @@ void Test500()
 
 	myOLED.OLEDclearBuffer();
 	printf("OLED Rotate test 505\r\n");
-	myOLED.setRotation(displayBC_Degrees_90);
+	myOLED.setRotation(myOLED.BC_Degrees_90);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 90");
@@ -657,7 +593,7 @@ void Test500()
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 
-	myOLED.setRotation(displayBC_Degrees_180);
+	myOLED.setRotation(myOLED.BC_Degrees_180);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 180");
@@ -666,7 +602,7 @@ void Test500()
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 
-	myOLED.setRotation(displayBC_Degrees_270);
+	myOLED.setRotation(myOLED.BC_Degrees_270);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate   270");
@@ -675,7 +611,7 @@ void Test500()
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 
-	myOLED.setRotation(displayBC_Degrees_0); //default normal
+	myOLED.setRotation(myOLED.BC_Degrees_0); //default normal
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 0");
@@ -686,4 +622,95 @@ void Test500()
 	myOLED.OLEDupdate();
 	myOLED.OLEDclearBuffer();
 	delayMilliSecRDL(500);
+}
+
+void Test808(void)
+{
+	// Error checking
+	printf("==== Test 808 Start Error Text Functions check ====\n");
+	// Define the expected return values
+	std::vector<uint8_t> expectedErrors = 
+	{
+		rdlib::CharFontASCIIRange, rdlib::CharFontASCIIRange, rdlib::Success, rdlib::CharArrayNullptr,
+		rdlib::Success, rdlib::CharFontASCIIRange, rdlib::CharFontASCIIRange,
+		rdlib::CharFontASCIIRange, rdlib::CharScreenBounds, rdlib::CharScreenBounds,
+		rdlib::CharScreenBounds, rdlib::CharScreenBounds, rdlib::CharArrayNullptr
+	};
+	
+	// Vector to store return values
+	std::vector<uint8_t> returnValues; 
+
+	char testlowercase[] = "ZA[ab";
+	char testNonNumExtend[] = "-;A";
+	bool errorFlag = false;
+	myOLED.setFont(font_gll);
+
+	// (1) Print statement test, gll font lower case letters
+	// We check print class error flag as print statement does not return errors it returns num of characters
+	// it attempted to print. Always clear error flag before checking getWriteError after new print
+	myOLED.setCursor(40,40);
+	myOLED.print("ABc"); // Print AB , return 3 (num of characters)
+	returnValues.push_back(myOLED.getWriteError()); // return error
+	myOLED.clearWriteError(); // Reset error flag
+	myOLED.print("abC");  // print C , return 3 (num of characters)
+	returnValues.push_back(myOLED.getWriteError()); // return error
+	myOLED.clearWriteError(); // Reset error flag
+	myOLED.print("12345"); // print 12345 , return 5 (num of characters)
+	returnValues.push_back(myOLED.getWriteError()); // return pass
+	myOLED.clearWriteError(); // Reset error flag
+	myOLED.print(nullptr);  // return 0 (num of characters)
+	returnValues.push_back(myOLED.getWriteError());  // return error
+	myOLED.clearWriteError(); // Reset error flag
+	TestReset();
+	printf("========\r\n");
+	// (2) writeChar + writeCharString
+	// gll lower case + ] character out of font bounds
+	returnValues.push_back(myOLED.writeChar(32, 0, '!')); //success
+	returnValues.push_back(myOLED.writeCharString(5,  5, testlowercase)); //throw gll font error 2
+	TestReset();
+	// Numeric extended bounds ; , A errors
+	myOLED.setFont(font_sixteenSeg);
+	returnValues.push_back(myOLED.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
+	returnValues.push_back(myOLED.writeChar(32, 0, ',')); //throw error 2
+	TestReset();
+	printf("========\r\n");
+	// screen out of bounds
+	myOLED.setFont(font_default);
+	returnValues.push_back(myOLED.writeChar(0, 140, 'e')); //throw error 1
+	returnValues.push_back(myOLED.writeChar(140, 0, 'f')); //throw error 1
+	TestReset();
+	myOLED.setFont(font_orla);
+	returnValues.push_back(myOLED.writeChar(0, 140, 'A')); //throw error 1
+	returnValues.push_back(myOLED.writeChar(140, 0, 'B')); //throw error 1
+	TestReset();
+
+	returnValues.push_back(myOLED.writeCharString(5, 5, nullptr)); //throw error 
+
+	//== SUMMARY SECTION===
+	printf("\nError Checking Summary.\n");
+	// Check return values against expected errors
+	for (size_t i = 0; i < returnValues.size(); ++i) {
+		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+			errorFlag = true;
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
+				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+		}
+	}
+		// Print all expectedErrors for summary
+	for (uint8_t value : expectedErrors ) 
+	{
+		printf("%d ", value);
+	}
+	printf("\n");
+	// Print all returnValues for summary
+	for (uint8_t value : returnValues) 
+	{
+		printf("%d ", value);
+	}
+	if (errorFlag == true ){
+		printf("\nError Checking has FAILED.\n");
+	}else{
+		printf("\nError Checking has PASSED.\n");
+	}
+	printf("\n=== STOP Error checking. ===\r\n");
 }

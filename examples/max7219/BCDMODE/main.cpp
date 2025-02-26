@@ -47,8 +47,8 @@ bool Setup(void)
 {
 	printf("Test Begin :: MAX7219_7SEG_RPI\r\n");
 	printf("lgpio library Version Number :: %i\r\n", lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
-	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeBCDThree) != rpiDisplay_Success)
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
+	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeBCDThree) != rdlib::Success)
 	{
 		printf("Error 1202 :: Cannot open SPI\n");
 		return false;

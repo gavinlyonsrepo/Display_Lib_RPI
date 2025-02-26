@@ -19,7 +19,7 @@
 ILI9341_TFT myTFT;
 int8_t RST_TFT  = 25;
 int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 uint16_t TFT_WIDTH = 240;// Screen width in pixels
 uint16_t TFT_HEIGHT = 320; // Screen height in pixels
@@ -64,7 +64,7 @@ int main()
 uint8_t Setup(void)
 {
 	std::cout << "TFT Start Test 1001 Touch Screen Demo" << std::endl;
-	std::cout << "ili9341 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ili9341 library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -76,15 +76,15 @@ uint8_t Setup(void)
 // ***********************************
 
 // ** USER OPTION 3 SPI **
-	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL_LCD, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL_LCD, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
 	}
 //*****************************
 	delayMilliSecRDL(100);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	
-	if (myXPT.XPTSPIInit(HWSPI_DEVICE, HWSPI_CHANNEL_XPT, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE, IRQPIN, RESPIN) != rpiDisplay_Success)
+	if (myXPT.XPTSPIInit(HWSPI_DEVICE, HWSPI_CHANNEL_XPT, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE, IRQPIN, RESPIN) != rdlib::Success)
 	{
 		return 4;
 	}
@@ -94,12 +94,12 @@ uint8_t Setup(void)
 void DrawButttons(void)
 {
 	// Draw buttons
-	myTFT.fillRoundRect(10,20, 60, 60 , 5 , RDLC_RED);
-	myTFT.fillRoundRect(90,20, 60, 60 , 5 , RDLC_GREEN);
-	myTFT.fillRoundRect(170,20, 60, 60 , 5 , RDLC_BLUE);
+	myTFT.fillRoundRect(10,20, 60, 60 , 5 , myTFT.RDLC_RED);
+	myTFT.fillRoundRect(90,20, 60, 60 , 5 , myTFT.RDLC_GREEN);
+	myTFT.fillRoundRect(170,20, 60, 60 , 5 , myTFT.RDLC_BLUE);
 	// draw text
 	myTFT.setFont(font_retro);
-	myTFT.setTextColor(RDLC_CYAN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_CYAN, myTFT.RDLC_BLACK);
 	myTFT.setCursor(12,170);
 	myTFT.print("Touch Screen Test");
 	myTFT.setCursor(12,210);
@@ -121,26 +121,26 @@ void TouchTest(void)
 			myXPT.XPTReadXY(&TouchX, &TouchY);
 			printf("Touch : x=%5d y=%5d\n", TouchX, TouchY);
 			// draw text box fill rectangle 
-			myTFT.fillRect(10,208, 160,60, RDLC_BLACK);
+			myTFT.fillRect(10,208, 160,60, myTFT.RDLC_BLACK);
 			// draw text
 			myTFT.setCursor(12,210);
 			if (TouchX < 1750 && TouchX > 1400 && TouchY < 550 && TouchY > 250)
 			{
-				myTFT.setTextColor(RDLC_RED, RDLC_BLACK);
+				myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
 				myTFT.print("You Touched Red");
 			}else if (TouchX < 1150 && TouchX > 800 && TouchY < 550 && TouchY > 250)
 			{
-				myTFT.setTextColor(RDLC_GREEN, RDLC_BLACK);
+				myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
 				myTFT.print("You Touched Green");
 			}else if (TouchX < 600 && TouchX > 200 && TouchY < 550 && TouchY > 250)
 			{
-				myTFT.setTextColor(RDLC_BLUE, RDLC_BLACK);
+				myTFT.setTextColor(myTFT.RDLC_BLUE, myTFT.RDLC_BLACK);
 				myTFT.print("You Touched Blue");
 			}else{
-				myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+				myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 				myTFT.print("You Touched Black");
 			}
-			myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+			myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 			myTFT.setCursor(12,230);
 			myTFT.print("X = ");
 			myTFT.print(TouchX);
@@ -157,7 +157,7 @@ void TouchTest(void)
 
 void EndTests(void)
 {
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.PowerDown(); // Power down TFT device
 	myXPT.XPTSPIend();
 	std::cout << "TFT End" << std::endl;

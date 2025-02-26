@@ -29,7 +29,7 @@ HD44780PCF8574LCD::HD44780PCF8574LCD(uint8_t NumRow, uint8_t NumCol, int I2CDevi
 /*!
 	@brief  Send data byte to  LCD via I2C
 	@param data The data byte to send
-	@note if _DebugON is true, will output data on I2C failures.
+	@note if debug flag is true, will output data on I2C failures.
 */
 void HD44780PCF8574LCD::LCDSendData(unsigned char data) {
 
@@ -48,17 +48,17 @@ void HD44780PCF8574LCD::LCDSendData(unsigned char data) {
 	dataBufferI2C[2] = dataNibbleLower | (LCDDataByteOn & _LCDBackLight); //enable=1 and rs =1 1101  YYYY-X-en-X-rs
 	dataBufferI2C[3] = dataNibbleLower | (LCDDataByteOff &  _LCDBackLight); //enable=0 and rs =1 1001 YYYY-X-en-X-rs
 
-	int ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, dataBufferI2C, 4);
+	int ErrorCode = Display_RDL_I2C_WRITE (_LCDI2CHandle, dataBufferI2C, 4);
 	// Error handling retransmit
 	while(ErrorCode < 0)
 	{
-		if (_DebugON == true)
+		if (rdlib_config::isDebugEnabled())
 		{
-			printf("Error:  LCDSendData I2C: (%s) \n", lguErrorText(ErrorCode) );
-			printf("Attempt Count: %u \n", AttemptCount );
+			fprintf(stderr, "Error:  LCDSendData I2C: (%s) \n", lguErrorText(ErrorCode) );
+			fprintf(stderr, "Attempt Count: %u \n", AttemptCount );
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay );
-		ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, dataBufferI2C, 4); // retransmit
+		ErrorCode = Display_RDL_I2C_WRITE (_LCDI2CHandle, dataBufferI2C, 4); // retransmit
 		_I2C_ErrorFlag = ErrorCode;
 		AttemptCount--;
 		if (AttemptCount == 0) break;
@@ -69,7 +69,7 @@ void HD44780PCF8574LCD::LCDSendData(unsigned char data) {
 /*!
 	@brief  Send command byte to lcd
 	@param cmd command byte
-	@note if _DebugON == true  ,will output data on I2C failures.
+	@note if debug flag == true  ,will output data on I2C failures.
 */
 void HD44780PCF8574LCD::LCDSendCmd(unsigned char cmd) {
 
@@ -89,17 +89,17 @@ void HD44780PCF8574LCD::LCDSendCmd(unsigned char cmd) {
 	cmdBufferI2C[2] = cmdNibbleLower | (LCDCmdByteOn & _LCDBackLight); // YYYY-1100 YYYY-led-en-rw-rs ,enable=1 and rs =0
 	cmdBufferI2C[3] = cmdNibbleLower | (LCDCmdByteOff & _LCDBackLight); // YYYY-1000 YYYY-led-en-rw-rs ,enable=0 and rs =0
 
-	int ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, cmdBufferI2C, 4);
+	int ErrorCode = Display_RDL_I2C_WRITE (_LCDI2CHandle, cmdBufferI2C, 4);
 	// Error handling retransmit
 	while(ErrorCode < 0)
 	{
-		if (_DebugON == true)
+		if (rdlib_config::isDebugEnabled())
 		{
-			printf("Error:  LCDSendCmd I2C: (%s) \n", lguErrorText(ErrorCode) );
-			printf("Attempt Count: %u \n", AttemptCount );
+			fprintf(stderr, "Error:  LCDSendCmd I2C: (%s) \n", lguErrorText(ErrorCode) );
+			fprintf(stderr, "Attempt Count: %u \n", AttemptCount );
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay );
-		ErrorCode = DISPLAY_RDL_I2C_WRITE (_LCDI2CHandle, cmdBufferI2C, 4); // retransmit
+		ErrorCode = Display_RDL_I2C_WRITE (_LCDI2CHandle, cmdBufferI2C, 4); // retransmit
 		_I2C_ErrorFlag = ErrorCode;
 		AttemptCount--;
 		if (AttemptCount == 0) break;
@@ -141,13 +141,13 @@ void HD44780PCF8574LCD::LCDClearLine(LCDLineNumber_e lineNo) {
 	@brief  Clear screen by writing spaces to every position
 	@note : See also LCDClearScreenCmd for software command clear alternative.
 */
-void HD44780PCF8574LCD::LCDClearScreen(void) {
+ rdlib::Return_Codes_e HD44780PCF8574LCD::LCDClearScreen(void) {
 	if (_NumRowsLCD < 1 || _NumRowsLCD >4)
 	{
-		if (_DebugON == true)
+		if (rdlib_config::isDebugEnabled())
 		{
-			printf("Error: LCDClearScreen  Number of rows invalid, must be: %u \n", _NumRowsLCD);
-			return;
+			fprintf(stderr, "Error: LCDClearScreen  : Number of rows invalid, must be: %u \n", _NumRowsLCD);
+			return rdlib::GenericError ;
 		}
 	}
 
@@ -159,6 +159,8 @@ void HD44780PCF8574LCD::LCDClearScreen(void) {
 		LCDClearLine(LCDLineNumberThree);
 	if (_NumRowsLCD == 4)
 		LCDClearLine(LCDLineNumberFour);
+	
+	return rdlib::Success;
 }
 
 
@@ -346,23 +348,23 @@ bool HD44780PCF8574LCD::LCDBackLightGet(void)
 	@brief Switch on the I2C
 	@note Start I2C operations. 
 	@return error for failure to init a I2C bus
-		-# rpiDisplay_Success
-		-# rpiDisplay_I2CbeginFail
+		-# rdlib::Success
+		-# rdlib::I2CbeginFail
 */
-rpiDisplay_Return_Codes_e HD44780PCF8574LCD::LCD_I2C_ON(void)
+rdlib::Return_Codes_e HD44780PCF8574LCD::LCD_I2C_ON(void)
 {
 	int I2COpenHandle = 0;
 
-	I2COpenHandle = DISPLAY_RDL_I2C_OPEN(_LCDI2CDevice, _LCDI2CAddress, _LCDI2CFlags);
+	I2COpenHandle = Display_RDL_I2C_OPEN(_LCDI2CDevice, _LCDI2CAddress, _LCDI2CFlags);
 	if (I2COpenHandle < 0 )
 	{
-		printf("Error: LCD_I2C_ON: Can't open I2C (%s) \n", lguErrorText(I2COpenHandle));
-		return rpiDisplay_I2CbeginFail;
+		fprintf(stderr, "Error: LCD_I2C_ON: Can't open I2C (%s) \n", lguErrorText(I2COpenHandle));
+		return rdlib::I2CbeginFail;
 	}
 	else
 	{
 		_LCDI2CHandle = I2COpenHandle;
-		return rpiDisplay_Success;
+		return rdlib::Success;
 	}
 }
 
@@ -370,20 +372,20 @@ rpiDisplay_Return_Codes_e HD44780PCF8574LCD::LCD_I2C_ON(void)
 /*!
 	@brief End I2C operations
 	@return error for failure to close a I2C bus device
-		-# rpiDisplay_Success
-		-# rpiDisplay_I2CcloseFail
+		-# rdlib::Success
+		-# rdlib::I2CcloseFail
 */
-rpiDisplay_Return_Codes_e HD44780PCF8574LCD::LCD_I2C_OFF(void)
+rdlib::Return_Codes_e HD44780PCF8574LCD::LCD_I2C_OFF(void)
 {
 	int I2CCloseHandleStatus = 0;
 
-	I2CCloseHandleStatus = DISPLAY_RDL_I2C_CLOSE(_LCDI2CHandle);
+	I2CCloseHandleStatus = Display_RDL_I2C_CLOSE(_LCDI2CHandle);
 	if (I2CCloseHandleStatus < 0 )
 	{
-		printf( "Error:  LCD_I2C_OFF : Can't Close I2C (%s) \n", lguErrorText(I2CCloseHandleStatus));
-		return rpiDisplay_I2CcloseFail;
+		fprintf(stderr,  "Error:  LCD_I2C_OFF : Can't Close I2C (%s) \n", lguErrorText(I2CCloseHandleStatus));
+		return rdlib::I2CcloseFail;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -433,22 +435,6 @@ void HD44780PCF8574LCD::LCDChangeEntryMode(LCDEntryMode_e newEntryMode)
 	LCDSendCmd(newEntryMode);
 	delayMilliSecRDL(3); // Requires a delay
 }
-
-/*!
-	 @brief Turn DEBUG mode on or off setter
-	 @param OnOff passed bool True = debug on , false = debug off
-	 @note prints out statements, if ON and if errors occur
-*/
-void HD44780PCF8574LCD::LCDDebugSet(bool OnOff)
-{
-	 OnOff ? (_DebugON  = true) : (_DebugON  = false);
-}
-
-/*!
-	 @brief get DEBUG mode status
-	 @return debug mode status flag
-*/
-bool HD44780PCF8574LCD::LCDDebugGet(void) { return _DebugON;}
 
 
 /*!
@@ -504,10 +490,10 @@ int HD44780PCF8574LCD::LCDCheckConnection(void)
 	char rxdatabuf[1]; //buffer to hold return byte
 	int I2CReadStatus = 0;
 
-	I2CReadStatus = DISPLAY_RDL_I2C_READ(_LCDI2CHandle, rxdatabuf, 1);
+	I2CReadStatus = Display_RDL_I2C_READ(_LCDI2CHandle, rxdatabuf, 1);
 	if (I2CReadStatus < 0 )
 	{
-		printf( "Error: LCDCheckConnection :Cannot read device (%s)\n",lguErrorText(I2CReadStatus));
+		fprintf(stderr, "Error: LCDCheckConnection :Cannot read device (%s)\n",lguErrorText(I2CReadStatus));
 	}
 
 	_I2C_ErrorFlag = I2CReadStatus;

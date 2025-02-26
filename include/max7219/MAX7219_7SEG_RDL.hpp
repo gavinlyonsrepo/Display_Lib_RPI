@@ -106,9 +106,9 @@ public:
 												overriding, but not altering, all controls and digit registers */
 	};
 
-	rpiDisplay_Return_Codes_e InitDisplay(ScanLimit_e numDigits, DecodeMode_e decodeMode);
+	rdlib::Return_Codes_e InitDisplay(ScanLimit_e numDigits, DecodeMode_e decodeMode);
 	void ClearDisplay(void);
-	rpiDisplay_Return_Codes_e DisplayEndOperations(void);
+	rdlib::Return_Codes_e DisplayEndOperations(void);
 
 	void SetBrightness(uint8_t brightness);
 	void DisplayTestMode(bool OnOff);
@@ -144,7 +144,7 @@ private:
 	uint16_t _CommDelay = 0; /**<  uS delay used in communications SW SPI, User adjust */
 	uint8_t _NoDigits   = 8; /**<  Number of digits in display */
 
-	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _DeviceNumGpioChip = 0; /**< SWSPI The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a device opened by lgGpiochipOpen */
 	int _spiHandle = 0; /**< Hold a handle for the SPI device on the channel lgSpiOpen(*/
 	int _spiDev = 0; /**< A SPI device, >= 0. */

@@ -15,14 +15,10 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <array>
 #include <bitset>  // required for Binary conversion
 #include <iomanip> // required for std::setprecision 
 #include <sstream> // Required for std::ostringstream
-
-#define RDL_DEC 10 /**< Format the passed integer in Decimal format */
-#define RDL_HEX 16 /**< Format the passed integer in Hexadecimal format  */
-#define RDL_OCT 8  /**< Format the passed integer in Octal format  */
-#define RDL_BIN 2  /**< Format the passed integer in Binary format  */
 
 /*!
 	@brief Polymorphic print class to print many data types by wrapping write function in the graphics class's
@@ -33,25 +29,27 @@ class Print
 {
 public:
 	Print() : write_error(0) {}
+	
+	/*! Base number type */
+	enum BaseNum : uint8_t{
+		RDL_DEC = 10, /**< Format the passed integer in Decimal format */
+		RDL_HEX = 16, /**< Format the passed integer in Hexadecimal format  */
+		RDL_OCT = 8,  /**< Format the passed integer in Octal format  */
+		RDL_BIN = 2   /**< Format the passed integer in Binary format  */
+	};
 
-	/*!
-		@brief  gets the error flag status, zero no error
-	*/
+	/*! @brief  gets the error flag status, zero no error */
 	int getWriteError() { return write_error; }
-	/*! 
-		@brief clears the errof flag by setting it to zero
-	 */
+	/*! @brief clears the errof flag by setting it to zero */
 	void clearWriteError() { setWriteError(0); }
-	/*! 
-		@brief writes a character to display , defined in the sub class
-	 */
+	/*! @brief writes a character to display , defined in the sub class */
 	virtual size_t write(uint8_t) = 0;
 	
 	size_t write(const char *str) 
 	{
 		if (str == nullptr) 
 		{
-			setWriteError(5); //rpiDisplay_CharArrayNullptr
+			setWriteError(5); //rdlib::CharArrayNullptr
 			return 0;
 		}
 		return write(reinterpret_cast<const uint8_t *>(str), strlen(str));
@@ -110,13 +108,13 @@ public:
 		return totalWritten;
 	}
 
-/*!
-	@brief Print a vector of elements followed by a newline.
-	@tparam T Type of the elements in the vector
-	@param vec The vector of elements to print
-	@param format Format specifier (e.g., base for integers or precision for floats)
-	@return Number of characters printed
-*/
+	/*!
+		@brief Print a vector of elements followed by a newline.
+		@tparam T Type of the elements in the vector
+		@param vec The vector of elements to print
+		@param format Format specifier (e.g., base for integers or precision for floats)
+		@return Number of characters printed
+	*/
 	template <typename T>
 	size_t println(const std::vector<T> &vec, int format = defaultFormat<T>()) 
 	{
@@ -125,7 +123,42 @@ public:
 		return chars;
 	}
 
-protected:
+	/*!
+		@brief Print a std::array of any type.
+		@tparam T Type of elements in the array.
+		@tparam N Size of the array.
+		@param arr The std::array to print.
+		@param format Format specifier:
+			- For floats/doubles: Number of decimal places (default is 2).
+			- For ints/longs: Conversion base (default is RDL_DEC for decimal).
+		@return Number of characters written.
+	*/
+	template <typename T, size_t N>
+	size_t print(const std::array<T, N> &arr, int format = defaultFormat<T>()) 
+	{
+		return print(std::vector<T>(arr.begin(), arr.end()), format);
+	}
+	
+		/*!
+		@brief Print a std::array of elements followed by a newline.
+		@tparam T Type of elements in the array.
+		@tparam N Size of the array.
+		@param arr The std::array to print.
+		@param format Format specifier:
+			- For floats/doubles: Number of decimal places (default is 2).
+			- For ints/longs: Conversion base (default is RDL_DEC for decimal).
+		@return Number of characters written.
+	*/
+	template <typename T, size_t N>
+	size_t println(const std::array<T, N> &arr, int format = defaultFormat<T>()) {
+		// Call print() to print the array elements
+		size_t chars = print(arr, format);
+		// Print a newline sequence
+		chars += print("\r\n");
+		return chars;
+	}
+
+	protected:
 
 	void setWriteError(int err = 0) { write_error = err; }
 
@@ -181,7 +214,7 @@ std::string formatElement(const T &element, int format) {
 }
 
 	/*!
-		@brief Called from vector template , Get the default format for a given type
+		@brief Called from vector & string template , Get the default format for a given type
 		@tparam T Type of the element
 		@return Default format
 	*/
@@ -194,5 +227,6 @@ std::string formatElement(const T &element, int format) {
 		}
 		return 0; // Fallback for unsupported types
 	}
+
 
 };

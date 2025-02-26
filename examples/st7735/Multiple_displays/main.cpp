@@ -59,7 +59,7 @@ void EndTests(void);
 int main() 
 {
 	std::cout << "Start Test" << std::endl;
-	std::cout << "Display_Lib_RPI library version :" << GetRDLibVersionNum()<< std::endl;
+	std::cout << "Display_Lib_RPI library version :" << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 	if(SetupLCDSPI() != 0)  return -1; //Hardware SPI St7735 LCD 
 	if(SetupOLEDSPI() != 0)  return -1; //Hardware SPI Ch1115 LCD 
@@ -85,7 +85,7 @@ uint8_t SetupLCDSPI(void)
 
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
 	// pass enum to param1 ,4 choices,see README
-	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL_ZERO, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL_ZERO, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -97,7 +97,7 @@ uint8_t SetupLCDSPI(void)
 uint8_t  SetupOLEDSPI(void)
 {
 	delayMilliSecRDL(50);
-	if(myOLED.OLEDbegin(OLEDcontrast, SPI_DEV, SPI_CHANNEL_ONE, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success) // initialize the OLED
+	if(myOLED.OLEDbegin(OLEDcontrast, SPI_DEV, SPI_CHANNEL_ONE, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success) // initialize the OLED
 	{
 		std::cout << "Error 1202: Setup : Cannot start spi" << std::endl;
 		return -1;
@@ -112,14 +112,14 @@ void HelloWorld(void)
 {
 	std::cout << "Hello World" << std::endl;
 	// LCD
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.setCursor(10,10);
 	myTFT.setFont(font_default);
 	myTFT.print("Hello world");
 	// OLED
 	// Buffer setup, Define a buffer to cover whole screen
 	uint8_t screenBuffer[myScreenSize]; 
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer) != rdlib::Success) return;
 	myOLED.OLEDclearBuffer(); // Clear buffer
 	myOLED.setFont(font_default);
 	myOLED.setCursor(0, 0);
@@ -131,7 +131,7 @@ void HelloWorld(void)
 void EndTests(void)
 {
 	//  LCD
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.TFTPowerDown(); // Power down device
 	// OLED
 	myOLED.OLEDPowerDown();

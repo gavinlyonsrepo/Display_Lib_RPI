@@ -20,7 +20,6 @@
 #define FULLSCREEN (MY_OLED_WIDTH * (MY_OLED_HEIGHT/8))
 
 // I2C related
-bool I2C_debug = true;
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
@@ -56,11 +55,11 @@ int main()
 bool SetupTest()
 {
 	std::cout<<"OLED Test Begin" << std::endl;
-	std::cout<<"SSD1306 library Version Number :: " <<  GetRDLibVersionNum() << std::endl;
+	std::cout<<"SSD1306 library Version Number :: " <<  rdlib::LibraryVersion() << std::endl;
 	std::cout<<"lgpio   library Version Number :: "  << lguVersion()   << std::endl;
 
 	// Open  on I2C device
-	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rpiDisplay_Success)
+	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rdlib::Success)
 	{
 		std::cout<<"Error 1201:Cannot open I2C device bus" << std::endl;
 		return false;
@@ -73,7 +72,7 @@ bool SetupTest()
 	}
 
 	delayMilliSecRDL(500);
-	myOLED.OLEDbegin(I2C_debug); // initialize the OLED
+	myOLED.OLEDbegin(); // initialize the OLED
 	return true;
 }
 
@@ -86,7 +85,7 @@ void EndTests()
 
 void Test()
 {
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer ) != rdlib::Success) return;
 	myOLED.setDrawBitmapAddr(false); // horizontal bitmaps.
 	SplashScreen();
 	DisplayClock();
@@ -103,19 +102,19 @@ void DisplayClock(void)
 		auto DateInfo = TimeString.substr(2, 8);
 		auto TimeInfo = TimeString.substr(11,8);
 
-		myOLED.drawBitmap(0,  0, SignalIconHa, 16, 8, RDL_BLACK , RDL_WHITE, sizeof(SignalIconHa));
-		myOLED.drawBitmap(20, 0, MsgIconHa, 16, 8, RDL_BLACK, RDL_WHITE, 16);
-		myOLED.drawBitmap(37, 0, AlarmIconHa, 8, 8, RDL_BLACK, RDL_WHITE, sizeof(AlarmIconHa));
-		myOLED.drawBitmap(110, 0, BatIconHa, 16, 8, RDL_BLACK, RDL_WHITE,sizeof(BatIconHa));
+		myOLED.drawBitmap(0,  0, SignalIconHa, 16, 8, myOLED.BLACK , myOLED.WHITE);
+		myOLED.drawBitmap(20, 0, MsgIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE);
+		myOLED.drawBitmap(37, 0, AlarmIconHa, 8, 8, myOLED.BLACK, myOLED.WHITE);
+		myOLED.drawBitmap(110, 0, BatIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE);
 
-		myOLED.drawLine(0,10,128,10,RDL_BLACK);
-		myOLED.drawLine(0,35,128,35,RDL_BLACK);
-		myOLED.drawLine(0,63,128,63,RDL_BLACK);
+		myOLED.drawLine(0,10,128,10,myOLED.BLACK);
+		myOLED.drawLine(0,35,128,35,myOLED.BLACK);
+		myOLED.drawLine(0,63,128,63,myOLED.BLACK);
 
-		myOLED.drawLine(0,35,0,63,RDL_BLACK);
-		myOLED.drawLine(127,35,127,63,RDL_BLACK);
+		myOLED.drawLine(0,35,0,63,myOLED.BLACK);
+		myOLED.drawLine(127,35,127,63,myOLED.BLACK);
 
-		myOLED.drawLine(75,35,75,63,RDL_BLACK);
+		myOLED.drawLine(75,35,75,63,myOLED.BLACK);
 
 		myOLED.setFont(font_mega);
 		myOLED.setCursor(0,17);
@@ -128,8 +127,8 @@ void DisplayClock(void)
 		myOLED.setCursor(90,54);
 		myOLED.print(count);
 
-		myOLED.drawBitmap(80, 40, MsgIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(MsgIconHa));
-		myOLED.drawBitmap(100, 40, MsgIconHa, 16, 8, RDL_BLACK, RDL_WHITE,sizeof(MsgIconHa));
+		myOLED.drawBitmap(80, 40, MsgIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE);
+		myOLED.drawBitmap(100, 40, MsgIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE);
 		delayMilliSecRDL(1000);
 		myOLED.OLEDupdate();
 		myOLED.OLEDclearBuffer();
@@ -144,7 +143,7 @@ void DisplayClock(void)
 
 void SplashScreen(void)
 {
-	myOLED.drawBitmap(0, 0, backupicon128x64, MY_OLED_WIDTH, MY_OLED_HEIGHT, RDL_BLACK , RDL_WHITE, sizeof(backupicon128x64));
+	myOLED.drawBitmap(0, 0, backupicon128x64, MY_OLED_WIDTH, MY_OLED_HEIGHT, myOLED.BLACK , myOLED.WHITE);
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 	myOLED.OLEDFillScreen(0x00, 0);

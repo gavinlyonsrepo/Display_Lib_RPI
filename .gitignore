@@ -4,5 +4,6 @@ build/
 examples/Bin
 examples/Build
 display.cppcheck
+geany_test_project
 run.sh
 

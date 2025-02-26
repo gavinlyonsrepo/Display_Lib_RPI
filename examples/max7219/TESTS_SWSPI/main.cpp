@@ -29,7 +29,7 @@
 uint8_t  CLK =16;  // clock GPIO, connected to clock line of module
 uint8_t  CS =20;   // Chip Select GPIO, connected to CS line of module
 uint8_t  DIN =21;  // data in GPIO, connected to DIN line of module
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 
 // Delays for testing
@@ -86,8 +86,8 @@ bool Setup(void)
 {
 	printf("Test Begin :: MAX7219_7SEG_RPI\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
-	if (myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rpiDisplay_Success)
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
+	if (myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rdlib::Success)
 	{
 		return false;
 	}

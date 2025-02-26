@@ -15,9 +15,9 @@
 */
 TM1638plus_common::TM1638plus_common(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev)
 {
-	_STROBE_IO = strobe;
-	_DATA_IO = data;
-	_CLOCK_IO = clock;
+	_Display_CS = strobe;
+	_Display_SDATA = data;
+	_Display_SCLK = clock;
 	_DeviceNumGpioChip = gpioDev;
 }
 
@@ -27,13 +27,13 @@ TM1638plus_common::TM1638plus_common(uint8_t strobe, uint8_t clock, uint8_t data
 */
 void TM1638plus_common::reset() {
 	sendCommand(TM_WRITE_INC); // set auto increment mode
-	TM163X_STROBE_SetLow;
+	Display_CS_SetLow;
 	sendData(TM_SEG_ADR);   // set starting address to 0
 	for (uint8_t position = 0; position < 16; position++)
 	{
 		sendData(0x00); //clear all segments
 	}
-	TM163X_STROBE_SetHigh;
+	Display_CS_SetHigh;
 }
 
 /*!
@@ -50,49 +50,49 @@ void TM1638plus_common::brightness(uint8_t brightness)
 /*!
 	@brief Begin method , sets pin modes and activate display.
 	@return 
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice;
-		-# rpiDisplay_GpioPinClaim
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice;
+		-# rdlib::GpioPinClaim
 		@note Call in Setup
 */
-rpiDisplay_Return_Codes_e TM1638plus_common::displayBegin(void)
+rdlib::Return_Codes_e TM1638plus_common::displayBegin(void)
 {
 	int GpioStrobeErrorstatus = 0;
 	int GpioClockErrorstatus = 0;
 	int GpioDataErrorstatus = 0;
 
-	_GpioHandle = TM163X_OPEN_GPIO_CHIP; // open /dev/gpiochipX
+	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// Clain GPIO as outputs
-	GpioStrobeErrorstatus = TM163X_SET_OUTPUT_STROBE;
-	GpioClockErrorstatus = TM163X_SET_OUTPUT_CLOCK;
-	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+	GpioStrobeErrorstatus = Display_CS_SetDigitalOutput;
+	GpioClockErrorstatus = Display_SCLK_SetDigitalOutput;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 
 	if (GpioStrobeErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim STB GPIO for output (%s)\n", lguErrorText(GpioStrobeErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioClockErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
 	sendCommand(TM_ACTIVATE);
 	brightness(_TMDefaultBrightness);
 	reset();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -101,9 +101,9 @@ rpiDisplay_Return_Codes_e TM1638plus_common::displayBegin(void)
 */
 void TM1638plus_common::sendCommand(uint8_t value)
 {
-	TM163X_STROBE_SetLow;
+	Display_CS_SetLow;
 	sendData(value);
-	TM163X_STROBE_SetHigh;
+	Display_CS_SetHigh;
 }
 
 /*!
@@ -128,10 +128,10 @@ uint8_t  TM1638plus_common::HighFreqshiftin(void)
 
 	for(i = 0; i < 8; ++i)
 	{
-		value |= (TM163X_DATA_READ << i);
-		TM163X_CLOCK_SetHigh;
+		value |= (Display_SDATA_Read << i);
+		Display_SCLK_SetHigh;
 		delayMicroSecRDL(_TMCommDelay);
-		TM163X_CLOCK_SetLow;
+		Display_SCLK_SetLow;
 		delayMicroSecRDL(_TMCommDelay);
 	}
 	return value;
@@ -148,10 +148,10 @@ void TM1638plus_common::HighFreqshiftOut(uint8_t val)
 
 	for (i = 0; i < 8; i++)
 	{
-		!!(val & (1 << i)) ? TM163X_DATA_SetHigh : TM163X_DATA_SetLow;
-		TM163X_CLOCK_SetHigh;
+		!!(val & (1 << i)) ? Display_SDATA_SetHigh : Display_SDATA_SetLow;
+		Display_SCLK_SetHigh;
 		delayMicroSecRDL(_TMCommDelay);
-		TM163X_CLOCK_SetLow;
+		Display_SCLK_SetLow;
 		delayMicroSecRDL(_TMCommDelay);
 	}
 }
@@ -171,12 +171,12 @@ void TM1638plus_common::TMCommDelayset(uint16_t CommDelay) {_TMCommDelay = CommD
 /*!
 	@brief Close method , frees GPIO and deactivate display.
 	@return 
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinFree
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinFree
 	@note call at end of program
 */
-rpiDisplay_Return_Codes_e TM1638plus_common::displayClose(void)
+rdlib::Return_Codes_e TM1638plus_common::displayClose(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
 
@@ -185,9 +185,9 @@ rpiDisplay_Return_Codes_e TM1638plus_common::displayClose(void)
 	int GpioDataErrorstatus = 0;
 	int GpioCloseStatus = 0;
 
-	GpioStrobeErrorstatus = TM163X_GPIO_FREE_STROBE;
-	GpioClockErrorstatus =  TM163X_GPIO_FREE_CLOCK;
-	GpioDataErrorstatus =   TM163X_GPIO_FREE_DATA;
+	GpioStrobeErrorstatus = Display_GPIO_FREE_CS;
+	GpioClockErrorstatus =  Display_GPIO_FREE_CLK;
+	GpioDataErrorstatus =   Display_GPIO_FREE_SDATA;
 
 	if (GpioStrobeErrorstatus < 0 )
 	{
@@ -205,7 +205,7 @@ rpiDisplay_Return_Codes_e TM1638plus_common::displayClose(void)
 		ErrorFlag = 2;
 	}
 
-	GpioCloseStatus = TM163X_CLOSE_GPIO_HANDLE; // close gpiochip
+	GpioCloseStatus = Display_CLOSE_GPIO_HANDLE; // close gpiochip
 	if ( GpioCloseStatus < 0)
 	{
 		fprintf(stderr,"Error :: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -215,10 +215,10 @@ rpiDisplay_Return_Codes_e TM1638plus_common::displayClose(void)
 	// 4 Check error flag (we don't want to return early for any failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_GpioChipDevice;;break;
-		default:printf("Warning::Unknown error flag value in displayClose"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::GpioChipDevice;;break;
+		default:fprintf(stderr, "Warning::Unknown error flag value in displayClose"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }

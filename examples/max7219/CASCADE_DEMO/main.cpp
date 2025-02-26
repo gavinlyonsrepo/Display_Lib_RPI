@@ -29,7 +29,7 @@ int main()
 
 	printf("Test Begin :: MAX7219_7SEG_RPI\r\n");
 	printf("lgpio library Version Number :: %i\r\n", lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	// Some test data defined
 	char teststr1[] = "Display1";
 	char teststr2[] = "Display2";
@@ -37,7 +37,7 @@ int main()
 	// Init the displays
 	// -Init Display one 
 	myMAX.SetCurrentDisplayNumber(1);
-	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rpiDisplay_Success)
+	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rdlib::Success)
 	{
 		printf("Error 1202 :: Cannot open SPI\n");
 		return -1;

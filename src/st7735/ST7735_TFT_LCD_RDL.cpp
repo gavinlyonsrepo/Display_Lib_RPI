@@ -14,13 +14,13 @@ ST7735_TFT :: ST7735_TFT(){}
 /*!
 	@brief Call when powering down TFT
 	@return 
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinFree
-		-# rpiDisplay_SPICloseFailure
-		-# rpiDisplay_GpioChipDevice
+		-# rdlib::Success
+		-# rdlib::GpioPinFree
+		-# rdlib::SPICloseFailure
+		-# rdlib::GpioChipDevice
 	@note Turns off Display Sets GPIO low and turns off SPI
 */
-rpiDisplay_Return_Codes_e  ST7735_TFT ::TFTPowerDown(void)
+rdlib::Return_Codes_e  ST7735_TFT ::TFTPowerDown(void)
 {
 	TFTchangeMode(TFT_Display_off_mode);
 	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
@@ -86,13 +86,13 @@ if (_hardwareSPI == false)
 	// 4 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;break;
-		case 4:return rpiDisplay_GpioChipDevice;break;
-		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;break;
+		case 4:return rdlib::GpioChipDevice;break;
+		default:fprintf(stderr, "Warning:Unknown error flag value in SPI-PowerDown"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -130,55 +130,56 @@ void ST7735_TFT::TFTSetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, int
 /*! 
 	@brief init the SPI
 	@return 
-		rpiDisplay_Success
-		rpiDisplay_GpioPinClaim
-		rpiDisplay_SPIOpenFailure
-		rpiDisplay_GpioChipDevice;
+		rdlib::Success
+		rdlib::GpioPinClaim
+		rdlib::SPIOpenFailure
+		rdlib::GpioChipDevice;
 */
-rpiDisplay_Return_Codes_e ST7735_TFT::TFTSPIInit(void)
+rdlib::Return_Codes_e ST7735_TFT::TFTSPIInit(void)
 {
 	//  1 open gpio Device open
 	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 	// 2 reset routine GPIO pin
-	if (TFTResetPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	if (TFTResetPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 	// 3 Data or command routine GPIO pin 
-	if (TFTDataCommandPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	if (TFTDataCommandPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 
 	if (_hardwareSPI == false)
 	{
 		// 4A Setup Software SPI for the 3 other GPIO : SCLK, Data & CS
-		if (TFTClock_Data_ChipSelect_Pins() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+		if (TFTClock_Data_ChipSelect_Pins() != rdlib::Success){return rdlib::GpioPinClaim;}
 	}else{
 		// 4B Open Hardware SPI
 		_spiHandle = Display_OPEN_SPI;
 		if ( _spiHandle  < 0)
 		{
 			fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
-			return rpiDisplay_SPIOpenFailure;
+			return rdlib::SPIOpenFailure;
 		}
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief Method for Hardware Reset pin control
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ST7735_TFT::TFTResetPin() {
+rdlib::Return_Codes_e ST7735_TFT::TFTResetPin() {
+	static constexpr auto TFT_RESET_DELAY = 10; /**< Reset delay in mS*/
 	// Claim GPIO as outputs for RST line
 	int GpioResetErrorStatus = 0;
 	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	Display_RST_SetHigh;
 	delayMilliSecRDL(TFT_RESET_DELAY);
@@ -186,16 +187,16 @@ rpiDisplay_Return_Codes_e ST7735_TFT::TFTResetPin() {
 	delayMilliSecRDL(TFT_RESET_DELAY);
 	Display_RST_SetHigh;
 	delayMilliSecRDL(TFT_RESET_DELAY);
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief Method for Data or Command pin setup
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ST7735_TFT::TFTDataCommandPin(void) {
+rdlib::Return_Codes_e ST7735_TFT::TFTDataCommandPin(void) {
 	
 	// Claim GPIO as outputs for DC line
 	int GpioDCErrorStatus = 0;
@@ -203,19 +204,19 @@ rpiDisplay_Return_Codes_e ST7735_TFT::TFTDataCommandPin(void) {
 	if (GpioDCErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	Display_DC_SetLow;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief Method for Clock, data and chip select  pin setup routine for software SPI.
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ST7735_TFT ::TFTClock_Data_ChipSelect_Pins(void)
+rdlib::Return_Codes_e ST7735_TFT ::TFTClock_Data_ChipSelect_Pins(void)
 {
 	// Claim 3 GPIO as outputs
 	int GpioCSErrorStatus = 0;
@@ -228,93 +229,93 @@ rpiDisplay_Return_Codes_e ST7735_TFT ::TFTClock_Data_ChipSelect_Pins(void)
 	if (GpioCSErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CS GPIO for output (%s)\n", lguErrorText(GpioCSErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioClockErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioSDATAErrorStatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioSDATAErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
 	Display_CS_SetHigh;
 	Display_SCLK_SetLow;
 	Display_SDATA_SetLow;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief init sub-routine ST7735R Green Tab
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
 		-# upstream error code from TFTSPIinit()
 */
-rpiDisplay_Return_Codes_e ST7735_TFT ::TFTGreenTabInitialize() {
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+rdlib::Return_Codes_e ST7735_TFT ::TFTGreenTabInitialize() {
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	DrawCharReturnCode = TFTSPIInit();
-	if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+	if(DrawCharReturnCode  != rdlib::Success) return DrawCharReturnCode;
 	Rcmd1();
 	Rcmd2green();
 	Rcmd3();
 	TFT_PCBtype = TFT_ST7735R_Green;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
 /*!
 	@brief ST7735R Red Tab Init Red PCB version
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
 		-# upstream error code from TFTSPIinit()
 */
-rpiDisplay_Return_Codes_e ST7735_TFT ::TFTRedTabInitialize() {
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+rdlib::Return_Codes_e ST7735_TFT ::TFTRedTabInitialize() {
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	DrawCharReturnCode = TFTSPIInit();
-	if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+	if(DrawCharReturnCode  != rdlib::Success) return DrawCharReturnCode;
 	Rcmd1();
 	Rcmd2red();
 	Rcmd3();
 	TFT_PCBtype = TFT_ST7735R_Red;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief Init Routine ST7735R Black Tab (ST7735S)
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
 		-# upstream error code from TFTSPIinit()
 */
-rpiDisplay_Return_Codes_e ST7735_TFT ::TFTBlackTabInitialize() {
+rdlib::Return_Codes_e ST7735_TFT ::TFTBlackTabInitialize() {
 
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	DrawCharReturnCode = TFTSPIInit();
-	if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+	if(DrawCharReturnCode  != rdlib::Success) return DrawCharReturnCode;
 	Rcmd1();
 	Rcmd2red();
 	Rcmd3();
 	writeCommand(ST7735_MADCTL);
 	writeData(0xC0);
 	TFT_PCBtype = TFT_ST7735S_Black ;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief init routine for ST7735B controller
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
 		-# upstream error code from TFTSPIinit()
 */
-rpiDisplay_Return_Codes_e ST7735_TFT ::TFTST7735BInitialize() {
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+rdlib::Return_Codes_e ST7735_TFT ::TFTST7735BInitialize() {
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	DrawCharReturnCode = TFTSPIInit();
-	if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+	if(DrawCharReturnCode  != rdlib::Success) return DrawCharReturnCode;
 	Bcmd();
 	TFT_PCBtype = TFT_ST7735B ;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -591,11 +592,11 @@ void ST7735_TFT ::TFTchangeMode(TFT_modes_e mode) {
 	@note if on your display colors are wrong after rotate change
 	you may have chosen wrong display pcb type.
 */
-void ST7735_TFT ::TFTsetRotation(TFT_rotate_e mode) {
+void ST7735_TFT ::TFTsetRotation(display_rotate_e mode) {
 	uint8_t madctl = 0;
 
 	switch (mode) {
-		case TFT_Degrees_0 :
+		case Degrees_0 :
 			if (TFT_PCBtype == TFT_ST7735S_Black ){
 				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MY | ST7735_MADCTL_RGB;
 			}else{
@@ -606,7 +607,7 @@ void ST7735_TFT ::TFTsetRotation(TFT_rotate_e mode) {
 			_XStart = _colstart;
 			_YStart = _rowstart;
 			break;
-		case TFT_Degrees_90:
+		case Degrees_90:
 			if (TFT_PCBtype == TFT_ST7735S_Black )
 			{
 				madctl = ST7735_MADCTL_MY | ST7735_MADCTL_MV | ST7735_MADCTL_RGB;
@@ -618,7 +619,7 @@ void ST7735_TFT ::TFTsetRotation(TFT_rotate_e mode) {
 			_width  =_heightStartTFT;
 			_height = _widthStartTFT;
 			break;
-		case TFT_Degrees_180:
+		case Degrees_180:
 			if (TFT_PCBtype == TFT_ST7735S_Black)
 			{
 				madctl = ST7735_MADCTL_RGB;
@@ -630,7 +631,7 @@ void ST7735_TFT ::TFTsetRotation(TFT_rotate_e mode) {
 			_width =_widthStartTFT;
 			_height = _heightStartTFT;
 			break;
-		case TFT_Degrees_270:
+		case Degrees_270:
 			if (TFT_PCBtype == TFT_ST7735S_Black){
 				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MV | ST7735_MADCTL_RGB;
 			}else{
@@ -642,7 +643,7 @@ void ST7735_TFT ::TFTsetRotation(TFT_rotate_e mode) {
 			_height = _widthStartTFT;
 			break;
 	}
-	TFT_rotate = mode;
+	displayRotate = mode;
 	writeCommand(ST7735_MADCTL);
 	writeData(madctl);
 }
@@ -677,19 +678,19 @@ void ST7735_TFT::TFTInitScreenSize(uint8_t colOffset, uint8_t rowOffset, uint16_
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@return
-		-# rpiDisplay_Success = success
-		-# rpiDisplay_WrongInputPCBType see enum choices.
+		-# rdlib::Success = success
+		-# rdlib::WrongInputPCBType see enum choices.
 		-# Various other failures modes from upstream functions TFT*Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
-rpiDisplay_Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, int device, int channel, int speed, int flags, int gpioDev)
+rdlib::Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, int device, int channel, int speed, int flags, int gpioDev)
 {
 	_DeviceNumGpioChip = gpioDev;
 	_spiDev = device;
 	_spiChan = channel;
 	_spiBaud = speed;
 	_spiFlags = flags;
-	rpiDisplay_Return_Codes_e DrawCharReturnCode = rpiDisplay_Success;
+	rdlib::Return_Codes_e DrawCharReturnCode = rdlib::Success;
 	switch(pcbType)
 	{
 		case TFT_ST7735R_Red : DrawCharReturnCode = TFTRedTabInitialize();break;
@@ -697,8 +698,8 @@ rpiDisplay_Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, int 
 		case TFT_ST7735S_Black: DrawCharReturnCode = TFTBlackTabInitialize() ;break;
 		case TFT_ST7735B : DrawCharReturnCode = TFTST7735BInitialize() ;break;
 		default:
-			printf( "Error:TFTInitPCBType 3: Wrong input pcb type\n");
-			DrawCharReturnCode = rpiDisplay_WrongInputPCBType;
+			fprintf(stderr, "Error:TFTInitPCBType 3: Wrong input pcb type\n");
+			DrawCharReturnCode = rdlib::WrongInputPCBType;
 		break;
 	}
 	return DrawCharReturnCode;
@@ -710,16 +711,16 @@ rpiDisplay_Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, int 
 	@param CommDelay uS GPIO delay used in software SPI
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@return
-		-# rpiDisplay_Success = success
-		-# rpiDisplay_WrongInputPCBType see enum choices.
+		-# rdlib::Success = success
+		-# rdlib::WrongInputPCBType see enum choices.
 		-# Various other failures modes from upstream functions TFT*Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
-rpiDisplay_Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, uint16_t CommDelay, int gpioDev)
+rdlib::Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, uint16_t CommDelay, int gpioDev)
 {
 	HighFreqDelaySet(CommDelay);
 	_DeviceNumGpioChip = gpioDev;
-	rpiDisplay_Return_Codes_e DrawCharReturnCode = rpiDisplay_Success;
+	rdlib::Return_Codes_e DrawCharReturnCode = rdlib::Success;
 	switch(pcbType)
 	{
 		case TFT_ST7735R_Red : DrawCharReturnCode = TFTRedTabInitialize();break;
@@ -727,8 +728,8 @@ rpiDisplay_Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, uint
 		case TFT_ST7735S_Black: DrawCharReturnCode = TFTBlackTabInitialize() ;break;
 		case TFT_ST7735B : DrawCharReturnCode = TFTST7735BInitialize() ;break;
 		default:
-			printf("Error:TFTInitPCBType 4: Wrong input pcb type:\n");
-			DrawCharReturnCode = rpiDisplay_WrongInputPCBType;
+			fprintf(stderr, "Error:TFTInitPCBType 4: Wrong input pcb type:\n");
+			DrawCharReturnCode = rdlib::WrongInputPCBType;
 		break;
 	}
 	return DrawCharReturnCode;

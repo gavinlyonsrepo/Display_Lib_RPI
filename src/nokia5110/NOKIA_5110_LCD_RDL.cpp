@@ -61,14 +61,14 @@ NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@note overloaded this one is for  Hardware SPI
-	@return rpiDisplay_Return_Codes_e
-		-# rpiDisplay_Success
-		-# rpiDisplay_WrongModeChosen
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
-		-# rpiDisplay_SPIOpenFailure
+	@return rdlib::Return_Codes_e
+		-# rdlib::Success
+		-# rdlib::WrongModeChosen
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
+		-# rdlib::SPIOpenFailure
 */
-rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int device, int channel, int speed, int flags, int gpioDev)
+rdlib::Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int device, int channel, int speed, int flags, int gpioDev)
 {
 	_inverse = Inverse;
 	_bias = Bias;
@@ -82,8 +82,8 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	// 1. check communication mode being called, if user called wrong one.
 	if(isHardwareSPI() == false)
 	{
-		printf("Wrong SPI mode chosen this method is for Hardware SPI \n");
-		return rpiDisplay_WrongModeChosen;
+		fprintf(stderr, "Wrong SPI mode chosen this method is for Hardware SPI \n");
+		return rdlib::WrongModeChosen;
 	}
 
 	// 2. setup gpioDev
@@ -91,7 +91,7 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// 3. Claim 2 GPIO as outputs for RST and CD lines
@@ -102,12 +102,12 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioDCErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
 	// 4. set up spi open
@@ -115,11 +115,11 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	if ( _spiHandle  < 0)
 	{
 		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
-		return rpiDisplay_SPIOpenFailure;
+		return rdlib::SPIOpenFailure;
 	}
 
 	LCDInit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -129,13 +129,13 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	@param Bias LCD Bias mode 1:48 0x12 to 0x14
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@note overloaded this one is for Software SPI
-	@return rpiDisplay_Return_Codes_e
-		-# rpiDisplay_Success
-		-# rpiDisplay_WrongModeChosen
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
+	@return rdlib::Return_Codes_e
+		-# rdlib::Success
+		-# rdlib::WrongModeChosen
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int gpioDev)
+rdlib::Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,uint8_t Bias, int gpioDev)
 {
 	_inverse = Inverse;
 	_bias = Bias;
@@ -146,8 +146,8 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	// 1. check communication mode being called, if user called wrong one.
 	if(isHardwareSPI() == true )
 	{
-		printf("Wrong SPI mode chosen this method is for Software SPI.\n");
-		return rpiDisplay_WrongModeChosen;
+		fprintf(stderr, "Wrong SPI mode chosen this method is for Software SPI.\n");
+		return rdlib::WrongModeChosen;
 	}
 
 	// 2. setup gpioDev
@@ -155,7 +155,7 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// 3. Claim 5 GPIO as outputs
@@ -183,11 +183,11 @@ rpiDisplay_Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contras
 		fprintf(stderr,"Error : Can't claim DIN GPIO for output (%s)\n", lguErrorText(GpioDINErrorStatus));
 	} else { ErrorFlag = false;}
 
-	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
+	if (ErrorFlag == true ) {return rdlib::GpioPinClaim;}
 
 	Display_CS_SetHigh;
 	LCDInit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*! 
@@ -216,12 +216,12 @@ void  NOKIA_5110_RPI::LCDInit(void)
 /*!
 	@brief End SPI operations. 
 	@return
-		-#  rpiDisplay_Success
-		-#  rpiDisplay_GpioPinFree
-		-#  rpiDisplay_SPICloseFailure
-		-#  rpiDisplay_GpioChipDevice
+		-#  rdlib::Success
+		-#  rdlib::GpioPinFree
+		-#  rdlib::SPICloseFailure
+		-#  rdlib::GpioChipDevice
 */
-rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
+rdlib::Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
 	
@@ -283,13 +283,13 @@ rpiDisplay_Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 	// 4 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;break;
-		case 4:return rpiDisplay_GpioChipDevice;break;
-		default:printf("Warning:Unknown error flag value in LCDSPIoff"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;break;
+		case 4:return rdlib::GpioChipDevice;break;
+		default:fprintf(stderr, "Warning:Unknown error flag value in LCDSPIoff"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
@@ -397,7 +397,7 @@ void NOKIA_5110_RPI::drawPixel(int16_t x, int16_t y, uint8_t color) {
 	switch(rotation) 
 	{
 		case 1:
-			LCD_Rotate_swap_int16_t(x, y);
+			LCDRotateswapint16t(x, y);
 			y =  HEIGHT - 1 - y;
 			break;
 		case 2:
@@ -405,15 +405,15 @@ void NOKIA_5110_RPI::drawPixel(int16_t x, int16_t y, uint8_t color) {
 			y = HEIGHT - 1 - y;
 			break;
 		case 3:
-			LCD_Rotate_swap_int16_t(x, y);
+			LCDRotateswapint16t(x, y);
 			x = WIDTH - 1 - x;
 	}
 
 	switch (color)
 	{
-		case RDL_WHITE:   LCDDisplayBuffer[x + (y / 8) * WIDTH] &= ~(1 << (y & 7)); break;
-		case RDL_BLACK:   LCDDisplayBuffer[x + (y / 8) * WIDTH] |= (1 << (y & 7)); break;
-		case RDL_INVERSE: LCDDisplayBuffer[x + (y / 8) * WIDTH] ^= (1 << (y & 7)); break;
+		case WHITE:   LCDDisplayBuffer[x + (y / 8) * WIDTH] &= ~(1 << (y & 7)); break;
+		case BLACK:   LCDDisplayBuffer[x + (y / 8) * WIDTH] |= (1 << (y & 7)); break;
+		case INVERSE: LCDDisplayBuffer[x + (y / 8) * WIDTH] ^= (1 << (y & 7)); break;
 	}
 }
 

@@ -26,7 +26,6 @@
 		-# Test 715 println + print & textwrap
 		-# Test 716 print method String object
 		-# Test 717 print method numbers
-		-# Test 808 Text methods error Checking
 		-# Test 902 Draw pixel
 		-# Test 903 Draw lines
 		-# Test 904 Draw shapes
@@ -48,7 +47,7 @@
 // GPIO
 const uint8_t RST_LCD = 25; // GPIO pin number pick any you want
 const uint8_t DC_LCD = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEV = 4; // GPIO chip device RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEV = 0; // GPIO chip device number usually 0
 
 //  LCD
 #define MY_LCD_WIDTH 84
@@ -105,7 +104,6 @@ void testFillTriangle(void);
 void testDrawRoundRect(void);
 void testFillRoundRect(void);
 
-void testErrorCheck(void);
 
 // ************  MAIN ***************
 
@@ -138,11 +136,10 @@ int main()
 	Test715();
 	Test716();
 	Test717();
-	testErrorCheck();
 
 	textDrawPixel();
 	testDrawLine();
-	std::cout << "Test 204 Draw shapes" << std::endl;
+	std::cout << "Test 904 Draw shapes" << std::endl;
 	testDrawRect();
 	testFillRect();
 	testdrawcircle();
@@ -165,9 +162,9 @@ bool Setup(void)
 {
 	std::cout << "LCD Start"  << std::endl;
 	std::cout<< "lgpio library version : " << lguVersion() << std::endl;
-	std::cout<< "Nokia 5110 library version : " << GetRDLibVersionNum() << std::endl;
+	std::cout<< "Nokia 5110 library version : " << rdlib::LibraryVersion() << std::endl;
 	delayMilliSecRDL(250);
-	if(myLCD.LCDBegin(LCD_INV, LCD_CST, LCD_BIAS, SPI_DEVICE, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myLCD.LCDBegin(LCD_INV, LCD_CST, LCD_BIAS, SPI_DEVICE, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		std::cout<< "Error 1202: Setup :Cannot start spi" << std::endl;
 		return false;
@@ -381,13 +378,13 @@ void Test714(void)
 	std::cout << "Test 714 Base number systems using print "<< std::endl;
 	myLCD.setFont(font_default);
 	myLCD.setCursor(0, 0);
-	myLCD.print(47, RDL_DEC);
+	myLCD.print(47, myLCD.RDL_DEC);
 	myLCD.setCursor(0, 9);
-	myLCD.print(47, RDL_HEX);
+	myLCD.print(47, myLCD.RDL_HEX);
 	myLCD.setCursor(0, 20);
-	myLCD.print(47, RDL_BIN);
+	myLCD.print(47, myLCD.RDL_BIN);
 	myLCD.setCursor(0, 29);
-	myLCD.print(47 ,RDL_OCT);
+	myLCD.print(47 ,myLCD.RDL_OCT);
 	screenReset();
 }
 
@@ -455,11 +452,11 @@ void Test717(void)
 	myLCD.setCursor(0, 0);
 	myLCD.print( intVec[0]);  // print 47
 	myLCD.setCursor(0, 9);  
-	myLCD.print( intVec[0], RDL_HEX);  // print 2F
+	myLCD.print( intVec[0], myLCD.RDL_HEX);  // print 2F
 	myLCD.setCursor(0, 20);
-	myLCD.print( intVec[0] ,RDL_OCT); //print 57
+	myLCD.print( intVec[0] ,myLCD.RDL_OCT); //print 57
 	myLCD.setCursor(0, 30);
-	myLCD.print( intVec[0], RDL_BIN); // print 101111
+	myLCD.print( intVec[0], myLCD.RDL_BIN); // print 101111
 	screenReset();
 
 	myLCD.setCursor(0, 0);
@@ -473,139 +470,65 @@ void Test717(void)
 	screenReset();
 }
 
-void testErrorCheck(void)
-{
-	// Error checking
-	printf("==== Test 808 Start Error checking ====\r\n");
-	// Define the expected return values
-	std::vector<uint8_t> expectedErrors = 
-	{
-		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
-		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
-		rpiDisplay_CharArrayNullptr
-	};
-	
-	// Vector to store return values
-	std::vector<uint8_t> returnValues; 
-
-	char testlowercase[] = "ZA[ab";
-	char testNonNumExtend[] = "-;A";
-	bool errorFlag = false;
-	
-	// character out of font bounds
-	// gll lower case + ]
-	myLCD.setFont(font_gll);
-	returnValues.push_back(myLCD.writeChar(32, 0, '!')); //success
-	returnValues.push_back(myLCD.writeCharString(5,  5, testlowercase)); //throw gll font error 2
-	screenReset();
-	// Numeric extended bounds ; , A errors
-	myLCD.setFont(font_sixteenSeg);
-	returnValues.push_back(myLCD.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
-	returnValues.push_back(myLCD.writeChar(32, 0, ',')); //throw error 2
-	screenReset();
-	printf("========\r\n");
-	// screen out of bounds
-	myLCD.setFont(font_default);
-	returnValues.push_back(myLCD.writeChar(0, 100, 'e')); //throw error 1
-	returnValues.push_back(myLCD.writeChar(200, 0, 'f')); //throw error 1
-	screenReset();
-	myLCD.setFont(font_orla);
-	returnValues.push_back(myLCD.writeChar(0, 100, 'A')); //throw error 1
-	returnValues.push_back(myLCD.writeChar(200, 0, 'B')); //throw error 1
-	screenReset();
-	
-	returnValues.push_back(myLCD.writeCharString(5, 5, nullptr)); //throw error 
-	
-	//== SUMMARY SECTION===
-	printf("\nError Checking Summary.\n");
-	// Check return values against expected errors
-	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
-			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
-		}
-	}
-
-	// Print all expectedErrors for summary
-	for (uint8_t value : expectedErrors ) 
-	{
-		printf("%d ", value);
-	}
-	printf("\n");
-	// Print all returnValues for summary
-	for (uint8_t value : returnValues) 
-	{
-		printf("%d ", value);
-	}
-	if (errorFlag == true ){
-		printf("\nError Checking has FAILED.\n");
-	}else{
-		printf("\nError Checking has PASSED.\n");
-	}
-	printf("\n=== STOP Error checking. ===\r\n");
-
-}
-
 void textDrawPixel(void) {
-	std::cout << "Test 202 Draw pixels" << std::endl;
-	myLCD.drawPixel(2, 5, RDL_BLACK);
-	myLCD.drawPixel(10, 10, RDL_BLACK);
-	myLCD.drawPixel(20, 20, RDL_BLACK);
-	myLCD.drawPixel(30, 30, RDL_BLACK);
-	myLCD.drawPixel(32, 35, RDL_BLACK);
+	std::cout << "Test 902 Draw pixels" << std::endl;
+	myLCD.drawPixel(2, 5, myLCD.BLACK);
+	myLCD.drawPixel(10, 10, myLCD.BLACK);
+	myLCD.drawPixel(20, 20, myLCD.BLACK);
+	myLCD.drawPixel(30, 30, myLCD.BLACK);
+	myLCD.drawPixel(32, 35, myLCD.BLACK);
 	screenReset();
 }
 
 void testdrawcircle(void) {
-	myLCD.drawCircle(20, 20, 10, RDL_BLACK);
+	myLCD.drawCircle(20, 20, 10, myLCD.BLACK);
 	screenReset();
 }
 
 void testfillcircle(void)
 {
-	myLCD.fillCircle(60, 20, 10, RDL_BLACK);
+	myLCD.fillCircle(60, 20, 10, myLCD.BLACK);
 	screenReset();
 }
 
 void testFillRect(void) {
 
-	myLCD.fillRect(0, 20, 10, 30, RDL_BLACK);
+	myLCD.fillRect(0, 20, 10, 30, myLCD.BLACK);
 	screenReset();
 }
 
 void testDrawTriangle(void) {
-	myLCD.drawTriangle(30, 20, 50, 5, 80, 20, RDL_BLACK);
+	myLCD.drawTriangle(30, 20, 50, 5, 80, 20, myLCD.BLACK);
 	screenReset();
 }
 
 void testFillTriangle(void) {
 
-	myLCD.fillTriangle(10, 20, 40, 5, 80, 20, RDL_BLACK);
+	myLCD.fillTriangle(10, 20, 40, 5, 80, 20, myLCD.BLACK);
 	screenReset();
 }
 
 void testDrawRoundRect(void) {
-	myLCD.drawRoundRect(20, 20, 15 , 15, 5, RDL_BLACK);
+	myLCD.drawRoundRect(20, 20, 15 , 15, 5, myLCD.BLACK);
 	screenReset();
 }
 
 void testFillRoundRect(void) {
-	myLCD.fillRoundRect(60, 20, 15, 15, 5, RDL_BLACK);
+	myLCD.fillRoundRect(60, 20, 15, 15, 5, myLCD.BLACK);
 	screenReset();
 }
 
 void testDrawRect(void) {
-	myLCD.drawRect(20, 15, 20, 15, RDL_BLACK);
+	myLCD.drawRect(20, 15, 20, 15, myLCD.BLACK);
 	screenReset();
 }
 
 void testDrawLine(void) {
 
-	std::cout << "Test 203 Draw lines " << std::endl;
-	myLCD.drawLine(0, 0, 40, 20, RDL_BLACK);
-	myLCD.drawFastHLine(50, 20, 10 , RDL_BLACK);
-	myLCD.drawFastVLine(70, 20 ,10, RDL_BLACK);
+	std::cout << "Test 903 Draw lines " << std::endl;
+	myLCD.drawLine(0, 0, 40, 20, myLCD.BLACK);
+	myLCD.drawFastHLine(50, 20, 10 , myLCD.BLACK);
+	myLCD.drawFastVLine(70, 20 ,10, myLCD.BLACK);
 	screenReset();
 }
 
@@ -643,21 +566,21 @@ void testRotate(void) {
 	myLCD.LCDdisplayClear();
 	myLCD.setCursor(0, 0);
 
-	myLCD.setRotation(displayBC_Degrees_90); // rotate 90 degrees counter clockwise,
+	myLCD.setRotation(myLCD.BC_Degrees_90); // rotate 90 degrees counter clockwise,
 	myLCD.setCursor(0, 0);
 	myLCD.print(testStr1);
 	myLCD.setCursor(0,70);
 	myLCD.print(testStr4);
 	screenReset();
 
-	myLCD.setRotation(displayBC_Degrees_180); // rotate 180 degrees counter clockwise,
+	myLCD.setRotation(myLCD.BC_Degrees_180); // rotate 180 degrees counter clockwise,
 	myLCD.setCursor(0, 0);
 	myLCD.print(testStr2);
 	myLCD.setCursor(0,30);
 	myLCD.print(testStr4);
 	screenReset();
 
-	myLCD.setRotation(displayBC_Degrees_270); // rotate 270 degrees counter clockwise,
+	myLCD.setRotation(myLCD.BC_Degrees_270); // rotate 270 degrees counter clockwise,
 	myLCD.setCursor(0, 0);
 	myLCD.print(testStr3);
 	myLCD.setCursor(0,70);
@@ -665,7 +588,7 @@ void testRotate(void) {
 	screenReset();
 
 	// revert back to no rotation
-	myLCD.setRotation(displayBC_Degrees_0);
+	myLCD.setRotation(myLCD.BC_Degrees_0);
 	myLCD.setCursor(0, 0);
 	myLCD.print(testStr0);
 	myLCD.setCursor(0,30);

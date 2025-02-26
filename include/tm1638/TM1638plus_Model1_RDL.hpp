@@ -29,6 +29,6 @@ public:
 	
 	// LED methods defined as overridden in sub-class for Model 3
 	virtual void setLEDs(uint16_t leds); 
-	virtual rpiDisplay_Return_Codes_e setLED(uint8_t position, uint8_t value); 
+	virtual rdlib::Return_Codes_e setLED(uint8_t position, uint8_t value); 
 	
 };

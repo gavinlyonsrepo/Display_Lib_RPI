@@ -20,7 +20,7 @@ int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for 
 int HWSPI_CHANNEL_XPT = 1; // A SPI channel, >= 0. Which Chip enable pin to use
 uint8_t IRQPIN   = 22;  // Interrupt GPIO ,T_IRQ
 int8_t RESPIN = 11; // // MOSI used to init device on init ,T_CLK reset pin if not used set to -1
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 void EndTest();
 void signal_callback_handler(int signum);
@@ -31,7 +31,7 @@ int main ()
 	// Setup
 	printf("Start, Press ctrl + c to quit\n");
 	signal(SIGINT, signal_callback_handler);
-	if (myXPT.XPTSPIInit(HWSPI_DEVICE, HWSPI_CHANNEL_XPT, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE, IRQPIN, RESPIN) != rpiDisplay_Success)
+	if (myXPT.XPTSPIInit(HWSPI_DEVICE, HWSPI_CHANNEL_XPT, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE, IRQPIN, RESPIN) != rdlib::Success)
 	{
 		printf("ERROR :: Could not Start XPT 2046 sensor\n");
 		return -1;

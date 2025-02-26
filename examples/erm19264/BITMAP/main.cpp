@@ -7,7 +7,6 @@
 		-#  Test 303 LCD update init method
 		-#  Test 304 Drawbitmap to buffer method, vertical addressing
 		-#  Test 305 Drawbitmap to buffer method, horizontal addressing
-		-#  Test 803 Bitmap error checking
 */
 
 #include <lgpio.h>
@@ -18,7 +17,7 @@
 //GPIO
 const uint8_t RST = 25; // GPIO pin number pick any you want
 const uint8_t CD = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 // Screen
 const uint8_t MY_LCD_WIDTH  = 192;
@@ -147,7 +146,6 @@ void Test301(void);
 void Test303(void);
 void Test304(void);
 void Test305(void);
-void Test803(void);
 bool setup(void);
 void myLoop(void);
 void EndTest(void);
@@ -167,9 +165,9 @@ int main()
 bool setup() {
 	printf("LCD Test Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(100);
-	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		printf("Error 1202: Cannot start spi\n");
 		return false;
@@ -190,7 +188,7 @@ void EndTest()
 
 void myLoop()
 {
-	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer192x64, sizeof(screenBuffer192x64)) != rpiDisplay_Success)
+	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer192x64) != rdlib::Success)
 	{
 		exit(-1);
 	};
@@ -198,7 +196,6 @@ void myLoop()
 	Test303();
 	Test304();
 	Test305();
-	Test803();
 }
 
 void Test301(void)
@@ -227,9 +224,9 @@ void Test304(void)
 	myLCD.LCDclearBuffer();   // Clear buffer
 	myLCD.setDrawBitmapAddr(true); // for Bitmap Data Vertical addressed
 
-	myLCD.drawBitmap(0,   5, SignalIconVa, 16, 8, RDL_BLACK, RDL_WHITE,sizeof(SignalIconVa));
-	myLCD.drawBitmap(100, 15, SignalIconVa, 16, 8, RDL_WHITE, RDL_BLACK,sizeof(SignalIconVa));
-	myLCD.drawBitmap(150, 5, BatIconVa, 16, 8 , RDL_BLACK, RDL_WHITE,sizeof(BatIconVa));
+	myLCD.drawBitmap(0,   5, SignalIconVa, 16, 8, myLCD.BLACK, myLCD.WHITE);
+	myLCD.drawBitmap(100, 15, SignalIconVa, 16, 8, myLCD.WHITE, myLCD.BLACK);
+	myLCD.drawBitmap(150, 5, BatIconVa, 16, 8 , myLCD.BLACK, myLCD.WHITE);
 
 	myLCD.LCDupdate();
 	delayMilliSecRDL(5000);
@@ -241,79 +238,11 @@ void Test305(void)
 	myLCD.LCDclearBuffer();   // Clear active buffer
 	myLCD.setDrawBitmapAddr(false); // for Bitmap Data Horizontal addressed
 
-	myLCD.drawBitmap(10, 25, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa));
-	myLCD.drawBitmap(100, 20, SignalIconHa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconHa));
-	myLCD.drawBitmap(60, 20, SignalIconHa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconHa));
+	myLCD.drawBitmap(10, 25, SignalIconHa, 16, 8, myLCD.BLACK, myLCD.WHITE);
+	myLCD.drawBitmap(100, 20, SignalIconHa, 16, 8, myLCD.WHITE, myLCD.BLACK);
+	myLCD.drawBitmap(60, 20, SignalIconHa, 16, 8, myLCD.WHITE, myLCD.BLACK);
 
 	myLCD.LCDupdate();
 	delayMilliSecRDL(5000);
 }
 
-
-//  Bitmap error checking test
-void Test803(void)
-{
-	myLCD.LCDFillScreen(0x00);
-	myLCD.LCDclearBuffer();
-
-	// === Setup tests ===
-	// Define the expected return values
-	std::vector<uint8_t> expectedErrors = 
-	{
-		rpiDisplay_Success,
-		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds,
-		rpiDisplay_BitmapLargerThanScreen, rpiDisplay_BitmapNullptr,
-		rpiDisplay_BitmapSize, rpiDisplay_BitmapSize, rpiDisplay_BitmapSize
-	};
-	// Vector to store return values
-	std::vector<uint8_t> returnValues; 
-	// test variables
-	char testString5[] = "Error Check Test 803";
-	bool errorFlag = false;
-
-	// === Tests, Perform function calls and store return values ===
-	printf("=== START Error checking. Expecting errors ===\r\n");
-	// Print message + sanity check for success
-	myLCD.setFont(font_default);
-	returnValues.push_back(myLCD.writeCharString(5, 5, testString5)); 
-	myLCD.LCDupdate();
-	delayMilliSecRDL(2000);
-	myLCD.LCDFillScreen(0x00);
-
-	returnValues.push_back(myLCD.drawBitmap(200, 0, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
-	returnValues.push_back(myLCD.drawBitmap(0, 100, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
-	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconHa, 180, 80, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
-	returnValues.push_back(myLCD.drawBitmap(0, 0, nullptr, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
-	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconHa, 16, 9, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa)));
-	myLCD.setDrawBitmapAddr(true);
-	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconVa, 17, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconVa)));
-	returnValues.push_back(myLCD.drawBitmap(0, 0, SignalIconVa, 16, 8, RDL_BLACK, RDL_WHITE, 200));
-	//== SUMMARY SECTION===
-	printf("\nError Checking Summary.\n");
-	// Check return values against expected errors
-	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
-			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
-		}
-	}
-
-	// Print all expectedErrors for summary
-	for (uint8_t value : expectedErrors ) 
-	{
-		printf("%d ", value);
-	}
-	printf("\n");
-	// Print all returnValues for summary
-	for (uint8_t value : returnValues) 
-	{
-		printf("%d ", value);
-	}
-	if (errorFlag == true ){
-		printf("\nError Checking has FAILED.\n");
-	}else{
-		printf("\nError Checking has PASSED.\n");
-	}
-	printf("\n=== STOP Error checking. ===\r\n");
-}

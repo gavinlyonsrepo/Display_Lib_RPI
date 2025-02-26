@@ -17,8 +17,8 @@
 */
 TM1637plus_Model4::TM1637plus_Model4(uint8_t clock, uint8_t data, int gpioDev, int delay, int displaySize)
 {
-	_DATA_IO = data;
-	_CLOCK_IO = clock;
+	_Display_SDATA = data;
+	_Display_SCLK = clock;
 	_DeviceNumGpioChip = gpioDev;
 	_BitDelayUS = delay;
 	_DisplaySize = displaySize;
@@ -35,39 +35,39 @@ void  TM1637plus_Model4::displayClear()
 /*!
 	@brief Begin method , set and claims GPIO
 	@return 
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
 	@note Call in Setup
 */
-rpiDisplay_Return_Codes_e TM1637plus_Model4::displayBegin(void)
+rdlib::Return_Codes_e TM1637plus_Model4::displayBegin(void)
 {
 	int GpioClockErrorstatus = 0;
 	int GpioDataErrorstatus = 0;
 
 	// open /dev/gpiochipX
-	_GpioHandle = TM163X_OPEN_GPIO_CHIP; 
+	_GpioHandle = Display_OPEN_GPIO_CHIP; 
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// Clain GPIO
-	GpioClockErrorstatus = TM163X_SET_INPUT_CLOCK;
-	GpioDataErrorstatus = TM163X_SET_INPUT_DATA;
+	GpioClockErrorstatus = Display_SCLK_SetDigitalInput;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalInput;
 	if (GpioClockErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for input (%s)\n", lguErrorText(GpioClockErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -230,19 +230,19 @@ void TM1637plus_Model4::DisplayString(const char* numStr, uint8_t dots, uint8_t 
 */
 unsigned char TM1637plus_Model4::encodeCharacter(unsigned char digit)
 {
-	unsigned char ascii = pFontSevenSegptr[digit- TM1637_ASCII_OFFSET];
+	unsigned char ascii = pFontSevenSegptr[digit- _ASCIIOffset ];
 	return ascii;
 }
 
 /*!
 	@brief Close method , frees GPIO and deactivate display.
 	@return 
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinFree
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinFree
 	@note call at end of program
 */
-rpiDisplay_Return_Codes_e TM1637plus_Model4::displayClose(void)
+rdlib::Return_Codes_e TM1637plus_Model4::displayClose(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
 
@@ -250,8 +250,8 @@ rpiDisplay_Return_Codes_e TM1637plus_Model4::displayClose(void)
 	int GpioDataErrorstatus = 0;
 	int GpioCloseStatus = 0;
 
-	GpioClockErrorstatus =  TM163X_GPIO_FREE_CLOCK;
-	GpioDataErrorstatus =   TM163X_GPIO_FREE_DATA;
+	GpioClockErrorstatus =  Display_GPIO_FREE_CLK;
+	GpioDataErrorstatus =   Display_GPIO_FREE_SDATA;
 
 	if (GpioClockErrorstatus < 0 )
 	{
@@ -264,7 +264,7 @@ rpiDisplay_Return_Codes_e TM1637plus_Model4::displayClose(void)
 		ErrorFlag = 2;
 	}
 
-	GpioCloseStatus = TM163X_CLOSE_GPIO_HANDLE; // close gpiochip
+	GpioCloseStatus = Display_CLOSE_GPIO_HANDLE; // close gpiochip
 	if ( GpioCloseStatus < 0)
 	{
 		fprintf(stderr,"Error :: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
@@ -274,12 +274,12 @@ rpiDisplay_Return_Codes_e TM1637plus_Model4::displayClose(void)
 	// 4 Check error flag (we don't want to return early for any failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_GpioChipDevice;;break;
-		default:printf("Warning::Unknown error flag value in displayClose"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::GpioChipDevice;;break;
+		default:fprintf(stderr, "Warning::Unknown error flag value in displayClose"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
@@ -298,7 +298,7 @@ void TM1637plus_Model4::CommBitDelay(void)
 void TM1637plus_Model4::CommStart(void)
 {
 	int GpioDataErrorstatus = 0;
-	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -314,21 +314,21 @@ void TM1637plus_Model4::CommStop(void)
 	int GpioDataErrorstatus = 0;
 	int GpioClockErrorstatus = 0;
 	
-	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
 	}
 	CommBitDelay();
 
-	GpioClockErrorstatus = TM163X_SET_INPUT_CLOCK;
+	GpioClockErrorstatus = Display_SCLK_SetDigitalInput;
 	if (GpioClockErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for input (%s)\n", lguErrorText(GpioClockErrorstatus));
 	}
 	CommBitDelay();
 
-	GpioDataErrorstatus = TM163X_SET_INPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalInput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -351,7 +351,7 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 	for(uint8_t i = 0; i < 8; i++) 
 	{
 		// Set clock low
-		GpioClockErrorstatus = TM163X_SET_OUTPUT_CLOCK;
+		GpioClockErrorstatus = Display_SCLK_SetDigitalOutput;
 		if (GpioClockErrorstatus < 0 )
 		{
 			fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorstatus));
@@ -361,7 +361,7 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 		// Set data bit
 		if (data & 0x01)
 		{
-			GpioDataErrorstatus = TM163X_SET_INPUT_DATA;
+			GpioDataErrorstatus = Display_SDATA_SetDigitalInput;
 			if (GpioDataErrorstatus < 0 )
 			{
 				fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -369,7 +369,7 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 		}
 		else
 		{
-			GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+			GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 			if (GpioDataErrorstatus < 0 )
 			{
 				fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -379,7 +379,7 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 		CommBitDelay();
 
 		// Set Clock high
-		GpioClockErrorstatus = TM163X_SET_INPUT_CLOCK;
+		GpioClockErrorstatus = Display_SCLK_SetDigitalInput;
 		if (GpioClockErrorstatus < 0 )
 		{
 			fprintf(stderr,"Error : Can't claim CLK GPIO for input (%s)\n", lguErrorText(GpioClockErrorstatus));
@@ -390,12 +390,12 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 
 	// Wait for acknowledge
 	// Set Clock to Low
-	GpioClockErrorstatus = TM163X_SET_OUTPUT_CLOCK;
+	GpioClockErrorstatus = Display_SCLK_SetDigitalOutput;
 	if (GpioClockErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorstatus));
 	}
-	GpioDataErrorstatus = TM163X_SET_INPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalInput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -403,17 +403,17 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 	CommBitDelay();
 
 	// Set clock to high
-	GpioClockErrorstatus = TM163X_SET_INPUT_CLOCK;
+	GpioClockErrorstatus = Display_SCLK_SetDigitalInput;
 	if (GpioClockErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for input (%s)\n", lguErrorText(GpioClockErrorstatus));
 	}
 	CommBitDelay();
 
-	uint8_t acknowledge = TM163X_DATA_READ;
+	uint8_t acknowledge = Display_SDATA_Read;
 	if (acknowledge == 0)
 	{
-		GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+		GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 		if (GpioDataErrorstatus < 0 )
 		{
 			fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -421,7 +421,7 @@ bool TM1637plus_Model4::writeByte(uint8_t byte)
 	}
 	CommBitDelay();
 
-	GpioClockErrorstatus = TM163X_SET_OUTPUT_CLOCK;
+	GpioClockErrorstatus = Display_SCLK_SetDigitalOutput;
 	if (GpioClockErrorstatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorstatus));

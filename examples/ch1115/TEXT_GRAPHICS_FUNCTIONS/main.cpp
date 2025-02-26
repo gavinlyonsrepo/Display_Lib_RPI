@@ -31,7 +31,6 @@
 		-# Test 716 print method String object 
 		-# Test 717 print method numbers 
 		-# Test 718 Fonts thick, seven segment + mint
-		-# Test 720 Text methods error Checking
 		-# Test 901 Graphic tests
 */
 
@@ -45,7 +44,7 @@ uint8_t graphicsCountLimit = 25;
 //GPIO
 const uint8_t RES = 25; // GPIO pin number pick any you want
 const uint8_t DC = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 // Screen 
 const uint8_t MY_OLED_WIDTH  = 128;
@@ -87,7 +86,6 @@ void Test715(void);
 void Test716(void);
 void Test717(void);
 void Test718(void);
-void testErrorCheck(void);
 void Test901(void);
 
 // ======================= Main ===================
@@ -106,10 +104,10 @@ bool Setup(void)
 {
 	printf("OLED Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(50);
 
-	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rpiDisplay_Success) // initialize the OLED
+	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rdlib::Success) // initialize the OLED
 	{
 		printf("Error 1202: Setup : Cannot start spi, \r\n");
 		return false;
@@ -132,7 +130,7 @@ void myTests()
 {
 	// Define a buffer to cover whole screen
 	uint8_t  screenBuffer[FULLSCREEN];
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer) != rdlib::Success) return;
 	myOLED.OLEDclearBuffer();
 
 	Test500();
@@ -154,7 +152,6 @@ void myTests()
 	Test716();
 	Test717();
 	Test718();
-	testErrorCheck();
 	Test901();
 
 }
@@ -379,13 +376,13 @@ void Test714(void)
 	printf("OLED Test 714 Base number systems using print \r\n");
 	myOLED.setFont(font_default);
 	myOLED.setCursor(0, 0);
-	myOLED.print(47 , RDL_DEC);
+	myOLED.print(47 , myOLED.RDL_DEC);
 	myOLED.setCursor(0, 16);
-	myOLED.print(47 , RDL_HEX); 
+	myOLED.print(47 , myOLED.RDL_HEX); 
 	myOLED.setCursor(0, 32);
-	myOLED.print(47, RDL_BIN);
+	myOLED.print(47, myOLED.RDL_BIN);
 	myOLED.setCursor(0, 48);
-	myOLED.print(47 , RDL_OCT);
+	myOLED.print(47 , myOLED.RDL_OCT);
 	TestReset();
 }
 
@@ -457,79 +454,6 @@ void Test718(void)
 	TestReset();
 }
 
-void testErrorCheck(void)
-{
-	// Error checking
-	printf("==== Test 808 Start Error checking ====\r\n");
-	// Define the expected return values
-	std::vector<uint8_t> expectedErrors = 
-	{
-		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
-		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
-		rpiDisplay_CharArrayNullptr
-	};
-	
-	// Vector to store return values
-	std::vector<uint8_t> returnValues; 
-
-	char testlowercase[] = "ZA[ab";
-	char testNonNumExtend[] = "-:;A";
-	bool errorFlag = false;
-	
-	// character out of font bounds
-	// gll lower case + ]
-	myOLED.setFont(font_gll);
-	returnValues.push_back(myOLED.writeChar(32, 0, '!')); //success
-	returnValues.push_back(myOLED.writeCharString(5,  5, testlowercase)); //throw gll font error 2
-	TestReset();
-	// Numeric extended bounds ; , A errors
-	myOLED.setFont(font_sixteenSeg);
-	returnValues.push_back(myOLED.writeCharString(0, 0, testNonNumExtend)); //throw font error 2
-	returnValues.push_back(myOLED.writeChar(32, 0, ',')); //throw error 2
-	TestReset();
-	printf("========\r\n");
-	// screen out of bounds
-	myOLED.setFont(font_default);
-	returnValues.push_back(myOLED.writeChar(0, 100, 'e')); //throw error 1
-	returnValues.push_back(myOLED.writeChar(150, 0, 'f')); //throw error 1
-	TestReset();
-	myOLED.setFont(font_orla);
-	returnValues.push_back(myOLED.writeChar(0, 100, 'A')); //throw error 1
-	returnValues.push_back(myOLED.writeChar(150, 0, 'B')); //throw error 1
-	TestReset();
-	
-	returnValues.push_back(myOLED.writeCharString(5, 5, nullptr)); //throw error 
-	
-	//== SUMMARY SECTION===
-	printf("\nError Checking Summary.\n");
-	// Check return values against expected errors
-	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
-			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
-		}
-	}
-
-	// Print all expectedErrors for summary
-	for (uint8_t value : expectedErrors ) 
-	{
-		printf("%d ", value);
-	}
-	printf("\n");
-	// Print all returnValues for summary
-	for (uint8_t value : returnValues) 
-	{
-		printf("%d ", value);
-	}
-	if (errorFlag == true ){
-		printf("\nError Checking has FAILED.\n");
-	}else{
-		printf("\nError Checking has PASSED.\n");
-	}
-	printf("\n=== STOP Error checking. ===\r\n");
-
-}
 
 void Test500(void)
 {
@@ -641,7 +565,7 @@ void Test500(void)
 	// ** Test 508 Rotate test **
 	myOLED.OLEDclearBuffer();
 	printf("OLED Rotate test 508\r\n");
-	myOLED.setRotation(displayBC_Degrees_90);
+	myOLED.setRotation(myOLED.BC_Degrees_90);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 90");
@@ -650,7 +574,7 @@ void Test500(void)
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 	
-	myOLED.setRotation(displayBC_Degrees_180);
+	myOLED.setRotation(myOLED.BC_Degrees_180);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 180");
@@ -659,7 +583,7 @@ void Test500(void)
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 	
-	myOLED.setRotation(displayBC_Degrees_270);
+	myOLED.setRotation(myOLED.BC_Degrees_270);
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate   270");
@@ -668,7 +592,7 @@ void Test500(void)
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(3000);
 	
-	myOLED.setRotation(displayBC_Degrees_0); //default normal 
+	myOLED.setRotation(myOLED.BC_Degrees_0); //default normal 
 	myOLED.OLEDclearBuffer();
 	myOLED.setCursor(5,5 );
 	myOLED.print("rotate 0");
@@ -704,9 +628,9 @@ void  Test901()
 		myOLED.setCursor(45, 0);
 		myOLED.print(colour);
 		// Draw the X
-		myOLED.drawLine(64,  0, 64, 64, RDL_BLACK);
-		myOLED.drawFastVLine(62, 0, 64, RDL_BLACK);
-		myOLED.drawFastHLine(0, 32, 128, RDL_BLACK);
+		myOLED.drawLine(64,  0, 64, 64, myOLED.BLACK);
+		myOLED.drawFastVLine(62, 0, 64, myOLED.BLACK);
+		myOLED.drawFastHLine(0, 32, 128, myOLED.BLACK);
 
 		// Q1
 		myOLED.fillRect(0, 10, 20, 20, colour);
@@ -716,7 +640,7 @@ void  Test901()
 		// Q2
 		myOLED.fillTriangle(80, 25, 90, 5, 100, 25, !colour);
 		myOLED.drawTriangle(80, 25, 90, 5, 100, 25, colour);
-		myOLED.drawRect(105, 10, 15, 15, RDL_BLACK);
+		myOLED.drawRect(105, 10, 15, 15, myOLED.BLACK);
 		// Q3
 		myOLED.fillRoundRect(0, 40, 40, 20, 10, !colour);
 		myOLED.drawRoundRect(0, 40, 40, 20, 10, colour);
@@ -724,7 +648,7 @@ void  Test901()
 		char i;
 		for (i = 0; i < 10; i ++)
 		{
-			myOLED.drawRect(70 + i, 40 + i, 50 - i * 2, 20 - i * 2, RDL_BLACK);
+			myOLED.drawRect(70 + i, 40 + i, 50 - i * 2, 20 - i * 2, myOLED.BLACK);
 			myOLED.OLEDupdate();
 			delayMilliSecRDL(50);
 		}

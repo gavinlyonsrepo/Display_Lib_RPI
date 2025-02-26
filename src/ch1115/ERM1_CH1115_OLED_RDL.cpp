@@ -60,14 +60,14 @@ ERMCH1115::ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8_t 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_WrongModeChosen
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
-		-# rpiDisplay_SPIOpenFailure
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::WrongModeChosen
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
+		-# rdlib::SPIOpenFailure
 */
-rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device, int channel, int speed, int flags, int gpioDev)
+rdlib::Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device, int channel, int speed, int flags, int gpioDev)
 {
 	_OLEDcontrast  = OLEDcontrast;
 	_DeviceNumGpioChip = gpioDev;
@@ -79,15 +79,15 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device
 	// 1. check communication mode being called, if user called wrong one.
 	if(GetCommMode() == 3)
 	{
-		printf("Wrong SPI mode chosen this method is for Hardware SPI : %i\n", _OLED_mode);
-		return rpiDisplay_WrongModeChosen;
+		fprintf(stderr,"Error 1: OLEDbegin: Wrong SPI mode chosen this method is for Hardware SPI : %i\n", _OLED_mode);
+		return rdlib::WrongModeChosen;
 	}
 	// 2. setup gpioDev
 	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
-		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		fprintf(stderr,"Error 2: OLEDbegin: Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rdlib::GpioChipDevice;
 	}
 
 	// 3. Claim 2 GPIO as outputs for RST and DC lines
@@ -97,38 +97,38 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device
 	GpioDCErrorStatus= Display_DC_SetDigitalOutput;
 	if (GpioResetErrorStatus < 0 )
 	{
-		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		fprintf(stderr,"Error 3: Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioDCErrorStatus < 0 )
 	{
-		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		fprintf(stderr,"Error 4: Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
+		return rdlib::GpioPinClaim;
 	}
 	//Display_CS_SetHigh;
 	// 4. set up spi open
 	 _spiHandle  = Display_OPEN_SPI;
 	if ( _spiHandle  < 0)
 	{
-		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
-		return rpiDisplay_SPIOpenFailure;
+		fprintf(stderr, "Error 5: Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
+		return rdlib::SPIOpenFailure;
 	}
 
 	OLEDinit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief begin Method initialise OLED for software SPI
 	@param OLEDcontrast Contrast of the OLED display default = 0x80 , range 0x00 to 0xFE
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_WrongModeChosen
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::WrongModeChosen
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
  */
-rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDev)
+rdlib::Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDev)
 {
 	_OLEDcontrast  = OLEDcontrast;
 	_DeviceNumGpioChip = gpioDev;
@@ -137,15 +137,15 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDe
 	// 1. check communication mode being called, if user called wrong one.
 	if(GetCommMode() == 2)
 	{
-		printf("Wrong SPI mode chosen this method is for Software SPI : %i\n", _OLED_mode);
-		return rpiDisplay_WrongModeChosen;
+		fprintf(stderr, "Error 1 :OLEDbegin : Wrong SPI mode chosen this method is for Software SPI : %i\n", _OLED_mode);
+		return rdlib::WrongModeChosen;
 	}
 	// 2. setup gpioDev
 	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
-		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		fprintf(stderr,"Error 2: OLEDbegin :Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
+		return rdlib::GpioChipDevice;
 	}
 
 	// 3. Claim 5 GPIO as outputs
@@ -173,37 +173,36 @@ rpiDisplay_Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int gpioDe
 		fprintf(stderr,"Error : Can't claim DIN GPIO for output (%s)\n", lguErrorText(GpioDINErrorStatus));
 	} else { ErrorFlag = false;}
 
-	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
+	if (ErrorFlag == true ) {return rdlib::GpioPinClaim;}
 
 	Display_CS_SetHigh;
 	OLEDinit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 /*!
 	@brief sets the buffer pointer to the users screen data buffer
 	@param width width of buffer in pixels
 	@param height height of buffer in pixels
-	@param pBuffer the buffer array which decays to pointer
-	@param sizeOfBuffer size of buffer
-	@return Will return rpiDisplay_Return_Codes_e enum
-		-# Success rpiDisplay_Success
-		-# Error 1 rpiDisplay_BufferSize
-		-# Error 2 rpiDisplay_BUfferNullptr
+	@param buffer the buffer span
+	@return Will return rdlib::Return_Codes_e enum
+		-# Success rdlib::Success
+		-# Error 1 rdlib::BufferSize
+		-# Error 2 rdlib::BufferEmpty
 */
-rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
+rdlib::Return_Codes_e ERMCH1115::OLEDSetBufferPtr(uint8_t width, uint8_t height , std::span<uint8_t> buffer)
 {
-	if(sizeOfBuffer !=  width * (height/8))
+	if(buffer.size() != static_cast<size_t>(width * (height / 8)))
 	{
-		printf("OLEDSetBufferPtr Error 1: buffer size does not equal : width * (height/8))\n");
-		return rpiDisplay_BufferSize;
+		fprintf(stderr, "Error 1: OLEDSetBufferPtr: buffer size does not equal : width * (height/8))\n");
+		return rdlib::BufferSize;
 	}
-	OLEDbuffer = pBuffer;
-	if(OLEDbuffer ==  nullptr)
+	if(buffer.empty())
 	{
-		printf("OLEDSetBufferPtr Error 2: Problem assigning buffer pointer, not a valid pointer object\r\n");
-		return rpiDisplay_BufferNullptr;
+		fprintf(stderr, "Error 2: OLEDSetBufferPtr: Problem assigning buffer pointer, empty object\r\n");
+		return rdlib::BufferEmpty;
 	}
-	return rpiDisplay_Success;
+	_OLEDbuffer = buffer;
+	return rdlib::Success;
 }
 
 
@@ -211,12 +210,12 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSetBufferPtr(uint8_t width, uint8_t he
 	@brief stops HW spi operations
 	@details End SPI operations. 
 	@return
-		-#  rpiDisplay_Success
-		-#  rpiDisplay_GpioPinFree
-		-#  rpiDisplay_SPICloseFailure
-		-#  rpiDisplay_GpioChipDevice
+		-#  rdlib::Success
+		-#  rdlib::GpioPinFree
+		-#  rdlib::SPICloseFailure
+		-#  rdlib::GpioChipDevice
 */
-rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
+rdlib::Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
 	
@@ -280,13 +279,13 @@ rpiDisplay_Return_Codes_e  ERMCH1115::OLEDSPIoff(void)
 	// 4 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;break;
-		case 4:return rpiDisplay_GpioChipDevice;break;
-		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;break;
+		case 4:return rdlib::GpioChipDevice;break;
+		default:fprintf(stderr, "Warning:Unknown error flag value in SPI-PowerDown"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -392,7 +391,7 @@ void ERMCH1115::OLEDinit()
 	if (GetCommMode() == 3)
 		Display_CS_SetHigh ;
 
-	delayMilliSecRDL(ERMCH1115_INITDELAY);
+	delayMilliSecRDL(ERMCH1115_Delays_t::INITDELAY);
 }
 
 /*!
@@ -414,11 +413,11 @@ void ERMCH1115::send_command (uint8_t command,uint8_t value)
 void ERMCH1115::OLEDReset ()
 {
 	Display_RST_SetHigh;
-	delayMilliSecRDL(ERMCH1115_RST_DELAY1);
+	delayMilliSecRDL(ERMCH1115_Delays_t::RST_DELAY1);
 	Display_RST_SetLow;
-	delayMilliSecRDL(ERMCH1115_RST_DELAY1);
+	delayMilliSecRDL(ERMCH1115_Delays_t::RST_DELAY1);
 	Display_RST_SetHigh ;
-	delayMilliSecRDL(ERMCH1115_RST_DELAY2);
+	delayMilliSecRDL(ERMCH1115_Delays_t::RST_DELAY2);
 }
 
 /*!
@@ -579,7 +578,7 @@ void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 
 	if (pageNum >= 8)
 	{
-		printf("Error OLEDFillPage 1 :page number must be between 0 and 7 \n");
+		fprintf(stderr, "Error: OLEDFillPage  :page number must be between 0 and 7 \n");
 		return;
 	}
 	if (GetCommMode() == 3)
@@ -612,10 +611,10 @@ void ERMCH1115::OLEDFillPage(uint8_t pageNum, uint8_t dataPattern)
 	 @param y offset 0-64
 	 @param w width 0-128
 	 @param h height 0-64
-	 @param data  pointer to the bitmap
+	 @param data span to the bitmap data
 	 @note data is const. writes direct to screen , no buffer.
 */
-void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data)
+void ERMCH1115::OLEDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const std::span<const uint8_t> data)
 {
 	if (GetCommMode() == 3)
 		Display_CS_SetLow;
@@ -667,35 +666,54 @@ void ERMCH1115::send_data(uint8_t dataByte)
 
 
 /*!
-	 @brief updates the OLED i.e. writes  buffer to the screen
+	@brief updates the OLED i.e. writes  buffer to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty if buffer is empty object
 */
-void ERMCH1115::OLEDupdate()
+rdlib::Return_Codes_e ERMCH1115::OLEDupdate()
 {
-	uint8_t x = 0;
-	uint8_t y = 0;
-	uint8_t w = this->_OLED_WIDTH;
+	if (_OLEDbuffer.empty())
+	{
+		fprintf(stderr, "Error: OLEDupdate: Buffer is empty, cannot update screen\r\n");
+		return rdlib::BufferEmpty;
+	}
+	uint8_t x = 0; 
+	uint8_t y = 0; 
+	uint8_t w = this->_OLED_WIDTH; 
 	uint8_t h = this->_OLED_HEIGHT;
-	OLEDBufferScreen( x,  y,  w,  h,this->OLEDbuffer);
+	OLEDBufferScreen( x,  y,  w,  h, this->_OLEDbuffer);
+	return rdlib::Success;
 }
 
 /*!
-	 @brief clears the active shared buffer i.e. does NOT write to the screen
+	@brief clears the buffer memory i.e. does NOT write to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty is buffer empty object
 */
-void ERMCH1115::OLEDclearBuffer()
+rdlib::Return_Codes_e ERMCH1115::OLEDclearBuffer()
 {
-	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH * (this->_OLED_HEIGHT /8))  );
+	if (_OLEDbuffer.empty())
+	{
+		fprintf(stderr, "Error: OLEDclearBuffer: Buffer is empty, cannot clear\r\n");
+		return rdlib::BufferEmpty;
+	}
+
+	std::fill(_OLEDbuffer.begin(), _OLEDbuffer.end(), 0x00);
+	return rdlib::Success;
 }
 
 /*!
 	 @brief Draw a bitmap to the screen
-	 @param x offset 0-128
-	 @param y offset 0-64
-	 @param w width 0-128
-	 @param h height 0-64
-	 @param data pointer to the bitmap data array
+	 @param x offset
+	 @param y offset
+	 @param w width
+	 @param h height
+	 @param data span the bitmap data array
 	 @note Called by OLEDupdate, used internally mostly
 */
-void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
+void ERMCH1115::OLEDBufferScreen(int16_t x, int16_t y, uint8_t w, uint8_t h, std::span<uint8_t> data)
 {
 
 	if (GetCommMode() == 3)
@@ -759,9 +777,9 @@ void ERMCH1115::drawPixel(int16_t x, int16_t y, uint8_t colour)
 	uint16_t tc = (_OLED_WIDTH * (y /8)) + x;
 	switch (colour)
 	{
-		case RDL_WHITE:  this->OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
-		case RDL_BLACK:  this->OLEDbuffer[tc] |= (1 << (y & 7)); break;
-		case RDL_INVERSE: this->OLEDbuffer[tc] ^= (1 << (y & 7)); break;
+		case WHITE:  this->_OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
+		case BLACK:  this->_OLEDbuffer[tc] |= (1 << (y & 7)); break;
+		case INVERSE: this->_OLEDbuffer[tc] ^= (1 << (y & 7)); break;
 	}
 
 }

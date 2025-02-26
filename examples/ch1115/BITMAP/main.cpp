@@ -15,7 +15,7 @@
 //GPIO
 const uint8_t RES = 25; // GPIO pin number pick any you want
 const uint8_t DC = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 // Screen 
 const uint8_t MY_OLED_WIDTH  = 128;
@@ -128,10 +128,10 @@ bool Setup(void)
 {
 	printf("OLED Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(50);
 
-	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rpiDisplay_Success) // initialize the OLED
+	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rdlib::Success) // initialize the OLED
 	{
 		printf("Error 1202: Setup : Cannot start spi, \r\n");
 		return false;
@@ -175,7 +175,7 @@ void Test302(void)
 {
 	// Method (2) assign bitmap to a buffer at init
 	printf(" Test 302 OLED buffer method, assign bitmap at initialization \n");
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer128x64, sizeof(screenBuffer128x64)) != rpiDisplay_Success)
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer128x64) != rdlib::Success)
 	{
 		EndTest();
 		exit(-1);
@@ -190,9 +190,9 @@ void Test303(void)
 {
 	printf(" Test 303 setDrawBitmapAddr method,  for Bitmap Data Vertical addressed\n");
 	myOLED.setDrawBitmapAddr(true); // for Bitmap Data Vertical  addressed
-	myOLED.drawBitmap(0, 0, SignalIconVa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconVa));
-	myOLED.drawBitmap(30, 20, SignalIconVa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconVa));
-	myOLED.drawBitmap(70, 30, TemperatureImageVA, 16, 16, RDL_WHITE, RDL_BLACK, sizeof(TemperatureImageVA));
+	myOLED.drawBitmap(0, 0, SignalIconVa, 16, 8, myOLED.BLACK, myOLED.WHITE);
+	myOLED.drawBitmap(30, 20, SignalIconVa, 16, 8, myOLED.WHITE, myOLED.BLACK);
+	myOLED.drawBitmap(70, 30, TemperatureImageVA, 16, 16, myOLED.WHITE, myOLED.BLACK);
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(5000);
 	myOLED.OLEDclearBuffer();
@@ -204,15 +204,15 @@ void Test304(void)
 	printf(" Test 304 setDrawBitmapAddr method,  for Bitmap Data Horziontal addressed\n");
 	myOLED.setDrawBitmapAddr(false); // for Bitmap Data Horziontal addressed
 
-	myOLED.drawBitmap(10, 25, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa));
-	myOLED.drawBitmap(100, 20, SignalIconHa, 16, 8, RDL_BLACK, RDL_WHITE, sizeof(SignalIconHa));
-	myOLED.drawBitmap(60, 20, SignalIconHa, 16, 8, RDL_WHITE, RDL_BLACK, sizeof(SignalIconHa));
+	myOLED.drawBitmap(10, 25, SignalIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE);
+	myOLED.drawBitmap(100, 20, SignalIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE);
+	myOLED.drawBitmap(60, 20, SignalIconHa, 16, 8, myOLED.WHITE, myOLED.BLACK);
 
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(5000);
 	myOLED.OLEDclearBuffer();
 
-	myOLED.drawBitmap(0, 0, bigImage64x64, 64, 64, RDL_BLACK, RDL_WHITE, sizeof(bigImage64x64));
+	myOLED.drawBitmap(0, 0, bigImage64x64, 64, 64, myOLED.BLACK, myOLED.WHITE);
 
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(5000);

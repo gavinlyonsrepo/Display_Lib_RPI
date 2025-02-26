@@ -22,7 +22,6 @@ uint8_t screenBuffer[FULLSCREEN];
 SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate  an object
 
 // I2C related
-bool I2C_debug = true;
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
@@ -64,10 +63,10 @@ bool SetupTest()
 {
 	
 	printf("OLED Test Begin\r\n");
-	printf("SSD1306 library Version Number :: %u\r\n",GetRDLibVersionNum());
+	printf("SSD1306 library Version Number :: %u\r\n",rdlib::LibraryVersion());
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
 	// Open an I2C device
-	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rpiDisplay_Success)
+	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rdlib::Success)
 	{
 		printf("Error 1201:Cannot open I2C device bus\n");
 		return false;
@@ -79,8 +78,7 @@ bool SetupTest()
 		return false;
 	}
 
-	myOLED.OLEDbegin(I2C_debug); // initialize the OLED
-	printf("Debug status is : %u\r\n", myOLED.OLEDDebugGet());
+	myOLED.OLEDbegin(); // initialize the OLED
 	printf("I2C Debug Error : %u\r\n", myOLED.OLEDI2CErrorGet()); // Print I2C error flag
 	printf("I2C Error Timeout mS : %u \r\n", myOLED.OLEDI2CErrorTimeoutGet()); // Print I2C error Timeout
 	printf("I2C Error retry attempts counts : %u \r\n", myOLED.OLEDI2CErrorRetryNumGet()); // Print I2C error retry count
@@ -94,7 +92,7 @@ void myLoop()
 {
 		printf("OLED Frame rate per second(FPS) test , ends at %u \r\n", countLimit);
 		myOLED.setFont(font_default);
-		if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+		if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer ) != rdlib::Success) return;
 		while (count < countLimit)
 		{
 			static long framerate = 0;
@@ -127,7 +125,7 @@ void display_buffer(long currentFramerate, int count)
 	myOLED.setCursor(0, 10);
 	myOLED.print("G Lyons");
 	myOLED.setCursor(0, 20);
-	myOLED.print(GetRDLibVersionNum());
+	myOLED.print(rdlib::LibraryVersion());
 	myOLED.setCursor(0, 30);
 	myOLED.print(myOLED.OLEDI2CErrorGet());
 	myOLED.setCursor(0, 40);
@@ -136,10 +134,10 @@ void display_buffer(long currentFramerate, int count)
 	myOLED.print(fps);
 	myOLED.print(" fps");
 
-	myOLED.drawFastVLine(64, 0, 63, RDL_WHITE);
+	myOLED.drawFastVLine(64, 0, 63,  myOLED.WHITE);
 	myOLED.fillRect(70, 10, 20, 20, colour);
 	myOLED.fillCircle(110, 20, 10, !colour);
-	myOLED.drawRoundRect(80, 40, 40, 20, 10, RDL_WHITE);
+	myOLED.drawRoundRect(80, 40, 40, 20, 10, myOLED.WHITE);
 	// ** END of TEST CODE ** 
 	
 	myOLED.OLEDupdate();

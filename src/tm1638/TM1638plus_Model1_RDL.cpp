@@ -23,24 +23,24 @@ TM1638plus_Model1::TM1638plus_Model1(uint8_t strobe, uint8_t clock, uint8_t data
 	@param position  0-7  == L1-L8 on PCB
 	@param  value  0 off 1 on
 	@return 
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e TM1638plus_Model1::setLED(uint8_t position, uint8_t value)
+rdlib::Return_Codes_e TM1638plus_Model1::setLED(uint8_t position, uint8_t value)
 {
 	int GpioDataErrorstatus = 0;
-	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	sendCommand(TM_WRITE_LOC);
-	TM163X_STROBE_SetLow;
+	Display_CS_SetLow;
 	sendData(TM_LEDS_ADR + (position << 1));
 	sendData(value);
-	TM163X_STROBE_SetHigh;
-	return rpiDisplay_Success;
+	Display_CS_SetHigh;
+	return rdlib::Success;
 }
 
 /*!
@@ -159,10 +159,10 @@ void TM1638plus_Model1::displayASCIIwDot(uint8_t position, uint8_t ascii) {
 */
 void TM1638plus_Model1::display7Seg(uint8_t position, uint8_t value) { // call 7-segment
 	sendCommand(TM_WRITE_LOC);
-	TM163X_STROBE_SetLow;
+	Display_CS_SetLow;
 	sendData(TM_SEG_ADR + (position << 1));
 	sendData(value);
-	TM163X_STROBE_SetHigh;
+	Display_CS_SetHigh;
 }
 
 /*!
@@ -215,9 +215,9 @@ uint8_t TM1638plus_Model1::readButtons()
 	uint8_t v =0;
 	int GpioDataErrorstatus = 0;
 
-	TM163X_STROBE_SetLow;
+	Display_CS_SetLow;
 	sendData(TM_BUTTONS_MODE); 
-	GpioDataErrorstatus = TM163X_SET_INPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalInput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
@@ -228,11 +228,11 @@ uint8_t TM1638plus_Model1::readButtons()
 		buttons |= v;
 	}
 
-	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
 	}
-	TM163X_STROBE_SetHigh;
+	Display_CS_SetHigh;
 	return buttons;
 }

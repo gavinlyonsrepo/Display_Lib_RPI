@@ -7,64 +7,6 @@
 
 #include "../../include/st7789/ST7789_TFT_LCD_RDL.hpp"
 
-// Section:  Defines
-
-// ST7789 registers + Commands
-
-// ST7789 general purpose
-#define ST7789_NOP     0x00 /**< Non operation */
-#define ST7789_SWRESET 0x01 /**< Soft Reset */
-
-// ST7789 Modes
-#define ST7789_SLPIN    0x10 /**< Sleep ON */
-#define ST7789_SLPOUT   0x11 /**< Sleep OFF */
-#define ST7789_PTLON    0x12 /**< Partial mode */
-#define ST7789_NORON    0x13 /**< Normal Display */
-#define ST7789_INVOFF   0x20 /**< Display invert off */
-#define ST7789_INVON    0x21 /**< Display Invert on */
-#define ST7789_DISPOFF  0x28 /**< Display off */
-#define ST7789_DISPON   0x29 /**< Display on */
-#define ST7789_IDLE_ON  0x39 /**< Idle Mode ON */
-#define ST7789_IDLE_OFF 0x38 /**< Idle Mode OFF */
-
-// ST7789 Addressing
-#define ST7789_CASET    0x2A /**< Column address set */
-#define ST7789_RASET    0x2B /**<  Page address set */
-#define ST7789_RAMWR    0x2C /**< Memory write */
-#define ST7789_RAMRD    0x2E /**< Memory read */
-#define ST7789_PTLAR    0x30 /**< Partial Area */
-#define ST7789_VSCRDEF  0x33 /**< Vertical scroll def */
-#define ST7789_SRLBTT   0x28 /**< Scroll direction bottom to top */
-#define ST7789_SRLTTB   0x30 /**< Scroll direction top to bottom */
-#define ST7789_COLMOD   0x3A /**< Interface Pixel Format */
-#define ST7789_MADCTL   0x36 /**< Memory Access Control */
-#define ST7789_VSCRSADD 0x37 /**< Vertical Access Control */
-
-// Frame Rate Control
-#define ST7789_FRMCTR1 0xB1 /**< Normal */
-#define ST7789_FRMCTR2 0xB2 /**< idle */
-#define ST7789_FRMCTR3 0xB3 /**< Partial */
-
-#define ST7789_INVCTR  0xB4 /**< Display Inversion control */
-#define ST7789_DISSET5 0xB6 /**< Display Function set */
-
-#define ST7789_RDID1   0xDA /**< read ID1 */
-#define ST7789_RDID2   0xDB /**< read ID2 */
-#define ST7789_RDID3   0xDC /**< read ID3 */
-#define ST7789_RDID4   0xDD /**< read ID4 */
-
-// ST7789 color control
-#define ST7789_GMCTRP1 0xE0 /**< Positive Gamma Correction Setting */
-#define ST7789_GMCTRN1 0xE1 /**< Negative Gamma Correction Setting */
-
-// Memory Access Data Control  Register
-#define ST7789_MADCTL_MY  0x80 /**< Row Address Order */
-#define ST7789_MADCTL_MX  0x40 /**< Column Address Order */
-#define ST7789_MADCTL_MV  0x20 /**< Row/Column Order (MV) */
-#define ST7789_MADCTL_ML  0x10 /**< Vertical Refresh Order */
-#define ST7789_MADCTL_RGB 0x00 /**< RGB order */
-#define ST7789_MADCTL_BGR 0x08 /**< BGR order */
-#define ST7789_MADCTL_MH  0x04  /**< Horizontal Refresh Order */
 
 /*! @brief Constructor for class ST7789_TFT */
 ST7789_TFT :: ST7789_TFT(){}
@@ -72,14 +14,14 @@ ST7789_TFT :: ST7789_TFT(){}
 
 /*!
 	@brief Call when powering down TFT
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinFree
-		-# rpiDisplay_SPIOpenClose
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinFree
+		-# rdlib::SPIOpenClose
 	@note Turns off Display Sets GPIO low and turns off SPI
 */
-rpiDisplay_Return_Codes_e  ST7789_TFT ::TFTPowerDown(void)
+rdlib::Return_Codes_e  ST7789_TFT ::TFTPowerDown(void)
 {
 	TFTenableDisplay(false);
 	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
@@ -146,22 +88,22 @@ if (_hardwareSPI == false)
 	// 4 Check error flag (we don't want to return early for any failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;;break;
-		case 4:return rpiDisplay_GpioChipDevice;;break;
-		default:printf("Warning::Unknown error flag value in SPI-PowerDown"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;;break;
+		case 4:return rdlib::GpioChipDevice;;break;
+		default:fprintf(stderr, "Warning::Unknown error flag value in SPI-PowerDown"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief Method for Hardware Reset pin control
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ST7789_TFT ::TFTResetPin() {
+rdlib::Return_Codes_e ST7789_TFT ::TFTResetPin() {
 	
 	// Claim GPIO as outputs for RST line
 	int GpioResetErrorStatus = 0;
@@ -169,7 +111,7 @@ rpiDisplay_Return_Codes_e ST7789_TFT ::TFTResetPin() {
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	Display_RST_SetHigh;
 	const uint8_t TFT_RESET_DELAY = 10; /**< Reset delay in mS*/
@@ -178,16 +120,16 @@ rpiDisplay_Return_Codes_e ST7789_TFT ::TFTResetPin() {
 	delayMilliSecRDL(TFT_RESET_DELAY);
 	Display_RST_SetHigh;
 	delayMilliSecRDL(TFT_RESET_DELAY);
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief: Method for Data or Command pin setup
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ST7789_TFT ::TFTDataCommandPin(void) {
+rdlib::Return_Codes_e ST7789_TFT ::TFTDataCommandPin(void) {
 	
 	// Claim GPIO as outputs for DC line
 	int GpioDCErrorStatus = 0;
@@ -195,19 +137,19 @@ rpiDisplay_Return_Codes_e ST7789_TFT ::TFTDataCommandPin(void) {
 	if (GpioDCErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	Display_DC_SetLow;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief: Method for Clock, data and chip select  pin setup routine for software SPI.
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ST7789_TFT::TFTClock_Data_ChipSelect_Pins(void)
+rdlib::Return_Codes_e ST7789_TFT::TFTClock_Data_ChipSelect_Pins(void)
 {
 	// Claim 3 GPIO as outputs
 	int GpioCSErrorStatus = 0;
@@ -220,23 +162,23 @@ rpiDisplay_Return_Codes_e ST7789_TFT::TFTClock_Data_ChipSelect_Pins(void)
 	if (GpioCSErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CS GPIO for output (%s)\n", lguErrorText(GpioCSErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioClockErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioSDATAErrorStatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioSDATAErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
 	Display_CS_SetHigh;
 	Display_SCLK_SetLow;
 	Display_SDATA_SetLow;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -273,43 +215,43 @@ void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, in
 
 /*!
 	@brief init routine for ST7789 controller
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
-		-# rpiDisplay_SPIOpenFailure;
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
+		-# rdlib::SPIOpenFailure;
 */
-rpiDisplay_Return_Codes_e ST7789_TFT::TFTST7789Initialize() {
+rdlib::Return_Codes_e ST7789_TFT::TFTST7789Initialize() {
 	
 	//  gpio Device open?
 	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 	// reset routine GPIO pin
-	if (TFTResetPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	if (TFTResetPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 	// Data or command routine  GPIO pin 
-	if (TFTDataCommandPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	if (TFTDataCommandPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 
 	if (_hardwareSPI == false)
 	{
 		// Setup Software SPI for the 3 other GPIO : SCLK, Data & CS
-		if (TFTClock_Data_ChipSelect_Pins() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+		if (TFTClock_Data_ChipSelect_Pins() != rdlib::Success){return rdlib::GpioPinClaim;}
 	}else{
 		_spiHandle = Display_OPEN_SPI;
 		if ( _spiHandle  < 0)
 		{
 			fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
-			return rpiDisplay_SPIOpenFailure;
+			return rdlib::SPIOpenFailure;
 		}
 	}
 
 	cmd89();
 	AdjustWidthHeight();
-	TFTsetRotation(TFT_Degrees_0);
-	return rpiDisplay_Success;
+	TFTsetRotation(Degrees_0);
+	return rdlib::Success;
 }
 
 
@@ -416,32 +358,32 @@ void ST7789_TFT ::TFTsleepDisplay(bool sleepMode){
 	2 = 180 rotate
 	3 =  270 rotate
 */
-void ST7789_TFT ::TFTsetRotation(TFT_rotate_e mode) {
+void ST7789_TFT ::TFTsetRotation(display_rotate_e mode) {
 	uint8_t madctl = 0;
 
 	switch (mode) {
-		case TFT_Degrees_0 :
+		case Degrees_0 :
 			madctl = ST7789_MADCTL_MX | ST7789_MADCTL_MY | ST7789_MADCTL_RGB;
 			_width =_widthStartTFT;
 			_height = _heightStartTFT;
 			_XStart = _colstart;
 			_YStart = _rowstart;
 			break;
-		case TFT_Degrees_90:
+		case Degrees_90:
 			madctl = ST7789_MADCTL_MY | ST7789_MADCTL_MV | ST7789_MADCTL_RGB;
 			_YStart = _colstart2;
 			_XStart = _rowstart;
 			_width  =_heightStartTFT;
 			_height = _widthStartTFT;
 			break;
-		case TFT_Degrees_180:
+		case Degrees_180:
 			madctl = ST7789_MADCTL_RGB;
 			_XStart = _colstart2;
 			_YStart = _rowstart2;
 			_width =_widthStartTFT;
 			_height = _heightStartTFT;
 			break;
-		case TFT_Degrees_270:
+		case Degrees_270:
 			madctl = ST7789_MADCTL_MX | ST7789_MADCTL_MV | ST7789_MADCTL_RGB;
 			_YStart = _colstart;
 			_XStart = _rowstart2;
@@ -449,7 +391,7 @@ void ST7789_TFT ::TFTsetRotation(TFT_rotate_e mode) {
 			_height = _widthStartTFT;
 			break;
 	}
-	TFT_rotate = mode;
+	displayRotate = mode;
 	writeCommand(ST7789_MADCTL);
 	writeData(madctl);
 }
@@ -483,11 +425,11 @@ void ST7789_TFT  :: TFTInitScreenSize(uint8_t colOffset, uint8_t rowOffset, uint
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@return
-		-# rpiDisplay_Success = success
+		-# rdlib::Success = success
 		-# upstream failure from TFTST7789Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI 
 */
-rpiDisplay_Return_Codes_e ST7789_TFT::TFTInitSPI(int device, int channel, int speed, int flags, int gpioDev)
+rdlib::Return_Codes_e ST7789_TFT::TFTInitSPI(int device, int channel, int speed, int flags, int gpioDev)
 {
 	_DeviceNumGpioChip = gpioDev;
 	_spiDev = device;
@@ -508,11 +450,11 @@ void ST7789_TFT::TFTNormalMode(void){writeCommand(ST7789_NORON);}
 	@param CommDelay uS GPIO delay used in software SPI
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@return
-		-# rpiDisplay_Success = success
+		-# rdlib::Success = success
 		-# upstream failure from TFTST7789Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI 
 */
-rpiDisplay_Return_Codes_e ST7789_TFT::TFTInitSPI(uint16_t CommDelay, int gpioDev)
+rdlib::Return_Codes_e ST7789_TFT::TFTInitSPI(uint16_t CommDelay, int gpioDev)
 {
 	HighFreqDelaySet(CommDelay);
 	_DeviceNumGpioChip = gpioDev;

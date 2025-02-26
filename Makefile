@@ -14,7 +14,7 @@
 MAKEFLAGS += --no-print-directory
 
 # Pre-compiler and Compiler flags
-CXX_FLAGS := -march=native -mtune=native -mcpu=native -Wall -Wextra  -std=c++20 
+CXX_FLAGS := -march=native -mtune=native -mcpu=native -Wall -Wextra  -std=c++23
 
 # Project directory structure
 SRC := src

@@ -58,9 +58,9 @@ int main()
 bool setup() {
 	printf("LCD Test Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(100);
-	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return false;
 	}
@@ -81,7 +81,7 @@ bool myTest() {
 
 	// Buffer setup, Define a buffer to cover whole screen
 	uint8_t screenBuffer[MY_SCREEN_SIZE];
-	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success)
+	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer) != rdlib::Success)
 	{
 		return false;
 	}
@@ -129,14 +129,14 @@ void displayData(long currentFramerate, int count)
 	myLCD.print(fps);
 	myLCD.print(" FPS SWSPI");
 	myLCD.setCursor(0, 50);
-	myLCD.print(GetRDLibVersionNum());
-	myLCD.drawFastVLine(92, 0, 63, RDL_BLACK);
+	myLCD.print(rdlib::LibraryVersion());
+	myLCD.drawFastVLine(92, 0, 63, myLCD.BLACK);
 
 
 	myLCD.fillRect(97, 10, 20, 20, colour);
-	myLCD.fillCircle(137, 20, 10, RDL_BLACK);
+	myLCD.fillCircle(137, 20, 10, myLCD.BLACK);
 	myLCD.fillTriangle(157, 30, 167, 10, 177, 30, !colour);
-	myLCD.drawRoundRect(107, 40, 60, 20, 10, RDL_BLACK);
+	myLCD.drawRoundRect(107, 40, 60, 20, 10, myLCD.BLACK);
 
 	myLCD.LCDupdate();
 }

@@ -45,9 +45,9 @@ bool setup(void) {
 	std::cout <<  "LCD Test Begin" << std::endl;
 	// print out library versions ( Note optional)
 	std::cout << "lgpio library Version Number :" << lguVersion() << std::endl;
-	std::cout << "HD44780_LCD_RPI lib Version Num :"  << GetRDLibVersionNum() << std::endl;
+	std::cout << "HD44780_LCD_RPI lib Version Num :"  << rdlib::LibraryVersion() << std::endl;
 
-	if (myLCD.LCD_I2C_ON() != rpiDisplay_Success)
+	if (myLCD.LCD_I2C_ON() != rdlib::Success)
 	{
 		return false;
 	}else{
@@ -55,7 +55,6 @@ bool setup(void) {
 	}
 	
 	delayMilliSecRDL(1000);
-	myLCD.LCDDebugSet(true); // Turn debug messages on 
 
 	if (myLCD.LCDCheckConnection() < 0)
 	{
@@ -66,7 +65,6 @@ bool setup(void) {
 	}
 
 	// Print out flag status
-	std::cout << "Debug status is : " << (myLCD.LCDDebugGet() ? "On" : "Off") << std::endl ;
 	std::cout <<  "Backlight status is : " << (myLCD.LCDBackLightGet() ? "On" : "Off") << std::endl ;
 	std::cout << "I2C Debug Error : " << myLCD.LCDI2CErrorGet() << std::endl; // Print I2C error flag
 	std::cout << "I2C Error Timeout mS : " << myLCD.LCDI2CErrorTimeoutGet() << std::endl; // Print I2C error Timeout

@@ -32,6 +32,7 @@
 #define  GPIO_CHIP_DEVICE 0 // try 0 or 4 , ls /dev/gpio*
 #define  COMM_DELAY_US 75 // Internal Serial Communications delay in uS
 #define  NUM_OF_DIGITS 4 // number of digits in display.
+#define  SEMI_COLON_ON (0x40)
 
 // Constructor object
 TM1637plus_Model4 tm(CLOCK_TM , DIO_TM, GPIO_CHIP_DEVICE, COMM_DELAY_US, NUM_OF_DIGITS);
@@ -72,7 +73,7 @@ bool Setup(void)
 {
 	printf("Test Begin :: Model 4 :: TM1637plus\r\n");
 	delaySecRDL(myTestDelay1);
-	if (tm.displayBegin() != rpiDisplay_Success)
+	if (tm.displayBegin() != rdlib::Success)
 	{
 		return false;
 	}
@@ -138,23 +139,23 @@ void Test2(void)
 	delaySecRDL(myTestDelay);
 
 	printf("Test 2C: decimal number leading zeros off,  with semi:colon on \r\n");
-	tm.DisplayDecimalwDot(1, 0x80 >> 1, false, 4, 0);
+	tm.DisplayDecimalwDot(1, SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(23, 0x80 >> 1, false, 4, 0);
+	tm.DisplayDecimalwDot(23, SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(784, 0x80 >> 1, false, 4, 0);
+	tm.DisplayDecimalwDot(784, SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(6281, 0x80 >> 1, false, 4, 0);
+	tm.DisplayDecimalwDot(6281, SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
 
 	printf("Test 2D: decimal number leading zeros on ,  with semi:colon on\r\n");
-	tm.DisplayDecimalwDot(1, 0x80 >> 1, true, 4, 0);
+	tm.DisplayDecimalwDot(1, SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(23, 0x80 >> 1, true, 4, 0);
+	tm.DisplayDecimalwDot(23, SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(784, 0x80 >> 1, true, 4, 0);
+	tm.DisplayDecimalwDot(784, SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(6281, 0x80 >> 1, true, 4, 0);
+	tm.DisplayDecimalwDot(6281, SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
 	tm.displayClear();
 }
@@ -169,8 +170,8 @@ void Test3(void)
 	printf("Test 3B: string 2 digit + semi colon\r\n");
 	char min[] = "07";
 	char sec[] = "53";
-	tm.DisplayString(min, 0x80 >> 1, 2, 0); // Display "07" starting at position 0
-	tm.DisplayString(sec, 0x80 >> 1, 2, 2); // Display "53" starting at position 2
+	tm.DisplayString(min, SEMI_COLON_ON, 2, 0); // Display "07" starting at position 0
+	tm.DisplayString(sec, SEMI_COLON_ON, 2, 2); // Display "53" starting at position 2
 	delaySecRDL(myTestDelay);
 
 	printf("Test 3C: string 4 digit\r\n");

@@ -60,7 +60,7 @@ int main()
 int8_t Setup(void)
 {
 	std::cout << "TFT Start Test " << std::endl;
-	std::cout << "Display_Lib_RPI library version :" << GetRDLibVersionNum()<< std::endl;
+	std::cout << "Display_Lib_RPI library version :" << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -73,7 +73,7 @@ int8_t Setup(void)
 
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
 	// pass enum to param1 ,4 choices,see README
-	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -86,7 +86,7 @@ void EndTests(void)
 {
 	char teststr1[] = "Tests over";
 	myTFT.setFont(font_retro);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 50, teststr1);
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTPowerDown(); // Power down device
@@ -94,7 +94,7 @@ void EndTests(void)
 }
 
 void TestFPS() {
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout << "FPS test: text + graphics ends at :: " << countLimit << std::endl;
 	while (count < countLimit)
 	{
@@ -133,13 +133,13 @@ void display(long currentFramerate, int count)
 	myTFT.print(fps);
 	myTFT.print(" fps");
 	myTFT.setCursor(5, 50);
-	myTFT.print(GetRDLibVersionNum());
+	myTFT.print(rdlib::LibraryVersion());
 
-	myTFT.drawFastVLine(63, 0, 127, RDLC_BLUE);
-	myTFT.drawFastHLine(0, 63, 127, RDLC_BLUE);
-	myTFT.fillRect(20, 70, 20, 20, RDLC_RED);
-	myTFT.fillCircle(100, 30, 10, RDLC_GREEN);
-	myTFT.fillTriangle(70,90, 90, 70 , 110, 90, RDLC_YELLOW);
+	myTFT.drawFastVLine(63, 0, 127, myTFT.RDLC_BLUE);
+	myTFT.drawFastHLine(0, 63, 127, myTFT.RDLC_BLUE);
+	myTFT.fillRect(20, 70, 20, 20, myTFT.RDLC_RED);
+	myTFT.fillCircle(100, 30, 10, myTFT.RDLC_GREEN);
+	myTFT.fillTriangle(70,90, 90, 70 , 110, 90, myTFT.RDLC_YELLOW);
 
 }
 

@@ -13,11 +13,6 @@
 #include "tm163X_font_data_RDL.hpp"
 
 
-#define TM1637_COMMAND_1        0x40   /**< Automatic data incrementing */
-#define TM1637_COMMAND_2        0xC0   /**< Data Data1~N: Transfer display data */
-#define TM1637_COMMAND_3        0x80   /**< Display intensity */
-#define TM1637_ASCII_OFFSET     0x20   /**< Offset in the ASCII table for font Start position */
-
 /*!
 	@brief Class for TM1637 Model 4
 */
@@ -26,8 +21,8 @@ class TM1637plus_Model4 {
 public:
 
 	TM1637plus_Model4 (uint8_t clock, uint8_t data ,int gpioDev, int delay, int DisplaySize) ;
-	rpiDisplay_Return_Codes_e displayBegin(void);
-	rpiDisplay_Return_Codes_e displayClose(void);
+	rdlib::Return_Codes_e displayBegin(void);
+	rdlib::Return_Codes_e displayClose(void);
 	void displayClear(void);
 	void setBrightness(uint8_t brightness, bool on );
 
@@ -41,13 +36,22 @@ protected:
 
 private:
 
-	uint8_t _DATA_IO; /**<  GPIO connected to DIO on Tm1637  */
-	uint8_t _CLOCK_IO; /**<  GPIO connected to CLk on Tm1637  */
+	// GPIO related
+	uint8_t _Display_SDATA; /**<  GPIO connected to DIO on Tm1637  */
+	uint8_t _Display_SCLK; /**<  GPIO connected to CLk on Tm1637  */
 	uint8_t _DisplaySize = 4; /**< size of display in digits */
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip usually 0 , ls /dev/gpio */
 	int _GpioHandle = 0; /**< This returns a handle to a gpiochip device. */
+
+	// Misc 
 	int _BitDelayUS = 75; /**< Us second delay used in communications */
-	uint8_t _brightness; /**< Brightness level 0-7*/
+	uint8_t _brightness = 7; /**< Brightness level 0-7*/
+	const uint8_t _ASCIIOffset = 0x20; /**< Offset in the ASCII table for font Start position */
+
+	// Tm1637 Command list
+	static constexpr uint8_t TM1637_COMMAND_1 = 0x40; /**< Automatic data incrementing */
+	static constexpr uint8_t TM1637_COMMAND_2 = 0xC0; /**< Data Data1~N: Transfer display data */
+	static constexpr uint8_t TM1637_COMMAND_3 = 0x80; /**< Display intensity */
 
 	void CommBitDelay(void);
 	void CommStart(void);

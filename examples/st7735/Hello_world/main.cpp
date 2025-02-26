@@ -52,7 +52,7 @@ int main()
 uint8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start Test 101 HWSPI" << std::endl;
-	std::cout << "Display_Lib_RPI library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "Display_Lib_RPI library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO **
@@ -65,7 +65,7 @@ uint8_t SetupHWSPI(void)
 
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
 	// pass enum to param1 ,4 choices,see README
-	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -77,9 +77,9 @@ uint8_t SetupHWSPI(void)
 void HelloWorld(void) 
 {
 	std::cout << "Hello World" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.setCursor(5,5);
-	myTFT.setTextColor(RDLC_YELLOW, RDLC_RED);
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_RED);
 	myTFT.setFont(font_default);
 	myTFT.print("Hello World!");
 	delayMilliSecRDL(10000);
@@ -87,7 +87,7 @@ void HelloWorld(void)
 
 void EndTests(void)
 {
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.TFTPowerDown(); // Power down device
 	std::cout << "TFT End" << std::endl;
 }

@@ -43,11 +43,11 @@ int main()
 	signal(SIGINT, signal_callback_handler);
 	printf("Test Begin :: MAX7219_7SEG\r\n");
 	printf("lgpio library Version Number :: %i\r\n", lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	printf("Press Ctrl+c to QUIT\r\n");
 	// -Init Display one
 	myMAX.SetCurrentDisplayNumber(1);
-	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rpiDisplay_Success)
+	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rdlib::Success)
 	{
 		printf("Error 1202 :: Cannot open SPI\n");
 		return -1;

@@ -49,6 +49,7 @@ void entryModeTest(void);
 void writeNumTest(void);
 void customChar(void);
 void vectorTest(void);
+void stdarrayTest(void);
 void backLightTest(void);
 void endTest(void);
 
@@ -67,6 +68,7 @@ int main()
 	writeNumTest();
 	customChar();
 	vectorTest();
+	stdarrayTest();
 	backLightTest();
 
 	endTest();
@@ -80,21 +82,19 @@ bool setup(void) {
 	std::cout <<  "LCD Test Begin" << std::endl;
 	// print out library versions ( Note optional)
 	std::cout << "lgpio library Version Number :" << lguVersion() << std::endl;
-	std::cout << "HD44780_LCD_RPI lib Version Num :"  << GetRDLibVersionNum() << std::endl;
+	std::cout << "HD44780_LCD_RPI lib Version Num :"  << rdlib::LibraryVersion() << std::endl;
 	delayMilliSecRDL(500);
 
-	if (myLCD.LCD_I2C_ON() != rpiDisplay_Success)
+	if (myLCD.LCD_I2C_ON() != rdlib::Success)
 	{
 		return false;
 	}
 
-	myLCD.LCDDebugSet(false); // Set to true to turn on debug mode
 	myLCD.LCDInit(myLCD.LCDCursorTypeOn);
 	myLCD.LCDClearScreen();
 	myLCD.LCDBackLightSet(true);
 
 	// print out flag status( Note optional)
-	std::cout << "Debug status is : " << (myLCD.LCDDebugGet() ? "On" : "Off") << std::endl ;
 	std::cout <<  "Backlight status is : " << (myLCD.LCDBackLightGet() ? "On" : "Off") << std::endl ;
 	return true;
 }
@@ -193,13 +193,13 @@ void writeNumTest()
 	myLCD.LCDClearScreen();
 
 	myLCD.LCDGOTO(myLCD.LCDLineNumberOne, 0); // 11
-	myLCD.print(11, RDL_DEC);
+	myLCD.print(11, myLCD.RDL_DEC);
 	myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 2);  // 13
-	myLCD.print(11, RDL_OCT);
+	myLCD.print(11, myLCD.RDL_OCT);
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo , 0); // B
-	myLCD.print(11, RDL_HEX);
+	myLCD.print(11, myLCD.RDL_HEX);
 	myLCD.LCDMoveCursor(myLCD.LCDMoveRight, 2); // 1011
-	myLCD.print(11, RDL_BIN);
+	myLCD.print(11, myLCD.RDL_BIN);
 
 	delayMilliSecRDL(DISPLAY_DELAY);
 }
@@ -253,6 +253,16 @@ void vectorTest(void)
 	myLCD.LCDGOTO(myLCD.LCDLineNumberTwo, 0);
 	std::vector<std::string> stringVec = {"Hello", "World"};
 	myLCD.print(stringVec); // Output: "Hello World"
+	delayMilliSecRDL(DISPLAY_DELAY);
+	myLCD.LCDClearScreen();
+}
+
+void stdarrayTest(void)
+{
+	// std::array (int)
+	std::array<int, 3> intArray = {47, 255, 1023};
+	myLCD.LCDGOTO(myLCD.LCDLineNumberOne, 0);
+	myLCD.print(intArray, myLCD.RDL_HEX); // Output: " 2F FF 3FF "
 	delayMilliSecRDL(DISPLAY_DELAY);
 	myLCD.LCDClearScreen();
 }

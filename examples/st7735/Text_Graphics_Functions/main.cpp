@@ -15,7 +15,7 @@
 	-# Test 705 print method all fonts
 	-# Test 706 Misc print class tests (string object, println invert, wrap, base nums etc)
 	-# Test 707 Misc draw functions (Invert, wrap)
-	-# Test 708 Vectors with print class
+	-# Test 708 Vectors & std::array with print class
 	-# Test 808 Error checks
 	-# Test 901 pixels and lines
 	-# Test 902 rectangles
@@ -116,7 +116,7 @@ int main(void)
 uint8_t Setup(void)
 {
 	std::cout << "TFT Start" << std::endl;
-	std::cout << "Display_Lib_RPI library version :" << GetRDLibVersionNum()<< std::endl;
+	std::cout << "Display_Lib_RPI library version :" << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -129,7 +129,7 @@ uint8_t Setup(void)
 
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
 	// pass enum to param1 ,4 choices,see README
-	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red , SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -142,15 +142,15 @@ void Test500(void)
 {
 	std::cout << "Test 500: Color Test:: Red,green,blue,yellow,white, black background" << std::endl;
 	myTFT.setFont(font_default);
-	myTFT.setTextColor(RDLC_GREEN,RDLC_BLACK);
-	myTFT.fillRoundRect(8, 10, 24, 60, 8, RDLC_RED);
-	myTFT.fillRoundRect(32, 10, 24, 60, 8, RDLC_GREEN);
-	myTFT.fillRoundRect(56, 10, 24, 60, 8, RDLC_BLUE);
-	myTFT.fillRoundRect(80, 10, 24, 60, 8, RDLC_YELLOW);
-	myTFT.fillRoundRect(104, 10, 24, 60, 8, RDLC_WHITE);
+	myTFT.setTextColor(myTFT.RDLC_GREEN,myTFT.RDLC_BLACK);
+	myTFT.fillRoundRect(8, 10, 24, 60, 8, myTFT.RDLC_RED);
+	myTFT.fillRoundRect(32, 10, 24, 60, 8, myTFT.RDLC_GREEN);
+	myTFT.fillRoundRect(56, 10, 24, 60, 8, myTFT.RDLC_BLUE);
+	myTFT.fillRoundRect(80, 10, 24, 60, 8, myTFT.RDLC_YELLOW);
+	myTFT.fillRoundRect(104, 10, 24, 60, 8, myTFT.RDLC_WHITE);
 	std::cout << "If colors are wrong user may have selected wrong PCB type in setup option 3" << std::endl;
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void Test501(void)
@@ -176,7 +176,7 @@ void Test501(void)
 	delayMilliSecRDL(TEST_DELAY);
 	}
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 
@@ -189,44 +189,44 @@ void Test502()
 	char teststr2[] = "Rotate 180"; // 180
 	char teststr3[] = "Rotate 270"; // 270
 
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.TFTsetRotation(myTFT.TFT_Degrees_0);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.TFTsetRotation(myTFT.Degrees_0);
 	myTFT.writeCharString(5, 5, teststr0);
 	myTFT.writeCharString(5, 108, teststr0);
 	delayMilliSecRDL(TEST_DELAY2);
 
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.TFTsetRotation(myTFT.TFT_Degrees_90);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.TFTsetRotation(myTFT.Degrees_90);
 	myTFT.writeCharString(5, 5, teststr1);
 	myTFT.writeCharString(5, 108, teststr1);
 	delayMilliSecRDL(TEST_DELAY2);
 
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.TFTsetRotation(myTFT.TFT_Degrees_180);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.TFTsetRotation(myTFT.Degrees_180);
 	myTFT.writeCharString(5, 5, teststr2);
 	myTFT.writeCharString(5, 108, teststr2);
 	delayMilliSecRDL(TEST_DELAY2);
 
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.TFTsetRotation(myTFT.TFT_Degrees_270);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.TFTsetRotation(myTFT.Degrees_270);
 	myTFT.writeCharString(5, 5, teststr3);
 	myTFT.writeCharString(5, 108, teststr3);
 	delayMilliSecRDL(TEST_DELAY2);
 
-	myTFT.TFTsetRotation(myTFT.TFT_Degrees_0);
+	myTFT.TFTsetRotation(myTFT.Degrees_0);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void Test503()
 {
 	std::cout << "Test 503-1: Mode Tests" << std::endl;
 	char teststr1[] = "Modes Test";
-	myTFT.fillRoundRect(8, 10, 24, 60, 8, RDLC_RED);
-	myTFT.fillRoundRect(32, 10, 24, 60, 8, RDLC_GREEN);
-	myTFT.fillRoundRect(56, 10, 24, 60, 8, RDLC_BLUE);
-	myTFT.fillRoundRect(80, 10, 24, 60, 8, RDLC_YELLOW);
-	myTFT.fillRoundRect(104, 10, 24, 60, 8, RDLC_WHITE);
+	myTFT.fillRoundRect(8, 10, 24, 60, 8, myTFT.RDLC_RED);
+	myTFT.fillRoundRect(32, 10, 24, 60, 8, myTFT.RDLC_GREEN);
+	myTFT.fillRoundRect(56, 10, 24, 60, 8, myTFT.RDLC_BLUE);
+	myTFT.fillRoundRect(80, 10, 24, 60, 8, myTFT.RDLC_YELLOW);
+	myTFT.fillRoundRect(104, 10, 24, 60, 8, myTFT.RDLC_WHITE);
 	myTFT.writeCharString(10, 80, teststr1);
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
@@ -272,7 +272,7 @@ void Test701(void) {
 	char teststr15[] = "GB";
 	char teststr16[] = "Mint";
 
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 
 	myTFT.setFont(font_default);
 	myTFT.writeCharString(5, 5, teststr1);
@@ -333,29 +333,29 @@ void Test702(void) {
 	char teststr11[] = "ORANGE";
 	char teststr12[] = "DGREEN";
 
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 5, teststr1);
-	myTFT.setTextColor(RDLC_BLUE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_BLUE, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 15, teststr2);
-	myTFT.setTextColor(RDLC_RED, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 25, teststr3);
-	myTFT.setTextColor(RDLC_GREEN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 35, teststr4);
-	myTFT.setTextColor( RDLC_CYAN, RDLC_BLACK);
+	myTFT.setTextColor( myTFT.RDLC_CYAN, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 45, teststr5);
-	myTFT.setTextColor(RDLC_MAGENTA, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_MAGENTA, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 55, teststr6);
-	myTFT.setTextColor(RDLC_YELLOW, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(60, 5, teststr7);
-	myTFT.setTextColor(RDLC_GREY, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_GREY, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(60, 15, teststr8);
-	myTFT.setTextColor(RDLC_TAN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_TAN, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(60, 25, teststr9);
-	myTFT.setTextColor(RDLC_BROWN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_BROWN, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(60, 35, teststr10);
-	myTFT.setTextColor( RDLC_ORANGE, RDLC_BLACK);
+	myTFT.setTextColor( myTFT.RDLC_ORANGE, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(60, 45, teststr11);
-	myTFT.setTextColor(RDLC_DGREEN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_DGREEN, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(60, 55, teststr12);
 	DisplayReset();
 }
@@ -365,7 +365,7 @@ void Test703(void) {
 	uint8_t row = 5;
 	uint8_t col = 5;
 	myTFT.setFont(font_default);
-	myTFT.setTextColor(RDLC_GREEN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
 	for (char i = 32; i < 127; i++) {
 
 		myTFT.writeChar(col, row, i);
@@ -384,7 +384,7 @@ void Test703(void) {
 
 void Test704(void) {
 	std::cout << "Test 704: font invert + test character draw using draw functions" << std::endl;
-	myTFT.setTextColor(RDLC_RED, RDLC_YELLOW);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
 	myTFT.setFont(font_default);
 	char teststr1[] = "TEST";
 	myTFT.writeCharString(15, 5, teststr1);
@@ -403,7 +403,7 @@ void Test705(void)
 	std::cout << "Test 705: Print class methods" << std::endl;
 
 	// Test Fonts default +  + pico+ sinclair + retro
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 
 	myTFT.setCursor(5,5);
 	myTFT.setFont(font_default);
@@ -499,7 +499,7 @@ void Test706(void)
 {
 	std::cout << "Test 706: Misc print class(string object, println invert, wrap, base nums etc)" << std::endl;
 	//Inverted print fonts
-	myTFT.setTextColor(RDLC_RED, RDLC_YELLOW);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
 	myTFT.setFont(font_default);
 
 	myTFT.setFont(font_sinclairS);
@@ -519,7 +519,7 @@ void Test706(void)
 	DisplayReset();
 
 	// Inverted print fonts
-	myTFT.setTextColor(RDLC_YELLOW, RDLC_RED);
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_RED);
 
 	myTFT.setFont(font_arialBold);
 	myTFT.setCursor(5,5);
@@ -536,17 +536,17 @@ void Test706(void)
 
 
 	// Test print with DEC BIN OCT HEX
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	uint8_t numPos = 47;
 	myTFT.setFont(font_pico);
 	myTFT.setCursor(5,5);
-	myTFT.print(numPos , RDL_DEC); // 47
+	myTFT.print(numPos , myTFT.RDL_DEC); // 47
 	myTFT.setCursor(5,25);
-	myTFT.print(numPos , RDL_BIN); // 10111
+	myTFT.print(numPos , myTFT.RDL_BIN); // 10111
 	myTFT.setCursor(5,45);
-	myTFT.print(numPos , RDL_OCT); // 57
+	myTFT.print(numPos , myTFT.RDL_OCT); // 57
 	myTFT.setCursor(5,65);
-	myTFT.print(numPos , RDL_HEX); // 2F
+	myTFT.print(numPos , myTFT.RDL_HEX); // 2F
 
 	DisplayReset();
 
@@ -603,28 +603,28 @@ void Test707(void)
 	char teststr4[] = "10 bold";
 
 	myTFT.setFont(font_mega);
-	myTFT.setTextColor(RDLC_RED, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
 	myTFT.writeChar(2, 2, '7');
-	myTFT.setTextColor(RDLC_YELLOW, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(2, 40, teststr1);
 
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.writeChar(2, 75, '8');
-	myTFT.setTextColor(RDLC_GREEN, RDLC_RED);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_RED);
 	myTFT.writeCharString(2, 100, teststr2);
 
 	DisplayReset();
 
 	myTFT.setFont(font_arialRound);
-	myTFT.setTextColor(RDLC_RED, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
 	myTFT.writeChar(2, 2, '9');
-	myTFT.setTextColor(RDLC_YELLOW, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(2, 26, teststr3);
 
 	myTFT.setFont(font_arialBold);
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.writeChar(2, 56, 'A');
-	myTFT.setTextColor(RDLC_GREEN, RDLC_RED);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_RED);
 	myTFT.writeCharString(2, 90, teststr4);
 
 	DisplayReset();
@@ -632,32 +632,40 @@ void Test707(void)
 
 void Test708(void)
 {
-	std::cout << "Test 708: print class : vectors" << std::endl;
+	std::cout << "Test 708: print class : vectors + std::array" << std::endl;
 	myTFT.setFont(font_default);
 	// For a vector of floats
 	myTFT.setCursor(5, 5);
-	std::vector<float> floatVec = {1.0, 22.004, -3.149823, 478.55434};
-	myTFT.println(floatVec, 1); // Output 1 decimal places
-	myTFT.println(floatVec);    // Output 2 decimal places(default)
-	myTFT.print(floatVec, 3); // Output 3 decimal places
+	std::vector<float> floatVec = {1.0, 22.004, -3.149823};
+	myTFT.println(floatVec, 1); // Output 1 decimal places 1.0  22.0 -3.2
+	myTFT.setCursor(5, 55);
+	myTFT.println(floatVec);    // Output 2 decimal places(default) 1.00 22.00 -3.15
+	myTFT.setCursor(5, 95);
+	myTFT.print(floatVec, 3); // Output 3 decimal places 1.000 22.004 -3.150
 	DisplayReset();
 	// For a vector of integers
 	std::vector<int> intVec = {47, 11, 34};
-	myTFT.setCursor(0, 5);
+	myTFT.setCursor(5, 5);
 	myTFT.println( intVec[0]);  // print 47 
-	myTFT.println( intVec[0], RDL_HEX);  // print 2F
-	myTFT.println( intVec[0] ,RDL_OCT); //print 57
-	myTFT.println( intVec[0], RDL_BIN); // print 101111
+	myTFT.println( intVec[0], myTFT.RDL_HEX); // print 2F
+	myTFT.println( intVec[0] ,myTFT.RDL_OCT); //print 57
+	myTFT.println( intVec[0], myTFT.RDL_BIN); // print 101111
 	DisplayReset();
 
-	myTFT.setCursor(0, 5);
+	myTFT.setCursor(5, 5);
 	myTFT.print( intVec); // 47 11 34
 
 	//For a vector of strings
-	myTFT.setCursor(0, 20);
+	myTFT.setCursor(5, 40);
 	std::vector<std::string> stringVec = {"HELLO", "VECTOR"};
 	myTFT.println(stringVec); // Output: "HELLO VECTOR"
 	myTFT.print(stringVec[1]); // Output: "VECTOR"
+	DisplayReset();
+
+	// For a array of integers
+	myTFT.setCursor(15, 15);
+	std::array<int, 2> intArray = {16, 254};
+	myTFT.print(intArray, myTFT.RDL_HEX); // Output: "10 FE"
 	DisplayReset();
 }
 
@@ -668,10 +676,10 @@ void Test808(void)
 	// Define the expected return values
 	std::vector<uint8_t> expectedErrors = 
 	{
-		rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange, rpiDisplay_Success, rpiDisplay_CharArrayNullptr,
-		rpiDisplay_Success, rpiDisplay_CharFontASCIIRange, rpiDisplay_CharFontASCIIRange,
-		rpiDisplay_CharFontASCIIRange, rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds,
-		rpiDisplay_CharScreenBounds, rpiDisplay_CharScreenBounds, rpiDisplay_CharArrayNullptr
+		rdlib::CharFontASCIIRange, rdlib::CharFontASCIIRange, rdlib::Success, rdlib::CharArrayNullptr,
+		rdlib::Success, rdlib::CharFontASCIIRange, rdlib::CharFontASCIIRange,
+		rdlib::CharFontASCIIRange, rdlib::CharScreenBounds, rdlib::CharScreenBounds,
+		rdlib::CharScreenBounds, rdlib::CharScreenBounds, rdlib::CharArrayNullptr
 	};
 	
 	// Vector to store return values
@@ -756,62 +764,62 @@ void Test901(void)
 {
 	std::cout << "Test 901: pixels and lines" << std::endl;
 	myTFT.setFont(font_retro);
-	myTFT.drawPixel(85, 5, RDLC_RED);
-	myTFT.drawPixel(87, 7, RDLC_RED);
-	myTFT.drawPixel(89, 9, RDLC_GREEN);
-	myTFT.drawPixel(91, 11, RDLC_GREEN);
-	myTFT.drawPixel(93, 13, RDLC_BLUE);
-	myTFT.drawPixel(95, 15, RDLC_BLUE);
-	myTFT.drawLine(10, 10, 30, 30, RDLC_RED);
-	myTFT.drawFastVLine(40, 40, 40, RDLC_GREEN);
-	myTFT.drawFastHLine(60, 60, 40, RDLC_YELLOW);
+	myTFT.drawPixel(85, 5, myTFT.RDLC_RED);
+	myTFT.drawPixel(87, 7, myTFT.RDLC_RED);
+	myTFT.drawPixel(89, 9, myTFT.RDLC_GREEN);
+	myTFT.drawPixel(91, 11, myTFT.RDLC_GREEN);
+	myTFT.drawPixel(93, 13, myTFT.RDLC_BLUE);
+	myTFT.drawPixel(95, 15, myTFT.RDLC_BLUE);
+	myTFT.drawLine(10, 10, 30, 30, myTFT.RDLC_RED);
+	myTFT.drawFastVLine(40, 40, 40, myTFT.RDLC_GREEN);
+	myTFT.drawFastHLine(60, 60, 40, myTFT.RDLC_YELLOW);
 
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void Test902(void) {
 	std::cout << "Test 902: rectangles " << std::endl;
-	rpiDisplay_Return_Codes_e returnValue;
-	myTFT.drawRectWH(5, 5, 20, 20, RDLC_RED);
-	returnValue = myTFT.fillRectangle(45, 5, 20, 20, RDLC_YELLOW);
-	if (returnValue != rpiDisplay_Success)
+	rdlib::Return_Codes_e returnValue;
+	myTFT.drawRectWH(5, 5, 20, 20, myTFT.RDLC_RED);
+	returnValue = myTFT.fillRectangle(45, 5, 20, 20, myTFT.RDLC_YELLOW);
+	if (returnValue != rdlib::Success)
 	{
 		std::cout << "Warning : Test TFTfillRectangle, An error occurred returnValue =" << +returnValue << std::endl;
 	}
-	myTFT.fillRect(85, 5, 20, 20, RDLC_GREEN);
-	myTFT.drawRoundRect(15, 60, 50, 50, 5, RDLC_CYAN);
-	myTFT.fillRoundRect(70, 60, 50, 50, 10, RDLC_WHITE);
+	myTFT.fillRect(85, 5, 20, 20, myTFT.RDLC_GREEN);
+	myTFT.drawRoundRect(15, 60, 50, 50, 5, myTFT.RDLC_CYAN);
+	myTFT.fillRoundRect(70, 60, 50, 50, 10, myTFT.RDLC_WHITE);
 
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void Test903(void) {
 	std::cout << "Test 903 & 904 : Triangles and circles" << std::endl;
-	myTFT.drawCircle(40, 20, 15, RDLC_GREEN);
-	myTFT.fillCircle(80, 20, 15, RDLC_YELLOW);
+	myTFT.drawCircle(40, 20, 15, myTFT.RDLC_GREEN);
+	myTFT.fillCircle(80, 20, 15, myTFT.RDLC_YELLOW);
 }
 
 void Test904(void) {
-	myTFT.drawTriangle(5, 80, 50, 40, 95, 80,RDLC_CYAN);
-	myTFT.fillTriangle(55, 120, 100, 90, 127, 120, RDLC_RED);
+	myTFT.drawTriangle(5, 80, 50, 40, 95, 80,myTFT.RDLC_CYAN);
+	myTFT.fillTriangle(55, 120, 100, 90, 127, 120, myTFT.RDLC_RED);
 
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void DisplayReset(void)
 {
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void EndTests(void)
 {
 	char teststr1[] = "Tests over";
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.setFont(font_retro);
 	myTFT.writeCharString(5, 50, teststr1);
 	DisplayReset();

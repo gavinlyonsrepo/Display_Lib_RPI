@@ -16,21 +16,6 @@
 #include "font_data_RDL.hpp"
 #include "common_data_RDL.hpp"
 
-#define swapDisplayRPI(a, b) { int16_t t = a; a = b; b = t; } /**< Swap two int16_t variables marco */
-
-// Pixel color
-#define RDL_WHITE   0 /**< pixel color for background */
-#define RDL_BLACK   1 /**< pixel color for foreground*/
-#define RDL_INVERSE 2 /**< inverted pixel color */
-
-/*! Enum to hold current screen rotation in degrees bi color display  */
-enum displayBC_rotate_e : uint8_t
-{
-	displayBC_Degrees_0 =   0,    /**< display screen rotated 0 degrees */
-	displayBC_Degrees_90 =  1,    /**< display screen rotated 90 degrees  */
-	displayBC_Degrees_180 = 2,    /**< display screen rotated 180 degrees  */
-	displayBC_Degrees_270 = 3     /**< display screen rotated 270 degrees */
-};
 
 /*! @brief Graphics class to hold graphic related functions  for 1-bit displays*/
 class bicolor_graphics : public display_Fonts, public Print{
@@ -38,7 +23,24 @@ class bicolor_graphics : public display_Fonts, public Print{
  public:
 
 	bicolor_graphics(int16_t w, int16_t h); // Constructor
+	
+	/*! Enum to hold current screen rotation in degrees bi color display  */
+	enum displayBC_rotate_e : uint8_t
+	{
+		BC_Degrees_0 =   0,    /**< display screen rotated 0 degrees */
+		BC_Degrees_90 =  1,    /**< display screen rotated 90 degrees  */
+		BC_Degrees_180 = 2,    /**< display screen rotated 180 degrees  */
+		BC_Degrees_270 = 3     /**< display screen rotated 270 degrees */
+	};
 
+	/*! Pixel color */
+	enum pixel_color_e : uint8_t 
+	{
+		WHITE   = 0, /**< pixel color for background */
+		BLACK   = 1, /**< pixel color for foreground*/
+		INVERSE = 2 /**< inverted pixel color */
+	};
+	
 	// Graphic related member functions
 	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) = 0;
 
@@ -72,18 +74,18 @@ class bicolor_graphics : public display_Fonts, public Print{
 
 	// Text related functions 
 	virtual size_t write(uint8_t) override;
-	rpiDisplay_Return_Codes_e writeChar( int16_t x, int16_t y, char value );
-	rpiDisplay_Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
+	rdlib::Return_Codes_e writeChar( int16_t x, int16_t y, char value );
+	rdlib::Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
 	void setTextWrap(bool w);
 	
 	// Bitmap related
 	void setDrawBitmapAddr(bool mode);
-	rpiDisplay_Return_Codes_e drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,
-			int16_t w, int16_t h, uint8_t color, uint8_t bg, uint16_t sizeOfBitmap);
+	rdlib::Return_Codes_e drawBitmap(int16_t x, int16_t y, const std::span<const uint8_t> bitmap,
+			int16_t w, int16_t h, uint8_t color, uint8_t bg);
 
 protected:
 
-	displayBC_rotate_e  _display_rotate = displayBC_Degrees_0; /**< Enum to hold rotation */
+	displayBC_rotate_e  _display_rotate = BC_Degrees_0; /**< Enum to hold rotation */
 
 	const int16_t WIDTH;  /**< This is the 'raw' display w - never changes */
 	const int16_t HEIGHT; /**< This is the 'raw' display h - never changes*/
@@ -96,4 +98,11 @@ protected:
 
 private:
 	bool _drawBitmapAddr; /**< data addressing mode for method drawBitmap, True-vertical , false-horizontal */
+
+	inline void swapint16t(int16_t& a, int16_t& b) 
+	{
+		int16_t t = a;
+		a = b;
+		b = t;
+	}
 };

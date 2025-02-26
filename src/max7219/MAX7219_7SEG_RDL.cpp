@@ -44,13 +44,13 @@ MAX7219_SS_RPI::MAX7219_SS_RPI(int device, int channel, int speed, int flags)
 
 /*!
 	@brief End display operations, called at end of program
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinFree
-		-# rpiDisplay_SPICloseFailure
-		-# rpiDisplay_GpioChipDevice
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinFree
+		-# rdlib::SPICloseFailure
+		-# rdlib::GpioChipDevice
 */
-rpiDisplay_Return_Codes_e MAX7219_SS_RPI::DisplayEndOperations(void)
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayEndOperations(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
 
@@ -105,13 +105,13 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::DisplayEndOperations(void)
 	// 3 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;break;
-		case 4:return rpiDisplay_GpioChipDevice;break;
-		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;break;
+		case 4:return rdlib::GpioChipDevice;break;
+		default:fprintf(stderr, "Warning:Unknown error flag value in SPI-PowerDown"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -126,14 +126,14 @@ bool MAX7219_SS_RPI::GetHardwareSPI(void)
 	@brief Init the display
 	@param numDigits scan limit set to 8 normally , advanced use only
 	@param decodeMode Must users will use 0x00 here
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinCliam
-		-# rpiDisplay_SPIOpenFailure
-		-# rpiDisplay_GpioChipDevice
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinCliam
+		-# rdlib::SPIOpenFailure
+		-# rdlib::GpioChipDevice
 	@note when cascading supplies init display one first always!
 */
-rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, DecodeMode_e decodeMode)
+rdlib::Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, DecodeMode_e decodeMode)
 {
 	if (_CurrentDisplayNumber == 1)
 	{
@@ -147,7 +147,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 			if ( _GpioHandle < 0)	// open error
 			{
 				fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-				return rpiDisplay_GpioChipDevice;
+				return rdlib::GpioChipDevice;
 			}
 
 			// Clain GPIO as outputs
@@ -158,17 +158,17 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 			if (GpioStrobeErrorstatus < 0 )
 			{
 				fprintf(stderr,"Error : Can't claim CS GPIO for output (%s)\n", lguErrorText(GpioStrobeErrorstatus));
-				return rpiDisplay_GpioPinClaim;
+				return rdlib::GpioPinClaim;
 			}
 			if (GpioClockErrorstatus < 0 )
 			{
 				fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorstatus));
-				return rpiDisplay_GpioPinClaim;
+				return rdlib::GpioPinClaim;
 			}
 			if (GpioDataErrorstatus < 0 )
 			{
 				fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
-				return rpiDisplay_GpioPinClaim;
+				return rdlib::GpioPinClaim;
 			}
 			Display_CS_SetHigh;
 		}else
@@ -177,7 +177,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 			if (_spiHandle < 0)
 			{
 				fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText(_spiHandle));
-				return rpiDisplay_SPIOpenFailure;
+				return rdlib::SPIOpenFailure;
 			}
 			delayMilliSecRDL(50); // small init delay before commencing transmissions
 		}
@@ -192,7 +192,7 @@ rpiDisplay_Return_Codes_e MAX7219_SS_RPI::InitDisplay(ScanLimit_e numDigits, Dec
 	DisplayTestMode(false);
 	ClearDisplay();
 	SetBrightness(IntensityDefault);
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -541,13 +541,15 @@ void MAX7219_SS_RPI::HighFreqshiftOut(uint8_t value)
 */
 uint8_t MAX7219_SS_RPI::ASCIIFetch(uint8_t character, DecimalPoint_e decimalPoint)
 {
-	if (character<=31 || character>=123)
+	const uint8_t  AsciiOffset = 0x20; // The font starts at ASCII 0x20 . space
+	const uint8_t AsciiEnd = 0x7B;
+	if (character <= (AsciiOffset-1) || character >= AsciiEnd)
 	{
-		printf("Error : AsciiFetch : ASCII character is outside font range %u, \n", character);
+		fprintf(stderr, "Error : AsciiFetch : ASCII character is outside font range %u, \n", character);
 		return 0;
 	} // check ASCII font bounds
 
-	const uint8_t  AsciiOffset = 0x20; // The font starts at ASCII 0x20 . space
+	
 	uint8_t returnCharValue =0;
 	returnCharValue = flipBitsPreserveMSB(pFontSevenSegptr[character - AsciiOffset]);
 	switch (decimalPoint)

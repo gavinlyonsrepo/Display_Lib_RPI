@@ -17,6 +17,7 @@
 # Display 11 = ST7735X  TFT LCD SPI
 # Display 12 = ST7789   TFT LCD SPI
 # Display 13 = ILI9341  TFT LCD SPI
+# Display 14 = SSD1331  LCD SPI
 # ==================================
 
 # ***********************************************
@@ -55,6 +56,7 @@
 #SRC=ssd1306/SPEED_TEST
 #SRC=ssd1306/BITMAP
 #SRC=ssd1306/CLOCK_DEMO
+#SRC=ssd1306/UTILS_TEST
 #=================================================
 
 # ========== ERM19264_UC1609 LCD SPI==============
@@ -112,6 +114,14 @@
 #SRC=ili9341/Text_Graphics_Functions
 #SRC=ili9341/Mandelbrot_set
 #SRC=ili9341/Touch_Screen
+#=================================================
+
+# =============== SSD1331 TFT LCD SPI =============
+#SRC=ssd1331/Hello_world
+#SRC=ssd1331/Hello_world_SWSPI
+#SRC=ssd1331/Bitmap_Tests
+#SRC=ssd1331/Text_Graphics_Functions
+#SRC=ssd1331/Clock_demo
 #=================================================
 
 # =========== XPT2046 touchscreen basic test ======

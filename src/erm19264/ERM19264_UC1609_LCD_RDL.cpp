@@ -61,14 +61,14 @@ ERM19264_UC1609 :: ERM19264_UC1609(int16_t lcdwidth, int16_t lcdheight , int8_t 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_WrongModeChosen
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
-		-# rpiDisplay_SPIOpenFailure
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::WrongModeChosen
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
+		-# rdlib::SPIOpenFailure
 */
-rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t VbiasPOT, int device, int channel, int speed, int flags, int gpioDev)
+rdlib::Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t VbiasPOT, int device, int channel, int speed, int flags, int gpioDev)
 {
 
 	if (AddressSet > 7 ) AddressSet = 0x02;
@@ -83,8 +83,8 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	// 1. check communication mode being called, if user called wrong one.
 	if(GetCommMode() == 3)
 	{
-		printf("Wrong SPI mode chosen this method is for Hardware SPI : %i\n", _LCD_mode);
-		return rpiDisplay_WrongModeChosen;
+		fprintf(stderr, "Wrong SPI mode chosen this method is for Hardware SPI : %i\n", _LCD_mode);
+		return rdlib::WrongModeChosen;
 	}
 
 	// 2. setup gpioDev
@@ -92,7 +92,7 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// 3. Claim 2 GPIO as outputs for RST and CD lines
@@ -103,12 +103,12 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	if (GpioResetErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioDCErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
 	// 4. set up spi open
@@ -116,11 +116,11 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	if ( _spiHandle  < 0)
 	{
 		fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
-		return rpiDisplay_SPIOpenFailure;
+		return rdlib::SPIOpenFailure;
 	}
 
 	LCDinit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -128,13 +128,13 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	@param AddressSet AC [2:0] registers for RAM addr ctrl. default=2 range 0-7
 	@param VbiasPOT contrast default = 0x49 , range 0x00 to 0xFE
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_WrongModeChosen
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::WrongModeChosen
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
  */
-rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t VbiasPOT, int gpioDev)
+rdlib::Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t VbiasPOT, int gpioDev)
 {
 	if (AddressSet > 7 ) AddressSet = 0x02;
 	_AddressCtrl =  AddressSet;
@@ -145,15 +145,15 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 	// 1. check communication mode being called, if user called wrong one.
 	if(GetCommMode() == 2)
 	{
-		printf("Wrong SPI mode chosen this method is for Software SPI : %i\n", _LCD_mode);
-		return rpiDisplay_WrongModeChosen;
+		fprintf(stderr, "Wrong SPI mode chosen this method is for Software SPI : %i\n", _LCD_mode);
+		return rdlib::WrongModeChosen;
 	}
 	// 2. setup gpioDev
 	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// 3. Claim 5 GPIO as outputs
@@ -181,23 +181,23 @@ rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t 
 		fprintf(stderr,"Error : Can't claim DIN GPIO for output (%s)\n", lguErrorText(GpioDINErrorStatus));
 	} else { ErrorFlag = false;}
 
-	if (ErrorFlag == true ) {return rpiDisplay_GpioPinClaim;}
+	if (ErrorFlag == true ) {return rdlib::GpioPinClaim;}
 
 	Display_CS_SetHigh;
 	LCDinit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
 /*!
 	@brief End SPI operations.
 	@return
-		-#  rpiDisplay_Success
-		-#  rpiDisplay_GpioPinFree
-		-#  rpiDisplay_SPICloseFailure
-		-#  rpiDisplay_GpioChipDevice
+		-#  rdlib::Success
+		-#  rdlib::GpioPinFree
+		-#  rdlib::SPICloseFailure
+		-#  rdlib::GpioChipDevice
 */
-rpiDisplay_Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
+rdlib::Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
 	// 1. Free reset & DC GPIO lines
@@ -261,14 +261,14 @@ rpiDisplay_Return_Codes_e  ERM19264_UC1609::LCDSPIoff(void)
 	// 4 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;break;
-		case 4:return rpiDisplay_GpioChipDevice;break;
-		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;break;
+		case 4:return rdlib::GpioChipDevice;break;
+		default:fprintf(stderr, "Warning: Unknown error flag value in SPI-PowerDown"); break;
 	}
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -297,22 +297,22 @@ void ERM19264_UC1609::LCDinit()
 
 	Display_DC_SetHigh;
 
-	delayMilliSecRDL(UC1609_INIT_DELAY2);
+	delayMilliSecRDL(UC1609_Delays_t::INIT_DELAY2);
 
 	LCDReset();
 
-	send_command(UC1609_TEMP_COMP_REG, UC1609_TEMP_COMP_SET);
-	send_command(UC1609_ADDRESS_CONTROL, _AddressCtrl); //  changed by user
-	send_command(UC1609_FRAMERATE_REG, UC1609_FRAMERATE_SET);
-	send_command(UC1609_BIAS_RATIO, UC1609_BIAS_RATIO_SET);
-	send_command(UC1609_POWER_CONTROL,  UC1609_PC_SET);
-	delayMilliSecRDL(UC1609_INIT_DELAY);
+	sendCommand(UC1609_TEMP_COMP_REG, UC1609_TEMP_COMP_SET);
+	sendCommand(UC1609_ADDRESS_CONTROL, _AddressCtrl); //  changed by user
+	sendCommand(UC1609_FRAMERATE_REG, UC1609_FRAMERATE_SET);
+	sendCommand(UC1609_BIAS_RATIO, UC1609_BIAS_RATIO_SET);
+	sendCommand(UC1609_POWER_CONTROL,  UC1609_PC_SET);
+	delayMilliSecRDL(UC1609_Delays_t::INIT_DELAY);
 
-	send_command(UC1609_GN_PM, 0);
-	send_command(UC1609_GN_PM, _VbiasPOT); //  changed by user
+	sendCommand(UC1609_GN_PM, 0);
+	sendCommand(UC1609_GN_PM, _VbiasPOT); //  changed by user
 
-	send_command(UC1609_DISPLAY_ON, 0x01); // turn on display
-	send_command(UC1609_LCD_CONTROL, UC1609_ROTATION_NORMAL); // rotate to normal
+	sendCommand(UC1609_DISPLAY_ON, 0x01); // turn on display
+	sendCommand(UC1609_LCD_CONTROL, UC1609_ROTATION_NORMAL); // rotate to normal
 	_sleep= false;
 
 	switch (GetCommMode())
@@ -329,10 +329,10 @@ void ERM19264_UC1609::LCDinit()
 	 @param value the values to change
 	 @note command and value  will be combined with OR
 */
-void ERM19264_UC1609::send_command (uint8_t command, uint8_t value)
+void ERM19264_UC1609::sendCommand (uint8_t command, uint8_t value)
 {
 	Display_DC_SetLow;
-	send_data(command | value);
+	sendData(command | value);
 	Display_DC_SetHigh;
 }
 
@@ -343,9 +343,9 @@ void ERM19264_UC1609::send_command (uint8_t command, uint8_t value)
 void ERM19264_UC1609::LCDReset ()
 {
 	Display_RST_SetLow;
-	delayMilliSecRDL(UC1609_RESET_DELAY);
+	delayMilliSecRDL(UC1609_Delays_t::RESET_DELAY);
 	Display_RST_SetHigh;
-	delayMilliSecRDL(UC1609_RESET_DELAY2);
+	delayMilliSecRDL(UC1609_Delays_t::RESET_DELAY2);
 }
 
 /*!
@@ -361,7 +361,7 @@ void ERM19264_UC1609::LCDEnable (uint8_t bits)
 	}
 
 	bits ? _sleep = false: _sleep = true;
-	send_command(UC1609_DISPLAY_ON, bits);
+	sendCommand(UC1609_DISPLAY_ON, bits);
 
 	switch (GetCommMode())
 	{
@@ -390,7 +390,7 @@ void ERM19264_UC1609::LCDscroll (uint8_t bits)
 		case 3: Display_CS_SetLow; break;
 	}
 
-	send_command(UC1609_SCROLL, bits);
+	sendCommand(UC1609_SCROLL, bits);
 
 	switch (GetCommMode())
 	{
@@ -405,29 +405,33 @@ void ERM19264_UC1609::LCDscroll (uint8_t bits)
 		Param1: 4 possible values 000 010 100 110 (defined)
 	@note If Mx is changed the buffer must BE updated see examples.
 */
-void ERM19264_UC1609::LCDrotate(uint8_t rotatevalue)
+rdlib::Return_Codes_e ERM19264_UC1609::LCDrotate(LCD_rotate_command_e rotatevalue)
 {
+
+	switch (rotatevalue)
+	{
+		case UC1609_ROTATION_FLIP_THREE:
+		case UC1609_ROTATION_FLIP_ONE:
+		case UC1609_ROTATION_NORMAL:
+		case UC1609_ROTATION_FLIP_TWO:
+			break; // Valid values, continue execution
+		default: 
+			return rdlib::GenericError; 
+			break;
+	}
+
 	switch (GetCommMode())
 	{
 		case 2: ; break;
 		case 3: Display_CS_SetLow; break;
 	}
-
-	switch (rotatevalue)
-	{
-		case 0: rotatevalue = 0; break;
-		case 0x02: rotatevalue = UC1609_ROTATION_FLIP_ONE; break;
-		case 0x04: rotatevalue = UC1609_ROTATION_NORMAL; break;
-		case 0x06: rotatevalue = UC1609_ROTATION_FLIP_TWO; break;
-		default: rotatevalue = UC1609_ROTATION_NORMAL; break;
-	}
-	send_command(UC1609_LCD_CONTROL, rotatevalue);
-
+	sendCommand(UC1609_LCD_CONTROL, rotatevalue); 
 	switch (GetCommMode())
 	{
 		case 2:  break;
 		case 3: Display_CS_SetHigh; break;
 	}
+	return rdlib::Success;
 }
 
 /*!
@@ -442,7 +446,7 @@ void ERM19264_UC1609::LCDinvert (uint8_t bits)
 		case 3: Display_CS_SetLow; break;
 	}
 
-	send_command(UC1609_INVERSE_DISPLAY, bits);
+	sendCommand(UC1609_INVERSE_DISPLAY, bits);
 
 	switch (GetCommMode())
 	{
@@ -464,7 +468,7 @@ void ERM19264_UC1609::LCDallpixelsOn(uint8_t bits)
 		case 3: Display_CS_SetLow; break;
 	}
 
-	send_command(UC1609_ALL_PIXEL_ON, bits);
+	sendCommand(UC1609_ALL_PIXEL_ON, bits);
 
 	switch (GetCommMode())
 	{
@@ -485,9 +489,9 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 		case 2: ; break;
 		case 3: Display_CS_SetLow; break;
 	}
-	send_command(UC1609_SET_COLADD_LSB, 0);
-	send_command(UC1609_SET_COLADD_MSB, 0);
-	send_command(UC1609_SET_PAGEADD, page_num);
+	sendCommand(UC1609_SET_COLADD_LSB, 0);
+	sendCommand(UC1609_SET_COLADD_MSB, 0);
+	sendCommand(UC1609_SET_PAGEADD, page_num);
 	switch (GetCommMode())
 	{
 		case 2:  break;
@@ -504,7 +508,7 @@ void ERM19264_UC1609::LCDFillPage(uint8_t page_num, uint8_t dataPattern)
 
 	for (uint8_t i = 0; i < _LCD_WIDTH; i++)
 	{
-		send_data(dataPattern);
+		sendData(dataPattern);
 	}
 	switch (GetCommMode())
 	{
@@ -533,7 +537,7 @@ void ERM19264_UC1609::LCDFillScreen(uint8_t dataPattern)
 	@param h height 0-64
 	@param data  pointer to the bitmap
 */
-void ERM19264_UC1609::LCDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data)
+void ERM19264_UC1609::LCDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const std::span<const uint8_t> data)
 {
 	switch (GetCommMode())
 	{
@@ -549,15 +553,15 @@ void ERM19264_UC1609::LCDBitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, cons
 	for (ty = 0; ty < h; ty = ty + 8)
 	{
 		if (y + ty < 0 || y + ty >= _LCD_HEIGHT) {continue;}
-		send_command(UC1609_SET_COLADD_LSB, (column & 0x0F));
-		send_command(UC1609_SET_COLADD_MSB, (column & 0xF0) >> 4);
-		send_command(UC1609_SET_PAGEADD, page++);
+		sendCommand(UC1609_SET_COLADD_LSB, (column & 0x0F));
+		sendCommand(UC1609_SET_COLADD_MSB, (column & 0xF0) >> 4);
+		sendCommand(UC1609_SET_PAGEADD, page++);
 
 		for (tx = 0; tx < w; tx++)
 		{
 			if (x + tx < 0 || x + tx >= _LCD_WIDTH) {continue;}
 			offset = (w * (ty >> 3)) + tx;
-			send_data(data[offset]);
+			sendData(data[offset]);
 		}
 	}
 
@@ -596,7 +600,7 @@ void ERM19264_UC1609::SoftwareSPIShiftOut(uint8_t value)
 	 @brief Send data byte with SPI to UC1609
 	 @param dataByte byte the data byte to send
 */
-void ERM19264_UC1609::send_data(uint8_t dataByte)
+void ERM19264_UC1609::sendData(uint8_t dataByte)
 {
 	int spiErrorStatus = 0;
 	char TransmitBuffer[1];
@@ -616,22 +620,40 @@ void ERM19264_UC1609::send_data(uint8_t dataByte)
 
 /*!
 	@brief updates the buffer i.e. writes it to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty if buffer is empty object
 */
-void ERM19264_UC1609::LCDupdate()
+rdlib::Return_Codes_e ERM19264_UC1609::LCDupdate()
 {
+	if (_LCDbufferScreen.empty())
+	{
+		fprintf(stderr, "Error: LCDupdate: Buffer is empty, cannot update screen\r\n");
+		return rdlib::BufferEmpty;
+	}
 	uint8_t x = 0;
 	uint8_t y = 0;
 	uint8_t w = this->_LCD_WIDTH;
 	uint8_t h = this->_LCD_HEIGHT;
-	LCDBuffer( x,  y,  w,  h, this->LCDbufferScreen);
+	LCDBuffer( x,  y,  w,  h, this->_LCDbufferScreen);
+	return rdlib::Success;
 }
 
 /*!
-	@brief clears the buffer i.e. does NOT write to the screen
+	@brief clears the buffer memory i.e. does NOT write to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty is buffer empty object
 */
-void ERM19264_UC1609::LCDclearBuffer()
+rdlib::Return_Codes_e ERM19264_UC1609::LCDclearBuffer()
 {
-	memset( this->LCDbufferScreen, 0x00, (this->_LCD_WIDTH * (this->_LCD_HEIGHT /8))  );
+	if (_LCDbufferScreen.empty())
+	{
+		fprintf(stderr, "Error: LCDclearBuffer: Buffer is empty, cannot clear\r\n");
+		return rdlib::BufferEmpty;
+	}
+	std::fill(_LCDbufferScreen.begin(), _LCDbufferScreen.end(), 0x00);
+	return rdlib::Success;
 }
 
 /*!
@@ -640,10 +662,10 @@ void ERM19264_UC1609::LCDclearBuffer()
 	 @param y offset 0-64
 	 @param w width 0-192
 	 @param h height 0-64
-	 @param data pointer to the data array
+	 @param data span to the data array
 	 @note Called by LCDupdate internally to write buffer to screen , can be called standalone 	as well
 */
-void ERM19264_UC1609::LCDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t* data)
+void ERM19264_UC1609::LCDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, std::span<uint8_t> data)
 {
 	switch (GetCommMode())
 	{
@@ -660,15 +682,15 @@ void ERM19264_UC1609::LCDBuffer(int16_t x, int16_t y, uint8_t w, uint8_t h, uint
 	{
 		if (y + ty < 0 || y + ty >= _LCD_HEIGHT) {continue;}
 
-		send_command(UC1609_SET_COLADD_LSB, (column & 0x0F));
-		send_command(UC1609_SET_COLADD_MSB, (column & 0XF0) >> 4);
-		send_command(UC1609_SET_PAGEADD, page++);
+		sendCommand(UC1609_SET_COLADD_LSB, (column & 0x0F));
+		sendCommand(UC1609_SET_COLADD_MSB, (column & 0XF0) >> 4);
+		sendCommand(UC1609_SET_PAGEADD, page++);
 
 		for (tx = 0; tx < w; tx++)
 		{
 			if (x + tx < 0 || x + tx >= _LCD_WIDTH) {continue;}
 			offset = (w * (ty /8)) + tx;
-			send_data(data[offset++]);
+			sendData(data[offset++]);
 		}
 	}
 
@@ -711,9 +733,9 @@ void ERM19264_UC1609::drawPixel(int16_t x, int16_t y, uint8_t colour)
 	uint16_t tc = (_LCD_WIDTH * (y /8)) + x;
 	switch (colour)
 	{
-		case RDL_WHITE:  this->LCDbufferScreen[tc] &= ~(1 << (y & 7)); break;
-		case RDL_BLACK:  this->LCDbufferScreen[tc] |= (1 << (y & 7)); break;
-		case RDL_INVERSE: this->LCDbufferScreen[tc] ^= (1 << (y & 7)); break;
+		case WHITE:  this->_LCDbufferScreen[tc] &= ~(1 << (y & 7)); break;
+		case BLACK:  this->_LCDbufferScreen[tc] |= (1 << (y & 7)); break;
+		case INVERSE: this->_LCDbufferScreen[tc] ^= (1 << (y & 7)); break;
 	}
 
 }
@@ -734,27 +756,26 @@ void ERM19264_UC1609::LCD_HighFreqDelaySet(uint16_t CommDelay){_LCD_HighFreqDela
 	@brief sets the buffer pointer to the users screen data buffer
 	@param width width of buffer in pixels
 	@param height height of buffer in pixels
-	@param pBuffer the buffer array which decays to pointer
-	@param sizeOfBuffer size of buffer
-	@return Will return rpiDisplay_Return_Codes_e enum
-		-# Success rpiDisplay_Success
-		-# Error 1 rpiDisplay_BufferSize
-		-# Error 2 rpiDisplay_BUfferNullptr
+	@param buffer the span to buffer data
+	@return Will return rdlib::Return_Codes_e enum
+		-# Success rdlib::Success
+		-# Error 1 rdlib::BufferSize
+		-# Error 2 rdlib::BufferEmpty
 */
-rpiDisplay_Return_Codes_e ERM19264_UC1609::LCDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
+rdlib::Return_Codes_e ERM19264_UC1609::LCDSetBufferPtr(uint8_t width, uint8_t height , std::span<uint8_t> buffer )
 {
-	if(sizeOfBuffer !=  width * (height/8))
+	if(buffer.size() != static_cast<size_t>(width * (height / 8)))
 	{
-		printf("LCDSetBufferPtr Error 1: buffer size does not equal : width * (height/8))\n");
-		return rpiDisplay_BufferSize;
+		fprintf(stderr, "Error 1: LCDSetBufferPtr: buffer size does not equal : width * (height/8))\n");
+		return rdlib::BufferSize;
 	}
-	LCDbufferScreen = pBuffer;
-	if(LCDbufferScreen ==  nullptr)
+	if(buffer.empty())
 	{
-		printf("LCDSetBufferPtr Error 2: Problem assigning buffer pointer, not a valid pointer object\r\n");
-		return rpiDisplay_BufferNullptr;
+		fprintf(stderr, "Error 2 :LCDSetBufferPtr: Problem assigning buffer, empty object\r\n");
+		return rdlib::BufferEmpty;
 	}
-	return rpiDisplay_Success;
+	_LCDbufferScreen = buffer;
+	return rdlib::Success;
 }
 
 //****************  EOF ******************************8

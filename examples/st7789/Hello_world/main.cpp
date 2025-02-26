@@ -17,7 +17,7 @@ ST7789_TFT myTFT;
 
 int8_t RST_TFT  = 25;
 int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
 uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
@@ -53,7 +53,7 @@ int main()
 uint8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start Test 101 HWSPI" << std::endl;
-	std::cout << "ST7789 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ST7789 library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout << "Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO  **
@@ -63,7 +63,7 @@ uint8_t SetupHWSPI(void)
 	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
 // ** USER OPTION 3 SPI settings **
-	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -75,9 +75,9 @@ uint8_t SetupHWSPI(void)
 void HelloWorld(void) 
 {
 	std::cout << "Hello World" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.setCursor(30,60);
-	myTFT.setTextColor(RDLC_GREEN, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
 	myTFT.setFont(font_arialBold);
 	myTFT.print("Hello world");
 	delayMilliSecRDL(7000);
@@ -85,7 +85,7 @@ void HelloWorld(void)
 
 void EndTests(void)
 {
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	delayMilliSecRDL(1000);
 	myTFT.TFTPowerDown(); // Power down device
 	std::cout << "TFT End" << std::endl;

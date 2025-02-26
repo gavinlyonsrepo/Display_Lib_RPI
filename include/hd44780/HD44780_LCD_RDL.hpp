@@ -67,16 +67,14 @@ class HD44780PCF8574LCD : public Print{
 	void LCDBackLightSet(bool);
 	bool LCDBackLightGet(void);
 	
-	rpiDisplay_Return_Codes_e LCD_I2C_ON(void);
-	rpiDisplay_Return_Codes_e LCD_I2C_OFF(void);
+	rdlib::Return_Codes_e LCD_I2C_ON(void);
+	rdlib::Return_Codes_e LCD_I2C_OFF(void);
 	int LCDCheckConnection(void);
 	int LCDI2CErrorGet(void);
 	uint16_t LCDI2CErrorTimeoutGet(void);
 	void LCDI2CErrorTimeoutSet(uint16_t);
 	uint8_t LCDI2CErrorRetryNumGet(void);
 	void LCDI2CErrorRetryNumSet(uint8_t);
-	bool LCDDebugGet(void);
-	void LCDDebugSet(bool);
 
 	void LCDSendString (char *str);
 	void LCDSendChar (char data);
@@ -88,7 +86,7 @@ class HD44780PCF8574LCD : public Print{
 	void LCDScroll(LCDDirectionType_e, uint8_t ScrollSize);
 	void LCDGOTO(LCDLineNumber_e  lineNo, uint8_t  col);
 	void LCDClearLine (LCDLineNumber_e lineNo);
-	void LCDClearScreen(void);
+	rdlib::Return_Codes_e  LCDClearScreen(void);
 	void LCDClearScreenCmd(void);
 	void LCDHome(void);
 	void LCDChangeEntryMode(LCDEntryMode_e mode);
@@ -118,9 +116,6 @@ class HD44780PCF8574LCD : public Print{
 	};
 	
 	enum  LCDBackLight_e _LCDBackLight= LCDBackLightOnMask;  /**< Enum to store backlight status*/
-	
-	
-	bool _DebugON = false;  /**< debug flag , if true error messages will be printed to console */
 
 	int _LCDI2CAddress = 0x27 ; /**< I2C address for I2C module PCF8574 backpack on LCD*/
 	int _LCDI2CDevice = 1; /**< An I2C device number. */
@@ -133,6 +128,5 @@ class HD44780PCF8574LCD : public Print{
 	uint8_t _NumRowsLCD = 2; /**< number of rows on LCD*/
 	uint8_t _NumColsLCD = 16; /**< number of columns on LCD*/
 
-		
   }; // end of HD44780PCF8574LCD class
 

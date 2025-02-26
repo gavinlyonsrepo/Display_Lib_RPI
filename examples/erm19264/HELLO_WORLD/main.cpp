@@ -15,7 +15,7 @@
 //GPIO
 const uint8_t RST = 25; // GPIO pin number pick any you want
 const uint8_t CD = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0;
 
 // Screen
 const uint8_t MY_LCD_WIDTH  = 192;
@@ -54,9 +54,9 @@ int main(void)
 bool setup() {
 	printf("LCD Test Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(100);
-	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		printf("Error 1202: Cannot start spi\n");
 		return false;
@@ -70,7 +70,7 @@ bool myTest() {
 
 	// Buffer setup, Define a buffer to cover whole screen
 	uint8_t screenBuffer[MY_SCREEN_SIZE];
-	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success)
+	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer) != rdlib::Success)
 	{
 		return false;
 	}

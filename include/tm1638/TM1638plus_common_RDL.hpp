@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <cstdbool>
 #include <cstring>
-
 #include <lgpio.h>
 #include "common_data_RDL.hpp"
 #include "tm163X_font_data_RDL.hpp"
@@ -41,6 +40,23 @@ public:
 		TM_BRIGHT_MASK = 0x07 /**< Brightness mask */
 	};
 
+
+	// Constructor
+	TM1638plus_common(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev);
+
+	void reset(void);
+	rdlib::Return_Codes_e displayBegin(void);
+	void brightness(uint8_t brightness);
+	uint16_t TMCommDelayGet(void);
+	void TMCommDelayset(uint16_t);
+	rdlib::Return_Codes_e displayClose(void);
+
+protected:
+	void sendCommand(uint8_t value);
+	void sendData(uint8_t  data);
+	uint8_t  HighFreqshiftin(void);
+	void HighFreqshiftOut(uint8_t val);
+
 	/*! Tm1638 register commands*/
 	enum TMCommands : uint8_t
 	{
@@ -53,27 +69,11 @@ public:
 		TM_BRIGHT_ADR = 0x88 /**< Brightness address */
 	};
 
-	// Constructor
-	TM1638plus_common(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev);
-
-	void reset(void);
-	rpiDisplay_Return_Codes_e displayBegin(void);
-	void brightness(uint8_t brightness);
-	uint16_t TMCommDelayGet(void);
-	void TMCommDelayset(uint16_t);
-	rpiDisplay_Return_Codes_e displayClose(void);
-
-protected:
-	void sendCommand(uint8_t value);
-	void sendData(uint8_t  data);
-	uint8_t  HighFreqshiftin(void);
-	void HighFreqshiftOut(uint8_t val);
-	
-	uint8_t _STROBE_IO; /**<  GPIO connected to STB on Tm1638  */
-	uint8_t _DATA_IO; /**<  GPIO connected to DIO on Tm1638  */
-	uint8_t _CLOCK_IO; /**<  GPIO connected to CLk on Tm1638  */
+	uint8_t _Display_CS; /**<  GPIO connected to STB on Tm1638  */
+	uint8_t _Display_SDATA; /**<  GPIO connected to DIO on Tm1638  */
+	uint8_t _Display_SCLK; /**<  GPIO connected to CLk on Tm1638  */
 	const uint8_t _TMDisplaySize = 8; /**< size of display in digts */
-	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0; /**< This returns a handle to a gpiochip device. */
 
 private:

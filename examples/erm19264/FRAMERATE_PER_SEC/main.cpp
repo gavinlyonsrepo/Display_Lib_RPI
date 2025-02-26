@@ -16,7 +16,7 @@
 //GPIO
 const uint8_t RST = 25; // GPIO pin number pick any you want
 const uint8_t CD = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 // Screen
 const uint8_t MY_LCD_WIDTH  = 192;
@@ -66,9 +66,9 @@ int main()
 bool setup() {
 	printf("LCD Test Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(100);
-	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myLCD.LCDbegin(RAMaddressCtrl, LCDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		printf("Error 1202: Cannot start spi\n");
 		return false;
@@ -89,7 +89,7 @@ void myTest() {
 
 	// Buffer setup, Define a buffer to cover whole screen
 	uint8_t screenBuffer[MY_SCREEN_SIZE];
-	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success)
+	if (myLCD.LCDSetBufferPtr(MY_LCD_WIDTH, MY_LCD_HEIGHT, screenBuffer) != rdlib::Success)
 	{
 		exit(-1);
 	};
@@ -133,14 +133,14 @@ void displayData(long currentFramerate, int count)
 	myLCD.print(fps);
 	myLCD.print(" fps");
 	myLCD.setCursor(0, 50);
-	myLCD.print(GetRDLibVersionNum());
-	myLCD.drawFastVLine(92, 0, 63, RDL_BLACK);
+	myLCD.print(rdlib::LibraryVersion());
+	myLCD.drawFastVLine(92, 0, 63, myLCD.BLACK);
 	
 
 	myLCD.fillRect(97, 10, 20, 20, colour);
-	myLCD.fillCircle(137, 20, 10, RDL_BLACK);
+	myLCD.fillCircle(137, 20, 10, myLCD.BLACK);
 	myLCD.fillTriangle(157, 30, 167, 10, 177, 30, !colour);
-	myLCD.drawRoundRect(107, 40, 60, 20, 10, RDL_BLACK);
+	myLCD.drawRoundRect(107, 40, 60, 20, 10, myLCD.BLACK);
 	
 	myLCD.LCDupdate();
 }

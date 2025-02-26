@@ -38,7 +38,7 @@ int main()
 {
 
 	if(SetupHWSPI() != 0) return -1; //Hardware SPI
-	myTFT.setRotation(myTFT.TFT_Degrees_90);
+	myTFT.setRotation(myTFT.Degrees_90);
 	drawMandelbrot();
 	EndTests();
 	return 0;
@@ -52,7 +52,7 @@ int main()
 uint8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start Test " << std::endl;
-	std::cout << "ili9341 library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ili9341 library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -64,7 +64,7 @@ uint8_t SetupHWSPI(void)
 // ***********************************
 
 // ** USER OPTION 3 SPI **
-	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -145,7 +145,7 @@ void drawMandelbrot(void)
 
 void EndTests(void)
 {
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.PowerDown(); // Power down device
 	std::cout << "End MandelBrot Test" << std::endl;
 }

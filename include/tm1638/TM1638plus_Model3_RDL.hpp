@@ -29,7 +29,7 @@ public:
 	
 	// These methods over-ride the super class.
 	virtual void setLEDs(uint16_t greenred) override;
-	virtual rpiDisplay_Return_Codes_e setLED(uint8_t position, uint8_t value) override;
+	virtual rdlib::Return_Codes_e setLED(uint8_t position, uint8_t value) override;
 
 };
 

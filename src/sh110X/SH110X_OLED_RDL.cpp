@@ -22,17 +22,15 @@ SH110X_RDL::SH110X_RDL(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(
 /*!
 	@brief  begin Method initialise OLED
 	@param OLEDtype enum type of display sh1106 or sh1107
-	@param I2c_debug default false
 	@param resetPin Used only if reset pin present on device, iF not = set to -1
 	@param gpioDev device num gpiochip 4-RPI5, 0=RPI3 Used only rst pin on device
 	@return
-		-#  rpiDisplay_Success everything worked
-		-#  rpiDisplay_GpioPinClaim Cannot claim the reset pin (if used)
-		-#  rpiDisplay_GpioChipDevice Cannot open the gpio handle for reset pin (if used)
+		-#  rdlib::Success everything worked
+		-#  rdlib::GpioPinClaim Cannot claim the reset pin (if used)
+		-#  rdlib::GpioChipDevice Cannot open the gpio handle for reset pin (if used)
 */
-rpiDisplay_Return_Codes_e SH110X_RDL::OLEDbegin(OLED_IC_type_e OLEDtype, bool I2c_debug, int8_t resetPin, int gpioDev)
+rdlib::Return_Codes_e SH110X_RDL::OLEDbegin(OLED_IC_type_e OLEDtype, int8_t resetPin, int gpioDev)
 {
-	_I2C_DebugFlag = I2c_debug;
 	_OLED_IC_type = OLEDtype;
 	_Display_RST = resetPin;
 	_DeviceNumGpioChip = gpioDev;
@@ -44,54 +42,53 @@ rpiDisplay_Return_Codes_e SH110X_RDL::OLEDbegin(OLED_IC_type_e OLEDtype, bool I2
 		if ( _GpioHandle < 0)	// open error
 		{
 			fprintf(stderr,"Errror : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-			return rpiDisplay_GpioChipDevice;
+			return rdlib::GpioChipDevice;
 		}
 		// Clain GPIO as outputs
 		GpioResetErrorstatus = Display_RST_SetDigitalOutput;
 		if (GpioResetErrorstatus < 0 )
 		{
 			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorstatus));
-			return rpiDisplay_GpioPinClaim;
+			return rdlib::GpioPinClaim;
 		}
 	}
 	OLEDinit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief sets the buffer pointer to the users screen data buffer
 	@param width width of buffer in pixels
 	@param height height of buffer in pixels
-	@param pBuffer the buffer array which decays to pointer
-	@param sizeOfBuffer size of buffer
-	@return Will return rpiDisplay_Return_Codes_e enum
-		-# Success rpiDisplay_Success
-		-# Error 1 rpiDisplay_BufferSize
-		-# Error 2 rpiDisplay_BUfferNullptr
+	@param buffer the buffer span
+	@return Will return rdlib::Return_Codes_e enum
+		-# Success rdlib::Success
+		-# Error 1 rdlib::BufferSize
+		-# Error 2 rdlib::BufferEmpty
 */
-rpiDisplay_Return_Codes_e SH110X_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t height , uint8_t* pBuffer, uint16_t sizeOfBuffer)
+rdlib::Return_Codes_e SH110X_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t height , std::span<uint8_t> buffer)
 {
-	if(sizeOfBuffer !=  width * (height/8))
+	if(buffer.size() != static_cast<size_t>(width * (height / 8)))
 	{
-		printf("OLEDSetBufferPtr Error 1: buffer size does not equal : width * (height/8))\n");
-		return rpiDisplay_BufferSize;
+		fprintf(stderr, "Error 1: OLEDSetBufferPtr: buffer size does not equal : width * (height/8))\n");
+		return rdlib::BufferSize;
 	}
-	OLEDbuffer = pBuffer;
-	if(OLEDbuffer ==  nullptr)
+	if(buffer.empty())
 	{
-		printf("OLEDSetBufferPtr Error 2: Problem assigning buffer pointer, not a valid pointer object\r\n");
-		return rpiDisplay_BufferNullptr;
+		fprintf(stderr, "Error 2: OLEDSetBufferPtr: Problem assigning buffer pointer, empty object\r\n");
+		return rdlib::BufferEmpty;
 	}
-	return rpiDisplay_Success;
+	_OLEDbuffer = buffer;
+	return rdlib::Success;
 }
 
 /*!
 	@brief  Start I2C operations.
 	@return
-		-#  rpiDisplay_Success everything worked
-		-#  rpiDisplay_I2CbeginFail Cannot open I2C device
+		-#  rdlib::Success everything worked
+		-#  rdlib::I2CbeginFail Cannot open I2C device
 */
-rpiDisplay_Return_Codes_e SH110X_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags)
+rdlib::Return_Codes_e SH110X_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr , int I2C_flags)
 {
 	_OLEDI2CDevice = I2C_device;
 	_OLEDI2CAddress = I2C_addr;
@@ -99,16 +96,16 @@ rpiDisplay_Return_Codes_e SH110X_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr ,
 
 	int I2COpenHandle = 0;
 
-	I2COpenHandle = DISPLAY_RDL_I2C_OPEN(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
+	I2COpenHandle = Display_RDL_I2C_OPEN(_OLEDI2CDevice, _OLEDI2CAddress, _OLEDI2CFlags);
 	if (I2COpenHandle < 0 )
 	{
-		printf("Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
-		return rpiDisplay_I2CbeginFail;
+		fprintf(stderr, "Error OLED_I2C_ON :: Can't open I2C %s \n", lguErrorText(I2COpenHandle));
+		return rdlib::I2CbeginFail;
 	}
 	else
 	{
 		_OLEDI2CHandle = I2COpenHandle;
-		return rpiDisplay_Success;
+		return rdlib::Success;
 	}
 }
 
@@ -116,12 +113,12 @@ rpiDisplay_Return_Codes_e SH110X_RDL::OLED_I2C_ON(int I2C_device, int I2C_addr ,
 /*!
 	@brief  End I2C operations. This closes the I2C device.
 	@return in event of any error
-		-#  rpiDisplay_Success everything worked
-		-#  rpiDisplay_GpioPinClaim Cannot free the reset pin (if used)
-		-#  rpiDisplay_GpioChipDevice Cannot close the gpio handle for reset pin (if used)
-		-#  rpiDisplay_I2CcloseFail cannot close I2c bus device
+		-#  rdlib::Success everything worked
+		-#  rdlib::GpioPinClaim Cannot free the reset pin (if used)
+		-#  rdlib::GpioChipDevice Cannot close the gpio handle for reset pin (if used)
+		-#  rdlib::I2CcloseFail cannot close I2c bus device
 */
-rpiDisplay_Return_Codes_e  SH110X_RDL::OLED_I2C_OFF(void)
+rdlib::Return_Codes_e  SH110X_RDL::OLED_I2C_OFF(void)
 {
 	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
 	
@@ -148,23 +145,23 @@ rpiDisplay_Return_Codes_e  SH110X_RDL::OLED_I2C_OFF(void)
 
 	// 3 close I2C device handle
 	int I2COpenHandleStatus = 0;
-	I2COpenHandleStatus = DISPLAY_RDL_I2C_CLOSE (_OLEDI2CHandle);
+	I2COpenHandleStatus = Display_RDL_I2C_CLOSE (_OLEDI2CHandle);
 	if (I2COpenHandleStatus < 0 )
 	{
-		printf("Error: OLED_I2C_OFF : Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
+		fprintf(stderr, "Error: OLED_I2C_OFF : Can't Close I2C %s \n", lguErrorText(I2COpenHandleStatus));
 		ErrorFlag = 4;
 	}
 	
 		// 4 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_GpioChipDevice;break;
-		case 4:return rpiDisplay_I2CcloseFail;break;
-		default:printf("Warning:Unknown error flag value inOLED_I2C_OFFn"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::GpioChipDevice;break;
+		case 4:return rdlib::I2CcloseFail;break;
+		default:fprintf(stderr, "Warning:Unknown error flag value in OLED_I2C_OFFn"); break;
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -190,7 +187,7 @@ void SH110X_RDL::OLEDinit()
 			SH1107_begin();
 		break;
 		default:
-			printf("Warning OLEDinit:: Unknown OLED type, Init Sh1106 by default\n");
+			fprintf(stderr, "Warning: OLEDinit: Unknown OLED type, Init Sh1106 by default\n");
 			SH1106_begin();
 		break;
 	}
@@ -224,42 +221,42 @@ void SH110X_RDL::SH1106_begin(void)
 	}
 	pageStartOffset = 2; // the SH1106 display  requires a small offset 
 
-	SH110X_RDL_command(SH110X_DISPLAYOFF);
-	SH110X_RDL_command(SH110X_SETDISPLAYCLOCKDIV);
-	SH110X_RDL_command(0x80);
+	I2CWriteByte(SH110X_DISPLAYOFF);
+	I2CWriteByte(SH110X_SETDISPLAYCLOCKDIV);
+	I2CWriteByte(0x80);
 
-	SH110X_RDL_command(SH110X_SETMULTIPLEX);
-	SH110X_RDL_command(0x3F);
+	I2CWriteByte(SH110X_SETMULTIPLEX);
+	I2CWriteByte(0x3F);
 
-	SH110X_RDL_command(SH110X_SETDISPLAYOFFSET);
-	SH110X_RDL_command(0x00);
-	SH110X_RDL_command(SH110X_SETSTARTLINE);
+	I2CWriteByte(SH110X_SETDISPLAYOFFSET);
+	I2CWriteByte(0x00);
+	I2CWriteByte(SH110X_SETSTARTLINE);
 
-	SH110X_RDL_command(SH110X_DCDC);
-	SH110X_RDL_command(0x8B);
+	I2CWriteByte(SH110X_DCDC);
+	I2CWriteByte(0x8B);
 
-	SH110X_RDL_command(SH110X_SEGREMAP + 1); // Left rotation +1
-	SH110X_RDL_command(SH110X_COMSCANDEC);
-	SH110X_RDL_command(SH110X_SETCOMPINS);
-	SH110X_RDL_command(0x12);  // Alternative (POR)
+	I2CWriteByte(SH110X_SEGREMAP + 1); // Left rotation +1
+	I2CWriteByte(SH110X_COMSCANDEC);
+	I2CWriteByte(SH110X_SETCOMPINS);
+	I2CWriteByte(0x12);  // Alternative (POR)
 
-	SH110X_RDL_command(SH110X_SETCONTRAST);
-	SH110X_RDL_command(0xFF);
+	I2CWriteByte(SH110X_SETCONTRAST);
+	I2CWriteByte(0xFF);
 
-	SH110X_RDL_command(SH110X_SETPRECHARGE);
-	SH110X_RDL_command(0x1F);
+	I2CWriteByte(SH110X_SETPRECHARGE);
+	I2CWriteByte(0x1F);
 
-	SH110X_RDL_command(SH110X_SETVCOMDETECT);
-	SH110X_RDL_command(0x40);
-	SH110X_RDL_command(0x33);
+	I2CWriteByte(SH110X_SETVCOMDETECT);
+	I2CWriteByte(0x40);
+	I2CWriteByte(0x33);
 
-	SH110X_RDL_command(SH110X_NORMALDISPLAY);
-	SH110X_RDL_command(SH110X_MEMORYMODE);
-	SH110X_RDL_command(0x10);
-	SH110X_RDL_command(SH110X_DISPLAYALLON_RESUME);
+	I2CWriteByte(SH110X_NORMALDISPLAY);
+	I2CWriteByte(SH110X_MEMORYMODE);
+	I2CWriteByte(0x10);
+	I2CWriteByte(SH110X_DISPLAYALLON_RESUME);
 
 	delayMilliSecRDL(_INITDELAY);
-	SH110X_RDL_command(SH110X_DISPLAYON);
+	I2CWriteByte(SH110X_DISPLAYON);
 }
 
 /*!
@@ -274,39 +271,39 @@ void SH110X_RDL::SH1107_begin(void)
 		OLEDReset();
 	}
 
-	SH110X_RDL_command(SH110X_DISPLAYOFF);
-	SH110X_RDL_command(SH110X_SETDISPLAYCLOCKDIV);
-	SH110X_RDL_command(0x51);
-	SH110X_RDL_command(SH110X_MEMORYMODE);
-	SH110X_RDL_command(SH110X_SETCONTRAST);
-	SH110X_RDL_command(0x4F);
-	SH110X_RDL_command(SH110X_DCDC);
-	SH110X_RDL_command(0x8A);
-	SH110X_RDL_command(SH110X_SEGREMAP);
-	SH110X_RDL_command(SH110X_COMSCANINC);
-	SH110X_RDL_command(SH110X_SETDISPSTARTLINE);
-	SH110X_RDL_command(0x0);
-	SH110X_RDL_command(SH110X_SETDISPLAYOFFSET);
-	SH110X_RDL_command(0x60);
-	SH110X_RDL_command(SH110X_SETPRECHARGE);
-	SH110X_RDL_command(0x22);
-	SH110X_RDL_command(SH110X_SETVCOMDETECT);
-	SH110X_RDL_command(0x35);
-	SH110X_RDL_command(SH110X_SETMULTIPLEX);
-	SH110X_RDL_command(0x3F);
-	SH110X_RDL_command(SH110X_DISPLAYALLON_RESUME);
-	SH110X_RDL_command(SH110X_NORMALDISPLAY);
+	I2CWriteByte(SH110X_DISPLAYOFF);
+	I2CWriteByte(SH110X_SETDISPLAYCLOCKDIV);
+	I2CWriteByte(0x51);
+	I2CWriteByte(SH110X_MEMORYMODE);
+	I2CWriteByte(SH110X_SETCONTRAST);
+	I2CWriteByte(0x4F);
+	I2CWriteByte(SH110X_DCDC);
+	I2CWriteByte(0x8A);
+	I2CWriteByte(SH110X_SEGREMAP);
+	I2CWriteByte(SH110X_COMSCANINC);
+	I2CWriteByte(SH110X_SETDISPSTARTLINE);
+	I2CWriteByte(0x0);
+	I2CWriteByte(SH110X_SETDISPLAYOFFSET);
+	I2CWriteByte(0x60);
+	I2CWriteByte(SH110X_SETPRECHARGE);
+	I2CWriteByte(0x22);
+	I2CWriteByte(SH110X_SETVCOMDETECT);
+	I2CWriteByte(0x35);
+	I2CWriteByte(SH110X_SETMULTIPLEX);
+	I2CWriteByte(0x3F);
+	I2CWriteByte(SH110X_DISPLAYALLON_RESUME);
+	I2CWriteByte(SH110X_NORMALDISPLAY);
 
 	if (_width == 128 && _height == 128)
 	{
-		SH110X_RDL_command(SH110X_SETDISPLAYOFFSET);
-		SH110X_RDL_command(0x00);
-		SH110X_RDL_command(SH110X_SETMULTIPLEX);
-		SH110X_RDL_command(0x7F);
+		I2CWriteByte(SH110X_SETDISPLAYOFFSET);
+		I2CWriteByte(0x00);
+		I2CWriteByte(SH110X_SETMULTIPLEX);
+		I2CWriteByte(0x7F);
 	}
 
 	delayMilliSecRDL(_INITDELAY);
-	SH110X_RDL_command(SH110X_DISPLAYON);
+	I2CWriteByte(SH110X_DISPLAYON);
 }
 
 /*!
@@ -316,7 +313,7 @@ void SH110X_RDL::SH1107_begin(void)
 void SH110X_RDL::OLEDEnable(uint8_t bits)
 {
 	
-	bits ? SH110X_RDL_command(SH110X_DISPLAYALLON ) : SH110X_RDL_command(SH110X_DISPLAYOFF);
+	bits ? I2CWriteByte(SH110X_DISPLAYALLON ) : I2CWriteByte(SH110X_DISPLAYOFF);
 }
 
 /*!
@@ -326,8 +323,8 @@ void SH110X_RDL::OLEDEnable(uint8_t bits)
 void SH110X_RDL::OLEDContrast(uint8_t contrast)
 {
 	
-	SH110X_RDL_command(SH110X_SETCONTRAST);
-	SH110X_RDL_command(contrast);
+	I2CWriteByte(SH110X_SETCONTRAST);
+	I2CWriteByte(contrast);
 }
 
 /*!
@@ -337,7 +334,7 @@ void SH110X_RDL::OLEDContrast(uint8_t contrast)
 void SH110X_RDL::OLEDInvert(bool value)
 {
 	
-	value ? SH110X_RDL_command(SH110X_INVERTDISPLAY) : SH110X_RDL_command(SH110X_NORMALDISPLAY);
+	value ? I2CWriteByte(SH110X_INVERTDISPLAY) : I2CWriteByte(SH110X_NORMALDISPLAY);
 }
 
 /*!
@@ -350,12 +347,12 @@ void SH110X_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 	
 	for (uint8_t row = 0; row < _OLED_PAGE_NUM; row++)
 	{
-		SH110X_RDL_command( SH110X_SETPAGEADDR  | row);
-		SH110X_RDL_command(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F));
-		SH110X_RDL_command(SH110X_SETHIGHCOLUMN + (pageStartOffset >> 4 )); // 0x10 | 2 >>4 = 10
+		I2CWriteByte( SH110X_SETPAGEADDR  | row);
+		I2CWriteByte(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F));
+		I2CWriteByte(SH110X_SETHIGHCOLUMN + (pageStartOffset >> 4 )); // 0x10 | 2 >>4 = 10
 		for (uint8_t col = 0; col < _OLED_WIDTH; col++)
 		{
-			SH110X_RDL_data(dataPattern);
+			I2CWriteByte(dataPattern, SH110X_DATA_BYTE);
 			delayMilliSecRDL(delay);
 		}
 	}
@@ -370,13 +367,13 @@ void SH110X_RDL::OLEDFillScreen(uint8_t dataPattern, uint8_t delay)
 void SH110X_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t mydelay)
 {
 	uint8_t Result =SH110X_SETPAGEADDR | page_num;
-	SH110X_RDL_command(Result);
-	SH110X_RDL_command(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F)); // SH110X_SETLOWCOLUMN   = 0x00
-	SH110X_RDL_command(SH110X_SETHIGHCOLUMN + (pageStartOffset >> 4));
+	I2CWriteByte(Result);
+	I2CWriteByte(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F)); // SH110X_SETLOWCOLUMN   = 0x00
+	I2CWriteByte(SH110X_SETHIGHCOLUMN + (pageStartOffset >> 4));
 	uint8_t numofbytes = _OLED_WIDTH;
 	for (uint8_t i = 0; i < numofbytes; i++)
 	{
-		SH110X_RDL_data(dataPattern);
+		I2CWriteByte(dataPattern, SH110X_DATA_BYTE);
 		delayMilliSecRDL(mydelay);
 	}
 }
@@ -385,25 +382,25 @@ void SH110X_RDL::OLEDFillPage(uint8_t page_num, uint8_t dataPattern,uint8_t myde
 	@brief Writes a byte to I2C address,command or data, used internally
 	@param value write the value to be written
 	@param cmd command or data
-	@note if _I2C_DebugFlag == true  ,will output data on I2C failures.
+	@note isDebugEnabled()  ,will output data on I2C failures.
 */
-void SH110X_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
+void SH110X_RDL::I2CWriteByte(uint8_t value, uint8_t cmd)
 {
 	char ByteBuffer[2] = {cmd,value};
 	uint8_t attemptI2Cwrite = _I2C_ErrorRetryNum;
 	int  ReasonCodes = 0;
 	
-	ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); 
+	ReasonCodes =Display_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); 
 	while(ReasonCodes < 0)
 	{//failure to write I2C byte ,Error handling retransmit
 		
-		if (_I2C_DebugFlag == true)
+		if (rdlib_config::isDebugEnabled())
 		{
-			printf("Error 602 I2C Write : %s\n", lguErrorText(ReasonCodes));
-			printf("Attempt Count: %u\n", attemptI2Cwrite);
+			fprintf(stderr, "Error 602 I2C Write : %s\n", lguErrorText(ReasonCodes));
+			fprintf(stderr, "Attempt Count: %u\n", attemptI2Cwrite);
 		}
 		delayMilliSecRDL(_I2C_ErrorDelay); // delay mS
-		ReasonCodes =DISPLAY_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); //retry
+		ReasonCodes =Display_RDL_I2C_WRITE(_OLEDI2CHandle, ByteBuffer, 2); //retry
 		_I2C_ErrorFlag = ReasonCodes; // set reasonCode to flag
 		attemptI2Cwrite--; // Decrement retry attempt
 		if (attemptI2Cwrite == 0) break;
@@ -413,41 +410,61 @@ void SH110X_RDL::I2C_Write_Byte(uint8_t value, uint8_t cmd)
 
 /*!
 	@brief updates the buffer i.e. writes it to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty if buffer is empty object
 */
-void SH110X_RDL::OLEDupdate()
+rdlib::Return_Codes_e SH110X_RDL::OLEDupdate()
 {
-	uint8_t w = this->_OLED_WIDTH; uint8_t h = this->_OLED_HEIGHT;
-	OLEDBufferScreen(w,  h, this->OLEDbuffer);
+	if (_OLEDbuffer.empty())
+	{
+		fprintf(stderr, "Error: OLEDupdate: Buffer is empty, cannot update screen\r\n");
+		return rdlib::BufferEmpty;
+	}
+	uint8_t w = this->_OLED_WIDTH; 
+	uint8_t h = this->_OLED_HEIGHT;
+	OLEDBufferScreen(w,  h, this->_OLEDbuffer);
+	return rdlib::Success;
 }
 
 /*!
 	@brief clears the buffer memory i.e. does NOT write to the screen
+	@return 
+		-# Success 
+		-# BufferEmpty is buffer empty object
 */
-void SH110X_RDL::OLEDclearBuffer()
+rdlib::Return_Codes_e SH110X_RDL::OLEDclearBuffer()
 {
-	memset( this->OLEDbuffer, 0x00, (this->_OLED_WIDTH* (this->_OLED_HEIGHT /8)));
+	if (_OLEDbuffer.empty())
+	{
+		fprintf(stderr, "Error: OLEDclearBuffer: Buffer is empty, cannot clear\r\n");
+		return rdlib::BufferEmpty;
+	}
+
+	std::fill(_OLEDbuffer.begin(), _OLEDbuffer.end(), 0x00);
+	return rdlib::Success;
 }
 
 /*!
 	@brief Draw the buffer to screen directly to the screen
-	@param w width 0-128
-	@param h height 0-64
+	@param w width
+	@param h height
 	@param data the buffer data
 	@note Called by OLEDupdate internally
 */
-void SH110X_RDL::OLEDBufferScreen(uint8_t w, uint8_t h, uint8_t* data)
+void SH110X_RDL::OLEDBufferScreen(uint8_t w, uint8_t h, std::span<uint8_t> data)
 {
 	uint8_t page;
 
 	for (page = 0; page < (h/8); page++) 
 	{
-		SH110X_RDL_command(SH110X_SETPAGEADDR + page);
-		SH110X_RDL_command(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F)); // SH110X_SETLOWCOLUMN   = 0x00
-		SH110X_RDL_command(SH110X_SETHIGHCOLUMN + (pageStartOffset >> 4));
+		I2CWriteByte(SH110X_SETPAGEADDR + page);
+		I2CWriteByte(SH110X_SETLOWCOLUMN + (pageStartOffset & 0x0F)); // SH110X_SETLOWCOLUMN   = 0x00
+		I2CWriteByte(SH110X_SETHIGHCOLUMN + (pageStartOffset >> 4));
 		//write data
 		for(int i = 0; i< w; i++ ) 
 		{
-			SH110X_RDL_data(data[i+page*w]);
+			I2CWriteByte(data[i+page*w], SH110X_DATA_BYTE);
 		}
 	}
 
@@ -486,29 +503,11 @@ void SH110X_RDL::drawPixel(int16_t x, int16_t y, uint8_t color)
 	uint16_t tc = (_OLED_WIDTH * (y /8)) + x;
 	switch (color)
 	{
-		case RDL_WHITE:  this->OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
-		case RDL_BLACK:  this->OLEDbuffer[tc] |= (1 << (y & 7)); break;
-		case RDL_INVERSE: this->OLEDbuffer[tc] ^= (1 << (y & 7)); break;
+		case WHITE:  this->_OLEDbuffer[tc] &= ~(1 << (y & 7)); break;
+		case BLACK:  this->_OLEDbuffer[tc] |= (1 << (y & 7)); break;
+		case INVERSE: this->_OLEDbuffer[tc] ^= (1 << (y & 7)); break;
 	}
 }
-
-
-
-/*!
-	 @brief Turn DEBUG mode on or off setter
-	 @param OnOff passed bool True = debug on , false = debug off
-	 @note prints out statements, if ON and if errors occur
-*/
-void SH110X_RDL::OLEDDebugSet(bool OnOff)
-{
-	 OnOff ? (_I2C_DebugFlag  = true) : (_I2C_DebugFlag = false);
-}
-
-/*!
-	 @brief get DEBUG mode status
-	 @return debug mode status flag
-*/
-bool SH110X_RDL::OLEDDebugGet(void) { return _I2C_DebugFlag;}
 
 
 /*!
@@ -562,10 +561,10 @@ int  SH110X_RDL::OLEDCheckConnection(void)
 	char rxdatabuf[1]; //buffer to hold return byte
 	int I2CReadStatus = 0;
 
-	I2CReadStatus = DISPLAY_RDL_I2C_READ(_OLEDI2CHandle, rxdatabuf, 1);
+	I2CReadStatus = Display_RDL_I2C_READ(_OLEDI2CHandle, rxdatabuf, 1);
 	if (I2CReadStatus < 0 )
 	{
-		printf("Error:OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));
+		fprintf(stderr, "Error:OLED CheckConnection :: Cannot read device %s\n",lguErrorText(I2CReadStatus));
 	}
 
 	_I2C_ErrorFlag = I2CReadStatus;

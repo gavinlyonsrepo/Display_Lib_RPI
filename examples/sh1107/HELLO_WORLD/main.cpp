@@ -19,14 +19,13 @@
 SH110X_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate a OLED object
 
 // I2C 
-bool I2C_debug = false;
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
 
 // Reset only needed if Hardware reset pin is present on device and used
 int OLED_RESET_PIN = -1; // set to -1 if not used
-int GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0, only needed for reset
+int GPIO_CHIP_DEVICE = 0; // only needed for reset
 
 
 // =============== Function prototype ================
@@ -48,11 +47,11 @@ int main(void)
 bool SetupTest()
 {
 	printf("OLED Test Begin\r\n");
-	printf("SH1107 library Version Number :: %u\r\n",GetRDLibVersionNum());
+	printf("SH1107 library Version Number :: %u\r\n",rdlib::LibraryVersion());
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
 
 	// Open  on I2C device
-	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rpiDisplay_Success)
+	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rdlib::Success)
 	{
 		printf("Error 1201:Cannot open I2C device bus\n");
 		return false;
@@ -66,7 +65,7 @@ bool SetupTest()
 
 	delayMilliSecRDL(500);
 	// initialize the OLED
-	myOLED.OLEDbegin(myOLED.SH1107_IC, I2C_debug, OLED_RESET_PIN, GPIO_CHIP_DEVICE);
+	myOLED.OLEDbegin(myOLED.SH1107_IC, OLED_RESET_PIN, GPIO_CHIP_DEVICE);
 	myOLED.OLEDFillScreen(0xF0, 0); // splash screen bars, optional just for effect
 	delayMilliSecRDL(1000);
 	return true;
@@ -84,7 +83,7 @@ void TestLoop()
 
 	// Define a buffer to cover whole screen
 	uint8_t  screenBuffer[FULLSCREEN];
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH , MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH , MY_OLED_HEIGHT, screenBuffer) != rdlib::Success) return;
 	myOLED.OLEDclearBuffer();
 	myOLED.setFont(font_default);
 	myOLED.setCursor(10, 10);

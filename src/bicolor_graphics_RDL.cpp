@@ -30,33 +30,33 @@ bicolor_graphics::bicolor_graphics(int16_t w, int16_t h):
 	@param  y character starting position on x-axis.
 	@param  value Character to be written.
 	@note Horizontal font addressing 
-	@return Will return rpiDisplay_Return_Codes_e enum
-		-# rpiDisplay_Success  success
-		-# rpiDisplay_CharScreenBounds co-ords out of bounds check x and y
-		-# rpiDisplay_CharFontASCIIRange Character out of ASCII Font bounds, check Font range
+	@return Will return rdlib::Return_Codes_e enum
+		-# rdlib::Success  success
+		-# rdlib::CharScreenBounds co-ords out of bounds check x and y
+		-# rdlib::CharFontASCIIRange Character out of ASCII Font bounds, check Font range
  */
-rpiDisplay_Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char value) {
+rdlib::Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char value) {
 
 	// 1. Check for screen out of bounds
 	if ((x >= _width) || // Clip right
 		(y >= _height) || // Clip bottom
 		((x + _Font_X_Size + 1) < 0) || // Clip left
 		((y + _Font_Y_Size) < 0)) { // Clip top
-		printf("writeChar Error 1: Co-ordinates out of bounds \r\n");
-		return rpiDisplay_CharScreenBounds;
+		fprintf(stderr, "Error 1 : writeChar : Co-ordinates out of bounds \r\n");
+		return rdlib::CharScreenBounds;
 	}
 
 	// 2. Check for character out of font range bounds
 	if (value < _FontOffset || value >= (_FontOffset + _FontNumChars + 1)) {
-		printf("writeChar Error 2: Character out of Font bounds  %c : %u<->%u \r\n", value, _FontOffset,(unsigned int)(_FontOffset + _FontNumChars));
-		return rpiDisplay_CharFontASCIIRange;
+		fprintf(stderr, "Error 2 : writeChar : Character out of Font bounds  %c : %u<->%u \r\n", value, _FontOffset,(unsigned int)(_FontOffset + _FontNumChars));
+		return rdlib::CharFontASCIIRange;
 	}
 
 	uint16_t fontIndex = 0;
 	int16_t colByte, cx, cy;
 	int16_t colbit;
 	fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
-	colByte = *(_FontSelect + fontIndex);
+	colByte = _FontSelect[fontIndex];
 	colbit = 7;
 	// Loop through each row (cy) and column (cx) of the character bitmap
 	for (cy = 0; cy < _Font_Y_Size; cy++)
@@ -73,11 +73,11 @@ rpiDisplay_Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char
 			if (colbit < 0) {
 				colbit = 7;
 				fontIndex++;
-				colByte = *(_FontSelect + fontIndex);
+				colByte = _FontSelect[fontIndex];
 			}
 		}
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
@@ -87,20 +87,20 @@ rpiDisplay_Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char
 	@param  y character starting position on y-axis.
 	@param  pText Pointer to the array of the text to be written.
 	@return Will return
-		-# rpiDisplay_Success Success
-		-# rpiDisplay_CharArrayNullptr  String pText Array invalid pointer object
+		-# rdlib::Success Success
+		-# rdlib::CharArrayNullptr  String pText Array invalid pointer object
 		-# 3 Failure in writeChar method upstream
  */
-rpiDisplay_Return_Codes_e  bicolor_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
+rdlib::Return_Codes_e  bicolor_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
 	uint8_t count=0;
 	uint8_t MaxLength=0;
 	// Check for null pointer
 	if(pText == nullptr)
 	{
-		printf("writeCharString Error 1 :String array is not valid pointer\n");
-		return rpiDisplay_CharArrayNullptr;
+		fprintf(stderr, "Error 1 :writeCharString :  String array is not valid pointer\n");
+		return rdlib::CharArrayNullptr;
 	}
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	while(*pText != '\0')
 	{
 		// check if text has reached end of screen
@@ -111,12 +111,12 @@ rpiDisplay_Return_Codes_e  bicolor_graphics::writeCharString(int16_t x, int16_t 
 			count = 0;
 		}
 		DrawCharReturnCode = writeChar(x + (count * (_Font_X_Size)), y, *pText++);
-		if(DrawCharReturnCode  != rpiDisplay_Success) return DrawCharReturnCode;
+		if(DrawCharReturnCode  != rdlib::Success) return DrawCharReturnCode;
 		count++;
 		MaxLength++;
 		if (MaxLength >= 150) break; // 2nd way out of loop, safety check
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -124,11 +124,11 @@ rpiDisplay_Return_Codes_e  bicolor_graphics::writeCharString(int16_t x, int16_t 
 	@param character the character to print
 	@return Will return
 		-# 1. success
-		-# rpiDisplay_Return_Codes_e enum error code An error in the writeChar method.
+		-# rdlib::Return_Codes_e enum error code An error in the writeChar method.
 */
 size_t bicolor_graphics::write(uint8_t character)
 {
-	rpiDisplay_Return_Codes_e DrawCharReturnCode;
+	rdlib::Return_Codes_e DrawCharReturnCode;
 	switch (character)
 	{
 		case '\n':
@@ -138,7 +138,7 @@ size_t bicolor_graphics::write(uint8_t character)
 		case '\r': break;
 		default:
 			DrawCharReturnCode = writeChar(_cursor_x, _cursor_y, character);
-			if (DrawCharReturnCode != rpiDisplay_Success) 
+			if (DrawCharReturnCode != rdlib::Success) 
 			{
 				// Set the write error based on the result of the drawing operation
 				setWriteError(DrawCharReturnCode); // Set error flag to non-zero value}
@@ -295,13 +295,13 @@ void bicolor_graphics::drawLine(int16_t x0, int16_t y0,
 				uint8_t color) {
 	int16_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
-	swapDisplayRPI(x0, y0);
-	swapDisplayRPI(x1, y1);
+	swapint16t(x0, y0);
+	swapint16t(x1, y1);
 	}
 
 	if (x0 > x1) {
-	swapDisplayRPI(x0, x1);
-	swapDisplayRPI(y0, y1);
+	swapint16t(x0, x1);
+	swapint16t(y0, y1);
 	}
 
 	int16_t dx, dy;
@@ -472,13 +472,13 @@ void bicolor_graphics::fillTriangle ( int16_t x0, int16_t y0,
 	int16_t a, b, y, last;
 
 	if (y0 > y1) {
-	swapDisplayRPI(y0, y1); swapDisplayRPI(x0, x1);
+	swapint16t(y0, y1); swapint16t(x0, x1);
 	}
 	if (y1 > y2) {
-	swapDisplayRPI(y2, y1); swapDisplayRPI(x2, x1);
+	swapint16t(y2, y1); swapint16t(x2, x1);
 	}
 	if (y0 > y1) {
-	swapDisplayRPI(y0, y1); swapDisplayRPI(x0, x1);
+	swapint16t(y0, y1); swapint16t(x0, x1);
 	}
 
 	if(y0 == y2) {
@@ -511,7 +511,7 @@ void bicolor_graphics::fillTriangle ( int16_t x0, int16_t y0,
 	sa += dx01;
 	sb += dx02;
 
-	if(a > b) swapDisplayRPI(a,b);
+	if(a > b) swapint16t(a,b);
 	drawFastHLine(a, y, b-a+1, color);
 	}
 
@@ -523,7 +523,7 @@ void bicolor_graphics::fillTriangle ( int16_t x0, int16_t y0,
 	b   = x0 + sb / dy02;
 	sa += dx12;
 	sb += dx02;
-	if(a > b) swapDisplayRPI(a,b);
+	if(a > b) swapint16t(a,b);
 	drawFastHLine(a, y, b-a+1, color);
 	}
 }
@@ -552,26 +552,26 @@ int16_t bicolor_graphics::height(void) const {return _height;}
 
  /*!
 	@brief Gets the _rotation of the display
-	@return _rotation value 0-3
+	@return _rotation value enum
 */
-displayBC_rotate_e  bicolor_graphics::getRotation(void){return _display_rotate;}
+bicolor_graphics::displayBC_rotate_e  bicolor_graphics::getRotation(void){return _display_rotate;}
 
  /*!
 	@brief Sets the _rotation of the display
-	@param CurrentRotation value 0-3
+	@param CurrentRotation value enum
 */
 void bicolor_graphics::setRotation(displayBC_rotate_e  CurrentRotation) {
 
 	_display_rotate = CurrentRotation;
 	switch(CurrentRotation)
 	{
-		case 0:
-		case 2:
+		case BC_Degrees_0:
+		case BC_Degrees_180:
 			_width  = WIDTH;
 			_height = HEIGHT;
 			break;
-		case 1:
-		case 3:
+		case BC_Degrees_90 :
+		case BC_Degrees_270:
 			_width  = HEIGHT;
 			_height = WIDTH;
 			break;
@@ -582,12 +582,11 @@ void bicolor_graphics::setRotation(displayBC_rotate_e  CurrentRotation) {
 	@brief Draw a 1-bit color bitmap
 	@param x x co-ord position
 	@param y y co-ord posiiton a
-	@param bitmap pointer to bitmap data 
+	@param bitmap span to bitmap data 
 	@param w width of the bitmap
 	@param h height of the bitmap
 	@param color foreground colour
 	@param bg background colour.
-	@param sizeOfBitmap size of the bitmap
 	@return Will return true for success, false for failure
 		Failure could be  out of bounds , wrong size , invalid pointer object.
 	@note Variable drawBitmapAddr controls data addressing
@@ -598,36 +597,40 @@ void bicolor_graphics::setRotation(displayBC_rotate_e  CurrentRotation) {
 		-# A horizontal Bitmap's w must be divisible by 8. For a bitmap with w=88 & h=48.
 		-# Bitmap excepted size = (88/8) * 48 = 528 bytes.
 */
-rpiDisplay_Return_Codes_e bicolor_graphics::drawBitmap(int16_t x, int16_t y,
-				const uint8_t *bitmap, int16_t w, int16_t h,
-				uint8_t color, uint8_t bg, uint16_t sizeOfBitmap)
+rdlib::Return_Codes_e bicolor_graphics::drawBitmap(int16_t x, int16_t y,
+				const std::span<const uint8_t> bitmap, int16_t w, int16_t h,
+				uint8_t color, uint8_t bg)
 {
 	// 1. User error check : Completely out of bounds?
 	if (x > _width || y > _height)
 	{
-		printf("Error 1 : drawBitmap : Bitmap co-ord out of bounds, check x and y\n");
-		return rpiDisplay_BitmapScreenBounds ;
+		fprintf(stderr, "Error 1 : drawBitmap : Bitmap co-ord out of bounds, check x and y\n");
+		return rdlib::BitmapScreenBounds ;
 	}
 	// 2. User error check  bitmap weight and height
 	if (w > _width || h > _height)
 	{
-		printf("Error 2 : drawBitmap : Bitmap is larger than screen, check w and h\n");
-		return rpiDisplay_BitmapLargerThanScreen ;
+		fprintf(stderr, "Error 2 : drawBitmap : Bitmap is larger than screen, check w and h\n");
+		return rdlib::BitmapLargerThanScreen ;
 	}
-	// 3. User error check  bitmap is null
-	if(bitmap == nullptr)
+	// 3. User error check  bitmap is empty
+	if(bitmap.empty())
 	{
-		printf("Error 3 : drawBitmap : Bitmap is is not valid pointer\n");
-		return rpiDisplay_BitmapNullptr ;
+		fprintf(stderr, "Error 3 : drawBitmap : Bitmap is not valid object\n");
+		return rdlib::BitmapDataEmpty;
 	}
 
 if (_drawBitmapAddr== true)
 {
-	if((sizeOfBitmap != (w * (h/8))) || (h % 8 != 0) ) 	// 4A.check vertical bitmap size
+	if(h % 8 != 0 )
 	{
-		printf("Error 4A : drawBitmap : vertical Bitmap size is incorrect:   %u  %i  %i \n", sizeOfBitmap , w , h);
-		printf("Check size =  (w*(h/8) or Is bitmap height  divisible evenly by eight or is all bitmap data there or too much \n");
-		return rpiDisplay_BitmapSize;
+		fprintf(stderr, "Error drawBitmap 4A-1: Check is bitmap height divisible evenly by eight\n");
+		return rdlib::BitmapVerticalSize;
+	}
+	if (bitmap.size() != static_cast<size_t>(w * (h / 8))) // 4A-1 check  bitmap size
+	{
+		fprintf(stderr, "Error drawBitmap 4A-2 : Vertical Bitmap size is incorrect: (w * (h / 8)\n");
+		return rdlib::BitmapSize;
 	}
 	// Vertical byte bitmaps mode
 	uint8_t vline;
@@ -654,12 +657,17 @@ if (_drawBitmapAddr== true)
 		}
 	}
 } else if (_drawBitmapAddr == false) {
-	if((sizeOfBitmap != ((w/8) * h)) || (w % 8 != 0)) // 4B.check Horizontal bitmap size
+	if(w % 8 != 0 )
 	{
-		printf("Error 4B: drawBitmap : Horizontal Bitmap size is incorrect:  Check Size =  (w/8 * h): %u  %i  %i \n", sizeOfBitmap , w , h);
-		printf("Check size = (w/8 *h) or Is bitmap width divisible evenly by eight or is all bitmap data there or too much \n");
-		return rpiDisplay_BitmapSize;
+		fprintf(stderr, "Error drawBitmap 4B-1 : Check is bitmap width divisible evenly by eight\n");
+		return rdlib::BitmapHorizontalSize;
 	}
+	if (bitmap.size() != static_cast<size_t>((w / 8) * h))
+	{
+		fprintf(stderr, "Error drawBitmap 4B-2: Horizontal Bitmap size is incorrect:  Check Size =  (w/8 * h)\n");
+		return rdlib::BitmapSize;
+	}
+
 	// Horizontal byte bitmaps mode
 	int16_t byteWidth = (w + 7) / 8;
 	uint8_t byte = 0;
@@ -675,7 +683,7 @@ if (_drawBitmapAddr== true)
 		}
 	}
 } // end of elseif
-return rpiDisplay_Success;
+return rdlib::Success;
 } // end of function
 
 

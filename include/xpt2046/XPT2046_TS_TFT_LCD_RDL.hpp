@@ -15,24 +15,6 @@
 #include <lgpio.h>
 #include "common_data_RDL.hpp"
 
-#define MAXTP 20 /**< Maximum Number of Touch point's to record */
-
-// GPIO LEVELS
-#define _XPT_RST_SetHigh  lgGpioWrite(_GpioHandle, _RESET_PIN , 1)
-#define _XPT_RST_SetLow  lgGpioWrite(_GpioHandle, _RESET_PIN , 0)
-#define _XPT_IRQ_Read lgGpioRead(_GpioHandle, _IRQ_PIN)
-// GPIO Set IO
-#define _XPT_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0,_RESET_PIN,  0);
-#define _XPT_IRQ_SetDigitalInput lgGpioClaimInput(_GpioHandle, 0,_IRQ_PIN);
-// GPIO open and close
-#define _XPT_OPEN_GPIO_CHIP lgGpiochipOpen(_DeviceNumGpioChip)
-#define _XPT_CLOSE_GPIO_HANDLE lgGpiochipClose(_GpioHandle)
-// GPIO free modes
-#define _XPT_GPIO_FREE_IRQ lgGpioFree(_GpioHandle , _IRQ_PIN)
-#define _XPT_GPIO_FREE_RST lgGpioFree(_GpioHandle , _RESET_PIN )
-// SPI 
-#define _XPT_OPEN_SPI lgSpiOpen(_spiDev, _spiChan, _spiBaud, _spiFlags)
-#define _XPT_CLOSE_SPI lgSpiClose(_spiHandle)
 
 /*! 
 	@brief Class to interface hardware of Touch point IC XPT2046 
@@ -46,9 +28,9 @@ public:
 	~XPT_2046_RDL(){};
 	
 	// SPI functions
-	rpiDisplay_Return_Codes_e XPTSPIInit(int device, int channel, int speed, int flags, int gpioDev, uint8_t IRQPin ,int8_t resPin);
+	rdlib::Return_Codes_e XPTSPIInit(int device, int channel, int speed, int flags, int gpioDev, uint8_t IRQPin ,int8_t resPin);
 	bool XPTIRQIsPressed();
-	rpiDisplay_Return_Codes_e XPTSPIend(void);
+	rdlib::Return_Codes_e XPTSPIend(void);
 	
 	// Read functions
 	int XPTReadSensor(int command);
@@ -69,12 +51,24 @@ public:
 		uint32_t id;
 	};
 
+	static constexpr auto MaxTouchPoints = 20; /**< Maximum Number of Touch point's to record */
+	static constexpr uint8_t MAX_LEN_BUFFER = 3; /**< Maximum length of RX and TX buffer */
+	static constexpr uint32_t DTMAX = 800000; /**< Delay 800mS */
+
 private:
+	// Control Register
+	static constexpr uint8_t XPT_START = 0x80; /**< Start bit Control Register */
+	static constexpr uint8_t XPT_XPOS  = 0x50; /**< A2-A0 Channel select bits for XPOS */
+	static constexpr uint8_t XPT_YPOS  = 0x10; /**< A2-A0 Channel select bits for YPOS */
+	static constexpr uint8_t XPT_8BIT  = 0x08; /**< Mode select 8 bit */
+	static constexpr uint8_t XPT_SER   = 0x04; /**< Single-Ended Select bit */
+	static constexpr uint8_t XPT_DEF   = 0x03; /**< Differential Reference Select bit */
+
 	uint16_t tpc;
 	uint16_t tpx;
 	time_t lsec;
 	suseconds_t lusec;
-	TouchPoint tps[MAXTP];
+	TouchPoint tps[MaxTouchPoints];
 	bool _calibration;
 	int16_t _min_xp; /**< Minimum xp calibration */
 	int16_t _min_yp; /**< Minimum yp calibration */
@@ -93,7 +87,7 @@ private:
 	int _spiFlags = 0;     /**<The flags 2 LSB defines SPI mode */
 	int _spiHandle = 0;    /**< Hold a handle for the SPI device on the channel.*/
 	// GPIO
-	int _DeviceNumGpioChip = 0;  /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _DeviceNumGpioChip = 0;  /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0;         /** This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 	uint8_t _RESET_PIN = 0;      /**< Reset pin for SPI */
 	uint8_t _IRQ_PIN = 0;        /**< Interrupt request GPIO pin */

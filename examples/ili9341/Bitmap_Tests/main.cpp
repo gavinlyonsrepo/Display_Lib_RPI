@@ -66,7 +66,7 @@ void Test304B(void); // 16 color bitmap
 std::string UTC_string(void); // for clock demo
 void TestFPS(void); // Frames per second 24 color bitmap test,
 int64_t getTime(); // Utility for FPS test
-std::unique_ptr<uint8_t[]> loadImage(const char* name); // Utility for FPS test
+std::vector<uint8_t> loadImage(const char* name); // Utility for FPS test
 void Test802(void); //error checking
 
 void EndTests(void);
@@ -77,7 +77,7 @@ int main(void)
 {
 
 	if(Setup() != 0)return -1;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	Test300();
 	Test301();
 	Test302();
@@ -98,7 +98,7 @@ int main(void)
 uint8_t Setup(void)
 {
 	std::cout << "TFT Start" << std::endl;
-	std::cout << "ili9341 ibrary version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "ili9341 ibrary version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -110,7 +110,7 @@ uint8_t Setup(void)
 // ***********************************
 
 // ** USER OPTION 3 SPI **
-	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rpiDisplay_Success)
+	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -123,24 +123,24 @@ void Test300(void)
 {
 	std::cout << "Test 300: Sprites demo" << std::endl;
 	// Test 300-A test 16-bit color Sprite 
-	// Draw as sprite, without background , 32 X 32 .background color = RDLC_LBLUE
+	// Draw as sprite, without background , 32 X 32 .background color = myTFT.RDLC_LBLUE
 	// Green background screen
-	myTFT.fillScreen(RDLC_GREEN);
+	myTFT.fillScreen(myTFT.RDLC_GREEN);
 	delayMilliSecRDL(TEST_DELAY1);
-	myTFT.drawSprite(80, 100, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	myTFT.drawSprite(80, 100, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE);
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	// Test 300-B test 16-bit color Sprite 
-	// Draw as sprite, without background , 32 X 32 .background color =RDLC_LBLUE
+	// Draw as sprite, without background , 32 X 32 .background color =myTFT.RDLC_LBLUE
 	// Bitmap background screen
-	if(myTFT.drawBitmap(40, 40, 128 , 128, RDLC_WHITE , RDLC_RED, pBackupMenuBitmap) != rpiDisplay_Success)
+	if(myTFT.drawBitmap(40, 40, 128 , 128, myTFT.RDLC_WHITE , myTFT.RDLC_RED, BackupMenuBitmap) != rdlib::Success)
 		return;
 	delayMilliSecRDL(TEST_DELAY5);
 
-	myTFT.drawSprite(80, 30, pSpriteTest16, 32, 32, RDLC_LBLUE);
-	myTFT.drawSprite(60, 60, pSpriteTest16, 32, 32, RDLC_LBLUE);
+	myTFT.drawSprite(80, 30, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE);
+	myTFT.drawSprite(60, 60, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE);
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
 void Test301(void)
@@ -149,31 +149,31 @@ void Test301(void)
 	uint16_t count=CLOCK_DISPLAY_TIME;
 	if (count > 999) count = 999;
 	char teststr1[] = "G Lyons";
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	
 	// Draw top bar of clock
-	myTFT.drawIcon(15, 20, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon);
-	myTFT.drawIcon(40, 20, 16, RDLC_BLACK, RDLC_WHITE, pMsgIcon);
-	myTFT.drawIcon(60, 20, 8, RDLC_BLACK, RDLC_WHITE, pAlarmIcon);
-	myTFT.drawIcon(210, 20, 16, RDLC_BLACK, RDLC_WHITE, pBatIcon);
+	myTFT.drawIcon(15, 20, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, SignalIconVa);
+	myTFT.drawIcon(40, 20, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, MsgIconVa);
+	myTFT.drawIcon(60, 20, 8, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, AlarmIconVa);
+	myTFT.drawIcon(210, 20, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, BatIconVa);
 
-	myTFT.drawIcon(5, 45, 12, RDLC_GREEN , RDLC_BLACK, pPowerIcon);
-	myTFT.drawIcon(20, 45, 12, RDLC_RED, RDLC_YELLOW, pSpeedIcon);
+	myTFT.drawIcon(5, 45, 12, myTFT.RDLC_GREEN , myTFT.RDLC_BLACK, PowerIcon);
+	myTFT.drawIcon(20, 45, 12, myTFT.RDLC_RED, myTFT.RDLC_YELLOW, SpeedIcon);
 	myTFT.setFont(font_arialBold);
 	myTFT.setCursor(60,45);
-	myTFT.print(GetRDLibVersionNum());
-	if (myTFT.drawBitmap(180, 45, 40 , 16, RDLC_CYAN , RDLC_BLACK, pSunText) != rpiDisplay_Success)
+	myTFT.print(rdlib::LibraryVersion());
+	if (myTFT.drawBitmap(180, 45, 40 , 16, myTFT.RDLC_CYAN , myTFT.RDLC_BLACK, SunText) != rdlib::Success)
 	{
 		std::cout << "Warning an Error occurred in drawBitmap." << std::endl;
 		return ;
 	}
 	// Lines
-	myTFT.drawFastHLine(0,15,240,RDLC_WHITE);
-	myTFT.drawFastHLine(0,40,240,RDLC_WHITE);
-	myTFT.drawFastHLine(0,90,240,RDLC_WHITE);
-	myTFT.drawFastHLine(0,135,240,RDLC_WHITE);
-	myTFT.drawFastHLine(0,180,240,RDLC_WHITE);
-	myTFT.drawFastHLine(0,230,240,RDLC_WHITE);
+	myTFT.drawFastHLine(0,15,240,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,40,240,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,90,240,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,135,240,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,180,240,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,230,240,myTFT.RDLC_WHITE);
 	// draw clock
 	while(count > 99)
 	{
@@ -184,28 +184,28 @@ void Test301(void)
 		
 		myTFT.setFont(font_groTesk);
 		//print time
-		myTFT.setTextColor(RDLC_RED, RDLC_BLACK);
+		myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
 		myTFT.setCursor(20,100);
 		myTFT.print(TimeInfo);
 		myTFT.setFont(font_groTesk);
 		//print date
-		myTFT.setTextColor(RDLC_GREEN, RDLC_BLACK);
+		myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
 		myTFT.setCursor(20,140);
 		myTFT.print(DateInfo);
 		
 		myTFT.setFont(font_retro);
 		// print count
-		myTFT.setTextColor(RDLC_YELLOW, RDLC_BLACK);
+		myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
 		myTFT.setCursor(160,210);
 		myTFT.print(count);
 		count--;
 		//print name
 		myTFT.setCursor(10,210);
-		myTFT.setTextColor(RDLC_CYAN, RDLC_BLACK);
+		myTFT.setTextColor(myTFT.RDLC_CYAN, myTFT.RDLC_BLACK);
 		myTFT.print(teststr1);
 	}
 	delayMilliSecRDL(TEST_DELAY2);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	
 }
 
@@ -213,16 +213,16 @@ void Test301(void)
 void Test302(void)
 {
 	std::cout << "Test 302: Bi-color bitmap 128X128 pixels" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.setFont(font_default);
 	char teststr1[] = "Bitmap bi-color, 128 X 128";
 	myTFT.writeCharString(25, 25, teststr1);
 	delayMilliSecRDL(TEST_DELAY2);
 	
-	if(myTFT.drawBitmap(40, 40, 128 , 128, RDLC_WHITE , RDLC_GREEN, pBackupMenuBitmap) != rpiDisplay_Success)
+	if(myTFT.drawBitmap(40, 40, 128 , 128, myTFT.RDLC_WHITE , myTFT.RDLC_GREEN, BackupMenuBitmap) != rdlib::Success)
 		return;
-	if(myTFT.drawBitmap(40, 180, 128 , 128, RDLC_RED , RDLC_YELLOW, pBackupMenuBitmap) != rpiDisplay_Success)
+	if(myTFT.drawBitmap(40, 180, 128 , 128, myTFT.RDLC_RED , myTFT.RDLC_YELLOW, BackupMenuBitmap) != rdlib::Success)
 		return;
 	delayMilliSecRDL(TEST_DELAY5);
 }
@@ -232,9 +232,9 @@ void Test302(void)
 void Test303A(void)
 {
 	std::cout << "Test 303-A: 24 bit color image bitmaps from the file system" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	char teststr1[] = "Bitmap 24,  220 X 240";
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(10,10, teststr1);
 	delayMilliSecRDL(TEST_DELAY1);
 
@@ -266,7 +266,7 @@ void Test303A(void)
 	fread(bmpBuffer.data(), pixelSize, widthBitmap *heightBitmap, pFile);
 	fclose(pFile);
 
-	if(myTFT.drawBitmap24(10, 20, bmpBuffer.data(),widthBitmap ,heightBitmap) != rpiDisplay_Success)
+	if(myTFT.drawBitmap24(10, 20, bmpBuffer, widthBitmap ,heightBitmap) != rdlib::Success)
 	{// Check for success 0x00
 		std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
 		return;
@@ -280,9 +280,9 @@ void Test303A(void)
 void Test303B(void)
 {
 	std::cout << "Test 303-B: 24 bit color image bitmaps from the file system" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	char teststr1[] = "Bitmap 24, 128 X 128";
-	myTFT.setTextColor(RDLC_WHITE, RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 5, teststr1);
 	delayMilliSecRDL(TEST_DELAY1);
 
@@ -325,7 +325,7 @@ void Test303B(void)
 		fread(bmpBuffer.data(), pixelSize,widthBitmap * heightBitmap, pFile);
 		fclose(pFile);
 
-		if(myTFT.drawBitmap24(20, 29, bmpBuffer.data(),widthBitmap, heightBitmap) != rpiDisplay_Success)
+		if(myTFT.drawBitmap24(20, 29, bmpBuffer,widthBitmap, heightBitmap) != rdlib::Success)
 		{// Check for success 0x00
 			std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
 			return;
@@ -345,7 +345,7 @@ void Test303B(void)
 void Test304A(void)
 {
 	std::cout << "Test 304-A: 16 bit color image bitmaps from the file system" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	char teststr1[] = "Bitmap 16, 128 X 128";
 	myTFT.writeCharString(25, 25, teststr1);
 	delayMilliSecRDL(TEST_DELAY2);
@@ -394,7 +394,7 @@ void Test304A(void)
 		fread(bmpBuffer.data(), pixelSize, bitmapWidth * bitmapHeight, pFile);
 		fclose(pFile);
 
-		if (myTFT.drawBitmap16(40, 40, bmpBuffer.data(), bitmapWidth, bitmapHeight) != rpiDisplay_Success)
+		if (myTFT.drawBitmap16(40, 40, bmpBuffer, bitmapWidth, bitmapHeight) != rdlib::Success)
 		{
 			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
 			return;
@@ -402,7 +402,7 @@ void Test304A(void)
 		delayMilliSecRDL(TEST_DELAY5);
 	} // end of for loop
 
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 } // end of test 
 
 
@@ -412,7 +412,7 @@ void Test304A(void)
 void Test304B(void)
 {
 	std::cout << "Test 304-B: 16 bit color image bitmap from the file system" << std::endl;
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	char teststr1[] = "Bitmap 16, 240 X 320";
 	myTFT.writeCharString(25, 25, teststr1);
 	delayMilliSecRDL(TEST_DELAY2);
@@ -452,7 +452,7 @@ void Test304B(void)
 		fread(bmpBuffer.data(), pixelSize, bitmapWidth * bitmapHeight, pFile);
 		fclose(pFile);
 
-		if (myTFT.drawBitmap16(0, 0, bmpBuffer.data(), bitmapWidth, bitmapHeight) != rpiDisplay_Success)
+		if (myTFT.drawBitmap16(0, 0, bmpBuffer, bitmapWidth, bitmapHeight) != rdlib::Success)
 		{
 			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
 			return;
@@ -461,7 +461,7 @@ void Test304B(void)
 		delayMilliSecRDL(TEST_DELAY5);
 	} // end of for loop
 
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 } // end of test 
 
 //Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
@@ -481,12 +481,12 @@ void Test802(void)
 	// Define the expected return values
 	std::vector<uint8_t> expectedErrors = 
 	{
-		rpiDisplay_Success,
-		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //icon
-		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //sprite
-		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, rpiDisplay_BitmapHorizontalSize, //1-bit bitmap
-		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr, //16-bit bitmap
-		rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapScreenBounds, rpiDisplay_BitmapNullptr  //24-bit bitmap
+		rdlib::Success,
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, //icon
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, //sprite
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, rdlib::BitmapHorizontalSize, //1-bit bitmap
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, //16-bit bitmap
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty  //24-bit bitmap
 	};
 	// Vector to store return values
 	std::vector<uint8_t> returnValues; 
@@ -502,28 +502,28 @@ void Test802(void)
 	myTFT.setFont(font_default);
 	returnValues.push_back(myTFT.writeCharString(5, 55, testString5)); 
 	delayMilliSecRDL(TEST_DELAY1);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	//TFTdrawIcon
-	returnValues.push_back(myTFT.drawIcon(350, 40, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon));
-	returnValues.push_back(myTFT.drawIcon(180, 350, 16, RDLC_BLACK, RDLC_WHITE, pSignalIcon));
-	returnValues.push_back(myTFT.drawIcon(40, 40, 16, RDLC_BLACK, RDLC_WHITE, nullptr));
+	returnValues.push_back(myTFT.drawIcon(350, 40, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, SignalIconVa));
+	returnValues.push_back(myTFT.drawIcon(180, 350, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, SignalIconVa));
+	returnValues.push_back(myTFT.drawIcon(40, 40, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, emptyBitmap));
 	//TFTdrawSprite
-	returnValues.push_back(myTFT.drawSprite(350, 50,pSpriteTest16, 32, 32, RDLC_LBLUE));
-	returnValues.push_back(myTFT.drawSprite(40, 350,pSpriteTest16, 32, 32, RDLC_LBLUE));
-	returnValues.push_back(myTFT.drawSprite(40, 180, nullptr, 32, 32, RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(350, 50,SpriteTest16, 32, 32, myTFT.RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 350,SpriteTest16, 32, 32, myTFT.RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 180, emptyBitmap, 32, 32, myTFT.RDLC_LBLUE));
 	//TFTdrawBitmap
-	returnValues.push_back(myTFT.drawBitmap(350, 65, 128, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
-	returnValues.push_back(myTFT.drawBitmap(50, 350, 128, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
-	returnValues.push_back(myTFT.drawBitmap(50, 65, 128, 128, RDLC_WHITE, RDLC_GREEN, nullptr));
-	returnValues.push_back(myTFT.drawBitmap(20, 20, 70, 128, RDLC_WHITE, RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(350, 65, 128, 128, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(50, 350, 128, 128, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, BackupMenuBitmap));
+	returnValues.push_back(myTFT.drawBitmap(50, 65, 128, 128, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, emptyBitmap));
+	returnValues.push_back(myTFT.drawBitmap(20, 20, 70, 128, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, BackupMenuBitmap));
 	//TFTdrawBitmap16 , We use const cast for testing only
-	returnValues.push_back(myTFT.drawBitmap16(350, 50, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
-	returnValues.push_back(myTFT.drawBitmap16(40, 350, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
-	returnValues.push_back(myTFT.drawBitmap16(40, 180, nullptr, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(350, 50, SpriteTest16, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 350, SpriteTest16, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 180, emptyBitmap, 32, 32));
 	//TFTdrawBitmap24 , We use const cast for testing only
-	returnValues.push_back(myTFT.drawBitmap24(340, 50, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
-	returnValues.push_back(myTFT.drawBitmap24(40, 330, const_cast<uint8_t*>(pSpriteTest16), 32, 32));
-	returnValues.push_back(myTFT.drawBitmap24(40, 180, nullptr, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(340, 50, SpriteTest16, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 330, SpriteTest16, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 180, emptyBitmap, 32, 32));
 	
 	//== SUMMARY SECTION===
 	printf("\nError Checking Summary.\n");
@@ -555,79 +555,75 @@ void Test802(void)
 	printf("\n=== STOP Error checking. ===\r\n");
 }
 
-//  Frames per second test , 24 color bitmap test, 
-void TestFPS(void) {
-
-	myTFT.fillScreen(RDLC_RED);
-	
+void TestFPS(void) 
+{
+	myTFT.fillScreen(myTFT.RDLC_RED);
+	printf("\n FPS TESTING \r\n");
 	// Load images into buffers
-	std::unique_ptr<uint8_t[]> img[5] = {
+	std::vector<uint8_t>  img[5] = {
 		loadImage("bitmap/bitmap24images/24pic1.bmp"),
 		loadImage("bitmap/bitmap24images/24pic2.bmp"),
 		loadImage("bitmap/bitmap24images/24pic3.bmp"),
 		loadImage("bitmap/bitmap24images/24pic4.bmp"),
 		loadImage("bitmap/bitmap24images/24pic5.bmp")
 	};
+
 	// Check if any loadImage call failed
 	for (size_t i = 0; i < 5; ++i) {
-		if (!img[i]) {
+		if (img[i].empty()) 
+		{
 			std::cout << "Error: Image " << i + 1 << " failed to load." << std::endl;
 			return;
 		}
 	}
+
 	int64_t start = getTime(), duration = 0;
 	uint32_t frames = 0;
 	double fps = 0;
 
-	// Run for ~10sec
-	while(duration < 10000000) {
-		myTFT.drawBitmap24(25, 50, img[frames % 5].get(), myBMPWidth, myBMPHeight);
-
+	// Run for ~10 seconds
+	while (duration < 10000000) {
+		myTFT.drawBitmap24(20, 50, img[frames % 5], myBMPWidth, myBMPHeight);
 		duration = getTime() - start;
 
-		if((++frames % 50) == 0) {
+		if ((++frames % 50) == 0) {
 			fps = (double)frames / ((double)duration / 1000000);
 			std::cout << fps << std::endl;
 		}
 	}
 
-	// Get final Stats and print
+	// Get final stats and print
 	duration = getTime() - start;
 	fps = (double)frames / ((double)duration / 1000000);
 	std::cout << frames << " frames, " << duration / 1000000 << " sec, " << fps << " fps" << std::endl;
-
 }
 
 
-// brief used in FPS 24 color bitmap test, 
-std::unique_ptr<uint8_t[]> loadImage(const char* name) 
-{
+
+std::vector<uint8_t> loadImage(const char* name) {
 	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
 
 	FILE *pFile = fopen(name, "r");
-	if (pFile == nullptr) 
-	{
+	if (pFile == nullptr) {
 		std::cout << "Error: File does not exist" << std::endl;
-		return nullptr;
+		return {}; // Return empty vector on failure
 	}
 
-	std::unique_ptr<uint8_t[]> bmpBuffer;
-	try 
-	{
-		bmpBuffer = std::make_unique<uint8_t[]>(myBMPWidth * myBMPHeight * pixelSize);
-	} catch (const std::bad_alloc&) 
-	{
+	std::vector<uint8_t> bmpBuffer;
+	try {
+		bmpBuffer.resize(myBMPWidth * myBMPHeight * pixelSize);
+	} catch (const std::bad_alloc&) {
 		std::cout << "Error: Could not allocate memory" << std::endl;
 		fclose(pFile);
-		return nullptr;
+		return {};
 	}
 
 	fseek(pFile, FileHeaderOffset, SEEK_SET);
-	fread(bmpBuffer.get(), pixelSize, myBMPWidth * myBMPHeight, pFile);
+	fread(bmpBuffer.data(), pixelSize, myBMPWidth *myBMPHeight, pFile);
 	fclose(pFile);
 
-	return bmpBuffer; // Transfer ownership to the caller
+	return bmpBuffer; // Return by value (RVO applies)
 }
 
 
@@ -645,10 +641,10 @@ void EndTests(void)
 {
 	char teststr1[] = "Tests over";
 	myTFT.setFont(font_mega);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.writeCharString(15, 50, teststr1);
 	delayMilliSecRDL(TEST_DELAY5);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.PowerDown(); // Power down device
 	std::cout << "TFT End" << std::endl;
 }

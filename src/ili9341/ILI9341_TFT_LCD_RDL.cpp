@@ -7,72 +7,6 @@
 
 #include "../../include/ili9341/ILI9341_TFT_LCD_RDL.hpp"
 
-#define ILI9341_NOP     0x00 /**< No-op register */
-#define ILI9341_SWRESET 0x01 /**< Software reset register */
-#define ILI9341_RDDID   0x04 /**< Read display identification information */
-#define ILI9341_RDDST   0x09 /**< Read Display Status */
-
-#define ILI9341_SLPIN  0x10 /**< Enter Sleep Mode */
-#define ILI9341_SLPOUT 0x11 /**< Sleep Out */
-#define ILI9341_PTLON  0x12 /**< Partial Mode ON */
-#define ILI9341_NORON  0x13 /**< Normal Display Mode ON */
-
-#define ILI9341_INVOFF    0x20 /**< Display Inversion OFF */
-#define ILI9341_INVON     0x21 /**< Display Inversion ON */
-#define ILI9341_GAMMASET  0x26 /**< Gamma Set */
-#define ILI9341_DISPOFF   0x28 /**< Display OFF */
-#define ILI9341_DISPON    0x29 /**< Display ON */
-
-#define ILI9341_CASET 0x2A /**< Column Address Set */
-#define ILI9341_PASET 0x2B /**< Page Address Set */
-#define ILI9341_RAMWR 0x2C /**< Memory Write */
-#define ILI9341_RAMRD 0x2E /**< Memory Read */
-
-#define ILI9341_PTLAR    0x30  /**< Partial Area */
-#define ILI9341_VSCRDEF  0x33  /**< Vertical Scrolling Definition */
-#define ILI9341_MADCTL   0x36  /**< Memory Access Control */
-#define ILI9341_VSCRSADD 0x37  /**< Vertical Scrolling Start Address */
-#define ILI9341_PIXFMT   0x3A  /**< COLMOD: Pixel Format Set */
-
-#define ILI9341_FRMCTR1 0xB1 /**< Frame Rate Ctrl (Normal Mode/Full Colors)  */
-#define ILI9341_FRMCTR2 0xB2 /**< Frame Rate Ctrl (Idle Mode/8 colors) */
-#define ILI9341_FRMCTR3 0xB3 /**< Frame Rate control (In Partial Mode/Full Colors) */
-#define ILI9341_INVCTR  0xB4 /**< Display Inversion Control */
-#define ILI9341_DFUNCTR 0xB6 /**< Display Function Control */
-
-#define ILI9341_PWCTR1 0xC0 /**< Power Control 1 */
-#define ILI9341_PWCTR2 0xC1 /**< Power Control 2 */
-#define ILI9341_PWCTR3 0xC2 /**< Power Control 3 */
-#define ILI9341_PWCTR4 0xC3 /**< Power Control 4 */
-#define ILI9341_PWCTR5 0xC4 /**< Power Control 5 */
-
-#define ILI9341_VMCTR1 0xC5 /**< VCOM Control 1 */
-#define ILI9341_VMCTR2 0xC7 /**< VCOM Control 2 */
-
-#define ILI9341_RDID1 0xDA /**< Read ID 1 */
-#define ILI9341_RDID2 0xDB /**< Read ID 2 */
-#define ILI9341_RDID3 0xDC /**< Read ID 3 */
-#define ILI9341_RDID4 0xDD /**< Read ID 4 */
-
-#define ILI9341_EN3GAM  0xF2 /**< Enable 3 gamma control*/
-#define ILI9341_GMCTRP1 0xE0 /**< Positive Gamma Correction */
-#define ILI9341_GMCTRN1 0xE1 /**< Negative Gamma Correction */
-
-#define ILI9341_PWONCS  0xED /**< Power on sequence control */
-#define ILI9341_PWCTRA  0xCB /**< Power Control A */
-#define ILI9341_PWCTRB  0xCF /**< Power Control B */
-#define ILI9341_DTMCTRA 0xE8 /**< Driver timing control A*/
-#define ILI9341_DTMCTRC 0xEA /**< Driver timing control C*/
-#define ILI9341_PURTCTR 0xF7 /**< Pump ratio control*/
-
-#define MADCTL_MY  0x80  /**< Bottom to top */
-#define MADCTL_MX  0x40  /**< Right to left */
-#define MADCTL_MV  0x20  /**< Reverse Mode */
-#define MADCTL_ML  0x10  /**< LCD refresh Bottom to top */
-#define MADCTL_RGB 0x00  /**< Red-Green-Blue pixel order */
-#define MADCTL_BGR 0x08  /**< Blue-Green-Red pixel order */
-#define MADCTL_MH  0x04  /**< LCD refresh right to left */
-
 /*! @brief Constructor for class ILI9341_TFT */
 ILI9341_TFT::ILI9341_TFT(){}
 
@@ -147,11 +81,11 @@ void ILI9341_TFT:: InitScreenSize(uint16_t width_TFT, uint16_t height_TFT)
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
 	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
 	@return
-		-# rpiDisplay_Success = success
+		-# rdlib::Success = success
 		-# Upstream error code from ILI9341Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(int device, int channel, int speed, int flags, int gpioDev)
+rdlib::Return_Codes_e ILI9341_TFT::InitSPI(int device, int channel, int speed, int flags, int gpioDev)
 {
 	_DeviceNumGpioChip = gpioDev;
 	_spiDev = device;
@@ -168,7 +102,7 @@ rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(int device, int channel, int spee
 	@return Upstream error code from ILI9341Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(uint16_t CommDelay , int gpioDev)
+rdlib::Return_Codes_e ILI9341_TFT::InitSPI(uint16_t CommDelay , int gpioDev)
 {
 	HighFreqDelaySet(CommDelay);
 	_DeviceNumGpioChip = gpioDev;
@@ -177,40 +111,40 @@ rpiDisplay_Return_Codes_e ILI9341_TFT::InitSPI(uint16_t CommDelay , int gpioDev)
 
 /*!
 	@brief init routine for ILI9341_TFTcontroller
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinClaim
-		-# rpiDisplay_SPIOpenFailure;
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinClaim
+		-# rdlib::SPIOpenFailure;
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT::ILI9341Initialize()
+rdlib::Return_Codes_e ILI9341_TFT::ILI9341Initialize()
 {
 	//  gpio Device open?
 	_GpioHandle = Display_OPEN_GPIO_CHIP; // open /dev/gpiochipX
 	if ( _GpioHandle < 0)	// open error
 	{
 		fprintf(stderr,"Error : Failed to open lgGpioChipOpen : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 	// reset routine GPIO pin
-	if (TFTResetPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	if (TFTResetPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 	// Data or command routine  GPIO pin 
-	if (TFTDataCommandPin() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+	if (TFTDataCommandPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 
 	if (_hardwareSPI == false)
 	{
 		// Setup Software SPI for the 3 other GPIO : SCLK, Data & CS
-		if (TFTClock_Data_ChipSelect_Pins() != rpiDisplay_Success){return rpiDisplay_GpioPinClaim;}
+		if (TFTClock_Data_ChipSelect_Pins() != rdlib::Success){return rdlib::GpioPinClaim;}
 	}else{
 		_spiHandle = Display_OPEN_SPI;
 		if ( _spiHandle  < 0)
 		{
 			fprintf(stderr, "Error : Cannot open SPI :(%s)\n", lguErrorText( _spiHandle ));
-			return rpiDisplay_SPIOpenFailure;
+			return rdlib::SPIOpenFailure;
 		}
 	}
 	cmdInit();
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 // SPI related
@@ -229,14 +163,14 @@ void  ILI9341_TFT::HighFreqDelaySet(uint16_t CommDelay){_HighFreqDelay = CommDel
 
 /*!
 	@brief Call when powering down TFT
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioChipDevice
-		-# rpiDisplay_GpioPinFree
-		-# rpiDisplay_SPIOpenClose
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioChipDevice
+		-# rdlib::GpioPinFree
+		-# rdlib::SPIOpenClose
 	@note Turns off Display Sets GPIO low and turns off SPI
 */
-rpiDisplay_Return_Codes_e  ILI9341_TFT::PowerDown(void)
+rdlib::Return_Codes_e  ILI9341_TFT::PowerDown(void)
 {
 	EnableDisplay(false);
 	uint8_t ErrorFlag = 0; // Becomes >0 in event of error
@@ -291,7 +225,7 @@ rpiDisplay_Return_Codes_e  ILI9341_TFT::PowerDown(void)
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error: Cannot Close SPI device :(%s)\n", lguErrorText(spiErrorStatus));
-			return rpiDisplay_SPICloseFailure;
+			return rdlib::SPICloseFailure;
 		}
 	}
 	// 3 Closes the opened gpiochip device.
@@ -300,20 +234,20 @@ rpiDisplay_Return_Codes_e  ILI9341_TFT::PowerDown(void)
 	if ( GpioCloseStatus < 0)
 	{
 		fprintf(stderr,"Error: Failed to close lgGpioChipclose error : %d (%s)\n", _DeviceNumGpioChip, lguErrorText(_GpioHandle));
-		return rpiDisplay_GpioChipDevice;
+		return rdlib::GpioChipDevice;
 	}
 
 	// 4 Check error flag ( we don't want to return early just for one failure)
 	switch (ErrorFlag)
 	{
-		case 0:return rpiDisplay_Success;break;
-		case 2:return rpiDisplay_GpioPinFree;break;
-		case 3:return rpiDisplay_SPICloseFailure;break;
-		case 4:return rpiDisplay_GpioChipDevice;break;
-		default:printf("Warning:Unknown error flag value in SPI-PowerDown"); break;
+		case 0:return rdlib::Success;break;
+		case 2:return rdlib::GpioPinFree;break;
+		case 3:return rdlib::SPICloseFailure;break;
+		case 4:return rdlib::GpioChipDevice;break;
+		default:fprintf(stderr, "Warning:Unknown error flag value in SPI-PowerDown"); break;
 	}
 
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 
@@ -389,26 +323,26 @@ void ILI9341_TFT::cmdInit(void)
 	@brief   Set origin of (0,0) and orientation of TFT display
 	@param   rotation  The index for rotation, from 0-3 inclusive, enum
 */
-void ILI9341_TFT::setRotation(TFT_rotate_e rotation) {
+void ILI9341_TFT::setRotation(display_rotate_e rotation) {
 	uint8_t madctlData = 0;
 	switch (rotation)
 	{
-	case TFT_Degrees_0 :
+	case Degrees_0 :
 		madctlData = (MADCTL_MX | MADCTL_BGR);
 		_width = _widthStartTFT ;
 		_height = _heightStartTFT ;
 	break;
-	case TFT_Degrees_90:
+	case Degrees_90:
 		madctlData = (MADCTL_MV | MADCTL_BGR);
 		_width = _heightStartTFT ;
 		_height = _widthStartTFT ;
 	break;
-	case TFT_Degrees_180:
+	case Degrees_180:
 		madctlData = (MADCTL_MY | MADCTL_BGR);
 		_width = _widthStartTFT ;
 		_height = _heightStartTFT ;
 	break;
-	case TFT_Degrees_270:
+	case Degrees_270:
 		madctlData = (MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR);
 		_width = _heightStartTFT ;
 		_height = _widthStartTFT ;
@@ -516,11 +450,11 @@ void ILI9341_TFT::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t 
 
 /*!
 	@brief: Method for Hardware Reset pin control
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT ::TFTResetPin() 
+rdlib::Return_Codes_e ILI9341_TFT ::TFTResetPin() 
 {
 	if (_resetPinOn == true)
 	{
@@ -530,7 +464,7 @@ rpiDisplay_Return_Codes_e ILI9341_TFT ::TFTResetPin()
 		if (GpioResetErrorStatus < 0 )
 		{
 			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-			return rpiDisplay_GpioPinClaim;
+			return rdlib::GpioPinClaim;
 		}
 		Display_RST_SetHigh;
 		delayMilliSecRDL(5);
@@ -542,16 +476,16 @@ rpiDisplay_Return_Codes_e ILI9341_TFT ::TFTResetPin()
 		writeCommand(ILI9341_SWRESET); // no hw reset pin, software reset.
 		delayMilliSecRDL(120);
 	}
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief: Method for Data or Command pin setup
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT::TFTDataCommandPin(void) {
+rdlib::Return_Codes_e ILI9341_TFT::TFTDataCommandPin(void) {
 	
 	// Claim GPIO as outputs for DC line
 	int GpioDCErrorStatus = 0;
@@ -559,19 +493,19 @@ rpiDisplay_Return_Codes_e ILI9341_TFT::TFTDataCommandPin(void) {
 	if (GpioDCErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim DC GPIO for output (%s)\n", lguErrorText(GpioDCErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	Display_DC_SetLow;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
 	@brief: Method for Clock, data and chip select  pin setup routine for software SPI.
-	@return a rpiDisplay_Return_Codes_e  code
-		-# rpiDisplay_Success
-		-# rpiDisplay_GpioPinClaim
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
 */
-rpiDisplay_Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
+rdlib::Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
 {
 	// Claim 3 GPIO as outputs
 	int GpioCSErrorStatus = 0;
@@ -584,23 +518,23 @@ rpiDisplay_Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
 	if (GpioCSErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CS GPIO for output (%s)\n", lguErrorText(GpioCSErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioClockErrorStatus < 0 )
 	{
 		fprintf(stderr,"Error : Can't claim CLK GPIO for output (%s)\n", lguErrorText(GpioClockErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	if (GpioSDATAErrorStatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioSDATAErrorStatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 
 	Display_CS_SetHigh;
 	Display_SCLK_SetLow;
 	Display_SDATA_SetLow;
-	return rpiDisplay_Success;
+	return rdlib::Success;
 }
 
 /*!
@@ -610,6 +544,15 @@ rpiDisplay_Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
 */
 void  ILI9341_TFT::PrintDiagnostic(void) 
 {
+	/*! Enum to hold Read diagnostics commands */
+	enum ILI9341_Read_diags_e : uint8_t{
+		ILI9341_RDMODE     = 0x0A, /**< Read the power mode */
+		ILI9341_RDMADCTL   = 0x0B, /**< Read MADCTL */
+		ILI9341_RDPIXFMT   = 0x0C, /**< Read pixel Format */
+		ILI9341_RDIMGFMT   = 0x0D, /**< Read image format */
+		ILI9341_RDSELFDIAG = 0x0F /**< Read self-diagnostic result */
+	};
+
 	if (_hardwareSPI == false)
 	{
 		// Software SPI
@@ -636,7 +579,7 @@ void  ILI9341_TFT::PrintDiagnostic(void)
 			writeCommand(commandByte); // Send the command byte
 			// Read the response
 			Display_DC_SetHigh;    // Set DC to high for reading data
-			SPINumOfBytes = lgSpiRead(_spiHandle, RxBuffer, 1);
+			SPINumOfBytes = Display_SPI_READ(_spiHandle, RxBuffer, 1);
 			// Print the results
 			printf("Command Sent: 0x%X\n", commandByte);
 			printf("SPI Number of bytes received: %d\n", SPINumOfBytes);

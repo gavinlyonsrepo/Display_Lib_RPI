@@ -16,37 +16,6 @@
 #include "font_data_RDL.hpp"
 #include "common_data_RDL.hpp"
 
-// defines
-#define _swap_int16_t_RDL(a, b) { int16_t t; t = a; a = b; b = t;}
-
-/**
- * @brief 16-bit color definitions (RGB565 format).
- */
-#define RDLC_BLACK   0x0000 /**< Black 16-bit color 565 code */
-#define RDLC_BLUE    0x001F /**< Blue 16-bit color 565 code */
-#define RDLC_RED     0xF800 /**< Red 16-bit color 565 code */
-#define RDLC_GREEN   0x07E0 /**< Green 16-bit color 565 code */
-#define RDLC_CYAN    0x07FF /**< Cyan 16-bit color 565 code */
-#define RDLC_MAGENTA 0xF81F /**< Magenta 16-bit color 565 code */
-#define RDLC_YELLOW  0xFFE0 /**< Yellow 16-bit color 565 code */
-#define RDLC_WHITE   0xFFFF /**< White 16-bit color 565 code */
-#define RDLC_TAN     0xED01 /**< Tan 16-bit color 565 code */
-#define RDLC_GREY    0x9CD1 /**< Grey 16-bit color 565 code */
-#define RDLC_BROWN   0x6201 /**< Brown 16-bit color 565 code */
-#define RDLC_DGREEN  0x01C0 /**< Dark Green 16-bit color 565 code */
-#define RDLC_ORANGE  0xFC00 /**< Orange 16-bit color 565 code */
-#define RDLC_NAVY    0x000F /**< Navy 16-bit color 565 code */
-#define RDLC_DCYAN   0x03EF /**< Dark Cyan 16-bit color 565 code */
-#define RDLC_MAROON  0x7800 /**< Maroon 16-bit color 565 code */
-#define RDLC_PURPLE  0x780F /**< Purple 16-bit color 565 code */
-#define RDLC_OLIVE   0x7BE0 /**< Olive 16-bit color 565 code */
-#define RDLC_LGREY   0xC618 /**< Light Grey 16-bit color 565 code */
-#define RDLC_DGREY   0x7BEF /**< Dark Grey 16-bit color 565 code */
-#define RDLC_GYELLOW 0xAFE5 /**< Greenish Yellow 16-bit color 565 code */
-#define RDLC_PINK    0xFC18 /**< Pink 16-bit color 565 code */
-#define RDLC_LBLUE   0x7E5F /**< Light Blue 16-bit color 565 code */
-#define RDLC_BEIGE   0xB5D2 /**< Beige 16-bit color 565 code */
-
 /*!
 	@brief Class to handle fonts and graphics of color 16 bit display
 */
@@ -57,6 +26,46 @@ class color16_graphics:public display_Fonts, public Print  {
 	color16_graphics(); // Constructor
 	~color16_graphics(){};
 
+	/*!
+	 * @brief 16-bit color definitions (RGB565 format).
+	 */
+	enum  pixel_color565_e : uint16_t
+	{
+		RDLC_BLACK   = 0x0000, /**< Black */
+		RDLC_BLUE    = 0x001F, /**< Blue */
+		RDLC_RED     = 0xF800, /**< Red */
+		RDLC_GREEN   = 0x07E0, /**< Green */
+		RDLC_CYAN    = 0x07FF, /**< Cyan */
+		RDLC_MAGENTA = 0xF81F, /**< Magenta */
+		RDLC_YELLOW  = 0xFFE0, /**< Yellow */
+		RDLC_WHITE   = 0xFFFF, /**< White */
+		RDLC_TAN     = 0xED01, /**< Tan */
+		RDLC_GREY    = 0x9CD1, /**< Grey */
+		RDLC_BROWN   = 0x6201, /**< Brown */
+		RDLC_DGREEN  = 0x01C0, /**< Dark Green */
+		RDLC_ORANGE  = 0xFC00, /**< Orange */
+		RDLC_NAVY    = 0x000F, /**< Navy */
+		RDLC_DCYAN   = 0x03EF, /**< Dark Cyan */
+		RDLC_MAROON  = 0x7800, /**< Maroon */
+		RDLC_PURPLE  = 0x780F, /**< Purple */
+		RDLC_OLIVE   = 0x7BE0, /**< Olive */
+		RDLC_LGREY   = 0xC618, /**< Light Grey */
+		RDLC_DGREY   = 0x7BEF, /**< Dark Grey */
+		RDLC_GYELLOW = 0xAFE5, /**< Greenish Yellow */
+		RDLC_PINK    = 0xFC18, /**< Pink */
+		RDLC_LBLUE   = 0x7E5F, /**< Light Blue */
+		RDLC_BEIGE   = 0xB5D2  /**< Beige */
+};
+
+	/*! TFT rotate modes in degrees*/
+	enum  display_rotate_e : uint8_t
+	{
+		Degrees_0 = 0, /**< No rotation 0 degrees*/
+		Degrees_90,    /**< Rotation 90 degrees*/
+		Degrees_180,   /**< Rotation 180 degrees*/
+		Degrees_270    /**< Rotation 270 degrees*/
+	};
+
 	// Screen related
 	// Defined in the display sub class
 	virtual void setAddrWindow(uint16_t, uint16_t, uint16_t, uint16_t) = 0;
@@ -66,11 +75,11 @@ class color16_graphics:public display_Fonts, public Print  {
 	// Shapes and lines
 	void drawPixel(uint16_t, uint16_t, uint16_t);
 	void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
-	rpiDisplay_Return_Codes_e drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color);
-	rpiDisplay_Return_Codes_e drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color);
+	rdlib::Return_Codes_e drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color);
+	rdlib::Return_Codes_e drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color);
 
 	void drawRectWH(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);
-	rpiDisplay_Return_Codes_e fillRectangle(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
+	rdlib::Return_Codes_e fillRectangle(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
 	void fillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);
 
 	void drawRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t color);
@@ -84,18 +93,18 @@ class color16_graphics:public display_Fonts, public Print  {
 
 	// Text related functions
 	virtual size_t write(uint8_t) override;
-	rpiDisplay_Return_Codes_e writeChar( int16_t x, int16_t y, char value );
-	rpiDisplay_Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
+	rdlib::Return_Codes_e writeChar( int16_t x, int16_t y, char value );
+	rdlib::Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
 	void setTextWrap(bool w);
 	void setTextColor(uint16_t c, uint16_t bg);
 	void setTextColor(uint16_t c);
 
 	// Bitmap & Icon
-	rpiDisplay_Return_Codes_e drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t bgcolor, const unsigned char character[]);
-	rpiDisplay_Return_Codes_e drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const uint8_t *pBmp);
-	rpiDisplay_Return_Codes_e drawBitmap24(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h);
-	rpiDisplay_Return_Codes_e drawBitmap16(uint16_t x, uint16_t y, uint8_t *pBmp, uint16_t w, uint16_t h);
-	rpiDisplay_Return_Codes_e drawSprite(uint16_t x, uint16_t y, const uint8_t *pBmp, uint16_t w, uint16_t h, uint16_t backgroundColor);
+	rdlib::Return_Codes_e drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t bgcolor,const std::span<const uint8_t> data);
+	rdlib::Return_Codes_e drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const std::span<const uint8_t> data);
+	rdlib::Return_Codes_e drawBitmap24(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h);
+	rdlib::Return_Codes_e drawBitmap16(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h);
+	rdlib::Return_Codes_e drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h, uint16_t backgroundColor);
 	// RGB to 565
 	int16_t Color565(int16_t ,int16_t , int16_t );
 
@@ -128,13 +137,21 @@ protected:
 	int8_t _Display_SDATA; /**< GPIO for MOSI line,  Software SPI only */
 	int8_t _Display_MISO;  /**< GPIO for  MISO line, Software SPI only*/
 
-	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip 4=rpi5 0=rpi4,3 /dev/gpio */
+	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0;        /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
 	bool _hardwareSPI=true;      /**< True for Hardware SPI on , false fpr Software SPI on*/
 	uint16_t _HighFreqDelay = 0; /**< uS GPIO Communications delay, SW SPI ONLY */
 	int _spiHandle = 0;          /**< Hold a handle for the SPI device on the channel.*/
+
 private:
+
+	inline void swapint16t(int16_t& a, int16_t& b) 
+	{
+		int16_t t = a;
+		a = b;
+		b = t;
+	}
 
 };
 // ********************** EOF *********************

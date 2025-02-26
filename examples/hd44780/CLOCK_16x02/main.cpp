@@ -57,22 +57,20 @@ bool setup(void) {
 	std::cout <<  "Press 'ctrl + c' to quit" << std::endl;
 	// print out library versions ( Note optional)
 	std::cout << "lgpio library Version Number :" << lguVersion() << std::endl;
-	std::cout << "HD44780_LCD_RPI lib Version Num :"  << GetRDLibVersionNum() << std::endl;
+	std::cout << "HD44780_LCD_RPI lib Version Num :"  << rdlib::LibraryVersion() << std::endl;
 
 	delayMilliSecRDL(250);
 
-	if (myLCD.LCD_I2C_ON() != rpiDisplay_Success)
+	if (myLCD.LCD_I2C_ON() != rdlib::Success)
 	{
 		return false;
 	}
 
-	myLCD.LCDDebugSet(true); // Set to true to turn on debug mode
 	myLCD.LCDInit(myLCD.LCDCursorTypeOn);
 	myLCD.LCDClearScreen();
 	myLCD.LCDBackLightSet(true);
 
 	// print out library versions & flag status( Note optional)
-	std::cout << "Debug status is : " << (myLCD.LCDDebugGet() ? "On" : "Off") << std::endl ;
 	std::cout <<  "Backlight status is : " << (myLCD.LCDBackLightGet() ? "On" : "Off")<< std::endl ;
 
 	return true;

@@ -18,6 +18,7 @@ ST7789 240x280 HW SPI text + graphics test
 
 ili9341 240X320 HW SPI mandelbrot set
 		SPI SPEED 24Mhz = Time Taken :: 78 ms
+		SPI SPEED 8Mhz = Time Taken :: 177 ms
 ili9341 240X320 HW SPI Bitmap test (128 x 128 images)
 		* 289 frames, 10 sec, 28.862 fps at 8Mhz SPI Baud rate
 

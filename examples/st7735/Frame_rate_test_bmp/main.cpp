@@ -13,6 +13,7 @@
 #include <lgpio.h>
 #include <ctime> // for test FPS
 #include "ST7735_TFT_LCD_RDL.hpp"
+#include <iostream>
 
 // Section :: Defines   
 //  Test related config
@@ -44,7 +45,7 @@ void TestFPS(void); // Frames per second 24 color bitmap test,
 void EndTests(void);
 
 int64_t getTime(); // Utility for FPS test
-std::unique_ptr<uint8_t[]> loadImage(const char* name); // Utility for FPS test
+std::vector<uint8_t>  loadImage(const char* name); // Utility for FPS test
 
 //  Section ::  MAIN loop
 
@@ -63,7 +64,7 @@ int main(void)
 int8_t Setup(void)
 {
 	std::cout << "TFT Start Test " << std::endl;
-	std::cout << "Display_Lib_RPI library version : " << GetRDLibVersionNum()<< std::endl;
+	std::cout << "Display_Lib_RPI library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 
 // ** USER OPTION 1 GPIO HW SPI **
@@ -76,7 +77,7 @@ int8_t Setup(void)
 
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
 	// pass enum to param1 ,4 choices,see README
-	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rpiDisplay_Success)
+	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
 	}
@@ -88,10 +89,10 @@ int8_t Setup(void)
 
 void TestFPS(void) 
 {
-	myTFT.fillScreen(RDLC_RED);
+	myTFT.fillScreen(myTFT.RDLC_RED);
 
 	// Load images into buffers
-	std::unique_ptr<uint8_t[]> img[5] = {
+	std::vector<uint8_t>  img[5] = {
 		loadImage("bitmap/bitmap24images/24pic1.bmp"),
 		loadImage("bitmap/bitmap24images/24pic2.bmp"),
 		loadImage("bitmap/bitmap24images/24pic3.bmp"),
@@ -101,7 +102,8 @@ void TestFPS(void)
 
 	// Check if any loadImage call failed
 	for (size_t i = 0; i < 5; ++i) {
-		if (!img[i]) {
+		if (img[i].empty()) 
+		{
 			std::cout << "Error: Image " << i + 1 << " failed to load." << std::endl;
 			return;
 		}
@@ -113,9 +115,7 @@ void TestFPS(void)
 
 	// Run for ~10 seconds
 	while (duration < 10000000) {
-		// Use .get() to pass the raw pointer
-		myTFT.drawBitmap24(0, 0, img[frames % 5].get(), MY_TFT_WIDTH, MY_TFT_HEIGHT);
-
+		myTFT.drawBitmap24(0, 0, img[frames % 5], MY_TFT_WIDTH, MY_TFT_HEIGHT);
 		duration = getTime() - start;
 
 		if ((++frames % 50) == 0) {
@@ -135,7 +135,7 @@ void EndTests(void)
 {
 	char teststr1[] = "Tests over";
 	myTFT.setFont(font_retro);
-	myTFT.fillScreen(RDLC_BLACK);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	myTFT.writeCharString(5, 50, teststr1);
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTPowerDown(); // Power down device
@@ -151,30 +151,30 @@ int64_t getTime() {
 	return micros;
 }
 
-std::unique_ptr<uint8_t[]> loadImage(const char* name) {
+std::vector<uint8_t> loadImage(const char* name) {
 	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
 	uint8_t FileHeaderOffset = 54;
 
 	FILE *pFile = fopen(name, "r");
 	if (pFile == nullptr) {
 		std::cout << "Error: File does not exist" << std::endl;
-		return nullptr;
+		return {}; // Return empty vector on failure
 	}
 
-	std::unique_ptr<uint8_t[]> bmpBuffer;
+	std::vector<uint8_t> bmpBuffer;
 	try {
-		bmpBuffer = std::make_unique<uint8_t[]>(MY_TFT_WIDTH *  MY_TFT_HEIGHT * pixelSize);
+		bmpBuffer.resize(MY_TFT_WIDTH * MY_TFT_HEIGHT * pixelSize);
 	} catch (const std::bad_alloc&) {
 		std::cout << "Error: Could not allocate memory" << std::endl;
 		fclose(pFile);
-		return nullptr;
+		return {};
 	}
 
 	fseek(pFile, FileHeaderOffset, SEEK_SET);
-	fread(bmpBuffer.get(), pixelSize, MY_TFT_WIDTH *  MY_TFT_HEIGHT, pFile);
+	fread(bmpBuffer.data(), pixelSize, MY_TFT_WIDTH * MY_TFT_HEIGHT, pFile);
 	fclose(pFile);
 
-	return bmpBuffer; // Transfer ownership to the caller
+	return bmpBuffer; // Return by value (RVO applies)
 }
 
 // *************** EOF ****************

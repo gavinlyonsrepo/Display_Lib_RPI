@@ -12,7 +12,7 @@
 //GPIO
 const uint8_t RES = 25; // GPIO pin number pick any you want
 const uint8_t DC = 24; // GPIO pin number pick any you want
-int  GPIO_CHIP_DEVICE = 4; // RPI 5 = 4 , other RPIs = 0
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 // Screen 
 const uint8_t MY_OLED_WIDTH  = 128;
@@ -57,10 +57,10 @@ bool Setup(void)
 {
 	printf("OLED Begin\r\n");
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
-	printf("Display_LIB_RPI Library version number :: %u\r\n", GetRDLibVersionNum()); 
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	delayMilliSecRDL(50);
 
-	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rpiDisplay_Success) // initialize the OLED
+	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rdlib::Success) // initialize the OLED
 	{
 		printf("Error 1202: Setup : Cannot start spi, \r\n");
 		return false;
@@ -82,7 +82,7 @@ void myTest() {
 
 	// Buffer setup, Define a buffer to cover whole screen
 	uint8_t screenBuffer[FULLSCREEN]; // 1024 bytes = 128 * 64/8
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH,MY_OLED_HEIGHT, screenBuffer, sizeof(screenBuffer)) != rpiDisplay_Success) return;
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH,MY_OLED_HEIGHT, screenBuffer) != rdlib::Success) return;
 
 	myOLED.OLEDclearBuffer(); // Clear buffer
 	printf("FPS HW SPI:: test ends at %u\r\n",countLimit  );
@@ -127,13 +127,13 @@ void display(long currentFramerate, int count)
 	myOLED.print(fps);
 	myOLED.print(" fps");
 	myOLED.setCursor(0, 50);
-	myOLED.print(GetRDLibVersionNum());
+	myOLED.print(rdlib::LibraryVersion());
 
-	myOLED.drawFastVLine(64, 0, 63, RDL_BLACK);
+	myOLED.drawFastVLine(64, 0, 63, myOLED.BLACK);
 	myOLED.fillRect(70, 10, 20, 20, colour);
 	myOLED.fillCircle(110, 20, 10, !colour);
-	myOLED.drawRoundRect(80, 40, 40, 20, 10, RDL_BLACK);
-	myOLED.drawPixel(65, 60, RDL_BLACK);
+	myOLED.drawRoundRect(80, 40, 40, 20, 10, myOLED.BLACK);
+	myOLED.drawPixel(65, 60, myOLED.BLACK);
 
 	myOLED.OLEDupdate();
 }

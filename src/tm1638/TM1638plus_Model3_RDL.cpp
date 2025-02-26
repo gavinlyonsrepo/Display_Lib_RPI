@@ -22,24 +22,24 @@ TM1638plus_Model3::TM1638plus_Model3(uint8_t strobe, uint8_t clock, uint8_t data
 	@param position  0-7  == L1-L8 on PCB
 	@param  value see enum TMLEDColors red = 0x02, green = 0x01, 0 is off
 	@return 
-		-# rpiDisplay_GpioPinClaim
-		-# rpiDisplay_Success
+		-# rdlib::GpioPinClaim
+		-# rdlib::Success
 */
-rpiDisplay_Return_Codes_e  TM1638plus_Model3::setLED(uint8_t position, uint8_t value)
+rdlib::Return_Codes_e  TM1638plus_Model3::setLED(uint8_t position, uint8_t value)
 {
 	int GpioDataErrorstatus = 0;
-	GpioDataErrorstatus = TM163X_SET_OUTPUT_DATA;
+	GpioDataErrorstatus = Display_SDATA_SetDigitalOutput;
 	if (GpioDataErrorstatus < 0 )
 	{
 		fprintf(stderr, "Error : Can't claim DATA GPIO for output (%s)\n", lguErrorText(GpioDataErrorstatus));
-		return rpiDisplay_GpioPinClaim;
+		return rdlib::GpioPinClaim;
 	}
 	sendCommand(TM_WRITE_LOC);
-	TM163X_STROBE_SetLow;
+	Display_CS_SetLow;
 	sendData(TM_LEDS_ADR + (position << 1));
 	sendData(value);
-	TM163X_STROBE_SetHigh;
-	return rpiDisplay_Success;
+	Display_CS_SetHigh;
+	return rdlib::Success;
 }
 
 /*!
