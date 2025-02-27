@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include <filesystem>
 
-
+/*! @brief Name space for config file related utilities*/
 namespace rdlib_config 
 {
 	extern bool LOGGING_ENABLED;
@@ -36,6 +36,7 @@ namespace rdlib_config
 	std::string getErrorLogPath();
 }
 
+/*! @brief Name space for log file related utilities*/
 namespace rdlib_log 
 {
 

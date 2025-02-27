@@ -14,6 +14,7 @@
 #include <lgpio.h>
 #include "utility_data_RDL.hpp"
 
+/*! @brief Name space for common utilities */
 namespace rdlib {
 
 /*! Enum to define a standard return code for most functions that return failures*/
