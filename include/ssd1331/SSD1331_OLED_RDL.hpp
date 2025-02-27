@@ -118,7 +118,7 @@ private:
 	uint16_t _heightStartOLED = 64; /**< never change after first init */
 	color_order_e _colorOrder = COLORORDER_RGB; /**< Enum to hold color order */
 	display_rotate_e _displayRotate = Degrees_0; /**< Enum to hold rotation */
-	Constrast_values_t ContrastValues  = { 0x7D, 0x7D, 0x7D }; ; /**< struct to hold normal mode contrast colors ABC */
+	Constrast_values_t ContrastValues  = { 0x7D, 0x7D, 0x7D }; /**< struct to hold normal mode contrast colors ABC */
 	Dim_Constrast_values_t DimContrastValues{ 0x1E, 0x1E, 0x1E }; /**< struct to hold dim mode contrast colors ABC */
 
 	// SPI related

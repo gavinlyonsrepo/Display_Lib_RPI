@@ -34,9 +34,18 @@ bool LOGGING_ENABLED = false; /**< is logging enabled ? */
 bool  DEBUG_ENABLED = false; /**< is global debug enabled ? */
 std::string ERROR_LOG_PATH = "/tmp/error.log"; /**< path to the log file */
 
-
+/*!
+ * @brief This function loads the config file into program
+ * @details if config file does not exist it creates it 
+ * at ($HOME)/.config/rdlib_config/config.cfg.
+ * if ($HOME) not set uses pwd. Defaults debug and logging
+ * settings to false. config file sets 3 settings 
+ * -# LOGGING_ENABLED=false
+ * -# DEBUG_ENABLED=false
+ * -# ERROR_LOG_PATH="/tmp/error.log"
+ */
 void loadConfig() {
-	// Get the home directory path, defaulting to "." if HOME is not set
+	
 	std::string homeDir = std::getenv("HOME") ? std::getenv("HOME") : ".";
 	// Define the configuration directory and file path
 	std::string configDir = homeDir + "/.config/rdlib_config/";
@@ -77,15 +86,21 @@ void loadConfig() {
 	}
 }
 
-
+/*!
+ * @brief retrieve the logging enabled setting , true for logging on
+ */
  bool isLoggingEnabled() {
 		return rdlib_config::LOGGING_ENABLED;
 }
-
+/*!
+ * @brief retrieve the debug enabled setting , true for debug on
+ */
  bool isDebugEnabled() {
 		return rdlib_config::DEBUG_ENABLED;
 }
-
+/*!
+ * @brief retrieve the log file path setting
+ */
 std::string getErrorLogPath() {
 		return rdlib_config::ERROR_LOG_PATH;
 	}
