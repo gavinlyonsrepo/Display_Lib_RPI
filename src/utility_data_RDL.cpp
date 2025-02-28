@@ -88,14 +88,14 @@ void loadConfig() {
 
 /*!
  * @brief retrieve the logging enabled setting , true for logging on
- */
- bool isLoggingEnabled() {
+*/
+bool isLoggingEnabled() {
 		return rdlib_config::LOGGING_ENABLED;
 }
 /*!
  * @brief retrieve the debug enabled setting , true for debug on
- */
- bool isDebugEnabled() {
+*/
+bool isDebugEnabled() {
 		return rdlib_config::DEBUG_ENABLED;
 }
 /*!

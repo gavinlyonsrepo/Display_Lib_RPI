@@ -5,5 +5,6 @@ examples/Bin
 examples/Build
 display.cppcheck
 geany_test_project
+display_RPI_geany.geany
 run.sh
 

@@ -35,12 +35,18 @@ Font size in bytes = ((X * (Y/8)) * numberOfCharacters) + (ControlBytes)
 
 ## Adding or removing a font
 
-1. Add/remove the Font data in font_data_RDL.cpp file
-2. Add/remove the pointer to font at bottom of font_data_RDL.cpp file
-3. Add/remove the associated extern pointer declaration in the font_data_RDL.hpp file
-4. Add/remove the font from the enum 'display_Font_name_e' in the font_data_RDL.hpp
-5. Add/remove the font enum name from the switch case in function 'setFont' in font_data_RDL.cpp
-6. re-compile and re-install library. 
+font_data_RDL.cpp file :
+
+ * Add/remove the Font data array.
+ * Add/remove the span to font data at the bottom of file.
+ * Add/remove the font enum name from the switch case in function 'setFont'.
+
+font_data_RDL.hpp file
+
+ * Add/remove the associated extern span declaration for font.
+ * Add/remove the font name from the enum 'display_Font_name_e'.
+
+ * Re-compile and re-install library. 
 
 A new ASCII font must have following font structure.
 First 4 bytes are control bytes followed by **horizontally** addressed font data.
@@ -50,7 +56,7 @@ First 4 bytes are control bytes followed by **horizontally** addressed font data
 // An 8 by 8 character size font starting at 
 // ASCII offset 0x30 in ASCII table with 0x02 characters in font. 
 // 0 and 1 , size 20 bytes, 4 Control bytes at start.
-static const uint8_t FontBinaryExample[] =
+static const std::array<uint8_t, 20> FontBinaryExample =
 {
 0x08, 0x08, 0x30, 0x01,   // x-size, y-size, offset, (last character-offset : 0x31-0x30)
 0x7C,0xC6,0xCE,0xD6,0xE6,0xC6,0x7C,0x00, // ASCII font data '0' : 0x30
