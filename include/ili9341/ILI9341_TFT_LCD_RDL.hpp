@@ -33,7 +33,6 @@ public:
 	uint16_t HighFreqDelayGet(void);
 	void HighFreqDelaySet(uint16_t);
 	rdlib::Return_Codes_e PowerDown(void);
-	void ResetPIN(void);
 	void EnableDisplay(bool enableDisplay);
 
 	// screen related

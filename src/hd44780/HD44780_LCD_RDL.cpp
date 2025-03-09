@@ -1,7 +1,7 @@
 /*!
 	@file     HD44780_LCD_RDL.cpp
 	@author   Gavin Lyons
-	@brief    HD44780-based character LCD I2C(PCF8574) source header file for RPI
+	@brief    HD44780-based character LCD I2C(PCF8574) source header file
 */
 
 // Section : Includes
@@ -140,6 +140,10 @@ void HD44780PCF8574LCD::LCDClearLine(LCDLineNumber_e lineNo) {
 /*!
 	@brief  Clear screen by writing spaces to every position
 	@note : See also LCDClearScreenCmd for software command clear alternative.
+	@return 
+		-#  Success
+		-#  GenericError of number of rows invalid 
+
 */
  rdlib::Return_Codes_e HD44780PCF8574LCD::LCDClearScreen(void) {
 	if (_NumRowsLCD < 1 || _NumRowsLCD >4)
@@ -211,9 +215,28 @@ void HD44780PCF8574LCD::LCDInit(LCDCursorType_e CursorType) {
 /*!
 	@brief  Send a string to LCD
 	@param str  Pointer to the char array
+	@return codes
+		-# Success
+		-# CharArrayNullptr
+		-# CustomCharLen
 */
-void HD44780PCF8574LCD::LCDSendString(char *str) {
+rdlib::Return_Codes_e HD44780PCF8574LCD::LCDSendString(char *str) 
+{
+	// Check for null pointer
+	if (str == nullptr) 
+	{
+		fprintf(stderr ,"Error: LCDSendString 1: String is a null pointer.\n");
+		return rdlib::CharArrayNullptr;
+	}
+	// Check for correct length for screen size.
+	size_t maxLength = static_cast<size_t>(_NumColsLCD * _NumRowsLCD + 1);
+	if (strlen(str) > maxLength)
+	{
+		fprintf(stderr, "Error: LCDSendString 2: String length is larger than screen.\n");
+		return rdlib::CustomCharLen;
+	}
 	while (*str) LCDSendData(*str++);
+	return rdlib::Success;
 }
 
 
@@ -307,17 +330,28 @@ void HD44780PCF8574LCD::LCDGOTO(LCDLineNumber_e line, uint8_t col) {
 	@brief  Saves a custom character to a location in character generator RAM 64 bytes.
 	@param location CG_RAM location 0-7, we only have 8 locations 64 bytes
 	@param charmap An array of 8 bytes representing a custom character data
+	@return codes
+		-# Success
+		-# CharArrayNullptr
+		-# InvalidRAMLocation
 */
-void HD44780PCF8574LCD::LCDCreateCustomChar(uint8_t location, uint8_t * charmap)
+rdlib::Return_Codes_e  HD44780PCF8574LCD::LCDCreateCustomChar(uint8_t location, uint8_t * charmap)
 {
-
+	if (charmap == nullptr) 
+	{
+		fprintf(stderr ,"Error:LCDCreateCustomChar 1: character map is a null pointer.\n");
+		return rdlib::CharArrayNullptr;
+	}
+	if (location >= 8) {
+		fprintf(stderr ,"Error:LCDCreateCustomChar 2: CG_RAM location invalid  must be 0-7 \n");
+		return rdlib::InvalidRAMLocation;
+	}
 	const uint8_t LCD_CG_RAM = 0x40;  //  character-generator RAM (CG RAM address)
-	 if (location >= 8) {return;}
-
 	LCDSendCmd(LCD_CG_RAM | (location<<3));
 	for (uint8_t i=0; i<8; i++) {
 		LCDSendData(charmap[i]);
 	}
+	return rdlib::Success;
 }
 
 /*!
@@ -402,6 +436,7 @@ void HD44780PCF8574LCD::LCDPrintCustomChar(uint8_t location)
 	@brief  Called by print class, used to print out numerical data types etc
 	@param character write a character
 	@note used internally. Called by the print method using virtual
+	@return returns 1 to the print class
 */
 size_t HD44780PCF8574LCD::write(uint8_t character)
 {

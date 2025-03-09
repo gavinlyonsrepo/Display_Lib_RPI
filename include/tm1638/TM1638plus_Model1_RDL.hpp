@@ -19,7 +19,7 @@ public:
 	
 	uint8_t readButtons(void);
 	
-	void displayText(const char *text);
+	rdlib::Return_Codes_e displayText(const char *text);
 	void displayASCII(uint8_t position, uint8_t ascii);
 	void displayASCIIwDot(uint8_t position, uint8_t ascii) ;
 	void displayHex(uint8_t position, uint8_t hex);

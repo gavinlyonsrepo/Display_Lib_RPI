@@ -60,7 +60,7 @@ ERM19264_UC1609 :: ERM19264_UC1609(int16_t lcdwidth, int16_t lcdheight , int8_t 
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::WrongModeChosen
@@ -127,7 +127,7 @@ rdlib::Return_Codes_e ERM19264_UC1609::LCDbegin(uint8_t AddressSet ,uint8_t Vbia
 	@brief begin Method initialise LCD for software SPI
 	@param AddressSet AC [2:0] registers for RAM addr ctrl. default=2 range 0-7
 	@param VbiasPOT contrast default = 0x49 , range 0x00 to 0xFE
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::WrongModeChosen
@@ -401,9 +401,12 @@ void ERM19264_UC1609::LCDscroll (uint8_t bits)
 
 /*!
 	@brief Rotates the display by sending commands to display
+	@param rotatevalue 4 possible values 000 010 100 110 (defined)
 	@details Set LC[2:1] for COM (row) mirror (MY), SEG (column) mirror (MX).
-		Param1: 4 possible values 000 010 100 110 (defined)
 	@note If Mx is changed the buffer must BE updated see examples.
+	@return 
+		-# Success
+		-# GenericError if value not found in enum
 */
 rdlib::Return_Codes_e ERM19264_UC1609::LCDrotate(LCD_rotate_command_e rotatevalue)
 {

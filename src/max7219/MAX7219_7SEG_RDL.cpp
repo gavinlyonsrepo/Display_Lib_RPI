@@ -13,7 +13,7 @@
 	@param clock CLk pin
 	@param chipSelect CS pin
 	@param data DIO pin
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3@
+	@param gpioDev The device number of a gpiochip.  @
 	@note overloaded this one is for Software SPI
 */
 MAX7219_SS_RPI::MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect , uint8_t data, int gpioDev)

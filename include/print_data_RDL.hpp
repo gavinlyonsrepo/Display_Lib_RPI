@@ -28,9 +28,9 @@
 class Print
 {
 public:
-	Print() : write_error(0) {}
-	
-	/*! Base number type */
+	Print() : _ErrorFlag(0) {}
+
+	/*! Base number type enum*/
 	enum BaseNum : uint8_t{
 		RDL_DEC = 10, /**< Format the passed integer in Decimal format */
 		RDL_HEX = 16, /**< Format the passed integer in Hexadecimal format  */
@@ -38,31 +38,16 @@ public:
 		RDL_BIN = 2   /**< Format the passed integer in Binary format  */
 	};
 
-	/*! @brief  gets the error flag status, zero no error */
-	int getWriteError() { return write_error; }
-	/*! @brief clears the errof flag by setting it to zero */
-	void clearWriteError() { setWriteError(0); }
-	/*! @brief writes a character to display , defined in the sub class */
+	int getWriteError();
+	void clearWriteError();
+	/*! @brief define in the sub class */
 	virtual size_t write(uint8_t) = 0;
-	
-	size_t write(const char *str) 
-	{
-		if (str == nullptr) 
-		{
-			setWriteError(5); //rdlib::CharArrayNullptr
-			return 0;
-		}
-		return write(reinterpret_cast<const uint8_t *>(str), strlen(str));
-	}
+	/*! @brief define in the sub class */
 	virtual size_t write(const uint8_t *buffer, size_t size);
-	size_t write(const char *buffer, size_t size) 
-	{
-		return write(reinterpret_cast<const uint8_t *>(buffer), size);
-	}
-
-	// default to zero, meaning "a single write may block"
-	// should be overriden by subclasses with buffering
-	virtual int availableForWrite() { return 255; }
+	size_t write(const char *str);
+	size_t write(const char *buffer, size_t size);
+	/*! @brief define in the sub class */
+	virtual int availableForWrite();
 
 	size_t print(const char[]);
 	size_t print(char);
@@ -96,7 +81,6 @@ public:
 	size_t print(const std::vector<T> &v,  int format = defaultFormat<T>()) {
 		size_t totalWritten = 0;
 		for (const auto &element : v) {
-			clearWriteError(); // Reset error flag
 			std::string elementStr = formatElement(element, format);
 			totalWritten += write(elementStr.c_str(), elementStr.length());
 
@@ -160,11 +144,11 @@ public:
 
 	protected:
 
-	void setWriteError(int err = 0) { write_error = err; }
+	void setWriteError(int err = 0);
 
 private:
 
-	int write_error; /**< class Error flag */
+	int _ErrorFlag; /**< class Error flag , zero no error*/
 	size_t printNumber(unsigned long, uint8_t);
 	size_t printFloat(double, uint8_t);
 

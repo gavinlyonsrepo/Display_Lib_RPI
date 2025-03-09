@@ -27,107 +27,110 @@
 # 2. Comment out the others.
 
 # ================= MAX7219_7SEG ================
-#SRC=max7219/TESTS_HWSPI
-#SRC=max7219/TESTS_SWSPI
-#SRC=max7219/BCDMODE
-#SRC=max7219/CLOCK_DEMO
-#SRC=max7219/CASCADE_DEMO
+#SRC=max7219/tests_hwspi
+#SRC=max7219/tests_swspi
+#SRC=max7219/bcdmode
+#SRC=max7219/clock_demo
+#SRC=max7219/cascade_demo
 #================================================
 
 # ================= TM1638 ======================
-#SRC=tm1638/TEST_Model_1_3
-#SRC=tm1638/TEST_Model2
+#SRC=tm1638/test_model_1_3
+#SRC=tm1638/test_model2
 # ================================================
 
 # ================= TM1637 ======================
-#SRC=tm1637/TEST_Model4
+#SRC=tm1637/test_model4
 # ================================================
 
 # ================= HD44780 LCD I2C ==============
-#SRC=hd44780/TEST_16x02
-#SRC=hd44780/TEST_20x04
-#SRC=hd44780/CLOCK_16x02
-#SRC=hd44780/TEST_I2C_16x02
+#SRC=hd44780/test_16x02
+#SRC=hd44780/test_20x04
 #=================================================
 
 # ================= SSD1306 OLED I2C =============
-#SRC=ssd1306/HELLO_WORLD
-#SRC=ssd1306/TEXT_GRAPHICS_FUNCTIONS
-#SRC=ssd1306/SPEED_TEST
-#SRC=ssd1306/BITMAP
-#SRC=ssd1306/CLOCK_DEMO
-#SRC=ssd1306/UTILS_TEST
+#SRC=ssd1306/hello_world
+#SRC=ssd1306/text_graphics_functions
+#SRC=ssd1306/framerate_test
+#SRC=ssd1306/bitmap
+#SRC=ssd1306/clock_demo
 #=================================================
 
 # ========== ERM19264_UC1609 LCD SPI==============
-#SRC=erm19264/HELLO_WORLD
-#SRC=erm19264/TEXT_GRAPHICS_FUNCTIONS
-#SRC=erm19264/FRAMERATE_PER_SEC
-#SRC=erm19264/BITMAP
-#SRC=erm19264/SOFTWARE_SPI
+#SRC=erm19264/hello_world
+#SRC=erm19264/text_graphics_functions
+#SRC=erm19264/framerate_per_sec
+#SRC=erm19264/bitmap
+#SRC=erm19264/software_spi
 #=================================================
 
 # ================ NOKIA5110 LCD SPI=============
-#SRC=nokia5110/HELLOWORLD
-#SRC=nokia5110/TEXT_GRAPHICS_FUNCTIONS
-#SRC=nokia5110/SPEEDTEST
-#SRC=nokia5110/SPEEDTEST_SWSPI
-#SRC=nokia5110/BITMAP
+#SRC=nokia5110/helloworld
+#SRC=nokia5110/text_graphics_functions
+#SRC=nokia5110/framerate_test
+#SRC=nokia5110/framerate_test_swspi
+#SRC=nokia5110/bitmap
 #=================================================
 
-# ============= CH1115 OLED SPI =================
-#SRC=ch1115/HELLO_WORLD
-#SRC=ch1115/TEXT_GRAPHICS_FUNCTIONS
-#SRC=ch1115/FPS_TEST
-#SRC=ch1115/FPS_TEST_SW_SPI
-#SRC=ch1115/BITMAP
+# ============= CH1115 OLED SPI ==================
+#SRC=ch1115/hello_world
+#SRC=ch1115/text_graphics_functions
+#SRC=ch1115/framerate_test
+#SRC=ch1115/framerate_test_swspi
+#SRC=ch1115/bitmap
 #================================================
 
 # =========== SH1106 or SH1107 OLED I2C ==========
-#SRC=sh1106/HELLO_WORLD
-#SRC=sh1107/HELLO_WORLD
+#SRC=sh1106/hello_world
+#SRC=sh1107/hello_world
 #=================================================
 
 # =============== ST7735 TFT LCD SPI =============
-#SRC=st7735/Hello_world
-#SRC=st7735/Hello_world_SWSPI
-#SRC=st7735/Text_Graphics_Functions
-#SRC=st7735/Bitmap_Tests
-#SRC=st7735/Frame_rate_test_bmp
-#SRC=st7735/Frame_rate_test_two
-#SRC=st7735/Multiple_displays
+#SRC=st7735/hello_world
+#SRC=st7735/hello_world_swspi
+#SRC=st7735/text_graphics_functions
+#RC=st7735/bitmap_tests
+#SRC=st7735/framerate_test
+#SRC=st7735/demos
 #=================================================
 
 # =============== ST7789 TFT LCD SPI =============
-#SRC=st7789/Hello_world
-#SRC=st7789/Hello_world_SWSPI
-#SRC=st7789/Bitmap_Tests
-#SRC=st7789/Text_Graphics_Functions
-#SRC=st7789/Frame_rate_test_bmp
-#SRC=st7789/Frame_rate_test_two
+#SRC=st7789/hello_world
+#SRC=st7789/hello_world_swspi
+#SRC=st7789/bitmap_tests
+#SRC=st7789/text_graphics_functions
+#SRC=st7789/framerate_test
+#SRC=st7789/demos
 #=================================================
 
 # =============== ILI9341 TFT LCD SPI ============
-#SRC=ili9341/Hello_world
-#SRC=ili9341/Hello_world_SWSPI
-#SRC=ili9341/Bitmap_Tests
-#SRC=ili9341/Text_Graphics_Functions
-#SRC=ili9341/Mandelbrot_set
-#SRC=ili9341/Touch_Screen
+#SRC=ili9341/hello_world
+#SRC=ili9341/hello_world_swspi
+#SRC=ili9341/bitmap_tests
+#SRC=ili9341/text_graphics_functions
+#SRC=ili9341/demos
+#SRC=ili9341/touch_screen
 #=================================================
 
-# =============== SSD1331 TFT LCD SPI =============
-#SRC=ssd1331/Hello_world
-#SRC=ssd1331/Hello_world_SWSPI
-#SRC=ssd1331/Bitmap_Tests
-#SRC=ssd1331/Text_Graphics_Functions
-#SRC=ssd1331/Clock_demo
+# =============== SSD1331 TFT LCD SPI ============
+#SRC=ssd1331/hello_world
+#SRC=ssd1331/hello_world_swspi
+#SRC=ssd1331/bitmap_tests
+#SRC=ssd1331/text_graphics_functions
+#SRC=ssd1331/demos
 #=================================================
 
-# =========== XPT2046 touchscreen basic test ======
-#SRC=xpt2046/xpt_Test
+# =========== XPT2046 touchscreen basic test =====
+#SRC=xpt2046/xpt_test
 #=================================================
 
+#========= Other misc Test ======================
+#SRC=misc_test/utilities_test
+#SRC=misc_test/unit_test_bicolor_class
+#SRC=misc_test/multiple_displays_test
+#SRC=misc_test/unit_test_color16_class
+#================================================
+ 
 # ************************************************
 # ************************************************
 
@@ -141,8 +144,8 @@ $(error SRC example file path is not set, pick a SRC path in Section A, exiting 
 endif
 
 # Pre-compiler and Compiler and linker flags
-LDFLAGS= -llgpio -lrpidisplaygl 
-CFLAGS= -Iinclude/ -c -Wall -Wextra -std=c++20
+LDFLAGS=  -lrpidisplaygl -llgpio
+CFLAGS= -Iinclude/ -c -Wall -Wextra -std=c++23
 
 # Build directories and output
 MD=mkdir

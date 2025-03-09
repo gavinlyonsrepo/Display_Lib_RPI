@@ -65,50 +65,51 @@ class SSD1306_RDL : public bicolor_graphics  {
 	void I2CWriteByte(uint8_t value = 0x00, uint8_t DataOrCmd =  SSD1306_COMMAND);
 	//  === SSD1306 Command Set  ===
 	// Fundamental Commands
-	static constexpr uint8_t SSD1306_SET_CONTRAST_CONTROL = 0x81;
-	static constexpr uint8_t SSD1306_DISPLAY_ALL_ON_RESUME = 0xA4;
-	static constexpr uint8_t SSD1306_DISPLAY_ALL_ON = 0xA5;
-	static constexpr uint8_t SSD1306_NORMAL_DISPLAY = 0xA6;
-	static constexpr uint8_t SSD1306_INVERT_DISPLAY = 0xA7;
-	static constexpr uint8_t SSD1306_DISPLAY_OFF = 0xAE;
-	static constexpr uint8_t SSD1306_DISPLAY_ON = 0xAF;
-	static constexpr uint8_t SSD1306_NOP = 0xE3;
+	static constexpr uint8_t SSD1306_SET_CONTRAST_CONTROL = 0x81;  /**< Set Contrast Control */
+	static constexpr uint8_t SSD1306_DISPLAY_ALL_ON_RESUME = 0xA4; /**< Entire Display ON follow RAM */
+	static constexpr uint8_t SSD1306_DISPLAY_ALL_ON = 0xA5;        /**< Entire Display ON ignore RAM */
+	static constexpr uint8_t SSD1306_NORMAL_DISPLAY = 0xA6;        /**< Set Normal Display */
+	static constexpr uint8_t SSD1306_INVERT_DISPLAY = 0xA7;        /**< Set Inverted Display*/
+	static constexpr uint8_t SSD1306_DISPLAY_OFF = 0xAE;           /**< Display Off, Sleep mode*/
+	static constexpr uint8_t SSD1306_DISPLAY_ON = 0xAF;            /**< Display ON in normal mode*/
+	static constexpr uint8_t SSD1306_NOP = 0xE3;                   /**< Command for no operation*/
 
 	// Scrolling Commands
-	static constexpr uint8_t SSD1306_RIGHT_HORIZONTAL_SCROLL = 0x26;
-	static constexpr uint8_t SSD1306_LEFT_HORIZONTAL_SCROLL = 0x27;
-	static constexpr uint8_t SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL = 0x29;
-	static constexpr uint8_t SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL = 0x2A;
-	static constexpr uint8_t SSD1306_DEACTIVATE_SCROLL = 0x2E;
-	static constexpr uint8_t SSD1306_ACTIVATE_SCROLL = 0x2F;
-	static constexpr uint8_t SSD1306_SET_VERTICAL_SCROLL_AREA = 0xA3;
+	static constexpr uint8_t SSD1306_RIGHT_HORIZONTAL_SCROLL = 0x26; /**< Right horizontal scroll command */
+	static constexpr uint8_t SSD1306_LEFT_HORIZONTAL_SCROLL = 0x27; /**< Left horizontal scroll command */
+	static constexpr uint8_t SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL = 0x29; /**< Vertical and right horizontal scroll command */
+	static constexpr uint8_t SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL = 0x2A; /**< Vertical and left horizontal scroll command */
+	static constexpr uint8_t SSD1306_DEACTIVATE_SCROLL = 0x2E; /**< Deactivate scroll command */
+	static constexpr uint8_t SSD1306_ACTIVATE_SCROLL = 0x2F; /**< Activate scroll command */
+	static constexpr uint8_t SSD1306_SET_VERTICAL_SCROLL_AREA = 0xA3; /**< Set vertical scroll area command */
+
 
 	// Addressing Setting Commands
-	static constexpr uint8_t SSD1306_SET_LOWER_COLUMN = 0x00;
-	static constexpr uint8_t SSD1306_SET_HIGHER_COLUMN = 0x10;
-	static constexpr uint8_t SSD1306_MEMORY_ADDR_MODE = 0x20;
-	static constexpr uint8_t SSD1306_SET_COLUMN_ADDR = 0x21;
-	static constexpr uint8_t SSD1306_SET_PAGE_ADDR = 0x22;
+	static constexpr uint8_t SSD1306_SET_LOWER_COLUMN = 0x00; /**<Lower Col Start Addr : Page Addressing mode*/
+	static constexpr uint8_t SSD1306_SET_HIGHER_COLUMN = 0x10;/**<Higher Col Start Addr : Page Addressing mode*/
+	static constexpr uint8_t SSD1306_MEMORY_ADDR_MODE = 0x20; /**< Set Memory Addressing Mode 00b, Horizontal Addressing Mode */
+	static constexpr uint8_t SSD1306_SET_COLUMN_ADDR = 0x21;  /**<Set Column Address */
+	static constexpr uint8_t SSD1306_SET_PAGE_ADDR = 0x22;    /**<Set Page Address*/
 
 	// Hardware Configuration Commands
-	static constexpr uint8_t SSD1306_SET_START_LINE = 0x40;
-	static constexpr uint8_t SSD1306_SET_SEGMENT_REMAP = 0xA0;
-	static constexpr uint8_t SSD1306_SET_MULTIPLEX_RATIO = 0xA8;
-	static constexpr uint8_t SSD1306_COM_SCAN_DIR_INC = 0xC0;
-	static constexpr uint8_t SSD1306_COM_SCAN_DIR_DEC = 0xC8;
-	static constexpr uint8_t SSD1306_SET_DISPLAY_OFFSET = 0xD3;
-	static constexpr uint8_t SSD1306_SET_COM_PINS = 0xDA;
-	static constexpr uint8_t SSD1306_CHARGE_PUMP = 0x8D;
+	static constexpr uint8_t SSD1306_SET_START_LINE = 0x40;     /**<Set display RAM display start line register from 0*/
+	static constexpr uint8_t SSD1306_SET_SEGMENT_REMAP = 0xA0;  /**<Set Segment Re-map to SEG0 */
+	static constexpr uint8_t SSD1306_SET_MULTIPLEX_RATIO = 0xA8;/**< Set Multiplex Ratio*/
+	static constexpr uint8_t SSD1306_COM_SCAN_DIR_INC = 0xC0;   /**<Set COM Output Scan Direction, normal mode*/
+	static constexpr uint8_t SSD1306_COM_SCAN_DIR_DEC = 0xC8;  /**< Set COM Output Scan Direction, remapped mode*/
+	static constexpr uint8_t SSD1306_SET_DISPLAY_OFFSET = 0xD3;/**< Set Display Offset , set vertical shift*/
+	static constexpr uint8_t SSD1306_SET_COM_PINS = 0xDA;      /**< Set COM Pins Hardware Configuration*/
+	static constexpr uint8_t SSD1306_CHARGE_PUMP = 0x8D;       /**< Charge pump setting */
 
 	// Timing & Driving Scheme Setting Commands
-	static constexpr uint8_t SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO = 0xD5;
-	static constexpr uint8_t SSD1306_SET_PRECHARGE_PERIOD = 0xD9;
-	static constexpr uint8_t SSD1306_SET_VCOM_DESELECT = 0xDB;
+	static constexpr uint8_t SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO = 0xD5; /**< Set Display Clock Divider - Oscillator Frequency*/
+	static constexpr uint8_t SSD1306_SET_PRECHARGE_PERIOD = 0xD9;        /**< Set Pre-charge Period */
+	static constexpr uint8_t SSD1306_SET_VCOM_DESELECT = 0xDB;          /**< Set VCOMH Deselect level */
 
 	// I2C related
-	static constexpr uint8_t SSD1306_COMMAND        = 0x00;
-	static constexpr uint8_t SSD1306_DATA           = 0xC0;
-	static constexpr uint8_t SSD1306_DATA_CONTINUE  = 0x40;
+	static constexpr uint8_t SSD1306_COMMAND        = 0x00; /**< Command byte code*/
+	static constexpr uint8_t SSD1306_DATA           = 0xC0; /**< data byte code  with continuation bit set */
+	static constexpr uint8_t SSD1306_DATA_CONTINUE  = 0x40; /**< data byte code with continuation bit clear*/
 	//  === SSD1306 Command Set END ===
 
 	int _OLEDI2CAddress = SSD1306_ADDR  ; /**< I2C address for I2C module PCF8574 backpack on OLED*/

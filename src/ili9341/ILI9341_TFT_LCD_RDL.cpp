@@ -79,7 +79,7 @@ void ILI9341_TFT:: InitScreenSize(uint16_t width_TFT, uint16_t height_TFT)
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return
 		-# rdlib::Success = success
 		-# Upstream error code from ILI9341Initialize()
@@ -98,7 +98,7 @@ rdlib::Return_Codes_e ILI9341_TFT::InitSPI(int device, int channel, int speed, i
 /*!
 	@brief intialise PCBtype and SPI, Software SPI
 	@param CommDelay uS GPIO delay used in software SPI
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return Upstream error code from ILI9341Initialize()
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
@@ -559,7 +559,7 @@ void  ILI9341_TFT::PrintDiagnostic(void)
 	} else 
 	{
 		// List of command bytes
-		uint8_t commandList[] = {
+		const uint8_t commandList[] = {
 			ILI9341_RDMODE,     // 0x0A
 			ILI9341_RDMADCTL,   // 0x0B
 			ILI9341_RDPIXFMT,   // 0x0C

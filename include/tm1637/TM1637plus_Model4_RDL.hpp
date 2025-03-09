@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <lgpio.h>
 #include "common_data_RDL.hpp"
-#include "tm163X_font_data_RDL.hpp"
+#include "led_segment_font_data_RDL.hpp"
 
 
 /*!
@@ -29,7 +29,7 @@ public:
 	void setSegments(const uint8_t segments[], uint8_t length , uint8_t pos );
 	void DisplayDecimal(int num, bool leading_zero, uint8_t length , uint8_t pos );
 	void DisplayDecimalwDot(int num, uint8_t dots , bool leading_zero ,uint8_t length , uint8_t pos );
-	void DisplayString(const char* numStr, uint8_t dots , uint8_t length, uint8_t position);
+	rdlib::Return_Codes_e  DisplayString(const char* numStr, uint8_t dots , uint8_t length, uint8_t position);
 	unsigned char encodeCharacter(unsigned char digit);
 
 protected:

@@ -67,30 +67,38 @@ class color16_graphics:public display_Fonts, public Print  {
 	};
 
 	// Screen related
-	// Defined in the display sub class
+	/*! @brief define in the sub class */
 	virtual void setAddrWindow(uint16_t, uint16_t, uint16_t, uint16_t) = 0;
 	void fillScreen(uint16_t color);
 	void setCursor(int16_t x, int16_t y);
 
 	// Shapes and lines
 	void drawPixel(uint16_t, uint16_t, uint16_t);
+	rdlib::Return_Codes_e drawDotGrid(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t DotGridGap, uint16_t color);
 	void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
 	rdlib::Return_Codes_e drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color);
 	rdlib::Return_Codes_e drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color);
-
+	void drawLineAngle(int16_t x, int16_t y, int angle, uint8_t start, uint8_t length, int offset, uint16_t color);
 	void drawRectWH(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);
 	rdlib::Return_Codes_e fillRectangle(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
 	void fillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);
-
 	void drawRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t color);
 	void fillRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t color);
-
 	void drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 	void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
-
+	void drawEllipse(int16_t cx, int16_t cy, int16_t semiMajorAxis, int16_t semiMinorAxis, bool fill, uint16_t color);
 	void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 	void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
-
+	void drawQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color);
+	void fillQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color,bool useTriangleSplit=true);
+	rdlib::Return_Codes_e drawPolygon(int16_t x, int16_t y, uint8_t sides, int16_t diameter, float rotation, bool fill , uint16_t color);
+	void drawSimpleArc(int16_t cx, int16_t cy, int16_t radius, float startAngle, float endAngle, uint16_t color);
+	void drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float startAngle, float endAngle, uint16_t color);
+	float getArcAngleMax() const;
+	void setArcAngleMax(float arcAngleMax);
+	int getArcAngleOffset() const;
+	void setArcAngleOffset(int arcAngleOffset);
+	
 	// Text related functions
 	virtual size_t write(uint8_t) override;
 	rdlib::Return_Codes_e writeChar( int16_t x, int16_t y, char value );
@@ -107,13 +115,13 @@ class color16_graphics:public display_Fonts, public Print  {
 	rdlib::Return_Codes_e drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h, uint16_t backgroundColor);
 	// RGB to 565
 	int16_t Color565(int16_t ,int16_t , int16_t );
+	//SPI 
+	int getDisplaySPIBlockSize() const;
+	void setDisplaySPIBlockSize(int size);
 
 protected:
 
 	void pushColor(uint16_t color);
-	void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color);
-	void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color);
-
 	void writeCommand(uint8_t);
 	void writeData(uint8_t);
 	void spiWrite(uint8_t);
@@ -129,6 +137,8 @@ protected:
 	uint16_t _height;     /**< Display h as modified by current rotation*/
 	uint8_t _XStart= 0;   /**< Used to store _colstart changed by current rotation */
 	uint8_t _YStart= 0;   /**< Used to store _rowstart changed by current rotation */
+	float _arcAngleMax = 360.0f; /**< Maximum angle of Arc , used by drawArc*/
+	int _arcAngleOffset= 0; /**< used by drawArc, offset for adjusting the starting angle of arc. default positive X-axis (0°)*/
 
 	int8_t _Display_DC;    /**< GPIO for data or command line */
 	int8_t _Display_RST;   /**< GPIO for reset line */
@@ -145,6 +155,11 @@ protected:
 	int _spiHandle = 0;          /**< Hold a handle for the SPI device on the channel.*/
 
 private:
+/// @cond
+	void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color);
+	void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color);
+	void ellipseHelper(uint16_t cx, uint16_t cy, uint16_t x, uint16_t y, uint16_t color);
+	void drawArcHelper(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float start, float end, uint16_t color);
 
 	inline void swapint16t(int16_t& a, int16_t& b) 
 	{
@@ -152,6 +167,7 @@ private:
 		a = b;
 		b = t;
 	}
-
+/// @endcond
+	int _Display_SPI_BLK_SIZE = 65536; /**< max block size SPI Transaction, lgpio lib default(LG_MAX_SPI_DEVICE_COUNT)*/
 };
 // ********************** EOF *********************

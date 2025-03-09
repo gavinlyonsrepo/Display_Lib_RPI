@@ -1,6 +1,6 @@
 /*!
 	@file utility_data_RDL.cpp
-	@brief A file to hold some utilities(config file logging etc) , included in common_data_RDL.
+	@brief A file to hold some utilities(maths, config, file logging etc) , included in common_data_RDL.
 
 	@details
 		Implements the operator<< function for std::source_location.
@@ -10,6 +10,56 @@
 */
 
 #include "utility_data_RDL.hpp"
+
+
+namespace rdlib_maths
+{
+
+/**
+ * @brief Maps a value from one range to another using linear interpolation.
+ * This function takes an input value within a specified range and maps it
+ * to a corresponding value in a different output range using std::lerp.
+ * @param x The input value to map.
+ * @param in_min The lower bound of the input range.
+ * @param in_max The upper bound of the input range.
+ * @param out_min The lower bound of the output range.
+ * @param out_max The upper bound of the output range.
+ * @return The mapped value in the output range.
+ */
+int mapValue(int x, int in_min, int in_max, int out_min, int out_max) 
+{
+	return static_cast<int>(std::lerp(out_min, out_max, (x - in_min) / static_cast<double>(in_max - in_min)));
+}
+
+
+/**
+ * @brief Computes the cosine of an angle given in degrees.
+ * This function converts the input angle from degrees to radians and then calculates 
+ * the cosine of that angle using the standard C++ `cos` function.
+ * @param angle The angle in degrees.
+ * @return The cosine value of the given angle.
+ */
+float cosineFromDegrees(float angle)
+{
+	float radians = angle / 360.0f * 2.0f *  std::numbers::pi;
+	return std::cos(radians);
+}
+
+/**
+ * @brief Computes the sine of an angle given in degrees.
+ * This function converts the input angle from degrees to radians and then calculates 
+ * the sine of that angle using the standard C++ `sin` function.
+ * @param angle The angle in degrees.
+ * @return The sine value of the given angle.
+ */
+float sineFromDegrees(float angle)
+{
+	float radians = angle / 360.0f * 2.0f *  std::numbers::pi;
+	return std::sin(radians);
+}
+
+}
+
 
 namespace rdlib_log 
 {
@@ -88,18 +138,21 @@ void loadConfig() {
 
 /*!
  * @brief retrieve the logging enabled setting , true for logging on
+ * @return If logging is enabled 
 */
 bool isLoggingEnabled() {
 		return rdlib_config::LOGGING_ENABLED;
 }
 /*!
  * @brief retrieve the debug enabled setting , true for debug on
+ * @return If debug is enabled 
 */
 bool isDebugEnabled() {
 		return rdlib_config::DEBUG_ENABLED;
 }
 /*!
  * @brief retrieve the log file path setting
+ * @return path to the log file
  */
 std::string getErrorLogPath() {
 		return rdlib_config::ERROR_LOG_PATH;

@@ -59,7 +59,7 @@ NOKIA_5110_RPI::NOKIA_5110_RPI(int16_t lcdwidth, int16_t lcdheight, uint8_t LCD_
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@note overloaded this one is for  Hardware SPI
 	@return rdlib::Return_Codes_e
 		-# rdlib::Success
@@ -127,7 +127,7 @@ rdlib::Return_Codes_e NOKIA_5110_RPI::LCDBegin(bool Inverse, uint8_t Contrast,ui
 	@param Inverse false normal mode true display inverted
 	@param Contrast Set LCD VOP contrast range 0xB1-BF
 	@param Bias LCD Bias mode 1:48 0x12 to 0x14
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@note overloaded this one is for Software SPI
 	@return rdlib::Return_Codes_e
 		-# rdlib::Success
@@ -397,7 +397,7 @@ void NOKIA_5110_RPI::drawPixel(int16_t x, int16_t y, uint8_t color) {
 	switch(rotation) 
 	{
 		case 1:
-			LCDRotateswapint16t(x, y);
+			std::swap(x, y);
 			y =  HEIGHT - 1 - y;
 			break;
 		case 2:
@@ -405,7 +405,7 @@ void NOKIA_5110_RPI::drawPixel(int16_t x, int16_t y, uint8_t color) {
 			y = HEIGHT - 1 - y;
 			break;
 		case 3:
-			LCDRotateswapint16t(x, y);
+			std::swap(x, y);
 			x = WIDTH - 1 - x;
 	}
 

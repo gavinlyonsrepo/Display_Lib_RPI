@@ -8,12 +8,61 @@
 
 // ==== Public Methods ====
 
+/**
+ * @brief Writes a string to the output.
+ * @param str Pointer to the character array.
+ * @return The number of bytes written. Returns 0 if @p str is nullptr.
+ */
+size_t Print::write(const char *str) 
+{
+	if (str == nullptr) 
+	{
+		setWriteError(5); // rdlib::CharArrayNullptr
+		return 0;
+	}
+	clearWriteError();
+	return write(reinterpret_cast<const uint8_t *>(str), strlen(str));
+}
+
+/**
+ * @brief Writes a buffer of a specified size to the output.
+ * @param buffer Pointer to the data buffer.
+ * @param size Number of bytes to write.
+ * @return The number of bytes written.
+ */
+size_t Print::write(const char *buffer, size_t size) 
+{
+	return write(reinterpret_cast<const uint8_t *>(buffer), size);
+}
+
+/**
+ * @brief Gets the number of bytes available for writing.
+ * default to zero, meaning "a single write may block"
+ * should be overriden by subclasses with buffering
+ * @return The maximum number of bytes that can be written.
+ */
+int Print::availableForWrite() { return 255; }
+
+/*! 
+	@brief  gets the error flag status, zero no error 
+	@return the errorFlag value
+	*/
+int Print::getWriteError() { return _ErrorFlag; }
+
+/*! @brief clears the error flag by setting it to zero */
+void Print::clearWriteError() { setWriteError(0); }
+
+/*! sets error flag  to value 
+ *  @param error error to set errorFlag*/
+void Print::setWriteError(int error) { _ErrorFlag = error; }
+
 // = print =
 
 /*! 
 	@brief default implementation: may be overridden 
 	@param buffer of ints
 	@param size
+	@return total number of characters printed
 */
 size_t Print::write(const uint8_t *buffer, size_t size)
 {
@@ -28,6 +77,7 @@ size_t Print::write(const uint8_t *buffer, size_t size)
 /*!
 	@brief print an array
 	@param str An array of characters
+	@return passes string to write
 */
 size_t Print::print(const char str[])
 {
@@ -37,6 +87,7 @@ size_t Print::print(const char str[])
 /*!
 	@brief print an character
 	@param c the character to print
+	@return passes character to write
 */
 size_t Print::print(char c)
 {
@@ -46,7 +97,8 @@ size_t Print::print(char c)
 /*!
 	@brief print an integer of base number system
 	@param n integer to print
-	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@param base the base number system to use (BIN HEX OCT DEC)
+	@return calls print(long)
 */
 size_t Print::print(int n, int base)
 {
@@ -56,7 +108,8 @@ size_t Print::print(int n, int base)
 /*!
 	@brief print an unsigned integer of base number system
 	@param n integer to print
-	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@param base the base number system to use (BIN HEX OCT DEC)
+	@return calls print( unsigned long)
 */
 size_t Print::print(unsigned int n, int base)
 {
@@ -67,6 +120,7 @@ size_t Print::print(unsigned int n, int base)
 	@brief print an long  integer of base number system
 	@param n integer to print
 	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@return formats negative number and passes to PrintNumber or write
 */
 size_t Print::print(long n, int base)
 {
@@ -92,11 +146,14 @@ size_t Print::print(long n, int base)
 	@brief print an unsigned long integer of base number system
 	@param n integer to print
 	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@return  passes to PrintNumber or write
 */
 size_t Print::print(unsigned long n, int base)
 {
-	if (base == 0) return write(n);
-	else return printNumber(n, base);
+	if (base == 0) 
+		return write(n);
+	else 
+		return printNumber(n, base);
 }
 
 /*!
@@ -104,6 +161,7 @@ size_t Print::print(unsigned long n, int base)
 	@param n integer to print
 	@param digits number of digits to print
 	@details print(3.7468,2) = will print 3.75 on display
+	@return passes to printFLoat
 */
 size_t Print::print(double n, int digits)
 {
@@ -113,6 +171,7 @@ size_t Print::print(double n, int digits)
 /*!
 	@brief print an C++ string object
 	@param s string object
+	@return converts to c style string and passes to write
 */
 size_t Print::print(const std::string &s) {
 	return write(s.c_str(), s.length());
@@ -129,8 +188,9 @@ size_t Print::println(void)
 }
 
 /*!
-	@brief print an array followed by new line
-	@param c An array of characters
+	@brief Prints a character array followed by a newline.
+	@param c Pointer to a null-terminated character array.
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(const char c[])
 {
@@ -142,6 +202,7 @@ size_t Print::println(const char c[])
 /*!
 	@brief print an character followed by new line
 	@param c the character to print
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(char c)
 {
@@ -154,6 +215,7 @@ size_t Print::println(char c)
 	@brief print an integer of base number system followed by new line
 	@param num integer to print
 	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(int num, int base)
 {
@@ -166,6 +228,7 @@ size_t Print::println(int num, int base)
 	@brief print an unsigned integer of base number system followed by new line
 	@param num integer to print
 	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(unsigned int num, int base)
 {
@@ -178,6 +241,7 @@ size_t Print::println(unsigned int num, int base)
 	@brief print an long  integer of base number system followed by new line
 	@param num integer to print
 	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(long num, int base)
 {
@@ -190,6 +254,7 @@ size_t Print::println(long num, int base)
 	@brief print an unsigned long integer of base number system followed by new line
 	@param num integer to print
 	@param base the base number system to use (BIN HEX OCT RDL_DEC)
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(unsigned long num, int base)
 {
@@ -203,6 +268,7 @@ size_t Print::println(unsigned long num, int base)
 	@param num float to print followed by new line
 	@param digits number of digits to print
 	@details print(3.7468,2) = will print 3.75 on display
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(double num, int digits)
 {
@@ -214,6 +280,7 @@ size_t Print::println(double num, int digits)
 /*!
 	@brief print an C++ string object followed by new line
 	@param s string object
+	@return Number of characters printed, including the newline.
 */
 size_t Print::println(const std::string &s) {
 	size_t n = print(s);
@@ -226,9 +293,10 @@ size_t Print::println(const std::string &s) {
 // ==== Private Methods ====
 
 /*!
- *@brief Used internally to parse and print number
- *@param n Number to parse
- *@param base to print to Binary hexadecimal etc
+	@brief Used internally to parse and print number
+	@param n Number to parse
+	@param base to print to Binary hexadecimal etc
+	@return passes the formatted string to write
  */
 size_t Print::printNumber(unsigned long n, uint8_t base)
 {
@@ -251,9 +319,10 @@ size_t Print::printNumber(unsigned long n, uint8_t base)
 }
 
 /*!
- *@brief Used internally to parse float
- *@param number The floating point number
- *@param digits Number of precision digits to print
+	@brief Used internally to parse float
+	@param number The floating point number
+	@param digits Number of precision digits to print
+	@return total number of characters printed 
  */
 size_t Print::printFloat(double number, uint8_t digits)
 {

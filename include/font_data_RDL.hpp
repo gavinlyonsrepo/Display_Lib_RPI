@@ -2,23 +2,6 @@
 	@file font_data_RDL.hpp
 	@brief font data file. Project Name: Display_Lib_RPI
 	@author Gavin Lyons.
-	@details
-		-#  FontDefault  8 by 8
-		-#  FontGll  8 by 8 (NO LOWERCASE letters)
-		-#  FontSinclairS 8 by 8
-		-#  FontPico 8 by 12
-		-#  FontRetro 8x16
-		-#  FontMega  16 by 16
-		-#  FontArialBold 16 by 16
-		-#  FontHallfetica 16 by 16
-		-#  FontArialRound 16 by 24
-		-#  FontOrla 16x24
-		-#  FontGroTesk 16 by 32
-		-#  FontInconsola 24 by 32
-		-#  FontMint 24 by 32
-		-#  FontSixteenSeg 32 by 48 (NUMBERS ONLY + : . -)
-		-#  FontSevenSeg 32 by 50 (NUMBERS ONLY + : . -)
-		-#  FontGroTesk 32 by 64 (NO LOWERCASE letters)
 */
 
 #pragma once
@@ -30,22 +13,22 @@
 #include "common_data_RDL.hpp" //error enum
 
 // Font data is in the cpp file accessed thru extern.
-extern const std::span<const uint8_t> pFontDefault;
-extern const std::span<const uint8_t> pFontPico;
-extern const std::span<const uint8_t> pFontGll;
-extern const std::span<const uint8_t> pFontSinclairS;
-extern const std::span<const uint8_t> pFontRetro;
-extern const std::span<const uint8_t> pFontMega;
-extern const std::span<const uint8_t> pFontArialBold;
-extern const std::span<const uint8_t> pFontHallfetica;
-extern const std::span<const uint8_t> pFontOrla;
-extern const std::span<const uint8_t> pFontArialRound;
-extern const std::span<const uint8_t> pFontGroTesk;
-extern const std::span<const uint8_t> pFontInconsola; 
-extern const std::span<const uint8_t> pFontMint;
-extern const std::span<const uint8_t> pFontSixteenSeg;
-extern const std::span<const uint8_t> pFontSevenSeg;
-extern const std::span<const uint8_t> pFontGroTeskBig;
+extern const std::span<const uint8_t> pFontDefault; /**< 8x8 default font */
+extern const std::span<const uint8_t> pFontGll; /**< 8x8 font (NO LOWERCASE letters) */
+extern const std::span<const uint8_t> pFontSinclairS; /**< 8x8 Sinclair-style font */
+extern const std::span<const uint8_t> pFontPico; /**< 8x12 Pico font */
+extern const std::span<const uint8_t> pFontRetro; /**< 8x16 retro-style font */
+extern const std::span<const uint8_t> pFontMega; /**< 16x16 mega font */
+extern const std::span<const uint8_t> pFontArialBold; /**< 16x16 Arial Bold font */
+extern const std::span<const uint8_t> pFontHallfetica; /**< 16x16 Helvetica-style font */
+extern const std::span<const uint8_t> pFontArialRound; /**< 16x24 Arial Round font */
+extern const std::span<const uint8_t> pFontOrla; /**< 16x24 Orla font */
+extern const std::span<const uint8_t> pFontGroTesk; /**< 16x32 GroTesk font */
+extern const std::span<const uint8_t> pFontInconsola; /**< 24x32 Inconsola font */
+extern const std::span<const uint8_t> pFontMint; /**< 24x32 Mint font */
+extern const std::span<const uint8_t> pFontSixteenSeg; /**< 32x48 Sixteen-segment font (NUMBERS ONLY + : . -) */
+extern const std::span<const uint8_t> pFontSevenSeg; /**< 32x50 Seven-segment font (NUMBERS ONLY + : . -) */
+extern const std::span<const uint8_t> pFontGroTeskBig; /**< 32x64 GroTesk font (NO LOWERCASE letters) */
 
 
 /*! Enum to define current font type selected  */

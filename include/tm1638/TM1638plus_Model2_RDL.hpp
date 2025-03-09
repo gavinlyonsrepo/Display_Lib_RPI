@@ -25,7 +25,7 @@ public:
 	void DisplaySegments(uint8_t segment, uint8_t segmentValue);
 	void DisplayHexNum(uint16_t  numberUpper, uint16_t numberLower, uint8_t dots,  AlignTextType_e = TMAlignTextLeft);
 	void DisplayDecNum(unsigned long number, uint8_t dots,  AlignTextType_e = TMAlignTextLeft);
-	void DisplayStr(const char* string, uint16_t dots = 0);
+	rdlib::Return_Codes_e DisplayStr(const char* string, uint16_t dots = 0);
 	void ASCIItoSegment(const uint8_t values[]);
 	void DisplayDecNumNibble(uint16_t numberUpper, uint16_t numberLower, uint8_t dots,  AlignTextType_e = TMAlignTextLeft);
 

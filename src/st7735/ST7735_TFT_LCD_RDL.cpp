@@ -503,11 +503,12 @@ void ST7735_TFT ::TFTsetScrollDefinition(uint8_t top_fix_heightTFT, uint8_t bott
 
 /*!
 	@brief: This method is used together with the TFTsetScrollDefinition.
+	@param vsp scrolling mode
 */
-void ST7735_TFT ::TFTVerticalScroll(uint8_t _vsp) {
+void ST7735_TFT ::TFTVerticalScroll(uint8_t vsp) {
 	writeCommand(ST7735_VSCRSADD);
 	writeData(0x00);
-	writeData(_vsp);
+	writeData(vsp);
 }
 
 /*!
@@ -598,7 +599,7 @@ void ST7735_TFT ::TFTsetRotation(display_rotate_e mode) {
 	switch (mode) {
 		case Degrees_0 :
 			if (TFT_PCBtype == TFT_ST7735S_Black ){
-				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MY | ST7735_MADCTL_RGB;
+				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MY;
 			}else{
 				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MY | ST7735_MADCTL_BGR;
 			}
@@ -610,7 +611,7 @@ void ST7735_TFT ::TFTsetRotation(display_rotate_e mode) {
 		case Degrees_90:
 			if (TFT_PCBtype == TFT_ST7735S_Black )
 			{
-				madctl = ST7735_MADCTL_MY | ST7735_MADCTL_MV | ST7735_MADCTL_RGB;
+				madctl = ST7735_MADCTL_MY | ST7735_MADCTL_MV;
 			}else{
 				madctl = ST7735_MADCTL_MY | ST7735_MADCTL_MV | ST7735_MADCTL_BGR;
 			}
@@ -633,7 +634,7 @@ void ST7735_TFT ::TFTsetRotation(display_rotate_e mode) {
 			break;
 		case Degrees_270:
 			if (TFT_PCBtype == TFT_ST7735S_Black){
-				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MV | ST7735_MADCTL_RGB;
+				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MV;
 			}else{
 				madctl = ST7735_MADCTL_MX | ST7735_MADCTL_MV | ST7735_MADCTL_BGR;
 			}
@@ -676,7 +677,7 @@ void ST7735_TFT::TFTInitScreenSize(uint8_t colOffset, uint8_t rowOffset, uint16_
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return
 		-# rdlib::Success = success
 		-# rdlib::WrongInputPCBType see enum choices.
@@ -709,7 +710,7 @@ rdlib::Return_Codes_e ST7735_TFT::TFTInitPCBType(TFT_PCBtype_e pcbType, int devi
 	@brief intialise PCBtype and SPI, Software SPI
 	@param pcbType 4 choices 0-3
 	@param CommDelay uS GPIO delay used in software SPI
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return
 		-# rdlib::Success = success
 		-# rdlib::WrongInputPCBType see enum choices.

@@ -107,11 +107,11 @@ private:
 
 	void OLEDConfigueDimMode(void);
 	void OLEDConfigueContrast(void);
-
 	rdlib::Return_Codes_e OLEDDataCommandPin(void);
 	rdlib::Return_Codes_e OLEDClock_Data_ChipSelect_Pins(void);
 	rdlib::Return_Codes_e OLEDSSD1331Initialize(void);
 	void cmdBegin(void);
+	void WriteColor16(uint16_t colorWrite);
 
 	// Screen
 	uint16_t _widthStartOLED = 96;  /**<  never change after first init */

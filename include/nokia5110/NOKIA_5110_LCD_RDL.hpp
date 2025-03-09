@@ -62,14 +62,6 @@ private:
 	void LCDWriteCommand(uint8_t command);
 	void LCDInit(void);
 
-
-	inline void LCDRotateswapint16t(int16_t& a, int16_t& b) 
-	{
-		int16_t t = a;
-		a = b;
-		b = t;
-	}
-
 	// LCD Commands & registers list
 	static constexpr uint8_t LCD_FUNCTIONSET           = 0x20; /**<LCD function set*/
 	static constexpr uint8_t LCD_POWERDOWN             = 0x04; /**<LCD power off */

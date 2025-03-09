@@ -75,8 +75,6 @@ User can turn on debug messages with LCDDebugSet method see example file.
 | ---- | ---- | ---- | 
 | TEST_16x02 | Carries out test sequence testing features | 16x02 |
 | TEST_20x04 | Carries out test sequence testing features | 20x04 |
-| CLOCK_16x02 | A basic clock Demo | 16x02 |
-| TEST_I2C_16x02 | Check I2C connection | 16x02 |
 
 ## Output
 

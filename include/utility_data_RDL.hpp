@@ -22,18 +22,23 @@
 #include <ctime>
 #include <cstdlib>
 #include <filesystem>
+#include <cmath>  // For std::cos, std::sin  std::lerp
 
 /*! @brief Name space for config file related utilities*/
 namespace rdlib_config 
 {
-	extern bool LOGGING_ENABLED;
-	extern bool DEBUG_ENABLED;
-	extern std::string ERROR_LOG_PATH;
-
 	void loadConfig();
 	bool isLoggingEnabled();
 	bool isDebugEnabled();
 	std::string getErrorLogPath();
+}
+
+/*! @brief Name space for maths related utilities*/
+namespace rdlib_maths 
+{
+	int mapValue(int x, int in_min, int in_max, int out_min, int out_max);
+	float sineFromDegrees(float angle);
+	float cosineFromDegrees(float angle);
 }
 
 /*! @brief Name space for log file related utilities*/

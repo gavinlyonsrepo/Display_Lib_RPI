@@ -345,13 +345,12 @@ void SSD1331_OLED ::OLEDsetRotation(display_rotate_e mode) {
 	uint8_t Degree270  = 0x63;
 	// We must preserve setting A[2] in _CMD_SETREMAP setting register
 	// This is set in constructor passing a by color_order_e. 
-	// the pixel color order RGB mapping 
+	// the pixel color order RGB mapping i.e RGB 0x72 BGR 0x76 A[2]
 	uint8_t BitMask_ReMapCmdA2 = 0x04; 
 
 	writeCommand(_CMD_SETREMAP);
 	switch (mode) {
 		case Degrees_0 :
-			 // RGB 0x72 BGR 0x76 A[2]
 			rotateValue  = (DegreeZero | (_colorOrder & BitMask_ReMapCmdA2)) ;
 			_width =_widthStartOLED;
 			_height = _heightStartOLED;
@@ -362,7 +361,6 @@ void SSD1331_OLED ::OLEDsetRotation(display_rotate_e mode) {
 			_height = _widthStartOLED;
 			break;
 		case Degrees_180:
-			// RGB 0x60 BGR 0x64 A[2]
 			rotateValue  = (Degree180 | (_colorOrder & BitMask_ReMapCmdA2)) ;
 			_width =_widthStartOLED;
 			_height = _heightStartOLED;
@@ -546,16 +544,21 @@ void SSD1331_OLED::OLEDConfigueContrast(void)
 
 /*!
 	@brief Clears a specific rectangular window on the OLED display.
-	@param column1 Starting column (X coordinate) of the window (Range: 0-95).
-	@param row1 Starting row (Y coordinate) of the window (Range: 0-63).
-	@param column2 Ending column (X coordinate) of the window (Range: 0-95).
-	@param row2 Ending row (Y coordinate) of the window (Range: 0-63).
-	@note The coordinates must be within the display bounds (96x64 pixels).
+	@param column1 Starting column (X coordinate) of the window
+	@param row1 Starting row (Y coordinate) of the window
+	@param column2 Ending column (X coordinate) of the window 
+	@param row2 Ending row (Y coordinate) of the window
+	@note The coordinates must be within the display bounds 
 	@note Uses the SSD1331 `_CMD_CLEAR_WINDOW` command.
 	@note A small delay is added (`delayMicroSecRDL(500)`) to allow processing time.
  */
 void SSD1331_OLED::OLEDClearWindowCmd(uint8_t column1 , uint8_t row1 , uint8_t column2 , uint8_t row2)
 {
+	if (_displayRotate % 2 == 1) // 90° or 270° rotations,
+	{
+		std::swap(column1, row1);
+		std::swap(column2, row2);
+	}
 	writeCommand(_CMD_CLEAR_WINDOW);
 	writeCommand(column1);
 	writeCommand(row1);
@@ -578,6 +581,12 @@ void SSD1331_OLED::OLEDClearWindowCmd(uint8_t column1 , uint8_t row1 , uint8_t c
  */
 void SSD1331_OLED::OLEDCopyWindowCmd(uint8_t column1 , uint8_t row1 , uint8_t column2 , uint8_t row2, uint8_t column3 , uint8_t row3)
 {
+	if (_displayRotate % 2 == 1) // 90° or 270° rotations,
+	{
+		std::swap(column1, row1);
+		std::swap(column2, row2);
+		std::swap(column3, row3);
+	}
 	writeCommand(_CMD_COPY_WINDOW);
 	writeCommand(column1);
 	writeCommand(row1);
@@ -591,16 +600,21 @@ void SSD1331_OLED::OLEDCopyWindowCmd(uint8_t column1 , uint8_t row1 , uint8_t co
 
 /*!
 	@brief Dims a specific rectangular window on the OLED display.
-	@param column1 Starting column (X coordinate) of the window to be dimmed (Range: 0-95).
-	@param row1 Starting row (Y coordinate) of the window to be dimmed (Range: 0-63).
-	@param column2 Ending column (X coordinate) of the window to be dimmed (Range: 0-95).
-	@param row2 Ending row (Y coordinate) of the window to be dimmed (Range: 0-63).
-	@note The coordinates must be within the display bounds (96x64 pixels).
+	@param column1 Starting column (X coordinate) of the window to be dimmed
+	@param row1 Starting row (Y coordinate) of the window to be dimmed
+	@param column2 Ending column (X coordinate) of the window to be dimmed 
+	@param row2 Ending row (Y coordinate) of the window to be dimmed
+	@note The coordinates must be within the display bounds .
 	@note Uses the SSD1331 `_CMD_DIM_WINDOW` command.
 	@note A small delay is added (`delayMicroSecRDL(500)`) to allow processing time.
  */
 void SSD1331_OLED::OLEDDimWindowCmd(uint8_t column1 , uint8_t row1 , uint8_t column2 , uint8_t row2)
 {
+	if (_displayRotate % 2 == 1) // 90° or 270° rotations,
+	{
+		std::swap(column1, row1);
+		std::swap(column2, row2);
+	}
 	writeCommand(_CMD_DIM_WINDOW);
 	writeCommand(column1);
 	writeCommand(row1);
@@ -620,23 +634,17 @@ void SSD1331_OLED::OLEDDimWindowCmd(uint8_t column1 , uint8_t row1 , uint8_t col
  */
 void SSD1331_OLED::OLEDDrawLineCmd(uint8_t c1, uint8_t r1, uint8_t c2, uint8_t r2, uint16_t color)
 {
-	if(_displayRotate  % 2 == 1)
+	if (_displayRotate % 2 == 1) // 90° or 270° rotations,
 	{
-		uint8_t temp = c1;
-		c1 = r1;
-		r1 = temp;
-		temp = c2;
-		c2 = r2;
-		r2 = temp;
+		std::swap(c1, r1);
+		std::swap(c2, r2);
 	}
 	writeCommand(_CMD_DRAWLINE);
 	writeCommand(c1);
 	writeCommand(r1);
 	writeCommand(c2);
 	writeCommand(r2);
-	writeCommand(color >> 10 & 0x3E);
-	writeCommand(color >> 5 & 0x3F);
-	writeCommand(color << 1 & 0x3E);
+	WriteColor16(color);
 	delayMicroSecRDL(100);
 }
 
@@ -656,14 +664,10 @@ void SSD1331_OLED::OLEDDrawLineCmd(uint8_t c1, uint8_t r1, uint8_t c2, uint8_t r
  */
 void SSD1331_OLED::OLEDDrawRectCmd(uint8_t c1, uint8_t r1, uint8_t  c2, uint8_t r2, uint16_t color, bool fill) {
 
-	if(_displayRotate  % 2 == 1)
+	if (_displayRotate % 2 == 1) // 90° or 270° rotations,
 	{
-		uint8_t temp = c1;
-		c1 = r1;
-		r1 = temp;
-		temp = c2;
-		c2 = r2;
-		r2 = temp;
+		std::swap(c1, r1);
+		std::swap(c2, r2);
 	}
 	//turn fill on or off
 	if (fill)
@@ -681,13 +685,9 @@ void SSD1331_OLED::OLEDDrawRectCmd(uint8_t c1, uint8_t r1, uint8_t  c2, uint8_t 
 	writeCommand(c2);
 	writeCommand(r2);
 	// Rect color
-	writeCommand(color >> 10 & 0x3E);
-	writeCommand(color >> 5 & 0x3F);
-	writeCommand(color << 1 & 0x3E);
+	WriteColor16(color);
 	if (fill){
-		writeCommand(color >> 10 & 0x3E);
-		writeCommand(color >> 5 & 0x3F);
-		writeCommand(color << 1 & 0x3E);
+		WriteColor16(color);
 	}else{
 		writeCommand(0);
 		writeCommand(0);
@@ -696,5 +696,18 @@ void SSD1331_OLED::OLEDDrawRectCmd(uint8_t c1, uint8_t r1, uint8_t  c2, uint8_t 
 	delayMicroSecRDL(500);
 }
 
+/*!
+	@brief Writes a 16-bit RGB565 color to the SSD1331 OLED display.
+		This function extracts the red, green, and blue components from the 
+		16-bit RGB565 color value and sends them as 6-bit values to the display.
+		RRRRR GGGGGG BBBBB.
+	@param colorWrite 16-bit RGB565 color value to be written to the display.
+ */
+void SSD1331_OLED::WriteColor16(uint16_t colorWrite)
+{
+	writeCommand(colorWrite >> 10 & 0x3E); // Extract and send 6-bit Red component
+	writeCommand(colorWrite >> 5 & 0x3F);  // Extract and send 6-bit Green component
+	writeCommand(colorWrite << 1 & 0x3E);  // Extract and send 6-bit Blue component
+}
 
 //**************** EOF *****************

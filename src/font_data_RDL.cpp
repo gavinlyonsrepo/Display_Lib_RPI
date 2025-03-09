@@ -86,6 +86,9 @@ bool display_Fonts::getInvertFont()
 
 
 // === Font Data ===
+
+/// @cond
+
 /*!
 	Standard ASCII 8x8 font
 	ASCII Range 95 chars
@@ -1600,3 +1603,5 @@ const std::span<const uint8_t> pFontSixteenSeg = FontSixteenSeg;
 const std::span<const uint8_t> pFontGroTeskBig = FontGroTeskBig;
 
 // === End of Font Data ===
+
+/// @endcond

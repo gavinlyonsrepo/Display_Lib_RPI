@@ -23,7 +23,7 @@ SH110X_RDL::SH110X_RDL(int16_t oledwidth, int16_t oledheight) :bicolor_graphics(
 	@brief  begin Method initialise OLED
 	@param OLEDtype enum type of display sh1106 or sh1107
 	@param resetPin Used only if reset pin present on device, iF not = set to -1
-	@param gpioDev device num gpiochip 4-RPI5, 0=RPI3 Used only rst pin on device
+	@param gpioDev device num gpiochip Used only rst pin on device
 	@return
 		-#  rdlib::Success everything worked
 		-#  rdlib::GpioPinClaim Cannot claim the reset pin (if used)
@@ -84,6 +84,9 @@ rdlib::Return_Codes_e SH110X_RDL::OLEDSetBufferPtr(uint8_t width, uint8_t height
 
 /*!
 	@brief  Start I2C operations.
+	@param I2C_device  An I2C device number.
+	@param I2C_addr The address of a device on the I2C bus. Default is 0x3C
+	@param I2C_flags  Flags which modify an I2C open command. None are currently defined.
 	@return
 		-#  rdlib::Success everything worked
 		-#  rdlib::I2CbeginFail Cannot open I2C device

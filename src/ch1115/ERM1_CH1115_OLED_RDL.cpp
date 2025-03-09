@@ -59,7 +59,7 @@ ERMCH1115::ERMCH1115(int16_t oledwidth, int16_t oledheight , int8_t rst, int8_t 
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::WrongModeChosen
@@ -121,7 +121,7 @@ rdlib::Return_Codes_e ERMCH1115::OLEDbegin (uint8_t OLEDcontrast, int device, in
 /*!
 	@brief begin Method initialise OLED for software SPI
 	@param OLEDcontrast Contrast of the OLED display default = 0x80 , range 0x00 to 0xFE
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::WrongModeChosen

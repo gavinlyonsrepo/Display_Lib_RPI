@@ -13,7 +13,7 @@
 	@param strobe GPIO STB pin
 	@param clock  GPIO CLK pin
 	@param data  GPIO DIO pin
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@param  swap_nibbles default false, if true, swaps nibbles on display byte.
 */
 TM1638plus_Model2::TM1638plus_Model2(uint8_t strobe, uint8_t clock, uint8_t data,int gpioDev,  bool swap_nibbles) : TM1638plus_common(strobe, clock, data, gpioDev) {
@@ -143,22 +143,26 @@ void TM1638plus_Model2::DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numb
 	@brief Display a string, with decimal point display
 	@param string pointer to char array
 	@param dots Turn on or off  decimal points 0 to 0xFF d7d6d5d4d3d2d1d0
+	@return error code  if string is nullptr
 	@note
 		Takes in string , converts it to ASCII using the font and masks for the decimal point.
 		Then passes array of eight ASCII bytes to DisplayValues function
 */
-void TM1638plus_Model2::DisplayStr(const char* string, uint16_t dots)
+rdlib::Return_Codes_e TM1638plus_Model2::DisplayStr(const char* string, uint16_t dots)
 {
+	if (string == nullptr) 
+	{
+		fprintf(stderr ,"Error: DisplayStr1: String is a null pointer.\n");
+		return rdlib::CharArrayNullptr;
+	}
 	uint8_t values[_TMDisplaySize];
 	bool done = false;
-	uint8_t Result  = 0;
-	memset(values, 0, _TMDisplaySize * sizeof(uint8_t));
-
+	std::fill(values, values + _TMDisplaySize, 0);
 	for (uint8_t  i = 0; i < _TMDisplaySize; i++)
 	{
 	 if (!done && string[i] != '\0') {
 		if (dots >> (7-i) & 1){  //if dots bit is set for that position apply the mask to turn on dot(0x80).
-			Result = pFontSevenSegptr[string[i] - TM_ASCII_OFFSET];
+			uint8_t Result = pFontSevenSegptr[string[i] - TM_ASCII_OFFSET];
 			values[i] = (Result | TM_DOT_MASK_DEC); //apply the Dot bitmask to value extracted from ASCII table
 			}
 		else
@@ -170,7 +174,8 @@ void TM1638plus_Model2::DisplayStr(const char* string, uint16_t dots)
 		}
 
 	}
- ASCIItoSegment(values);
+	ASCIItoSegment(values);
+	return rdlib::Success;
 }
 
   /*!
@@ -244,6 +249,10 @@ unsigned char TM1638plus_Model2::ReadKey16()
 		-# S1 = 0x0001
 		-# S16 = 0x8000
 		-# S1 + S16 together = 0x8001
+	@details 
+		Data matrix for read key_value. c = datain
+		c3 0110 0110  c2 0110 0110  c1 0110 0110  c0 0110 0110 :uint8_ts read
+		 8,16 7,15     6,14 5,13     4,12 3,11      2,10  1,9 :button value
 	@note
 		 Can detect multiple key presses. However,  See notes section in readme regarding,
 		 problems with seven segment display when pressing certain keys in combination.
@@ -252,7 +261,6 @@ uint16_t TM1638plus_Model2::ReadKey16Two()
 {
 
 	uint16_t key_value = 0;
-	uint8_t Datain ,i = 0;
 	int GpioDataErrorstatus = 0;
 	Display_CS_SetLow;
 	sendData(TM_BUTTONS_MODE);
@@ -261,9 +269,9 @@ uint16_t TM1638plus_Model2::ReadKey16Two()
 	{
 		fprintf(stderr, "Can't claim DATA GPIO for input (%s)\n", lguErrorText(GpioDataErrorstatus));
 	}
-	for (i = 0; i < 4; i++)
+	for (uint8_t i = 0; i < 4; i++)
 	{
-		Datain =  HighFreqshiftin();
+		uint8_t Datain =  HighFreqshiftin();
 		// turn Datain ABCDEFGI = 0BC00FG0  into 00CG00BF see matrix below
 		Datain = (((Datain & 0x40) >> 3 | (Datain & 0x04)) >> 2) | (Datain & 0x20) | (Datain & 0x02) << 3;
 		 // i = 0 Datain =  00,10,9,0021 // i = 1 Datain  = 00,12,11,0043
@@ -279,8 +287,4 @@ uint16_t TM1638plus_Model2::ReadKey16Two()
 	Display_CS_SetHigh;
 
 	return (key_value);
-
-	//  Data matrix for read key_value. c = datain
-	//   c3 0110 0110  c2 0110 0110  c1 0110 0110  c0 0110 0110 :uint8_ts read
-	//    8,16 7,15     6,14 5,13     4,12 3,11                   2,10  1,9 :button value
 }

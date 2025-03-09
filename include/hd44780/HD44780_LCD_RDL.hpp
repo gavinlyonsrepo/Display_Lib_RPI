@@ -76,10 +76,10 @@ class HD44780PCF8574LCD : public Print{
 	uint8_t LCDI2CErrorRetryNumGet(void);
 	void LCDI2CErrorRetryNumSet(uint8_t);
 
-	void LCDSendString (char *str);
+	rdlib::Return_Codes_e LCDSendString (char *str);
 	void LCDSendChar (char data);
 	virtual size_t write(uint8_t);
-	void LCDCreateCustomChar(uint8_t location, uint8_t* charmap);
+	rdlib::Return_Codes_e  LCDCreateCustomChar(uint8_t location, uint8_t* charmap);
 	void LCDPrintCustomChar(uint8_t location);
 	
 	void LCDMoveCursor(LCDDirectionType_e, uint8_t moveSize);

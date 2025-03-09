@@ -6,9 +6,6 @@
 
 # pragma once
 
-#include <array>
-#include <span>
-
 /*
  Icons 1 bit ::
 	Power icon, 12x8 vertically addressed
@@ -32,7 +29,11 @@
 	'SpriteTest16' , 32x32px, 16 bit color 
 */
 
+#include <array>
+#include <span>
 #include <cstdint>
+
+/// @cond
 
 //power icon, 12x8 vertically addressed
 std::array<const uint8_t, 12>  PowerIcon =
@@ -456,8 +457,9 @@ std::array<const uint8_t, 2048> SpriteTest16  = {
   0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f, 0x7e, 0x5f
 };
 
-
 // Define an empty span for error check testing
 std::span<const uint8_t> emptyBitmap{};
 
 
+
+/// @endcond

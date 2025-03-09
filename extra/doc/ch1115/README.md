@@ -61,11 +61,11 @@ Example files :
 
 | Examples files main.cpp  | Description |
 | ------ | ------ |
-| HELLO_WORLD | Hello world , Basic usage |
-| BITMAP | Shows use of bitmaps methods  |
-| TEXT_GRAPHICS_FUNCTIONS | Fonts graphics + misc functions |
-| FPS_TEST |  Frames per second test  |
-| FPS_TEST_SW_SPI | Frames per second test but with software SPI setup|
+| hello_world | Hello world , Basic usage |
+| bitmap | Shows use of bitmaps methods  |
+| text_graphics_functions | Fonts graphics + misc functions |
+| framerate_test|  Frames per second test  |
+| framerate_test_swspi | Frames per second test but with software SPI setup|
 
 ### SPI
 

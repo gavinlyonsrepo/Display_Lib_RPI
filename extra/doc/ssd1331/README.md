@@ -54,7 +54,6 @@ This library supports both Hardware SPI and software SPI.
 The SetupGPIO function is overloaded(2 off one for HW SPI the other for SW SPI).
 The parameters set for SetupGPIO define which is used.
 
-
 *User Option 2 Screen size  + Offsets*
 
 User can adjust screen pixel height, screen pixel width.
@@ -86,12 +85,11 @@ The color bitmaps used in testing are in bitmap folder, 2 16-bit and 2 24-bit im
 
 | # | example file name  | Desc|
 | ------ | ------ |  ------ |
-| 1 | Hello_world| Basic use case |
-| 2 | Hello_world_SWSPI | Basic use case software SPI |
-| 3 | Text_Graphic_Functions | Tests text,graphics & function testing  |
-| 4 | Bitmap_Tests | bitmap tests |
-| 5 | Clock_demo| Clock Demo |
-
+| 1 | hello_world| Basic use case |
+| 2 | hello_world_SWSPI | Basic use case software SPI |
+| 3 | text_graphic_functions | Tests text,graphics & function testing  |
+| 4 | bitmap_tests | bitmap tests |
+| 5 | demos| various demos |
 
 ### Bitmap
 
@@ -140,24 +138,37 @@ Connections as setup in main.cpp test file.
 
 ### spidev buf size
 
-Certain 'Display_lib_RPI' functions use buffered writes, the ones that draw bitmaps, write fonts, 
-fill rectangles, clear screen, etc. In order for this to work the spidev.buf size setting  
-must be at least greater than the biggest buffer write user will send  device which for a 96X64 16 bit screen
-is about 12 KiB.
-To check the setting on your device run command:
+| Device or library | maximum SPI transaction size bytes| where defined |
+| --- | --- | --- |
+| lgpio | 65536 | LG_MAX_SPI_DEVICE_COUNT in lgpio.h |
+| Display_lib_RPI | 2 <-> 65536(default) | Display_SPI_BLK_SIZE |
+| Raspberry pis | set same or bigger as Display_SPI_BLK_SIZE | /boot/firmware/cmdline.txt spidev.bufsiz |
+| other SBC | set same or bigger as Display_SPI_BLK_SIZE | ??? |
+
+The maximum SPI transaction size that 'lgpio' can handle by default is 65536 bytes.(see LG_MAX_SPI_DEVICE_COUNT in lgpio.h)
+So this is also the maximum transaction size of Display_lib_RPI, if more than that needs to be sent
+it is sent in blocks of Display_SPI_BLK_SIZE(default 65536) bytes.
+Certain color 16-bit  'Display_lib_RPI' functions use buffered writes, the ones that draw bitmaps, write fonts, 
+fill rectangles, clear screen, etc.  User can also change and view maximum SPI transaction size( Display_SPI_BLK_SIZE) of 'Display_lib_RPI' by using getDisplaySPIBlockSize() and 
+setDisplaySPIBlockSize() functions, by default it is 65536. Due not set it higher than this or 'lgppio' will give an spi Write error.
+In order for buffered writes to work the spidev.buf size of users SBC must bigger than or equal Display_SPI_BLK_SIZE(max and default 65536), 
+but no bigger than 65536.
+
+*On Raspberry Pi's SBC*
+
+spidev bufsiz defines the number of bytes that the SPI driver will use as a buffer for data transfers.
+To check the  spidev buf size setting on your device run command:
 
 ```sh
 cat /sys/module/spidev/parameters/bufsiz
 ```
 
-If it is lower than 12 kiB you can change it by adding a value greater than 12KiB
-to the start of line in file /boot/firmware/cmdline.txt. (raspberry pi )
+If it is lower than 65536 you can change it by adding 
+this to the start of line in file /boot/firmware/cmdline.txt.
 Make sure everything is on one line and there is space ' ' between this parameter and next one.
 Then reboot machine. Verify again by running last cat command above
 
 ```sh
 spidev.bufsiz=65536
 ```
-
-bufsiz defines the number of bytes that the SPI driver will use as a buffer for data transfers.
 

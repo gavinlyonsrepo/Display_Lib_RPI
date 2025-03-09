@@ -122,14 +122,14 @@ void SSD1306_RDL::OLEDinit()
 	delayMilliSecRDL(SSD1306_INITDELAY);
 	I2CWriteByte( SSD1306_DISPLAY_OFF);
 	I2CWriteByte( SSD1306_SET_DISPLAY_CLOCK_DIV_RATIO);
-	I2CWriteByte( 0x80);
+	I2CWriteByte( 0x80); // default RESET values. 
 	I2CWriteByte( SSD1306_SET_MULTIPLEX_RATIO );
 	I2CWriteByte( _OLED_HEIGHT - 1 );
 	I2CWriteByte( SSD1306_SET_DISPLAY_OFFSET );
 	I2CWriteByte(0x00);
 	I2CWriteByte( SSD1306_SET_START_LINE);
 	I2CWriteByte( SSD1306_CHARGE_PUMP );
-	I2CWriteByte(0x14);
+	I2CWriteByte(0x14); // Enable Charge Pump
 	I2CWriteByte( SSD1306_MEMORY_ADDR_MODE );
 	I2CWriteByte(0x00);  //Horizontal Addressing Mode is Used
 	I2CWriteByte( SSD1306_SET_SEGMENT_REMAP| 0x01);

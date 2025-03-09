@@ -11,7 +11,7 @@
 	@param strobe  GPIO STB pin
 	@param clock  GPIO CLK pin
 	@param data  GPIO DIO pin
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 */
 TM1638plus_Model3::TM1638plus_Model3(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev) : TM1638plus_Model1(strobe, clock, data, gpioDev) {
  // Blank constructor

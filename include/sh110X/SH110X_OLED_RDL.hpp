@@ -61,12 +61,10 @@ class SH110X_RDL : public bicolor_graphics  {
 	void OLEDI2CErrorTimeoutSet(uint16_t);
 	uint8_t OLEDI2CErrorRetryNumGet(void);
 	void OLEDI2CErrorRetryNumSet(uint8_t);
-	bool OLEDDebugGet(void);
-	void OLEDDebugSet(bool);
-	
 
   protected:
-	 uint8_t pageStartOffset = 0;
+	
+	 uint8_t pageStartOffset = 0; /**< the SH1106 display  requires a small offset */
 
   private:
 
@@ -93,13 +91,13 @@ class SH110X_RDL : public bicolor_graphics  {
 	// If reset pin is present on device
 	int8_t _Display_RST = -1; /**< Reset pin only needed of reset pin is present on display*/
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip  ls /dev/gpio */
-	int _GpioHandle = 0; /** This returns a handle to a  device. */
+	int _GpioHandle = 0; /**< This returns a handle to a  device. */
 
 	//  SH110X register command Set
-	static constexpr uint8_t SH110X_MEMORYMODE  = 0x20 ;
-	static constexpr uint8_t SH110X_COLUMNADDR  = 0x21 ;
-	static constexpr uint8_t SH110X_PAGEADDR    = 0x22 ;
-	static constexpr uint8_t SH110X_CHARGEPUMP  = 0x8D ;
+	static constexpr uint8_t SH110X_MEMORYMODE  = 0x20 ; /**< Memory mode control register */
+	static constexpr uint8_t SH110X_COLUMNADDR  = 0x21 ; /**< Column address control register */
+	static constexpr uint8_t SH110X_PAGEADDR    = 0x22 ; /**< Page address control register */
+	static constexpr uint8_t SH110X_CHARGEPUMP  = 0x8D ; /**< Charge pump control register */
 	static constexpr uint8_t SH110X_SETCONTRAST = 0x81 ; /**<Command to set contrast, 256 contrast steps*/
 	static constexpr uint8_t SH110X_SEGREMAP    = 0xA0 ; /**<Set segment remap, left or right */
 
@@ -127,7 +125,7 @@ class SH110X_RDL : public bicolor_graphics  {
 	static constexpr uint8_t SH110X_SETHIGHCOLUMN = 0x10  ; /**<Set higher column address*/
 	static constexpr uint8_t SH110X_SETSTARTLINE  = 0x40  ; /**<Specifies line address to determine the initial display*/
 
-	static constexpr uint8_t SH110X_COMMAND_BYTE    =  0x00 ;
-	static constexpr uint8_t SH110X_DATA_BYTE       =  0x40 ;
+	static constexpr uint8_t SH110X_COMMAND_BYTE    =  0x00 ; /**< Command byte command */
+	static constexpr uint8_t SH110X_DATA_BYTE       =  0x40 ; /**< Data byte command */
 
 };

@@ -12,12 +12,13 @@ namespace rdlib {
 */
 uint16_t LibraryVersion(void)
 {
-	return 220;
+	return 230;
 }
 
 /*! 
 	@brief Prints out Enum label and help message for given enum code from Return_Codes_e
 	@param code an enum code from Return_Codes_e
+	@return A String containing the error enum and message
 */
 std::string ReturnCodetoText(rdlib::Return_Codes_e code) 
 {

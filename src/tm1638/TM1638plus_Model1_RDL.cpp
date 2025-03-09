@@ -12,7 +12,7 @@
 	@param strobe  GPIO STB pin
 	@param clock  GPIO CLK pin
 	@param data  GPIO DIO pin
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 */
 TM1638plus_Model1::TM1638plus_Model1(uint8_t strobe, uint8_t clock, uint8_t data, int gpioDev) : TM1638plus_common(strobe, clock, data, gpioDev) {
  // Blank constructor
@@ -123,22 +123,30 @@ void TM1638plus_Model1::DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numb
 /*!
 	@brief Display a text string  on display
 	@param text pointer to a character array
+	@return error code  if string is nullptr or toll long 
 	@note 
 		Dots are removed from string and dot on preceding digit switched on
 		"abc.def" will be shown as "abcdef" with c decimal point turned on.
 */
-void TM1638plus_Model1::displayText(const char *text) {
+rdlib::Return_Codes_e TM1638plus_Model1::displayText(const char *text) {
+	// Check for null pointer
+	if (text == nullptr) 
+	{
+		fprintf(stderr ,"Error: displayText 1: String is a null pointer.\n");
+		return rdlib::CharArrayNullptr;
+	}
 	char c, pos;
 	pos = 0;
-		while ((c = (*text++)) && pos < _TMDisplaySize)  {
-		if (*text == '.' && c != '.') {
-			displayASCIIwDot(pos++, c);
-
-			text++;
-		}  else {
-			displayASCII(pos++, c);
+		while ((c = (*text++)) && pos < _TMDisplaySize)
+		{
+			if (*text == '.' && c != '.') {
+				displayASCIIwDot(pos++, c);
+				text++;
+			}else{
+				displayASCII(pos++, c);
+			}
 		}
-		}
+	return rdlib::Success;
 }
 
 /*!
@@ -181,15 +189,15 @@ void TM1638plus_Model1::displayASCII(uint8_t position, uint8_t ascii) {
 */
 void TM1638plus_Model1::displayHex(uint8_t position, uint8_t hex) 
 {
-		uint8_t offset = 0;
 		hex = hex % 16;
 		if (hex <= 9)
 		{
 			display7Seg(position, pFontSevenSegptr[hex + TM_HEX_OFFSET]);
 			// 16 is offset in reduced ASCII table for 0 
-		}else if ((hex >= 10) && (hex <=15))
+		}else
 		{
 			// Calculate offset in reduced ASCII table for AbCDeF
+			uint8_t offset = 0;
 			switch(hex) 
 			{
 			 case 10: offset = 'A'; break;
@@ -212,7 +220,6 @@ void TM1638plus_Model1::displayHex(uint8_t position, uint8_t hex)
 uint8_t TM1638plus_Model1::readButtons()
 {
 	uint8_t buttons = 0;
-	uint8_t v =0;
 	int GpioDataErrorstatus = 0;
 
 	Display_CS_SetLow;
@@ -224,7 +231,7 @@ uint8_t TM1638plus_Model1::readButtons()
 	}
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		v = HighFreqshiftin() << i;
+		uint8_t v = HighFreqshiftin() << i;
 		buttons |= v;
 	}
 

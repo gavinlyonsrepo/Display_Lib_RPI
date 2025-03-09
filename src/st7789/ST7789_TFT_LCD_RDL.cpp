@@ -281,11 +281,12 @@ void ST7789_TFT::TFTsetScrollDefinition(uint16_t top_fix_heightTFT, uint16_t bot
 
 /*!
 	@brief: This method is used together with the TFTsetScrollDefinition.
+	@param vsp scrolling mode
 */
-void ST7789_TFT ::TFTVerticalScroll(uint16_t _vsp) {
+void ST7789_TFT ::TFTVerticalScroll(uint16_t vsp) {
 	writeCommand(ST7789_VSCRSADD);
-	writeData(_vsp >> 8);
-	writeData(_vsp & 0xFF);
+	writeData(vsp >> 8);
+	writeData(vsp & 0xFF);
 }
 
 /*!
@@ -363,14 +364,14 @@ void ST7789_TFT ::TFTsetRotation(display_rotate_e mode) {
 
 	switch (mode) {
 		case Degrees_0 :
-			madctl = ST7789_MADCTL_MX | ST7789_MADCTL_MY | ST7789_MADCTL_RGB;
+			madctl = ST7789_MADCTL_MX | ST7789_MADCTL_MY;
 			_width =_widthStartTFT;
 			_height = _heightStartTFT;
 			_XStart = _colstart;
 			_YStart = _rowstart;
 			break;
 		case Degrees_90:
-			madctl = ST7789_MADCTL_MY | ST7789_MADCTL_MV | ST7789_MADCTL_RGB;
+			madctl = ST7789_MADCTL_MY | ST7789_MADCTL_MV;
 			_YStart = _colstart2;
 			_XStart = _rowstart;
 			_width  =_heightStartTFT;
@@ -384,7 +385,7 @@ void ST7789_TFT ::TFTsetRotation(display_rotate_e mode) {
 			_height = _heightStartTFT;
 			break;
 		case Degrees_270:
-			madctl = ST7789_MADCTL_MX | ST7789_MADCTL_MV | ST7789_MADCTL_RGB;
+			madctl = ST7789_MADCTL_MX | ST7789_MADCTL_MV;
 			_YStart = _colstart;
 			_XStart = _rowstart2;
 			_width =_heightStartTFT;
@@ -423,7 +424,7 @@ void ST7789_TFT  :: TFTInitScreenSize(uint8_t colOffset, uint8_t rowOffset, uint
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return
 		-# rdlib::Success = success
 		-# upstream failure from TFTST7789Initialize()
@@ -448,7 +449,7 @@ void ST7789_TFT::TFTNormalMode(void){writeCommand(ST7789_NORON);}
 /*!
 	@brief intialise PCBtype and SPI, Software SPI
 	@param CommDelay uS GPIO delay used in software SPI
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@return
 		-# rdlib::Success = success
 		-# upstream failure from TFTST7789Initialize()

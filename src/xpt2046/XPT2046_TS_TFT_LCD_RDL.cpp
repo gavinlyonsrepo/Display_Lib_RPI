@@ -20,7 +20,7 @@ XPT_2046_RDL::XPT_2046_RDL(){}
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
-	@param gpioDev The device number of a gpiochip. 4 for RPI5, 0 for RPI3
+	@param gpioDev The device number of a gpiochip.  
 	@param IRQPin The GPIO to use for interrupt eg T_IRQ on ili9341 PCB 
 	@param resPin GPIO for reset pin MOSI only needed if SPI not already on by TFT set to -1 normally
 	@return Returns a rdlib::Return_Codes_e 
@@ -167,16 +167,22 @@ bool XPT_2046_RDL::XPTIRQIsPressed()
 
 /*! 
 	@brief Read the touch screen sensor Data
+	@param command the x or y position 
 	@return The readbuffer data
 */
-int XPT_2046_RDL::XPTReadSensor(int Command){
+int XPT_2046_RDL::XPTReadSensor(int command){
 	char ReadBuffer[MAX_LEN_BUFFER];
 	char WriteBuffer[MAX_LEN_BUFFER];
 	int spiErrorStatus = 0;
-	memset(WriteBuffer, 0, sizeof(ReadBuffer));
-	memset(ReadBuffer, 0, sizeof(ReadBuffer));
-	WriteBuffer[0] = Command;
-	spiErrorStatus = Display_SPI_TRANSFER(_spiHandle, (const char *)WriteBuffer,(char *)ReadBuffer, sizeof(WriteBuffer));
+	// Use std::fill to set all elements to zero
+	std::fill(std::begin(WriteBuffer), std::end(WriteBuffer), 0);
+	std::fill(std::begin(ReadBuffer), std::end(ReadBuffer), 0);
+	WriteBuffer[0] = command;
+	spiErrorStatus = Display_SPI_TRANSFER(_spiHandle, 
+									  reinterpret_cast<const char *>(WriteBuffer), 
+									  reinterpret_cast<char *>(ReadBuffer), 
+									  sizeof(WriteBuffer));
+
 	if (spiErrorStatus <0 ) 
 	{
 		fprintf(stderr, "Error : spiWriteDataBuffer 1: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -196,7 +202,9 @@ void XPT_2046_RDL::XPTReadXY(int *xp, int *yp){
 
 }
 
-
+/*! 
+	@brief init values 
+*/
 void XPT_2046_RDL::XPTInitValues(){
 	tpc = 0;
 	tpx = MaxTouchPoints;
@@ -204,6 +212,9 @@ void XPT_2046_RDL::XPTInitValues(){
 	lusec = 0;
 }
 
+/*! 
+	@brief print the touch point values if debug enabled 
+*/
 void XPT_2046_RDL::XPTPrintValues(){
 	int i;
 	if (!rdlib_config::isDebugEnabled()) return;
@@ -218,6 +229,19 @@ void XPT_2046_RDL::XPTPrintValues(){
 	}
 }
 
+/*!
+ * @brief Sets the touch points for the XPT_2046 touch controller.
+ *
+ * This function updates the touch point coordinates (`x1`, `y1`, `x2`, `y2`) and touch point ID (`id`) for the touch controller.
+ * It ensures the coordinates are correctly ordered, swapping values if necessary (i.e., making sure that `x1 <= x2` and `y1 <= y2`).
+ * The function then stores the updated values into the `tps` array at the current `tpc` index, and increments `tpc` to move to the next index.
+ * 
+ * @param x1 The first x-coordinate to set.
+ * @param y1 The first y-coordinate to set.
+ * @param x2 The second x-coordinate to set.
+ * @param y2 The second y-coordinate to set.
+ * @param id The identifier for the touch point.
+ */
 void XPT_2046_RDL::XPTSetPoint(uint16_t x1,uint16_t y1,uint16_t x2,uint16_t y2,uint16_t id){
 	if (tpc == tpx) return;
 	int index = tpc;
@@ -239,7 +263,17 @@ void XPT_2046_RDL::XPTSetPoint(uint16_t x1,uint16_t y1,uint16_t x2,uint16_t y2,u
 	tpc++;
 }
 
-
+/*!
+ * @brief Gets the touch point ID based on the current touch coordinates.
+ * 
+ * This function reads the X and Y touch coordinates, performs a range check, and 
+ * then scales the coordinates based on predefined minimum and maximum values for 
+ * both the touch screen and the display. It ensures no double-touch is registered 
+ * by checking the time between touch events, and returns the ID of the touch point 
+ * if it lies within the specified touch areas.
+ *
+ * @return The ID of the touch point if it lies within a valid region, or -1 if no valid touch is detected or double-touch is detected.
+ */
 int XPT_2046_RDL::XPTGetPoint() {
 	int i;
 	struct timeval myTime;

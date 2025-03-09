@@ -42,11 +42,11 @@ Example files
 
 | Filepath | File Function | Screen Size |
 | ---- | ---- | ---- |
-| HELLO_WORLD | Basic use case | 128x64 |
-| BITMAP  | Shows use of bitmaps | 128x64 |
-| CLOCK_DEMO | A basic clock Demo | 128x64 |
-| SPEED_TEST | Frame rate per second test | 128x64 |
-| TEXT_GRAPHICS_FUNCTIONS |Tests Text,graphics and functions| 128x64 |
+| hello_world | Basic use case | 128x64 |
+| bitmap  | Shows use of bitmaps | 128x64 |
+| clock_demo | A basic clock Demo | 128x64 |
+| framerate_test | Frame rate per second test | 128x64 |
+| text_graphics_functions |Tests Text,graphics and functions| 128x64 |
 
 ### I2C
 

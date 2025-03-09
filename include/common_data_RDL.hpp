@@ -33,7 +33,7 @@ enum Return_Codes_e : uint8_t
 	BitmapVerticalSize = 10,    /**< A vertical Bitmap's height must be divisible by 8.*/
 	BitmapHorizontalSize = 11,  /**< A horizontal Bitmap's width  must be divisible by 8*/
 	BitmapSize = 12,            /**< Size of the Bitmap is incorrect: BitmapSize(vertical)!=(w*(h/8),BitmapSize(horizontal)!=(w/8)*h*/
-	CustomCharLen = 13,         /**< CustomChar array must always be 5 bytes long*/
+	CustomCharLen = 13,         /**< Char array is incorrect size*/
 	BufferSize = 14,            /**< Size of the Buffer is incorrect: BufferSize(vertical)!=(w*(h/8)*/
 	BufferEmpty = 15,           /**< The Buffer span is an empty object*/
 	SPIOpenFailure = 16,        /**< Failed to open HW SPI , lgpio*/
@@ -47,10 +47,14 @@ enum Return_Codes_e : uint8_t
 	GpioPinClaim = 24,          /**< Failed to claim a GPIO for output or input, lgpio*/
 	GpioPinFree = 25,           /**< Failed to free a GPIO for output or input, lgpio*/
 	WrongModeChosen = 26,       /**< Wrong SPI communication mode chosen by user */
-	GenericError = 27           /**< Generic Error message */
+	GenericError = 27,          /**< Generic Error message, for minor errors */
+	UnknownError = 28,          /**< For Unknown Errors */
+	InvalidRAMLocation = 29     /**< Invalid Display RAM location */
 };
 
-constexpr std::array<const char*, 28> ReturnCodesStrings = {
+/*! String array to hold error data so user if in possession of an error code can print out message ,
+ *  the message consists of the enum label and its associated comment */
+constexpr std::array<const char*, 30> ReturnCodesStrings = {
 	"Success, Function ran without defined Error",
 	"Reserved, Reserved for future use",
 	"WrongFont, Wrong Font selected",
@@ -64,7 +68,7 @@ constexpr std::array<const char*, 28> ReturnCodesStrings = {
 	"BitmapVerticalSize, A vertical Bitmap's height must be divisible by 8",
 	"BitmapHorizontalSize, A horizontal Bitmap's width must be divisible by 8",
 	"BitmapSize, Size of the Bitmap is incorrect: BitmapSize(vertical)!=(w*(h/8), BitmapSize(horizontal)!=(w/8)*h",
-	"CustomCharLen, CustomChar array must always be 5 bytes long",
+	"CustomCharLen, Char array is incorrect size",
 	"BufferSize, Size of the Buffer is incorrect: BufferSize(vertical)!=(w*(h/8)",
 	"BufferEmpty, The Buffer span is an empty object",
 	"SPIOpenFailure, Failed to open HW SPI, lgpio",
@@ -78,7 +82,9 @@ constexpr std::array<const char*, 28> ReturnCodesStrings = {
 	"GpioPinClaim, Failed to claim a GPIO for output or input, lgpio",
 	"GpioPinFree, Failed to free a GPIO for output or input, lgpio",
 	"WrongModeChosen, Wrong SPI communication mode chosen by user",
-	"GenericError, Generic Error message"
+	"GenericError, Generic error message , for minor errors",
+	"UnknownError, For unknown error events",
+	"InvalidRAMLocation, Invalid RAM location"
 };
 
 std::string ReturnCodetoText(Return_Codes_e);
@@ -93,6 +99,9 @@ uint16_t LibraryVersion(void);
 #define delayMilliSecRDL(x) std::this_thread::sleep_for(std::chrono::milliseconds(x))
 /*! micro second delay abstraction */
 #define delayMicroSecRDL(x) std::this_thread::sleep_for(std::chrono::microseconds(x))
+
+
+/// @cond
 
 // lg library GLOBAL ABSTRACTION
 // (this makes porting or changing the library much easier across all devices)
@@ -141,10 +150,11 @@ uint16_t LibraryVersion(void);
 #define Display_CLOSE_SPI lgSpiClose(_spiHandle)
 #define Display_SPI_READ lgSpiRead
 #define Display_SPI_WRITE lgSpiWrite
-#define Display_SPI_BLK_SIZE 65536 /**< This is maximum block size of SPI Transaction that lgpio library handles by default*/
 #define Display_SPI_TRANSFER lgSpiXfer
 // I2C 
 #define Display_RDL_I2C_OPEN  lgI2cOpen
 #define Display_RDL_I2C_CLOSE lgI2cClose
 #define Display_RDL_I2C_WRITE lgI2cWriteDevice
 #define Display_RDL_I2C_READ  lgI2cReadDevice
+
+/// @endcond

@@ -199,16 +199,28 @@ void TM1637plus_Model4::DisplayDecimalwDot(int number, uint8_t dots,  bool leadi
 	@param length The number of digits to set. The user must ensure that the number to be shown
 		  fits to the number of digits requested
 	@param position The position most significant digit (0 - leftmost, 3 - rightmost)
+	@return codes
+		-# Success
+		-# CharArrayNullptr
+		-# GenericError ( if The number of digits to set is greater than DisplaySzie)
 */
-void TM1637plus_Model4::DisplayString(const char* numStr, uint8_t dots, uint8_t length, uint8_t position)
+rdlib::Return_Codes_e  TM1637plus_Model4::DisplayString(const char* numStr, uint8_t dots, uint8_t length, uint8_t position)
 {
+	if (numStr == nullptr) 
+	{
+		fprintf(stderr ,"Error: DisplayString 1: String is  null.\n");
+		return rdlib::CharArrayNullptr;
+	}
+	if (length >  _DisplaySize) 
+	{
+		fprintf(stderr ,"Error: DisplayString 2: Length of array is greater than Display Size\n");
+		return rdlib::GenericError;
+	}
 	uint8_t digits[_DisplaySize] = {0}; // Initialize all segments to 0
-	uint8_t digit = 0;
-	
 	for (int8_t i = 0; i < length; i++) 
 	{
 		char currentChar = numStr[i];
-		digit = encodeCharacter(currentChar);
+		uint8_t digit = encodeCharacter(currentChar);
 		// Add the decimal point/colon to the digit if specified in `dots`
 		digit |= (dots & 0x80); // Check the MSB of `dots` and add it to the current digit
 		dots <<= 1;             // Shift the `dots` value to apply the next dot/colon to the next digit
@@ -216,6 +228,7 @@ void TM1637plus_Model4::DisplayString(const char* numStr, uint8_t dots, uint8_t 
 	}
 	// Set the segments based on the processed digits
 	setSegments(digits, length, position);
+	return rdlib::Success;
 }
 
 
