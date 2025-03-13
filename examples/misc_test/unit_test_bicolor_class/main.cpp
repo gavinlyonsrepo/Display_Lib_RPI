@@ -295,7 +295,7 @@ bool Test806(void)
 	returnValues.push_back(myOLED.drawFastHLine(1, 130, MY_OLED_WIDTH, myOLED.WHITE));
 	delayMilliSecRDL(500);
 	//drawPolygon
-	returnValues.push_back(myOLED.drawPolygon(50, 50, 12, 45, 45, false, myOLED.WHITE));
+	returnValues.push_back(myOLED.drawPolygon(50, 50, 14, 45, 45, false, myOLED.WHITE));
 	returnValues.push_back(myOLED.drawPolygon(50, 50, 1, 50, 45, true, myOLED.WHITE));
 	delayMilliSecRDL(500);
 	//== SUMMARY SECTION===

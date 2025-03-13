@@ -132,7 +132,7 @@ bool Test801(void)
 	returnValues.push_back(myTFT.fillRectangle(1, 130, TFT_WIDTH, TFT_HEIGHT, myTFT.RDLC_GREEN));
 	delayMilliSecRDL(500);
 	//drawPolygon
-	returnValues.push_back(myTFT.drawPolygon(50, 50, 12, 45, 45, false, myTFT.RDLC_WHITE));
+	returnValues.push_back(myTFT.drawPolygon(50, 50, 14, 45, 45, false, myTFT.RDLC_WHITE));
 	returnValues.push_back(myTFT.drawPolygon(50, 50, 1, 50, 45, true, myTFT.RDLC_WHITE));
 	delayMilliSecRDL(500);
 	//== SUMMARY SECTION===
