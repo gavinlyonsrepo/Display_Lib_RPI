@@ -9,7 +9,7 @@
 	* [Fourteen segment](#fourteen-segment)
 	* [Sixteen segment](#sixteen-segment)
   * [Software](#software)
-	* [Example files](#Example files)
+	* [Example files](#example-files)
 	* [I2C](#i2c)
 
 
@@ -108,7 +108,7 @@ not enough segment lines.
 ### Example files
 
 | Filepath | File Function |
-| ---- | ---- | ---- |
+| ---- | ---- |
 | test_7_segment| Carries out test sequence testing 3 digit 7 segment |
 | test_14_segment| Carries out test sequence testing 2 digit 14 segment |
 
