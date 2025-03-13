@@ -39,4 +39,10 @@ Version control history
 	* Code optimisations.
 	* Namespace improvements.
 
+* Version 2.3.0 03-2025
+	* Added Support for Ht16k33 LED segment controller module
+	* Added more demos to color 16-bit section 
+	* Added more graphics functions to color 16-bit section  (arc, polygon, ellipse etc)
+
+
 

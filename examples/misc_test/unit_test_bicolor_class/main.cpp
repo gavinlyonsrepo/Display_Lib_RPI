@@ -3,6 +3,7 @@
 	@brief Test file for SSD1306_OLED display 
 		showing unit testing bi-color graphics class , graphics text and bitmaps.
 	@test
+		-# Test 806 Unit testing graphics bi-color library
 		-# Test 805 Unit testing Bitmap  bi-color library
 		-# Test 804 Unit testing Text bi-color library
 */

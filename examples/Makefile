@@ -4,6 +4,7 @@
 # Run make help for options 
 
 # === SUPPORTED DISPLAY LIST  ===
+# Display 0 =  HT16K33
 # Display 1 =  MAX7219
 # Display 2 =  TM1638
 # Display 3 =  TM1637
@@ -12,8 +13,8 @@
 # Display 6 =  ERM19264 LCD SPI
 # Display 7 =  NOKIA5110 LCD SPI
 # Display 8 =  CH1115 OLED I2C
-# Display 9 =  Sh1106 OLED I2C
-# Display 10 = Sh1107 OLED I2C
+# Display 9 =  SH1106 OLED I2C
+# Display 10 = SH1107 OLED I2C
 # Display 11 = ST7735X  TFT LCD SPI
 # Display 12 = ST7789   TFT LCD SPI
 # Display 13 = ILI9341  TFT LCD SPI
@@ -25,6 +26,11 @@
 # ** User SRC directory path Option Section A ***
 # 1. Pick an example file "SRC" path and ONE ONLY.
 # 2. Comment out the others.
+
+# ================= HT16K33 ======================
+#SRC=ht16k33/test_7_segment
+#SRC=ht16k33/test_14_segment
+# ================================================
 
 # ================= MAX7219_7SEG ================
 #SRC=max7219/tests_hwspi

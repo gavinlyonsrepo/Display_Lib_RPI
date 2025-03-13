@@ -1162,8 +1162,8 @@ void color16_graphics::setArcAngleOffset(int arcAngleOffset) {
  */
 rdlib::Return_Codes_e color16_graphics::drawPolygon(int16_t x, int16_t y, uint8_t sides, int16_t diameter, float rotation, bool fill , uint16_t color) 
 {
-	if ((sides < 3 ) || (sides > 10)) {
-		fprintf(stderr, "Error : drawPolygon : sides incorrect value 3-10\r\n");
+	if ((sides < 3 ) || (sides > 12)) {
+		fprintf(stderr, "Error : drawPolygon : sides incorrect value 3-12\r\n");
 		return rdlib::GenericError;
 	}
 	// Convert degrees to radians

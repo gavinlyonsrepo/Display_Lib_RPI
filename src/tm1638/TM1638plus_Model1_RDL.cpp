@@ -123,7 +123,7 @@ void TM1638plus_Model1::DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numb
 /*!
 	@brief Display a text string  on display
 	@param text pointer to a character array
-	@return error code  if string is nullptr or toll long 
+	@return error code  if string is nullptr or too long 
 	@note 
 		Dots are removed from string and dot on preceding digit switched on
 		"abc.def" will be shown as "abcdef" with c decimal point turned on.

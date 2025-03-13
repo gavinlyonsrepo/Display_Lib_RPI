@@ -85,19 +85,12 @@ bool setup(void) {
 	{
 		return false;
 	}
-
 	delayMilliSecRDL(250);
-
-	if (myLCD.LCD_I2C_ON() != rdlib::Success)
-	{
-		return false;
-	}
 
 	myLCD.LCDInit(myLCD.LCDCursorTypeOn);
 	myLCD.LCDClearScreen();
 	myLCD.LCDBackLightSet(true);
 
-	
 	// print out  flag status( Note optional)
 	std::cout <<  "Backlight status is :" << (myLCD.LCDBackLightGet() ? "On" : "Off") << std::endl ;
 	

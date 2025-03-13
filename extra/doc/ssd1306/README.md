@@ -70,7 +70,7 @@ param=i2c_arm=on,i2c_arm_baudrate=400000
 ```
 
 3. In the event of an error writing a byte, debug info with error code will be written to console. 
-Debug flag must be set to true to see this output. User can set error timeout between retry attempts and number of retry attempts 
+Debug configuration flag must be set to true to see this output. User can set error timeout between retry attempts and number of retry attempts 
 and can monitor the Error flag.
 
 ### Bitmaps

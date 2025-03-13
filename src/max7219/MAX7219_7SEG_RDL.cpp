@@ -542,7 +542,7 @@ void MAX7219_SS_RPI::HighFreqshiftOut(uint8_t value)
 uint8_t MAX7219_SS_RPI::ASCIIFetch(uint8_t character, DecimalPoint_e decimalPoint)
 {
 	const uint8_t  AsciiOffset = 0x20; // The font starts at ASCII 0x20 . space
-	const uint8_t AsciiEnd = 0x7B;
+	const uint8_t AsciiEnd = 0x7E;
 	if (character <= (AsciiOffset-1) || character >= AsciiEnd)
 	{
 		fprintf(stderr, "Error : AsciiFetch : ASCII character is outside font range %u, \n", character);

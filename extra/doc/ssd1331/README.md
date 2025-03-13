@@ -9,6 +9,7 @@
       * [Bitmap](#bitmap)
       * [Color codes](#color-codes)
   * [Hardware](#hardware)
+  * [Output](#output)
   * [Notes](#notes)
      * [spidev buf size](#spidev-buf-size)
 
@@ -133,6 +134,10 @@ Connections as setup in main.cpp test file.
 2. User can select  SPI_CE0  or SPI_CE1 for HW SPI
 
 [![Image SSD](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1331.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1331.jpg)
+
+## Output
+
+[![ demo pic 2](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1331output.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1331output.jpg)
 
 ## Notes
 
