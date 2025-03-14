@@ -50,6 +50,7 @@ font_data_RDL.hpp file
 
 A new ASCII font must have following font structure.
 First 4 bytes are control bytes followed by **horizontally** addressed font data.
+Also the fonts character width (or x-size) must be divisible evenly by 8.
 
 ```
 // Example Font

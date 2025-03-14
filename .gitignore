@@ -1,6 +1,7 @@
 stuff/
 bin/
 build/
+display-cppcheck-build-dir/
 examples/Bin
 examples/Build
 display.cppcheck

@@ -31,7 +31,7 @@ enum Return_Codes_e : uint8_t
 	BitmapScreenBounds = 8,     /**< The Bitmap starting point is outside screen bounds, check x and y*/
 	BitmapLargerThanScreen = 9, /**< The Bitmap is larger than screen, check  w and h*/
 	BitmapVerticalSize = 10,    /**< A vertical Bitmap's height must be divisible by 8.*/
-	BitmapHorizontalSize = 11,  /**< A horizontal Bitmap's width  must be divisible by 8*/
+	BitmapHorizontalSize = 11,  /**< A horizontal Bitmap's width must be divisible by 8*/
 	BitmapSize = 12,            /**< Size of the Bitmap is incorrect: BitmapSize(vertical)!=(w*(h/8),BitmapSize(horizontal)!=(w/8)*h*/
 	CustomCharLen = 13,         /**< Char array is incorrect size*/
 	BufferSize = 14,            /**< Size of the Buffer is incorrect: BufferSize(vertical)!=(w*(h/8)*/
