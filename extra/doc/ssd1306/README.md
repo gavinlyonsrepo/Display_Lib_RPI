@@ -89,7 +89,7 @@ See example file "BITMAP" for more details.
 
 [![ Output image ](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ssd1306.jpg)
 
-[![ Output image 2 ](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)](https://github.com/gavinlyonsrepo/SSD1306_OLED_PICO/blob/main/extra/image/3.jpg)
+[![ Output image 2 ](https://github.com/gavinlyonsrepo/display_1bit_PICO/blob/main/extra/image/3.jpg)](https://github.com/gavinlyonsrepo/display_1bit_PICO/blob/main/extra/image/3.jpg)
 
 ## Notes and issues
 

@@ -31,7 +31,7 @@
 
 ## Output
 
-[![ output image ](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_PICO/blob/main/extra/image/all.jpg)](https://github.com/gavinlyonsrepo/ER_OLEDM1_CH1115_PICO/blob/main/extra/image/all.jpg)
+[![ output image ](https://github.com/gavinlyonsrepo/display_1bit_PICO/blob/main/extra/image/all.jpg)](https://github.com/gavinlyonsrepo/display_1bit_PICO/blob/main/extra/image/all.jpg)
 
 
 ## Hardware
