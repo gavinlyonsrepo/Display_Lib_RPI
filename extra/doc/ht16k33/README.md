@@ -45,8 +45,8 @@ Max. 16 x 8 patterns, 16 segments and 8 commons.
 
  I2C-bus interface. I2C Connections to PI.
 
-1. HT16J33 SCLK = SCLK1 I2C pins P1-05 GPIO3
-2. HT16J33 SDA = SDA1 I2C pins P1-03 GPIO2
+1. HT16K33 SCLK = SCLK1 I2C pins P1-05 GPIO3
+2. HT16K33 SDA = SDA1 I2C pins P1-03 GPIO2
 
 ### Seven segment
 

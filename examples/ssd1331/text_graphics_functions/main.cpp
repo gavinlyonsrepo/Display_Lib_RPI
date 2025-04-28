@@ -5,8 +5,10 @@
 	@note See USER OPTIONS 1-3 in SETUP function and in myOLED constructor
 	@test
 	-# Test 500 RGB color OK?
+	-# Test 501 change modes test -> Invert, display on/off and Sleep.
 	-# Test 502 Rotate
-	-# Test 503 change modes test -> Invert, display on/off and Sleep.
+	-# Test 503 windows command tests
+	-# Test 504 Scroll
 	-# Test 705 print method all fonts
 	-# Test 706 Misc print class tests (string object, println invert, wrap, base nums)
 	-# Test 902 rectangles

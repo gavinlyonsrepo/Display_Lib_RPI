@@ -23,6 +23,7 @@
 	-# Test 907 Quadrilateral
 	-# Test 908 Ellipse
 	-# Test 909 Draw Arc and draw simple arc
+	-# Test 910 Draw line at an angle
 */
 
 // Section ::  libraries
@@ -79,6 +80,7 @@ void Test906(void);
 void Test907(void);
 void Test908(void);
 void Test909(void);
+void Test910(uint8_t revolutions);
 
 //  Section ::  MAIN loop
 

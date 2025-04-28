@@ -397,7 +397,8 @@ void color16_graphics ::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 	@param color color to fill , 565 16-bit
 */
 void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color) {
-	int16_t a, b, y, last, dx01, dy01, dx02, dy02, dx12, dy12, sa, sb;
+	int16_t a, b, y, last, dx01, dy01, dx02, dy02, dx12, dy12;
+	int32_t sa = 0, sb = 0;
 	// Sort coordinates by Y order (y2 >= y1 >= y0)
 	if (y0 > y1) {
 		swapint16t(y0, y1);

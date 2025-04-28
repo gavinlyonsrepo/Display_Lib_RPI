@@ -188,7 +188,7 @@ void Test701(void)
 
 void Test702(void)
 {
-	std::cout << "Test 702 Wide font, NO LOWERCASE LETTERS "<< std::endl;
+	std::cout << "Test 702 gll font, NO LOWERCASE LETTERS "<< std::endl;
 	myLCD.setFont(font_gll);
 	char TestStr[] = "GLL FONT";
 	char InvertedStr[] = "INVERT";

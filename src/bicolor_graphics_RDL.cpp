@@ -1062,21 +1062,6 @@ void bicolor_graphics::ellipseHelper(uint16_t cx, uint16_t cy, uint16_t x, uint1
 	if (x != 0 && y != 0) drawPixel(cx - x, cy - y, color);
 }
 
-
-/*!
-	@brief helps drawARC draw an Arc on screen 
-	@param cx X-coordinate of the center of the arc
-	@param cy Y-coordinate of the center of the arc
-	@param radius The radius of the arc
-	@param thickness the thickness of the arc
-	@param start Starting angle of arc
-	@param end End angle of arc
-	@param color The color of the arc.
-	@details @details This function uses a modified midpoint circle algorithm combined with scanline filling
-		to efficiently draw an arc with a specified thickness. It calculates pixel positions using 
-		trigonometric boundary checks and slopes for accurate rendering. 
-		For more information, see: https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
-*/
 /*!
 	@brief helps drawARC draw an Arc on screen 
 	@param centerX X-coordinate of the center of the arc

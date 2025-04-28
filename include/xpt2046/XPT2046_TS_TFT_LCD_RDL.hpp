@@ -14,6 +14,7 @@
 #include <lgpio.h>
 #include "common_data_RDL.hpp"
 
+#pragma once 
 
 /*! 
 	@brief Class to interface hardware of Touch point IC XPT2046 

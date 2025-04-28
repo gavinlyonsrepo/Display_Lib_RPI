@@ -5,7 +5,7 @@
 	@note See USER OPTIONS 1-3 in SETUP function and in myOLED constructor
 	@test
 	-# Test 300 Sprites demo, small bitmap
-	-# Test 302 bi-color image 128x128
+	-# Test 302 bi-color image 64x64
 	-# Test 303 24 bit color image bitmaps from the file system
 	-# Test 304 16 bit color image bitmaps from the file system
 */
