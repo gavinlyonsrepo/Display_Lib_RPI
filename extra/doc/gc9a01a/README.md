@@ -1,4 +1,4 @@
-# GC9A01A Readme Readme
+# GC9A01A Readme
 
 ## Table of contents
 

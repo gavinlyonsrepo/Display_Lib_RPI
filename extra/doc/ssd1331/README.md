@@ -8,6 +8,7 @@
       * [File system](#file-system)
       * [Bitmap](#bitmap)
       * [Color codes](#color-codes)
+      * [Advanced screen buffer mode](#Advanced-screen-buffer-mode)
   * [Hardware](#hardware)
   * [Output](#output)
   * [Notes](#notes)
