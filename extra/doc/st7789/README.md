@@ -161,7 +161,7 @@ Connections as setup in main.cpp test file.
 
 ### Error 99
 
-[Error 99 Documentation](../error_99/Readme.md)
+[Error 99 Documentation](../error_99/README.md)
 
 ### Display offsets
 

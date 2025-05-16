@@ -193,6 +193,6 @@ Output of the basic touch screen example included.
 
 ### Error 99
 
-[Error 99 Documentation](../error_99/Readme.md)
+[Error 99 Documentation](../error_99/README.md)
 
 
