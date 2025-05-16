@@ -140,6 +140,11 @@ Library naming :
 5. Installed size = ~500 KiB.
 6. Namespaces see API.documentation.
 
+Project Overview : 
+
+[![pov img](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/project.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/project.jpg)
+
+
 ### Error Codes 
 
 Most functions that return a value, return a enum 'rdlib::Return_Codes'. 
