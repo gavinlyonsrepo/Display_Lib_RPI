@@ -20,8 +20,8 @@
 /*!
 	@brief  The base Class , used to store common data & functions for all models types.
 */
-class TM1638plus_common{
-
+class TM1638plus_common : public SevenSegmentFont 
+{
 public:
 
 	/*! Alignment of text on display */

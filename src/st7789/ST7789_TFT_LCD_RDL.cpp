@@ -26,19 +26,23 @@ rdlib::Return_Codes_e  ST7789_TFT ::TFTPowerDown(void)
 	TFTenableDisplay(false);
 	uint8_t ErrorFlag = 0; // Becomes > 0 in event of error
 
-	// 1. free rst & DC GPIO lines
-	int GpioResetErrorStatus = 0;
+	// 1A. free rst GPIO line
+	if (_resetPinOn == true)
+	{
+		int GpioResetErrorStatus = 0;
+		Display_RST_SetLow;
+		GpioResetErrorStatus = Display_GPIO_FREE_RST;
+		if (GpioResetErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error: Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
+			ErrorFlag = 2;
+		}
+	}
+	// 1B. free DC GPIO line
 	int GpioDCErrorStatus = 0;
-	Display_RST_SetLow;
 	Display_DC_SetLow;
-	GpioResetErrorStatus = Display_GPIO_FREE_RST;
 	GpioDCErrorStatus  =  Display_GPIO_FREE_DC;
-
-	if (GpioResetErrorStatus < 0 ){
-
-		fprintf(stderr,"Error:Can't Free RST GPIO (%s)\n", lguErrorText(GpioResetErrorStatus));
-		ErrorFlag = 2;
-	}else if (GpioDCErrorStatus  < 0 ){
+	if (GpioDCErrorStatus  < 0 ){
 		fprintf(stderr,"Error:Can't Free CD GPIO (%s)\n", lguErrorText(GpioDCErrorStatus));
 		ErrorFlag = 2;
 	}
@@ -99,27 +103,33 @@ if (_hardwareSPI == false)
 
 /*!
 	@brief Method for Hardware Reset pin control
+	@details If you have a display with no reset pin this will issue the software reset command
+		this software reset is untested on actual hardware. 
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::GpioPinClaim
 */
 rdlib::Return_Codes_e ST7789_TFT ::TFTResetPin() {
-	
-	// Claim GPIO as outputs for RST line
-	int GpioResetErrorStatus = 0;
-	GpioResetErrorStatus= Display_RST_SetDigitalOutput;
-	if (GpioResetErrorStatus < 0 )
-	{
-		fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
-		return rdlib::GpioPinClaim;
+	if (_resetPinOn == true){
+		// Claim GPIO as outputs for RST line
+		int GpioResetErrorStatus = 0;
+		GpioResetErrorStatus= Display_RST_SetDigitalOutput;
+		if (GpioResetErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error : Can't claim Reset GPIO for output (%s)\n", lguErrorText(GpioResetErrorStatus));
+			return rdlib::GpioPinClaim;
+		}
+		Display_RST_SetHigh;
+		const uint8_t TFT_RESET_DELAY = 10; /**< Reset delay in mS*/
+		delayMilliSecRDL(TFT_RESET_DELAY);
+		Display_RST_SetLow;
+		delayMilliSecRDL(TFT_RESET_DELAY);
+		Display_RST_SetHigh;
+		delayMilliSecRDL(TFT_RESET_DELAY);
+	}else {
+		writeCommand(ST7789_SWRESET); // no hw reset pin, software reset. untested maybe not be needed ?
+		delayMilliSecRDL(120);
 	}
-	Display_RST_SetHigh;
-	const uint8_t TFT_RESET_DELAY = 10; /**< Reset delay in mS*/
-	delayMilliSecRDL(TFT_RESET_DELAY);
-	Display_RST_SetLow;
-	delayMilliSecRDL(TFT_RESET_DELAY);
-	Display_RST_SetHigh;
-	delayMilliSecRDL(TFT_RESET_DELAY);
 	return rdlib::Success;
 }
 
@@ -185,12 +195,13 @@ rdlib::Return_Codes_e ST7789_TFT::TFTClock_Data_ChipSelect_Pins(void)
 	@brief  sets up TFT GPIO for Hardware SPi
 	@param rst reset GPIO
 	@param dc data or command GPIO.
+	@details for software reset pass -1 to rst
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI 
 */
 void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc)
 {
 	_hardwareSPI = true;
-	_Display_RST= rst;
+	TFTSetupResetPin(rst);
 	_Display_DC = dc;
 }
 
@@ -201,15 +212,16 @@ void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc)
 	@param cs chip select GPIO
 	@param sclk Data clock GPIO
 	@param din Data to TFT GPIO
+	@details for software reset pass -1 to rst
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI 
 */
 void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, int8_t din)
 {
 	_hardwareSPI = false;
+	TFTSetupResetPin(rst);
 	_Display_CS = cs;
 	_Display_SDATA = din;
 	_Display_SCLK = sclk;
-	_Display_RST= rst;
 	_Display_DC = dc;
 }
 
@@ -483,16 +495,19 @@ void  ST7789_TFT::HighFreqDelaySet(uint16_t CommDelay){_HighFreqDelay = CommDela
 	@note virtual function overloads graphics library
  */
 void ST7789_TFT::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
-	uint8_t x0Higher = (x0 >> 8) + _XStart;
-	uint8_t x0Lower  = (x0 &  0xFF) + _XStart;
-	uint8_t y0Higher = (y0 >> 8) + _YStart;
-	uint8_t y0Lower  = (y0 &  0xFF) + _YStart;
-	uint8_t x1Higher = (x1 >> 8) + _XStart;
-	uint8_t x1Lower  = (x1 &  0xFF) + _XStart;
-	uint8_t y1Higher = (y1 >> 8) + _YStart;
-	uint8_t y1Lower  = (y1 &  0xFF) + _YStart;
-	uint8_t seqCASET[]    {x0Higher ,x0Lower,x1Higher,x1Lower};
-	uint8_t seqRASET[]    {y0Higher,y0Lower,y1Higher,y1Lower};
+	uint16_t x0_ = x0 + _XStart;
+	uint16_t x1_ = x1 + _XStart;
+	uint16_t y0_ = y0 + _YStart;
+	uint16_t y1_ = y1 + _YStart;
+	uint8_t seqCASET[] = {
+		(uint8_t)(x0_ >> 8), (uint8_t)(x0_ & 0xFF),
+		(uint8_t)(x1_ >> 8), (uint8_t)(x1_ & 0xFF)
+	};
+	uint8_t seqRASET[] = {
+		(uint8_t)(y0_ >> 8), (uint8_t)(y0_ & 0xFF),
+		(uint8_t)(y1_ >> 8), (uint8_t)(y1_ & 0xFF)
+	};
+
 	writeCommand(ST7789_CASET); //Column address set
 	spiWriteDataBuffer(seqCASET, sizeof(seqCASET));
 	writeCommand(ST7789_RASET); //Row address set
@@ -506,9 +521,9 @@ void ST7789_TFT::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y
 */
 void ST7789_TFT::cmd89(void)
 {
-	uint8_t CASETsequence[] {0x00, 0x00, uint8_t(_widthStartTFT  >> 8),  uint8_t(_widthStartTFT  & 0xFF)};
-	uint8_t RASETsequence[] {0x00, 0x00, uint8_t(_heightStartTFT >> 8) , uint8_t(_heightStartTFT & 0XFF)};
-	
+	uint8_t CASETsequence[] {0x00, 0x00, 0,  240};
+	uint8_t RASETsequence[] {0x00, 0x00, 320 >> 8 , 320 & 0xFF};
+
 	writeCommand(ST7789_SWRESET);
 	delayMilliSecRDL(150);
 	writeCommand(ST7789_SLPOUT);
@@ -556,4 +571,19 @@ void ST7789_TFT::AdjustWidthHeight() {
 	}
 }
 
+/*!
+	@brief sets up TFT GPIO reset pin
+	@param rst reset GPIO
+	@details if rst value is -1 use software reset, else use Hardware reset.
+*/
+void ST7789_TFT::TFTSetupResetPin(int8_t rst)
+{
+	if(rst != -1)
+	{
+		_Display_RST= rst;
+		_resetPinOn = true;
+	}else{
+		_resetPinOn  = false;
+	}
+}
 //**************** EOF *****************

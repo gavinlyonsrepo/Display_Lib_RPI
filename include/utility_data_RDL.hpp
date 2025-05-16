@@ -39,6 +39,7 @@ namespace rdlib_maths
 	int mapValue(int x, int in_min, int in_max, int out_min, int out_max);
 	float sineFromDegrees(float angle);
 	float cosineFromDegrees(float angle);
+	uint16_t generateColor(uint8_t value);
 }
 
 /*! @brief Name space for log file related utilities*/

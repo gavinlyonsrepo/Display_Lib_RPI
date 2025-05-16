@@ -3,6 +3,7 @@
 	@author   Gavin Lyons
 	@brief    Library header file for 16 bit (565) color graphics library.
 				This file handles the graphic methods
+	@details Note  USER OPTION for advanced screen buffer mode, its off by default
 */
 
 #pragma once
@@ -15,6 +16,11 @@
 #include "print_data_RDL.hpp"
 #include "font_data_RDL.hpp"
 #include "common_data_RDL.hpp"
+
+// ===== USER OPTION turns on advanced screen buffer mode if commented in =
+// Default is off, commented OUT , tested in file examples/st7735/advanced_screen_buffer_mode
+//#define color16_ADVANCED_SCREEN_BUFFER_ENABLE
+// ================================================================
 
 /*!
 	@brief Class to handle fonts and graphics of color 16 bit display
@@ -66,6 +72,14 @@ class color16_graphics:public display_Fonts, public Print  {
 		Degrees_270    /**< Rotation 270 degrees*/
 	};
 
+	// buffer screen mode functions
+#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+	rdlib::Return_Codes_e setBuffer(void);
+	rdlib::Return_Codes_e clearBuffer(uint16_t color =RDLC_BLACK);
+	rdlib::Return_Codes_e writeBuffer(void);
+	rdlib::Return_Codes_e destroyBuffer(void);
+#endif
+
 	// Screen related
 	/*! @brief define in the sub class */
 	virtual void setAddrWindow(uint16_t, uint16_t, uint16_t, uint16_t) = 0;
@@ -90,7 +104,7 @@ class color16_graphics:public display_Fonts, public Print  {
 	void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 	void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
 	void drawQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color);
-	void fillQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color,bool useTriangleSplit=true);
+	void fillQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color);
 	rdlib::Return_Codes_e drawPolygon(int16_t x, int16_t y, uint8_t sides, int16_t diameter, float rotation, bool fill , uint16_t color);
 	void drawSimpleArc(int16_t cx, int16_t cy, int16_t radius, float startAngle, float endAngle, uint16_t color);
 	void drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float startAngle, float endAngle, uint16_t color);
@@ -106,13 +120,15 @@ class color16_graphics:public display_Fonts, public Print  {
 	void setTextWrap(bool w);
 	void setTextColor(uint16_t c, uint16_t bg);
 	void setTextColor(uint16_t c);
+	void setTextCharPixelOrBuffer(bool mode);
+	bool getTextCharPixelOrBuffer() const;
 
 	// Bitmap & Icon
 	rdlib::Return_Codes_e drawIcon(uint16_t x, uint16_t y, uint16_t w, uint16_t color, uint16_t bgcolor,const std::span<const uint8_t> data);
 	rdlib::Return_Codes_e drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const std::span<const uint8_t> data);
 	rdlib::Return_Codes_e drawBitmap24(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h);
 	rdlib::Return_Codes_e drawBitmap16(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h);
-	rdlib::Return_Codes_e drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h, uint16_t backgroundColor);
+	rdlib::Return_Codes_e drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h, uint16_t backgroundColor, bool printBg = false);
 	// RGB to 565
 	int16_t Color565(int16_t ,int16_t , int16_t );
 	//SPI 
@@ -130,6 +146,7 @@ protected:
 	bool _textwrap = true;           /**< wrap text around the screen on overflow*/
 	uint16_t _textcolor = 0xFFFF ;   /**< 16 bit ForeGround color for text*/
 	uint16_t _textbgcolor = 0x0000 ; /**< 16 bit BackGround color for text*/
+	
 
 	int16_t _cursorX = 0; /**< Current X co-ord cursor position */
 	int16_t _cursorY = 0; /**< Current Y co-ord cursor position */
@@ -169,5 +186,9 @@ private:
 	}
 /// @endcond
 	int _Display_SPI_BLK_SIZE = 65536; /**< max block size SPI Transaction, lgpio lib default(LG_MAX_SPI_DEVICE_COUNT)*/
+	bool _textCharPixelOrBuffer = false;  /**< Text character is drawn by buffer(false) or pixel(true) */
+#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+	std::vector <uint8_t> _screenBuffer; /**< Buffer for screen used by advanced screen buffer mode, off by default*/
+#endif
 };
 // ********************** EOF *********************

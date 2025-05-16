@@ -56,14 +56,14 @@ sudo make install
 	* Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.3.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.4.0.tar.gz | tar xz
 ```
 
 3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
 	* It will be installed to usr/local/lib and usr/local/include by default. 
 
 ```sh
-cd Display_Lib_RPI-2.3.0
+cd Display_Lib_RPI-2.4.0
 make
 sudo make install
 ```
@@ -97,6 +97,7 @@ make run
 | ILI9341 |16 bit Colour Graphic TFT LCD|SPI HW & SW| [Readme](extra/doc/ili9341/README.md)|
 | ST7789 |16 bit Colour Graphic TFT LCD|SPI HW & SW| [Readme](extra/doc/st7789/README.md)|
 | ST7735 |16 bit Colour Graphic TFT LCD|SPI HW & SW| [Readme](extra/doc/st7735/README.md)|
+| GC9A01A |16 bit Colour Graphic TFT LCD|SPI HW & SW| [Readme](extra/doc/gc9a01/README.md)|
 | SSD1331 |16 bit Colour Graphic OLED|SPI HW & SW| [Readme](extra/doc/ssd1331/README.md)|
 | ERM19264 UC1609|Bi colour Graphic LCD|SPI HW & SW| [Readme](extra/doc/erm19264/README.md) |
 | PCD8544|Bi colour Graphic LCD|SPI HW & SW| [Readme](extra/doc/nokia5110/README.md) |
@@ -104,7 +105,7 @@ make run
 | SSD1306|Bi colour Graphic OLED| I2C | [Readme](extra/doc/ssd1306/README.md) |
 | SH1106 SH1107|Bi colour Graphic OLED | I2C | [Readme](extra/doc/sh110x/README.md) |
 | HD44780 PCF8574 |Character LCD| I2C | [Readme](extra/doc/hd44780/README.md) |
-| TM1638 |LED 7 segment display| ~SPI SW | [Readme](extra/doc/tm1638/README.md) |
+| TM1638 |LED 7 segment display| GPIO| [Readme](extra/doc/tm1638/README.md) |
 | TM1637 |LED 7 segment display| GPIO | [Readme](extra/doc/tm1637/README.md) |
 | MAX7219 |LED 7 segment display| SPI HW & SW| [Readme](extra/doc/max7219/README.md) |
 | HT16K33 |LED segment display| I2C| [Readme](extra/doc/ht16k33/README.md) |
@@ -143,7 +144,7 @@ Library naming :
 
 Most functions that return a value, return a enum 'rdlib::Return_Codes'. 
 Zero for success and a positive number for an error code. The error codes are listed in
-is in the 'doc' folder [at link.](extra/doc/errors/README.md)
+is in the 'doc' folder [at link.](extra/doc/error_codes/README.md)
 
 ### Tool chain
 
@@ -152,6 +153,8 @@ is in the 'doc' folder [at link.](extra/doc/errors/README.md)
 	2. C++, g++ (Debian 12.2.0)
 	3. Raspbian , Debian 12 bookworm OS, 64 bit.
 	4. lgpio library Version Number :: 131584
+
+* Also tested on a raspberry pi 4 see issue number 2 on github.
 
 ### Configuration
 

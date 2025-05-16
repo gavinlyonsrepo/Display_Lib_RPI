@@ -156,7 +156,8 @@ rdlib::Return_Codes_e TM1638plus_Model1::displayText(const char *text) {
 */
 void TM1638plus_Model1::displayASCIIwDot(uint8_t position, uint8_t ascii) { 
 		// add 128 or 0x080 0b1000000 to turn on decimal point/dot in seven seg
-	display7Seg(position, pFontSevenSegptr[ascii- TM_ASCII_OFFSET] + TM_DOT_MASK_DEC);
+	const uint8_t *font = SevenSegmentFont::pFontSevenSegptr();
+	display7Seg(position, font[ascii- TM_ASCII_OFFSET] + TM_DOT_MASK_DEC);
 }
 
 /*!
@@ -179,7 +180,8 @@ void TM1638plus_Model1::display7Seg(uint8_t position, uint8_t value) { // call 7
 	@param ascii The ASCII value from font table  to display 
 */
 void TM1638plus_Model1::displayASCII(uint8_t position, uint8_t ascii) {
-	display7Seg(position, pFontSevenSegptr[ascii - TM_ASCII_OFFSET]);
+	const uint8_t *font = SevenSegmentFont::pFontSevenSegptr();
+	display7Seg(position, font[ascii - TM_ASCII_OFFSET]);
 }
  
 /*!
@@ -189,10 +191,11 @@ void TM1638plus_Model1::displayASCII(uint8_t position, uint8_t ascii) {
 */
 void TM1638plus_Model1::displayHex(uint8_t position, uint8_t hex) 
 {
+		const uint8_t *font = SevenSegmentFont::pFontSevenSegptr();
 		hex = hex % 16;
 		if (hex <= 9)
 		{
-			display7Seg(position, pFontSevenSegptr[hex + TM_HEX_OFFSET]);
+			display7Seg(position, font[hex + TM_HEX_OFFSET]);
 			// 16 is offset in reduced ASCII table for 0 
 		}else
 		{
@@ -207,7 +210,8 @@ void TM1638plus_Model1::displayHex(uint8_t position, uint8_t hex)
 			 case 14: offset = 'E'; break;
 			 case 15: offset = 'F'; break;
 			}
-			display7Seg(position, pFontSevenSegptr[offset-TM_ASCII_OFFSET]);
+			
+			display7Seg(position, font[offset-TM_ASCII_OFFSET]);
 		}
 		
 }

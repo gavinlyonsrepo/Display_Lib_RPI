@@ -70,7 +70,7 @@ class bicolor_graphics : public display_Fonts, public Print{
 	void drawQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, 
 		int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t color);
 	void fillQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int16_t y1, 
-		int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t color,bool useTriangleSplit=true);
+		int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t color);
 	rdlib::Return_Codes_e drawPolygon(int16_t x, int16_t y, uint8_t sides, 
 		int16_t diameter, float rotation, bool fill , uint8_t color);
 	void drawArc(uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, 

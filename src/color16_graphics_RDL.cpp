@@ -18,13 +18,24 @@ color16_graphics::color16_graphics(){}
 	@param x  Column co-ord
 	@param y  row co-ord
 	@param color 565 16-bit
+	@details By default uses spiWriteDataBuffer method to write each pixel direct to VRAM of display
+			If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
+			will draw the pixel into the screen buffer.
 */
 void color16_graphics::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	if ((x >= _width) || (y >= _height))
 		return;
+#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+	// Calculate the index in the buffer
+	size_t index = (y * _width + x) * 2; // 2 bytes per pixel for RGB565
+	// Write the color to the buffer
+	_screenBuffer[index] = (uint8_t)(color >> 8);     // High byte
+	_screenBuffer[index + 1] = (uint8_t)(color & 0xFF); // Low byte
+#else
 	setAddrWindow(x, y, x + 1, y + 1);
 	uint8_t TransmitBuffer[2] {(uint8_t)(color >> 8), (uint8_t)(color & 0xFF)};
 	spiWriteDataBuffer(TransmitBuffer, 2);
+#endif
 }
 
 
@@ -152,100 +163,159 @@ rdlib::Return_Codes_e color16_graphics::drawFastHLine(uint16_t x, uint16_t y, ui
 
 /*!
 	@brief draws a circle where (x0,y0) are center coordinates an r is circle radius.
-	@param x0 circle center x position
-	@param y0 circle center y position
-	@param r radius of circle
+	@param centerX circle center x position
+	@param centerY circle center y position
+	@param radius radius of circle
 	@param color The color of the circle , 565 16 Bit color
 */
-void color16_graphics::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color) {
-	int16_t f, ddF_x, ddF_y, x, y;
-	f = 1 - r, ddF_x = 1, ddF_y = -2 * r, x = 0, y = r;
-	drawPixel(x0, y0 + r, color);
-	drawPixel(x0, y0 - r, color);
-	drawPixel(x0 + r, y0, color);
-	drawPixel(x0 - r, y0, color);
-	while (x < y) {
-		if (f >= 0) {
+void color16_graphics::drawCircle(int16_t centerX, int16_t centerY, int16_t radius, uint16_t color)
+{
+	// Initial decision parameter for the circle drawing algorithm
+	int16_t decisionParam = 1 - radius;
+	// Differences for circle drawing in the x and y directions
+	int16_t deltaX = 1;
+	int16_t deltaY = -2 * radius;
+	// Starting coordinates
+	int16_t x = 0;
+	int16_t y = radius;
+	// Draw the initial points on the circle (4 points)
+	drawPixel(centerX, centerY + radius, color);
+	drawPixel(centerX, centerY - radius, color);
+	drawPixel(centerX + radius, centerY, color);
+	drawPixel(centerX - radius, centerY, color);
+	// Apply the circle drawing algorithm to plot points around the circle
+	while (x < y)
+	{
+		// If the decision parameter is positive or zero, adjust y and deltaY
+		if (decisionParam >= 0)
+		{
 			y--;
-			ddF_y += 2;
-			f += ddF_y;
+			deltaY += 2;
+			decisionParam += deltaY;
 		}
+		// Always adjust x and deltaX
 		x++;
-		ddF_x += 2;
-		f += ddF_x;
-		drawPixel(x0 + x, y0 + y, color);
-		drawPixel(x0 - x, y0 + y, color);
-		drawPixel(x0 + x, y0 - y, color);
-		drawPixel(x0 - x, y0 - y, color);
-		drawPixel(x0 + y, y0 + x, color);
-		drawPixel(x0 - y, y0 + x, color);
-		drawPixel(x0 + y, y0 - x, color);
-		drawPixel(x0 - y, y0 - x, color);
+		deltaX += 2;
+		decisionParam += deltaX;
+		// Draw the 8 symmetrical points of the circle for each iteration
+		drawPixel(centerX + x, centerY + y, color);
+		drawPixel(centerX - x, centerY + y, color);
+		drawPixel(centerX + x, centerY - y, color);
+		drawPixel(centerX - x, centerY - y, color);
+		drawPixel(centerX + y, centerY + x, color);
+		drawPixel(centerX - y, centerY + x, color);
+		drawPixel(centerX + y, centerY - x, color);
+		drawPixel(centerX - y, centerY - x, color);
 	}
 }
 
 /// @cond
 
 /*!
-	@brief Used internally by drawRoundRect
+	@brief Internal helper function used by drawRoundRect to draw parts of a circle.
+	@param centerX The x-coordinate of the circle's center.
+	@param centerY The y-coordinate of the circle's center.
+	@param radius The radius of the circle.
+	@param cornerFlags A bitmask indicating which corners of the circle to draw.
+	@param color The color of the circle.
 */
-void color16_graphics::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color) {
-	int16_t f, ddF_x, ddF_y, x, y;
-	f = 1 - r, ddF_x = 1, ddF_y = -2 * r, x = 0, y = r;
-	while (x < y) {
-		if (f >= 0) {
+void color16_graphics::drawCircleHelper(int16_t centerX, int16_t centerY,
+										   int16_t radius, uint8_t cornerFlags, uint16_t color)
+{
+	// Initial decision parameter for the circle drawing algorithm
+	int16_t decisionParam = 1 - radius;
+	// Differences for circle drawing in the x and y directions
+	int16_t deltaX = 1;
+	int16_t deltaY = -2 * radius;
+	// Starting coordinates
+	int16_t x = 0;
+	int16_t y = radius;
+	// Apply the circle drawing algorithm to plot points in the specified corners
+	while (x < y)
+	{
+		// If the decision parameter is positive or zero, adjust y and deltaY
+		if (decisionParam >= 0)
+		{
 			y--;
-			ddF_y += 2;
-			f += ddF_y;
+			deltaY += 2;
+			decisionParam += deltaY;
 		}
+		// Always adjust x and deltaX
 		x++;
-		ddF_x += 2;
-		f += ddF_x;
-		if (cornername & 0x4) {
-			drawPixel(x0 + x, y0 + y, color);
-			drawPixel(x0 + y, y0 + x, color);
+		deltaX += 2;
+		decisionParam += deltaX;
+		// Draw the points for each corner based on the cornerFlags
+		if (cornerFlags & 0x4) // Top-right corner
+		{
+			drawPixel(centerX + x, centerY + y, color);
+			drawPixel(centerX + y, centerY + x, color);
 		}
-		if (cornername & 0x2) {
-			drawPixel(x0 + x, y0 - y, color);
-			drawPixel(x0 + y, y0 - x, color);
+		if (cornerFlags & 0x2) // Bottom-right corner
+		{
+			drawPixel(centerX + x, centerY - y, color);
+			drawPixel(centerX + y, centerY - x, color);
 		}
-		if (cornername & 0x8) {
-			drawPixel(x0 - y, y0 + x, color);
-			drawPixel(x0 - x, y0 + y, color);
+		if (cornerFlags & 0x8) // Top-left corner
+		{
+			drawPixel(centerX - y, centerY + x, color);
+			drawPixel(centerX - x, centerY + y, color);
 		}
-		if (cornername & 0x1) {
-			drawPixel(x0 - y, y0 - x, color);
-			drawPixel(x0 - x, y0 - y, color);
+		if (cornerFlags & 0x1) // Bottom-left corner
+		{
+			drawPixel(centerX - y, centerY - x, color);
+			drawPixel(centerX - x, centerY - y, color);
 		}
 	}
 }
 
 /*!
-	@brief Used internally by fill circle fillRoundRect and fillcircle
+	@brief Internal helper function used by fillCircle and fillRoundRect to fill parts of a circle.
+	@param centerX The x-coordinate of the circle's center.
+	@param centerY The y-coordinate of the circle's center.
+	@param radius The radius of the circle.
+	@param cornerFlags A bitmask indicating which parts of the circle to fill.
+	@param verticalOffset An additional vertical offset to adjust the line length.
+	@param color The color to fill the circle with.
 */
-void color16_graphics::fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color) {
-	int16_t f, ddF_x, ddF_y, x, y;
-	f = 1 - r, ddF_x = 1, ddF_y = -2 * r, x = 0, y = r;
-	while (x < y) {
-		if (f >= 0) {
+void color16_graphics::fillCircleHelper(int16_t centerX, int16_t centerY, int16_t radius,
+											  uint8_t cornerFlags, int16_t verticalOffset, uint16_t color)
+{
+	// Initial decision parameter for the circle filling algorithm
+	int16_t decisionParam = 1 - radius;
+	// Differences for circle drawing in the x and y directions
+	int16_t deltaX = 1;
+	int16_t deltaY = -2 * radius;
+	// Starting coordinates
+	int16_t x = 0;
+	int16_t y = radius;
+	// Apply the circle filling algorithm to plot vertical lines at the specified points
+	while (x < y)
+	{
+		// If the decision parameter is positive or zero, adjust y and deltaY
+		if (decisionParam >= 0)
+		{
 			y--;
-			ddF_y += 2;
-			f += ddF_y;
+			deltaY += 2;
+			decisionParam += deltaY;
 		}
+		// Always adjust x and deltaX
 		x++;
-		ddF_x += 2;
-		f += ddF_x;
-
-		if (cornername & 0x1) {
-			drawFastVLine(x0 + x, y0 - y, 2 * y + 1 + delta, color);
-			drawFastVLine(x0 + y, y0 - x, 2 * x + 1 + delta, color);
+		deltaX += 2;
+		decisionParam += deltaX;
+		// Draw the vertical lines for each part of the circle based on the cornerFlags
+		if (cornerFlags & 0x1) // Bottom-right corner
+		{
+			drawFastVLine(centerX + x, centerY - y, 2 * y + 1 + verticalOffset, color);
+			drawFastVLine(centerX + y, centerY - x, 2 * x + 1 + verticalOffset, color);
 		}
-		if (cornername & 0x2) {
-			drawFastVLine(x0 - x, y0 - y, 2 * y + 1 + delta, color);
-			drawFastVLine(x0 - y, y0 - x, 2 * x + 1 + delta, color);
+		if (cornerFlags & 0x2) // Bottom-left corner
+		{
+			drawFastVLine(centerX - x, centerY - y, 2 * y + 1 + verticalOffset, color);
+			drawFastVLine(centerX - y, centerY - x, 2 * x + 1 + verticalOffset, color);
 		}
 	}
 }
+
 
 /// @endcond
 
@@ -396,59 +466,76 @@ void color16_graphics ::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 	@param y2 y start coordinate point 3
 	@param color color to fill , 565 16-bit
 */
-void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color) {
-	int16_t a, b, y, last, dx01, dy01, dx02, dy02, dx12, dy12;
-	int32_t sa = 0, sb = 0;
+void color16_graphics::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
+{
+	// Temporary variables for line drawing
+	int16_t leftX, rightX, y, lastY;
 	// Sort coordinates by Y order (y2 >= y1 >= y0)
-	if (y0 > y1) {
+	if (y0 > y1)
+	{
 		swapint16t(y0, y1);
 		swapint16t(x0, x1);
 	}
-	if (y1 > y2) {
+	if (y1 > y2)
+	{
 		swapint16t(y2, y1);
 		swapint16t(x2, x1);
 	}
-	if (y0 > y1) {
+	if (y0 > y1)
+	{
 		swapint16t(y0, y1);
 		swapint16t(x0, x1);
 	}
-	if (y0 == y2) {
-		a = b = x0;
-		if (x1 < a) a = x1;
-		else if (x1 > b) b = x1;
-		if (x2 < a) a = x2;
-		else if (x2 > b) b = x2;
-		drawFastHLine(a, y0, b - a + 1, color);
+	// If the triangle is flat (top and bottom vertices are the same y-coordinate)
+	if (y0 == y2)
+	{
+		leftX = rightX = x0;
+		if (x1 < leftX)
+			leftX = x1;
+		else if (x1 > rightX)
+			rightX = x1;
+		if (x2 < leftX)
+			leftX = x2;
+		else if (x2 > rightX)
+			rightX = x2;
+		drawFastHLine(leftX, y0, rightX - leftX + 1, color);
 		return;
 	}
-	dx01 = x1 - x0;
-	dy01 = y1 - y0;
-	dx02 = x2 - x0;
-	dy02 = y2 - y0;
-	dx12 = x2 - x1;
-	dy12 = y2 - y1;
-	sa = 0;
-	sb = 0;
-	if (y1 == y2) last = y1;
-	else last = y1 - 1;
-	for (y = y0; y <= last; y++) {
-		a = x0 + sa / dy01;
-		b = x0 + sb / dy02;
+	int16_t dx01 = x1 - x0,
+			dy01 = y1 - y0,
+			dx02 = x2 - x0,
+			dy02 = y2 - y0,
+			dx12 = x2 - x1,
+			dy12 = y2 - y1;
+	// Accumulated error terms for drawing the triangle
+	int32_t sa = 0, sb = 0;
+	if (y1 == y2)
+		lastY = y1;
+	else
+		lastY = y1 - 1;
+	for (y = y0; y <= lastY; y++)
+	{
+		leftX = x0 + sa / dy01;
+		rightX = x0 + sb / dy02;
 		sa += dx01;
 		sb += dx02;
-		if (a > b) swapint16t(a, b);
-		drawFastHLine(a, y, b - a + 1, color);
+		if (leftX > rightX)
+			swapint16t(leftX, rightX);
+		drawFastHLine(leftX, y, rightX - leftX + 1, color);
 	}
-
+	// Reset error terms for the lower part of the triangle
 	sa = dx12 * (y - y1);
 	sb = dx02 * (y - y0);
-	for (; y <= y2; y++) {
-		a = x1 + sa / dy12;
-		b = x0 + sb / dy02;
+	// Draw the lower part of the triangle
+	for (; y <= y2; y++)
+	{
+		leftX = x1 + sa / dy12;
+		rightX = x0 + sb / dy02;
 		sa += dx12;
 		sb += dx02;
-		if (a > b) swapint16t(a, b);
-		drawFastHLine(a, y, b - a + 1, color);
+		if (leftX > rightX)
+			swapint16t(leftX, rightX);
+		drawFastHLine(leftX, y, rightX - leftX + 1, color);
 	}
 }
 
@@ -512,13 +599,12 @@ rdlib::Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uint16_
 		-# rdlib::BitmapDataEmpty Error
 		-# rdlib::BitmapHorizontalSize Error
 		-# rdlib::MemoryAError Error
+	@note If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
+			will write to screen Buffer instead of VRAM.
 */
 rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const std::span<const uint8_t> bitmap) {
 	int16_t byteWidth = (w + 7) / 8;
 	uint8_t byte = 0;
-	uint16_t mycolor = 0;
-	uint32_t ptr;
-
 	if( bitmap.empty()) //  Check for empty bitmap
 	{
 		fprintf(stderr, "Error: drawBitmap 1: Bitmap span is empty\n" );
@@ -534,12 +620,12 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 		fprintf(stderr, "Error: drawBitmap 3: Out of screen bounds, check x & y\n" );
 		return rdlib::BitmapScreenBounds;
 	}
-
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-
-	// Create bitmap buffer
-	std::vector<uint8_t> buffer;
+#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+	uint16_t mycolor = 0;
+	uint32_t ptr;
+	std::vector<uint8_t> buffer; // Create bitmap buffer
 	try 
 	{
 		// Allocate buffer
@@ -549,7 +635,6 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * 2));
 		return  rdlib::MemoryAError;
 	}
-
 	ptr = 0;
 	for (uint16_t j = 0; j < h; j++)
 	{
@@ -567,7 +652,19 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
-
+#else
+	for (int16_t j = 0; j < h; j++, y++)
+	{
+		for (int16_t i = 0; i < w; i++)
+		{
+			if (i & 7)
+				byte <<= 1;
+			else
+				byte = bitmap[j * byteWidth + i / 8];
+			drawPixel(x + i, y, (byte & 0x80) ? color : bgcolor);
+		}
+	}
+#endif
 	return rdlib::Success;
 }
 
@@ -582,14 +679,16 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 		-# rdlib::Success for success
 		-# rdlib::BitmapScreenBounds Error
 		-# rdlib::BitmapDataEmpty Error
+		-# rdlib::BitmapSize Error
 		-# rdlib::MemoryAError Error
 	@note 24 bit color converted to 16 bit color
+	@note If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
+			will write to screen Buffer instead of VRAM.
 */
 rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, const std::span<const uint8_t> bitmap, uint16_t w, uint16_t h)
 {
 	uint16_t i, j;
 	uint16_t color;
-	uint32_t rgb, ptr;
 	// 1. Check for null pointer
 	if( bitmap.empty())
 	{
@@ -602,21 +701,26 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 		fprintf(stderr, "Error: drawBitmap24 2: Out of screen bounds\n");
 		return rdlib::BitmapScreenBounds;
 	}
+	if (bitmap.size() < w * h * 3) // Ensure bitmap has enough data
+	{
+		fprintf(stderr, "Error drawBitmap24 3: Bitmap size too small\r\n");
+		return rdlib::BitmapSize;
+	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-	// Create bitmap buffer
-	std::vector<uint8_t> buffer;
+#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+	uint32_t rgb, ptr;
+	std::vector<uint8_t> buffer; 	// Create bitmap buffer
 	try
 	{
 		// Allocate buffer
 		buffer = std::vector<uint8_t>(w * h * 2);
 	} catch (const std::bad_alloc&) 
 	{
-		fprintf(stderr, "Error:  drawBitmap24  3: Memory allocation failed\n");
+		fprintf(stderr, "Error:  drawBitmap24  4: Memory allocation failed\n");
 		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * 2));
 		return rdlib::MemoryAError;
 	}
-
 	ptr = 0;
 	for(j = 0; j < h; j++)
 	{
@@ -629,10 +733,23 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 			buffer[ptr++] = color;
 		}
 	}
-
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
+#else
+	for (j = 0; j < h; j++)
+	{
+		for (i = 0; i < w; i++)
+		{
+			size_t index = i * 3 + (h - 1 - j) * w * 3;
+			uint8_t b = bitmap[index + 0];
+			uint8_t g = bitmap[index + 1];
+			uint8_t r = bitmap[index + 2];
+			color = Color565(r, g, b);
+			drawPixel(x + i, y + j, color);
+		}
+	}
+#endif
 
 	return rdlib::Success;
 }
@@ -649,12 +766,14 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 		-# rdlib::Success for success
 		-# rdlib::BitmapScreenBounds Error
 		-# rdlib::BitmapDataEmpty Error
+		-# rdlib::BitmapSize Error
 		-# rdlib::MemoryAError Error
+	@note If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
+			will write to screen Buffer instead of VRAM.
 */
 rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, const std::span<const uint8_t> bitmap, uint16_t w, uint16_t h) {
 	uint16_t i, j;
 	uint16_t color;
-	uint32_t ptr;
 	// 1. Check for null pointer
 	if( bitmap.empty())
 	{
@@ -667,10 +786,16 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 		fprintf(stderr, "Error: drawBitmap16 2: Out of screen bounds\n" );
 		return rdlib::BitmapScreenBounds;
 	}
+	if (bitmap.size() < w * h * 2) // Ensure bitmap has enough data
+	{
+		fprintf(stderr, "Error drawBitmap16 3: Bitmap size too small\r\n");
+		return rdlib::BitmapSize;
+	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-
+#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
 	// Create bitmap buffer
+	uint32_t ptr;
 	std::vector<uint8_t> buffer;
 	try 
 	{
@@ -678,12 +803,11 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 		buffer = std::vector<uint8_t>(w * h * 2);
 	} catch (const std::bad_alloc&) 
 	{
-		fprintf(stderr ,"Error:  drawBitmap16  3: Memory allocation failed\n");
+		fprintf(stderr ,"Error:  drawBitmap16  4: Memory allocation failed\n");
 		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * 2));
 		return rdlib::MemoryAError;
 	}
 	ptr = 0;
-
 	for(j = 0; j < h; j++)
 	{
 		for(i = 0; i < w; i ++)
@@ -693,11 +817,21 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 			buffer[ptr++] = color;
 		}
 	}
-
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
-
+#else
+	size_t offset = 0;
+	for (j = 0; j < h; j++)
+	{
+		for (i = 0; i < w; i++)
+		{
+			color = (bitmap[offset + 1] << 8) | bitmap[offset];
+			offset += 2;
+			drawPixel(x + i, y + h - 1 - j, color);
+		}
+	}
+#endif
 	return rdlib::Success;
 }
 
@@ -769,36 +903,31 @@ void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 		Display_CS_SetLow;
 		for(int i=0; i<len; i++) {spiWrite(spidata[i]);}
 		Display_CS_SetHigh;
-	} else 
-	{
+	} else {
 		int spiErrorStatus = 0;
 		if (len >= 1) 
 		{ // Remove the upper limit constraint
 			int remainingLen = len;
 			const uint8_t* currentData = spidata;
-
 			while (remainingLen > 0) 
 			{
 				// Determine how much to write in this iteration
 				int writeSize = (remainingLen > _Display_SPI_BLK_SIZE) ? _Display_SPI_BLK_SIZE : remainingLen;
-
 				// Perform SPI write
 				spiErrorStatus = Display_SPI_WRITE(_spiHandle, reinterpret_cast<const char*>(currentData), writeSize);
 				if (spiErrorStatus < 0) {
-					fprintf(stderr, "Error: spiWriteDataBuffer: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
-					fprintf(stderr, "The problem maybe: The spidev buf size setting must be set at 65536 bytes or higher.\n") ;
+					fprintf(stderr, "\n\n Error 99: spiWriteDataBuffer: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+					fprintf(stderr, "The problem MAYBE: The spidev buf size setting must be equal or greater than %i bytes.\n", writeSize) ;
 					fprintf(stderr, "See readme, note section, of relevant display at https://github.com/gavinlyonsrepo/Display_Lib_RPI for more details\n");
-					fprintf(stderr, "spidev buf defines the number of bytes that the SPI driver will use as a buffer for data transfers.\n");
+					fprintf(stderr, "spidev buf defines the number of bytes that the SPI driver will use as a buffer for data transfers.\n\n");
 					break; // Exit loop on error
 				}
-
 				// Update pointers and counters
 				currentData += writeSize;
 				remainingLen -= writeSize;
 			}
-		} else 
-		{
-			fprintf(stderr, "Buffer wrong size to draw = %i. Allowed size = 1 or greater.\n", len);
+		} else {
+			fprintf(stderr, "Error : spiWriteDataBuffer :: Buffer wrong size to draw = %i. Allowed size = 1 or greater.\n", len);
 		}
 	}
 }
@@ -877,62 +1006,77 @@ rdlib::Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char val
 		fprintf(stderr, "Error 2: writeChar16 : Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (unsigned int)(_FontOffset + _FontNumChars));
 		return rdlib::CharFontASCIIRange;
 	}
-
-	// Create bitmap buffer
-	std::vector<uint8_t> buffer;
-	try
-	{
-		// Allocate buffer
-		buffer = std::vector<uint8_t>(_Font_X_Size * _Font_Y_Size * 2);
-	} catch (const std::bad_alloc&) 
-	{
-		fprintf(stderr, "Error: writeChar16 3: Memory allocation failed\n");
-		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(_Font_X_Size * _Font_Y_Size * 2));
-		return rdlib::MemoryAError;
-	}
-
+	int16_t cx, cy;
 	uint16_t ltextcolor = 0; 
 	uint16_t ltextbgcolor = 0; 
 	if (getInvertFont()== true)
 	{
 		ltextbgcolor = _textcolor;
 		ltextcolor = _textbgcolor;
-	}else
-	{
+	}else{
 		ltextbgcolor = _textbgcolor;
 		ltextcolor = _textcolor;
 	}
 	uint16_t fontIndex = 0;
-	uint32_t bufferIndex = 0; // Index into the display buffer
-	int16_t colByte, cx, cy;
-	int16_t colbit;
 	fontIndex = ((value - _FontOffset)*((_Font_X_Size * _Font_Y_Size) / 8)) + 4;
-	colByte = _FontSelect[fontIndex];
-	colbit = 7;
-	for (cx = 0; cx < _Font_X_Size; cx++)
-	{
-		for (cy = 0; cy < _Font_Y_Size; cy++)
-		{
-			if ((colByte & (1 << colbit)) != 0) {
-				buffer[bufferIndex++] = (ltextcolor >> 8) & 0xFF; // High byte
-				buffer[bufferIndex++] = ltextcolor & 0xFF;    // Low byte
-			} else {
-				buffer[bufferIndex++] = (ltextbgcolor >> 8) & 0xFF; // High byte
-				buffer[bufferIndex++] = ltextbgcolor & 0xFF;    // Low byte
-			}
-			colbit--;
-			if (colbit < 0) {
-				colbit = 7;
-				fontIndex++;
-				colByte = _FontSelect[fontIndex];
+	if (_textCharPixelOrBuffer){// Pixel-by-pixel drawing mode
+		
+		for (int16_t cy = 0; cy < _Font_Y_Size; cy++)
+		{ // Process row first
+			for (int16_t cx = 0; cx < _Font_X_Size; cx++)
+			{ // Then process each column in the row
+				int byteIndex = fontIndex + (cy * (_Font_X_Size / 8)) + (cx / 8);
+				int bitIndex = 7 - (cx % 8); // Bit index within the byte (MSB first)
+
+				if (_FontSelect[byteIndex] & (1 << bitIndex))
+				{
+					drawPixel(x + cx, y + cy, ltextcolor);
+				}else{
+					drawPixel(x + cx, y + cy, ltextbgcolor);
+				}
 			}
 		}
+	}else{ //Buffered write
+		int16_t colByte;
+		int16_t colbit;
+		uint32_t bufferIndex = 0; // Index into the display buffer
+		// Create bitmap buffer
+		std::vector<uint8_t> buffer;
+		try
+		{
+			// Allocate buffer
+			buffer = std::vector<uint8_t>(_Font_X_Size * _Font_Y_Size * 2);
+		} catch (const std::bad_alloc&) 
+		{
+			fprintf(stderr, "Error: writeChar16 3: Memory allocation failed\n");
+			rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(_Font_X_Size * _Font_Y_Size * 2));
+			return rdlib::MemoryAError;
+		}
+		colByte = _FontSelect[fontIndex];
+		colbit = 7;
+		for (cx = 0; cx < _Font_X_Size; cx++)
+		{
+			for (cy = 0; cy < _Font_Y_Size; cy++)
+			{
+				if ((colByte & (1 << colbit)) != 0) {
+					buffer[bufferIndex++] = (ltextcolor >> 8) & 0xFF; // High byte
+					buffer[bufferIndex++] = ltextcolor & 0xFF;    // Low byte
+				} else {
+					buffer[bufferIndex++] = (ltextbgcolor >> 8) & 0xFF; // High byte
+					buffer[bufferIndex++] = ltextbgcolor & 0xFF;    // Low byte
+				}
+				colbit--;
+				if (colbit < 0) {
+					colbit = 7;
+					fontIndex++;
+					colByte = _FontSelect[fontIndex];
+				}
+			}
+		}
+		// Set window and write buffer
+		setAddrWindow(x, y, x + _Font_X_Size - 1, y +_Font_Y_Size - 1);;
+		spiWriteDataBuffer(buffer.data(), buffer.size());
 	}
-
-	// Set window and write buffer
-	setAddrWindow(x, y, x + _Font_X_Size - 1, y +_Font_Y_Size - 1);;
-	spiWriteDataBuffer(buffer.data(), buffer.size());
-
 	return rdlib::Success ;
 }
 
@@ -1046,6 +1190,7 @@ void color16_graphics::setTextWrap(bool w) {
 	@param w width of the sprite in pixels
 	@param h height of the sprite in pixels
 	@param backgroundColor the background color of sprite (16 bit 565) this will be made transparent
+	@param printBg  if true print the background color, if false sprite mode.
 	@note  Does not use buffer, just draw pixel
 	@return
 		-# Success=success
@@ -1053,7 +1198,7 @@ void color16_graphics::setTextWrap(bool w) {
 		-# BitmapScreenBounds=Co-ordinates out of bounds
 		-# BitmapSize=Sprite data out of bounds
 */
-rdlib::Return_Codes_e  color16_graphics::drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> sprite, uint16_t w, uint16_t h, uint16_t backgroundColor)
+rdlib::Return_Codes_e  color16_graphics::drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> sprite, uint16_t w, uint16_t h, uint16_t backgroundColor, bool printBg)
 {
 	uint8_t i, j;
 	uint16_t colour;
@@ -1088,8 +1233,13 @@ rdlib::Return_Codes_e  color16_graphics::drawSprite(uint16_t x, uint16_t y, cons
 			// Read 16-bit color value from sprite
 			colour = (sprite[index] << 8) | sprite[index + 1];
 			index += 2;
-			if (colour != backgroundColor)
+			if (printBg == false)
 			{
+				if (colour != backgroundColor)
+				{
+					drawPixel(x + i - 1, y + j - 1, colour);
+				}
+			}else{
 				drawPixel(x + i - 1, y + j - 1, colour);
 			}
 		}
@@ -1348,16 +1498,22 @@ void color16_graphics::drawQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int1
 	@param x3 The x-coordinate of the fourth vertex.
 	@param y3 The y-coordinate of the fourth vertex.
 	@param color The color used to fill the quadrilateral.
-	@param useTriangleSplit A boolean flag that determines whether the quadrilateral should be divided into
-		   two or three triangles.
  */
-void color16_graphics::fillQuadrilateral(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color, bool useTriangleSplit)
+void color16_graphics::fillQuadrilateral(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint16_t color)
 {
-	fillTriangle(x0,y0,x1,y1,x2,y2,color);
-	if (useTriangleSplit){
+	// Compute the cross product of vectors (x1-x0, y1-y0) and (x2-x0, y2-y0)
+	// to determine convexity
+	int32_t crossProduct = (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+	if (crossProduct >= 0)
+	{
+		// Convex case (or degenerate, treat as convex)
+		fillTriangle(x0, y0, x1, y1, x2, y2, color);
 		fillTriangle(x2, y2, x3, y3, x0, y0, color);
+	}else{
+		// Concave case: Choose the alternative diagonal
+		fillTriangle(x1, y1, x2, y2, x3, y3, color);
+		fillTriangle(x3, y3, x0, y0, x1, y1, color);
 	}
-	fillTriangle(x1,y1,x2,y2,x3,y3,color);
 }
 
 /*!
@@ -1687,4 +1843,116 @@ void color16_graphics::drawSimpleArc(int16_t cx, int16_t cy, int16_t radius, flo
 		drawPixel(x, y, color);
 	}
 }
+
+/*!
+	@brief Set the text rendering mode to either buffered or pixel-by-pixel.
+	@param mode If true, characters are drawn pixel by pixel; if false, characters are drawn using a buffer.
+ */
+void color16_graphics::setTextCharPixelOrBuffer(bool mode)
+{
+	_textCharPixelOrBuffer = mode;
+}
+
+/*!
+	@brief Get the current text rendering mode.
+	@return if true characters are, drawn pixel by pixel, 
+	if false, characters are drawn using a buffered write.
+ */
+bool color16_graphics::getTextCharPixelOrBuffer() const
+{
+	return _textCharPixelOrBuffer;
+}
+
+
+/***************** Buffer mode functions *****************/
+#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+/*!
+	@brief Allocates memory for the screen buffer based on display resolution.
+		The buffer size is calculated as width × height × 2 bytes (RGB565 format).
+		If allocation fails, it returns a memory allocation error.
+		In debug mode, it prints the allocated buffer size.
+	@return rdlib::Success on successful allocation,
+			rdlib::MemoryAError if allocation fails.
+*/
+rdlib::Return_Codes_e color16_graphics::setBuffer(void)
+{
+	// Allocate memory for the buffer
+	_screenBuffer.resize(_width * _height * 2);
+	if (_screenBuffer.empty())
+	{
+		fprintf(stderr, "Error: setBuffer: Memory allocation failed\n");
+		return rdlib::MemoryAError;
+	}
+	if(rdlib_config::isDebugEnabled())
+	{
+		printf("Buffer size set: %zu bytes\n", _screenBuffer.size());
+	}
+	return rdlib::Success;
+}
+
+/*!
+	@brief Clears the screen buffer by filling it with a given color.
+		The buffer is filled in RGB565 format. This function assumes the buffer
+		has already been allocated via setBuffer().
+	@param color The 16-bit RGB565 color to fill the buffer with.
+	@return rdlib::Success on completion.
+			rdlib::BufferEmpty if the buffer is empty.
+*/
+rdlib::Return_Codes_e color16_graphics::clearBuffer(uint16_t color)
+{
+	if (_screenBuffer.empty())
+	{
+		fprintf(stderr, "Error: clearBuffer: Buffer is empty\n");
+		return rdlib::BufferEmpty;
+	}
+	for (size_t i = 0; i < _screenBuffer.size(); i += 2)
+	{
+		_screenBuffer[i] = color >> 8;
+		_screenBuffer[i + 1] = color;
+	}
+	return rdlib::Success;
+}
+
+/*!
+	@brief Writes the contents of the screen buffer to the display.
+		This function assumes the buffer has already been allocated and filled.
+		It sets the address window for the entire screen and writes the buffer data.
+	@return rdlib::Success on completion.
+			rdlib::BufferEmpty if the buffer is empty.
+*/
+rdlib::Return_Codes_e color16_graphics::writeBuffer(void)
+{
+	if (_screenBuffer.empty())
+	{
+		fprintf(stderr, "Error: writeBuffer: Buffer is empty\n");
+		return rdlib::BufferEmpty;
+	}
+	setAddrWindow(0, 0, _width -1, _height);
+	spiWriteDataBuffer(const_cast<uint8_t *>(_screenBuffer.data()),_screenBuffer.size());
+	return rdlib::Success;
+}
+
+/*!
+	@brief Destroys the screen buffer by resizing it to zero.
+		This function checks if the buffer has been 
+		successfully destroyed and prints debug information.
+	@return rdlib::Success on successful destruction,
+			rdlib::MemoryAError if destruction fails.
+*/
+rdlib::Return_Codes_e color16_graphics::destroyBuffer(void)
+{
+	_screenBuffer.resize(0);
+	if (_screenBuffer.size() == 0)
+	{
+		if (rdlib_config::isDebugEnabled()){
+			printf("Buffer has been successfully destroyed.\n");
+		}
+		return rdlib::Success;
+	}else {
+			fprintf(stderr, "Error: destroyBuffer : Buffer annihilation failed.\n");
+		return rdlib::MemoryAError;
+	}
+	return rdlib::Success;
+}
+#endif
 // **************** EOF *****************

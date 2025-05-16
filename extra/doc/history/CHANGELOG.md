@@ -44,5 +44,9 @@ Version control history
 	* Added more demos to color 16-bit section 
 	* Added more graphics functions to color 16-bit section  (arc, polygon, ellipse etc)
 
+* Version 2.4.0 05-2025
+	* Added Support for GC9A01A 16 bit Colour Graphic TFT LCD.
+	* Added optional frame buffer mode. 
+
 
 

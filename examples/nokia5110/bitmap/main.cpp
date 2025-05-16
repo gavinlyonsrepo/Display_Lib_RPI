@@ -32,6 +32,8 @@ int  GPIO_CHIP_DEV = 0; // GPIO chip device number usually 0
 //  LCD
 #define MY_LCD_WIDTH 84
 #define MY_LCD_HEIGHT 48
+#define FULLSCREEN (MY_LCD_WIDTH * (MY_LCD_HEIGHT/8))
+uint8_t screenBuffer[FULLSCREEN];
 #define LCD_INV  false // set to true to invert display pixel color
 #define LCD_CST  0xB2 // contrast default is 0xBF set in LCDinit, Try 0xB1 <-> 0xBF if your display is too dark/dim
 #define LCD_BIAS 0x13 // LCD LCD_BIAS mode 1:48: Try 0x12 or 0x13 or 0x14
@@ -60,7 +62,7 @@ int main()
 {
 	if(!Setup()) return -1;
 
-	myLCD.LCDdisplayClear();
+	myLCD.LCDclearBuffer();
 	myLCD.setDrawBitmapAddr(true);
 	testBitMap();
 	testSmallBitmap();
@@ -83,17 +85,23 @@ bool Setup(void)
 	delayMilliSecRDL(250);
 	if(myLCD.LCDBegin(LCD_INV, LCD_CST, LCD_BIAS, SPI_DEVICE, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
-		std::cout<< "Error 1202: Setup :Cannot start spi" << std::endl;
+		std::cout<< "Error 1201: Setup :Cannot start spi" << std::endl;
 		return false;
 	}
-	
+	if (myLCD.LCDSetBufferPtr(screenBuffer) != rdlib::Success)
+	{
+		std::cout<< "Error 1202: Setup :Cannot Assign Buffer" << std::endl;
+		return false;
+	}
 	delayMilliSecRDL(250);
-	myLCD.LCDdisplayClear();
+	myLCD.LCDfillScreen();
 	return true;
 }
 
 void EndTests(void)
 {
+	myLCD.LCDfillScreen();
+	myLCD.LCDclearBuffer();
 	myLCD.LCDPowerDown();
 	myLCD.LCDSPIoff();
 	std::cout << "LCD End" << std::endl;
@@ -107,9 +115,9 @@ void testBitMap(void)
 }
 
 void screenReset(void) {
-	myLCD.LCDdisplayUpdate();
+	myLCD.LCDupdate();
 	delayMilliSecRDL(TEST_DELAY5);
-	myLCD.LCDdisplayClear();
+	myLCD.LCDclearBuffer();
 }
 
 

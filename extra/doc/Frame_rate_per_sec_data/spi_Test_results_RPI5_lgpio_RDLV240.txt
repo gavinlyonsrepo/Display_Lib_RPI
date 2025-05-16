@@ -1,0 +1,47 @@
+
+================================================
+Rpi 5 lgpio , Display_RPI_LIB version 2.4.0
+================================================
+
+
+=== ST7735 ===
+
+ST7735 128X128 HW SPI framerate_test file
+
+601. Bitmap test 601
+	* 288 frames, 10 sec, 28.7465 fps at 8Mhz SPI Baud rate
+603 text
+	* 1185 frames, 20 sec, 59.2019 fps  at 8Mhz SPI Baud rate
+604 graphics
+	* 181 frames, 20 sec, 9.04706 fps  8Mhz SPI Baud rate 
+
+ST7735 128X128 HW SPI Advanced_screen_buffer_mode file
+
+1. Bitmap test
+	* 29 FPS at 8Mhz SPI Baud rate
+2. Text test
+	* 30 fps at 8Mhz SPI Baud rate
+
+
+=== ST7789 ===
+
+ST7789 240X280 HW SPI framerate_test , 8 MHz
+
+Test 601 FPS test: text + graphics :: 20 seconds
+	* 223 frames, 20 sec, 11.1461 fps
+=============
+Test 603 FPS test: bitmaps ::10 seconds
+	* 287 frames, 10 sec, 28.692 fps
+
+
+=== 1i19341 ===
+
+1. ili9341 240X320 HW SPI mandelbrot set
+	* SPI SPEED 24Mhz = Time Taken ::Time Taken :: 79 ms
+2. ili9341 240X320 HW SPI julia set
+	* SPI SPEED 24Mhz = Time Taken ::Time Taken :: 19780 ms
+3. ili9341 240X320 HW SPI Bitmap test (128 x 128 images)
+	* 287 frames, 10 sec, 28.6947 fps at 8Mhz SPI Baud rate
+
+
+

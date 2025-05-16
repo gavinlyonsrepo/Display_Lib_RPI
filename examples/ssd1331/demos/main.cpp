@@ -57,7 +57,6 @@ std::vector<VuBar_t> bars(_NUM_BARS);
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_int_distribution<int> dist(10, 99);
-uint16_t generateColor(uint8_t value); // demo 2 also
 
 //demo 3 
 void VUmeterGradient(uint16_t secondsDisplay);
@@ -232,7 +231,7 @@ void updateLevels() {
 }
 
 uint16_t getColorForLevel(int level) {
-	return generateColor(rdlib_maths::mapValue(level, 0, 100, 0, 127));
+	return rdlib_maths::generateColor(rdlib_maths::mapValue(level, 0, 100, 0, 127));
 }
 
 void drawVuMeter() {
@@ -275,7 +274,7 @@ void VUmeterGradient(uint16_t secondsDisplay){
 void drawVerticalVU(uint8_t x, uint8_t y, uint8_t width, uint8_t value, uint16_t color) {
 	uint8_t height = rdlib_maths::mapValue(value, 0, 255, 63- y, 1);
 	if (color < 1) {
-		color = generateColor(rdlib_maths::mapValue(value, 0, 255, 1, 127));
+		color = rdlib_maths::generateColor(rdlib_maths::mapValue(value, 0, 255, 1, 127));
 	}
 	myOLED.fillRectangle(x, 1, width, height, myOLED.RDLC_GREY);
 	// Draw colored VU meter segment
@@ -284,33 +283,6 @@ void drawVerticalVU(uint8_t x, uint8_t y, uint8_t width, uint8_t value, uint16_t
 		
 	}
 }
-
-
-// demo 2 & 3 
-
-// This function is designed to return a color in the 16-bit 
-// RGB format based on the input value, creating a smooth transition 
-// between colors in different stages. The gradient is calculated by 
-// cycling through different color transitions as val increases, 
-// allowing for smooth visual effects such as changing hues 
-// or creating rainbow-like effects on an LCD. 1-127 will
-// This will create a gradient color between blue and red based on the value.
-uint16_t generateColor(uint8_t value)
-{
-	uint8_t red = 0;
-	uint8_t green = 0;
-	uint8_t blue = 0;
-	uint8_t segment = value / 32;
-	switch(segment) 
-	{
-		case 0: red = 0; green = 2 * (value % 32); blue = 31; break;
-		case 1: red = 0; green = 63; blue = 31 - (value % 32); break;
-		case 2: red = value % 32; green = 63; blue = 0; break;
-		case 3: red = 31; green = 63 - 2 * (value % 32); blue = 0; break;
-	}
-	return (red << 11) + (green << 5) + blue;
-}
-
 
 //Demo 4
 void DigitalClock(uint16_t count)
@@ -462,12 +434,6 @@ void demoRadar(uint16_t sweeps)
 	}
 	myOLED.fillScreen(myOLED.RDLC_BLACK);
 }
-
-
-
-
-
-// misc 
 
 //Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
 std::string UTC_string() 

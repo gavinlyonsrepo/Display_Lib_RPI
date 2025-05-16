@@ -58,6 +58,34 @@ float sineFromDegrees(float angle)
 	return std::sin(radians);
 }
 
+/*!
+	@brief This function is designed to return a color in the 16-bit 
+		RGB format based on the input value, creating a smooth transition 
+		between colors in different stages.
+	@param value input value 1-127
+	@return 16 bit color
+	@details The gradient is calculated by 
+		cycling through different color transitions as val increases, 
+		allowing for smooth visual effects such as changing hues 
+		or creating rainbow-like effects on an LCD. 1-127 will
+		This will create a gradient color between blue and red based on the value.
+*/
+uint16_t generateColor(uint8_t value)
+{
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	uint8_t segment = value / 32;
+	switch(segment) 
+	{
+		case 0: red = 0; green = 2 * (value % 32); blue = 31; break;
+		case 1: red = 0; green = 63; blue = 31 - (value % 32); break;
+		case 2: red = value % 32; green = 63; blue = 0; break;
+		case 3: red = 31; green = 63 - 2 * (value % 32); blue = 0; break;
+	}
+	return (red << 11) + (green << 5) + blue;
+}
+
 }
 
 

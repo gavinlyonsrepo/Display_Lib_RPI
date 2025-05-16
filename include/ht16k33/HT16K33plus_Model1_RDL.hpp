@@ -20,7 +20,8 @@
 #include "led_segment_font_data_RDL.hpp"
 
 /*! @brief class to control Ht16K33 , supports 7 9 14 and 16 segment displays */
-class HT16K33plus_Model1
+class HT16K33plus_Model1 : public SevenSegmentFont, public  NineSegmentFont, 
+					public FourteenSegmentFont, public SixteenSegmentFont
 {
 	public:
 		// enums:

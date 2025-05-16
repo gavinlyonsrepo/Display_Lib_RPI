@@ -7,10 +7,13 @@
 
 #include "../../include/led_segment_font_data_RDL.hpp"
 
-/// @cond
 
-/*! font , map of ASCII values/table to 7-segment, offset to position 32. dp-gfedcba order. */
-const uint8_t SevenSeg[91] = {
+/*!
+ 	@brief Font data table for ASCII values mapped to seven-segment representation.
+ 	 	Offset starts at ASCII value 32 (space).
+ 		Encoded in dp-gfedcba bit order.
+ */
+const uint8_t SevenSegmentFont::fontData[91] = {
 	0x00, 0x86, 0x22, 0x7E, 0x6D, 0xD2, 0x46, 0x20, 0x29, 0x0B, /* space - ) */
 	0x21, 0x70, 0x10, 0x40, 0x80, 0x52, 0x3F, 0x06, 0x5B, 0x4F, /* * - 3 */
 	0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x09, 0x0D, 0x61, 0x48, /* 4 - = */
@@ -23,8 +26,20 @@ const uint8_t SevenSeg[91] = {
 	0x5B                                                        /* z  */
 };
 
-/*! font , map of ASCII values/table to 9-segment, offset to position 32. dp-ihgfedcba order. */
-const uint16_t NineSeg[91] = {
+/*!
+	@brief Retrieves a pointer to the seven-segment font data table.
+	@return Pointer to the font data array.
+ */
+const uint8_t *SevenSegmentFont::pFontSevenSegptr() 
+{
+	return fontData;
+}
+
+/*! 
+ * @brief font , map of ASCII values/table to 9-segment, 
+ * offset to position 32. dp-ihgfedcba order. 
+ */
+const uint16_t NineSegmentFont::fontData[91] = {
 	0x000, 0x206, 0x022, 0x1FE, 0x0ED, 0x1A4, 0x1E9, 0x080, 0x188, 0x00F, /* space - ) */
 	0x083, 0x1C0, 0x100, 0x040, 0x200, 0x1C0, 0x1BF, 0x086, 0x05B, 0x04F, /* * - 3 */
 	0x066, 0x06D, 0x07D, 0x181, 0x07F, 0x06F, 0x084, 0x120, 0x0C0, 0x041, /* 4 - = */
@@ -37,8 +52,20 @@ const uint16_t NineSeg[91] = {
 	0x148                                                                 /* z */
 };
 
-/*! font , map of ASCII values/table to 14-segment, offset to position 32. dp-nmlkjh-g2-g1-fedcba order. */
-const uint16_t FourteenSeg[91] = {
+/*!
+	@brief Retrieves a pointer to the nine-segment font data table.
+	@return Pointer to the font data array.
+ */
+const uint16_t *NineSegmentFont::pFontNineSegptr() 
+{
+	return fontData;
+}
+
+/*! 
+ * @brief font , map of ASCII values/table to 14-segment, offset to position 32. 
+ * dp-nmlkjh-g2-g1-fedcba order. 
+ */
+const uint16_t FourteenSegmentFont::fontData[91] = {
 	0x0000, 0x4006, 0x0202, 0x12CE, 0x12ED, 0x3FE4, 0x2359, 0x0200, 0x2400, 0x0900, /* space - ) */
 	0x3FC0, 0x12C0, 0x0800, 0x00C0, 0x4000, 0x0C00, 0x0C3F, 0x0406, 0x00DB, 0x008F, /* * - 3 */
 	0x00E6, 0x00ED, 0x00FD, 0x0007, 0x00FF, 0x00EF, 0x1200, 0x0A00, 0x2440, 0x00C8, /* 4 - = */
@@ -51,8 +78,20 @@ const uint16_t FourteenSeg[91] = {
 	0x0848                                                                          /* z */
 };
 
-/*! font , map of ASCII values/table to 16-segment, offset to position 32. utsrpnmkhgfedcba order. */
-const uint16_t SixteenSeg[91] = {
+/*!
+	@brief Retrieves a pointer to the fourteen-segment font data table.
+	@return Pointer to the font data array.
+ */
+const uint16_t *FourteenSegmentFont::pFontFourteenSegptr() 
+{
+	return fontData;
+}
+
+/*! 
+ * @brief font , map of ASCII values/table to 16-segment, 
+ * offset to position 32. utsrpnmkhgfedcba order. 
+ */
+const uint16_t SixteenSegmentFont::fontData[91] = {
 	0x0000, 0x000C, 0x0204, 0xAA3C, 0xAABB, 0xEE99, 0x9371, 0x0200, 0x1400, 0x4100, /* space - ) */
 	0xFF00, 0xAA00, 0x4000, 0x8800, 0x1000, 0x4400, 0x44FF, 0x040C, 0x8877, 0x083F, /* * - 3 */
 	0x888C, 0x90B3, 0x88FB, 0x000F, 0x88FF, 0x88BF, 0x2200, 0x4200, 0x9400, 0x8830, /* 4 - = */
@@ -62,12 +101,17 @@ const uint16_t SixteenSeg[91] = {
 	0x1100, 0x2221, 0x5000, 0x0030, 0x0100, 0xA070, 0xA0E0, 0x8060, 0x281C, 0xC060, /* \ - e */
 	0xAA02, 0xA2A1, 0xA0C0, 0x2000, 0x2260, 0x3600, 0x00C0, 0xA848, 0xA040, 0xA060, /* f - o */
 	0x82C1, 0xA281, 0x8040, 0xA0A1, 0x80E0, 0x2060, 0x4040, 0x5048, 0x5500, 0x0A1C, /* p - y */
-	0xC020                                                                          /* z */
+	0xC020                                                                          /* z */                                                     /* z  */
 };
 
-/// @endcond
+/*!
+	@brief Retrieves a pointer to the sixteen-segment font data table.
+	@return Pointer to the font data array.
+ */
+const uint16_t *SixteenSegmentFont::pFontSixteenSegptr() 
+{
+	return fontData;
+}
 
-const uint8_t   * pFontSevenSegptr = SevenSeg;       /**< Pointer 7  segment font data */
-const uint16_t  * pFontNineSegptr = NineSeg;         /**< Pointer 9 segment font data */
-const uint16_t  * pFontFourteenSegptr = FourteenSeg; /**< Pointer 14 segment font data */
-const uint16_t  * pFontSixteenSegptr = SixteenSeg;   /**< Pointer 16 segment font data */
+
+

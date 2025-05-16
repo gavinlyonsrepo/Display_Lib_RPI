@@ -6,6 +6,7 @@
 		-# test 401 Mandelbro set demo
 		-# test 402 Julia Set demo
 		-# test 403 analog clock demo
+		-# test 404 Unit circle demo
 */
 
 // Section ::  libraries
@@ -31,21 +32,24 @@ int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
 int HWSPI_SPEED =  24000000; // The speed of serial communication in bits per second.
 int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 
-
 //  Section ::  Function Headers
 
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
-void drawMandelbrot(void);
-void drawJuliaSet(float r, float i, float zoom);
-void drawJuliaLoop(void);
-void ClockDemo(uint32_t seconds);
-
-
 std::string UTC_string(void);
 void signal_callback_handler(int signum);
 void displayMenu(void);
 static uint64_t MilliCount(void); // ~millis()
 void EndTests(void);
+
+// Demo 1
+void drawMandelbrot(void);
+// Demo 2
+void drawJuliaSet(float r, float i, float zoom);
+void drawJuliaLoop(void);
+// Demo 3
+void ClockDemo(uint32_t seconds);
+// Demo 4
+void unitCircleDemo(void);
 
 //  Section ::  MAIN loop
 
@@ -70,7 +74,8 @@ int main()
 			case 1: drawMandelbrot(); break;
 			case 2: drawJuliaLoop(); break;
 			case 3: ClockDemo(20); break;
-			case 4:
+			case 4: unitCircleDemo();break;
+			case 5:
 				std::cout << "Exiting menu\n";
 				break;
 			default:
@@ -79,7 +84,7 @@ int main()
 		}
 		std::cout << std::endl;
 
-	} while (choice != 4);
+	} while (choice != 5);
 
 	EndTests();
 	return 0;
@@ -93,15 +98,12 @@ int main()
 uint8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start Test " << std::endl;
-
 // ** USER OPTION 1 GPIO HW SPI **
 	myTFT.SetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
-
 // ** USER OPTION 2 Screen SetupHWSPI **
 	myTFT.InitScreenSize(TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
-
 // ** USER OPTION 3 SPI **
 	if(myTFT.InitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
@@ -113,6 +115,7 @@ uint8_t SetupHWSPI(void)
 	return 0;
 }
 
+// Demo 3
 void ClockDemo(uint32_t secondsDisplay) 
 {
 	char buffer[3];
@@ -123,6 +126,18 @@ void ClockDemo(uint32_t secondsDisplay)
 	// Draw Clock
 	myTFT.fillScreen(myTFT.RDLC_DGREY);
 	myTFT.fillCircle(centerX, centerY, radius, myTFT.RDLC_BLACK);
+	// Draw tick marks
+	for (int i = 0; i < 60; ++i) {
+		float angle = i * 2 * M_PI / 60.0;
+		int outerX = centerX + (int)((radius - 1) * sinf(angle));
+		int outerY = centerY - (int)((radius - 1) * cosf(angle));
+		int innerX = centerX + (int)((radius - (i % 5 == 0 ? 8 : 3)) * sinf(angle));
+		int innerY = centerY - (int)((radius - (i % 5 == 0 ? 8 : 3)) * cosf(angle));
+		uint16_t color = (i % 5 == 0) ? myTFT.RDLC_WHITE : myTFT.RDLC_DGREY;
+		myTFT.drawLine(innerX, innerY, outerX, outerY, color);
+	}
+	// Draw center pivot
+	myTFT.fillCircle(centerX, centerY, 3, myTFT.RDLC_WHITE);
 	// Start the clock
 	uint16_t xSecond = centerX, ySecond = centerY;
 	uint16_t xMinute = centerX, yMinute = centerY;
@@ -144,9 +159,9 @@ void ClockDemo(uint32_t secondsDisplay)
 		{
 			// Draw the hour hand
 			myTFT.drawLine(centerX, centerY, xHour, yHour, myTFT.RDLC_BLACK);
-			angle = 2 * M_PI / 12 * hour;
-			xHour = (uint16_t) (centerX + (radius / 2) * sinf(angle));
-			yHour = (uint16_t) (centerY - (radius / 2) * cosf(angle));
+			float hourAngle = 2 * M_PI / 12 * (hour % 12 + minute / 60.0f);
+			xHour = (uint16_t)(centerX + (radius / 2) * sinf(hourAngle));
+			yHour = (uint16_t)(centerY - (radius / 2) * cosf(hourAngle));
 			myTFT.drawLine(centerX, centerY, xHour, yHour, myTFT.RDLC_RED);
 			// Draw the minute hand
 			myTFT.drawLine(centerX, centerY, xMinute, yMinute, myTFT.RDLC_BLACK);
@@ -157,8 +172,8 @@ void ClockDemo(uint32_t secondsDisplay)
 			// Draw the second hand
 			myTFT.drawLine(centerX, centerY, xSecond, ySecond, myTFT.RDLC_BLACK);
 			angle = 2 * M_PI / 60 * second;
-			xSecond = (uint16_t) (centerX + (radius - 2) * sinf(angle));
-			ySecond = (uint16_t) (centerY - (radius - 2) * cosf(angle));
+			xSecond = (uint16_t) (centerX + (radius - 10) * sinf(angle));
+			ySecond = (uint16_t) (centerY - (radius - 10) * cosf(angle));
 			myTFT.drawLine(centerX, centerY, xSecond, ySecond, myTFT.RDLC_YELLOW);
 			lastSecond = second;
 			secondsDisplay--;
@@ -169,12 +184,18 @@ void ClockDemo(uint32_t secondsDisplay)
 		myTFT.setTextColor(myTFT.RDLC_DGREEN, myTFT.RDLC_DGREY);
 		sprintf(buffer, "%02d", secondsDisplay);
 		myTFT.print(buffer);
+		std::string timeStr = utcTime.substr(11, 8); // "HH:MM:SS"
+		myTFT.setCursor(centerX - 90, centerY + radius + 10);
+		myTFT.setTextColor(myTFT.RDLC_CYAN, myTFT.RDLC_DGREY);
+		myTFT.setFont(font_mint);
+		myTFT.print(timeStr.c_str());
 		std::cout<< utcTime << "\r" << std::flush;
 	}
 	myTFT.setFont(font_default);
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 
+// Demo 1
 void drawMandelbrot(void)
 {
 	myTFT.setRotation(myTFT.Degrees_90);
@@ -186,7 +207,6 @@ void drawMandelbrot(void)
 	const int16_t pixelWidth  = 320;  // TFT  Width in pixels
 	const int16_t pixelHeight = 240;  // TFT  Height in pixels
 	const int16_t iterations  = 128;   // Maximum number of iterations to check for each pixel
-
 	// Mandelbrot set properties: Center point and coverage area in the complex plane
 	float centerReal  = -0.6; // Image center point in complex plane
 	float centerImag  =  0.0; // Image center point in complex plane
@@ -244,9 +264,11 @@ void drawMandelbrot(void)
 	
 }
 
-
+// Demo 2
 void drawJuliaSet(float realConstant, float imaginaryConstant, float zoom) {
 
+	uint32_t startTime,elapsedTime; // Variables to track start and elapsed time
+	startTime = MilliCount(); // Start Timer Calculation
 	// Julia set
 	const uint16_t MAX_ITERATION = 300;
 	myTFT.setCursor(0, 0);
@@ -283,11 +305,17 @@ void drawJuliaSet(float realConstant, float imaginaryConstant, float zoom) {
 			}
 		}
 	}
+	elapsedTime = MilliCount() -startTime; // End Timer Calculation
+	std::cout << "Time Taken :: " << elapsedTime << " ms" << std::endl;
 }
 
 void drawJuliaLoop(void) {
-	float zoom = 0.5; 
-	for(uint8_t i=0 ;i < 5 ; i ++)
+
+
+	float zoom = 0.5;
+	uint8_t NumOfiteration =1;
+	std::cout << "Start Julia Set Test" << std::endl;
+	for(uint8_t i=0 ;i < NumOfiteration; i ++)
 	{
 		drawJuliaSet(-0.8, +0.156, zoom);
 		myTFT.fillRect(0, 0, 150, 20, myTFT.RDLC_BLACK);
@@ -295,12 +323,92 @@ void drawJuliaLoop(void) {
 		myTFT.setTextColor(myTFT.RDLC_WHITE);
 		myTFT.print(" Zoom = ");
 		myTFT.println(zoom);
-		delayMilliSecRDL(2000);
+		delayMilliSecRDL(3000);
 		zoom *= 1.5;
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	std::cout << "End Julia Set Test"<< std::endl;
 }
 
+// Demo 4
+void unitCircleDemo(void)
+{
+	myTFT.setRotation(myTFT.Degrees_270);
+	std::cout << "Unit Circle & Sine & Cos Wave" << std::endl;
+
+	int16_t CenterCircleX = 24;
+	int16_t CenterCircleY = 64;
+	int16_t Radius = 23;
+	int16_t waveStartX = 48; // Start position for sine wave
+	int16_t waveBaseY = CenterCircleY; // Align sine wave with center
+
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	char buffer[4];
+
+	myTFT.setFont(font_mega);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
+	myTFT.drawCircle(CenterCircleX, CenterCircleY, Radius+2, myTFT.RDLC_WHITE);
+	myTFT.drawCircle(CenterCircleX, CenterCircleY, Radius+1, myTFT.RDLC_WHITE);
+	myTFT.setCursor(5, 130);
+	myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
+	myTFT.print("Degrees = ");
+	myTFT.setCursor(5, 150);
+	myTFT.print("Radians = ");
+	myTFT.setCursor(5, 170);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
+	myTFT.print("    Sin = ");
+	myTFT.setTextColor(myTFT.RDLC_TAN, myTFT.RDLC_BLACK);
+	myTFT.setCursor(5, 190);
+	myTFT.print("    Cos = ");
+	// Initialize previous needle position at 0 degrees
+	int16_t prevX1 = CenterCircleX + (int16_t)(Radius * cos(0));
+	int16_t prevY1 = CenterCircleY - (int16_t)(Radius * sin(0));
+	int16_t sineX = waveStartX;
+	int16_t cosX = waveStartX;
+	for (int j = 0 ; j < 2 ; j++)
+	{
+		for (int angle = 0; angle <= 360; angle++)
+		{
+			// Convert angle to radians
+			float radians = angle * (std::numbers::pi / 180.0f);
+			int16_t x1 = CenterCircleX + (int16_t)(Radius * cos(radians));
+			int16_t y1 = CenterCircleY - (int16_t)(Radius * sin(radians)); // Inverted Y for display
+			// Erase previous needle
+			myTFT.drawLine(CenterCircleX, CenterCircleY, prevX1, prevY1, myTFT.RDLC_BLACK);
+			// Draw new needle (counterclockwise)
+			myTFT.drawLine(CenterCircleX, CenterCircleY, x1, y1, myTFT.RDLC_GREEN);
+			// Update previous needle position
+			prevX1 = x1;
+			prevY1 = y1;
+			// Draw x and y axes
+			myTFT.drawFastHLine(0, CenterCircleY, 320, myTFT.RDLC_CYAN);
+			myTFT.drawFastVLine(CenterCircleX, 0, 120, myTFT.RDLC_CYAN);
+			// Draw sine wave
+			int16_t sineY = waveBaseY - (int16_t)(Radius * sin(radians));
+			myTFT.drawPixel(sineX, sineY, myTFT.RDLC_RED);
+			if ( angle % 2) sineX++;
+			// Draw cos wave
+			int16_t cosY = waveBaseY - (int16_t)(Radius * cos(radians));
+			myTFT.drawPixel(cosX, cosY, myTFT.RDLC_TAN);
+			if (angle % 2) cosX++;
+			myTFT.setCursor(150, 130);
+			sprintf(buffer, "%03d", angle);
+			myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
+			myTFT.print(buffer);
+			myTFT.setCursor(150, 150);
+			myTFT.print(radians, 4);
+			myTFT.setCursor(150, 170);
+			myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
+			myTFT.print(sin(radians), 4);
+			myTFT.setCursor(150, 190);
+			myTFT.setTextColor(myTFT.RDLC_TAN, myTFT.RDLC_BLACK);
+			myTFT.print(cos(radians), 4);
+			delayMilliSecRDL(50);
+		}
+	}
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	std::cout << "End Demo 4"<< std::endl;
+}
 
 void EndTests(void)
 {
@@ -328,7 +436,8 @@ void displayMenu() {
 	std::cout << "1. Mandlebrot Set\n";
 	std::cout << "2. Julia Set \n";
 	std::cout << "3. Clock  \n";
-	std::cout << "4. Quit\n";
+	std::cout << "4. Unit Circle Demo\n";
+	std::cout << "5. Quit\n";
 	std::cout << "Enter your choice: ";
 }
 

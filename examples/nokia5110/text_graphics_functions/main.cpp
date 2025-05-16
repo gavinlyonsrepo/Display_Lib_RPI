@@ -55,6 +55,8 @@ int  GPIO_CHIP_DEV = 0; // GPIO chip device number usually 0
 //  LCD
 #define MY_LCD_WIDTH 84
 #define MY_LCD_HEIGHT 48
+#define FULLSCREEN (MY_LCD_WIDTH * (MY_LCD_HEIGHT/8))
+uint8_t screenBuffer[FULLSCREEN];
 #define LCD_INV  false // set to true to invert display pixel color
 #define LCD_CST  0xB2 // contrast default is 0xBF set in LCDinit, Try 0xB1 <-> 0xBF if your display is too dark/dim
 #define LCD_BIAS 0x13 // LCD LCD_BIAS mode 1:48: Try 0x12 or 0x13 or 0x14
@@ -106,9 +108,6 @@ int main()
 {
 	if(!Setup()) return -1;
 
-	myLCD.LCDfillScreenPattern(0x31); // Splash screen
-	screenReset();
-
 	Test501();
 	Test502();
 	Test503();
@@ -153,16 +152,23 @@ bool Setup(void)
 	delayMilliSecRDL(250);
 	if(myLCD.LCDBegin(LCD_INV, LCD_CST, LCD_BIAS, SPI_DEVICE, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
-		std::cout<< "Error 1202: Setup :Cannot start spi" << std::endl;
+		std::cout<< "Error 1201: Setup :Cannot start spi" << std::endl;
+		return false;
+	}
+	if (myLCD.LCDSetBufferPtr(screenBuffer) != rdlib::Success)
+	{
+		std::cout<< "Error 1202: Setup :Cannot Assign Buffer" << std::endl;
 		return false;
 	}
 	delayMilliSecRDL(250);
-	myLCD.LCDdisplayClear();
+	myLCD.LCDfillScreen();
 	return true;
 }
 
 void EndTests(void)
 {
+	myLCD.LCDfillScreen();
+	myLCD.LCDclearBuffer();
 	myLCD.LCDPowerDown();
 	myLCD.LCDSPIoff();
 	std::cout << "LCD End" << std::endl;
@@ -516,7 +522,9 @@ void Test904(void) {
 	int16_t x11 = 64, y11 = 20;
 	myLCD.drawQuadrilateral(x8, y8, x9, y9, x10, y10, x11, y11, myLCD.BLACK);
 	screenReset();
-
+	myLCD.fillQuadrilateral(x8, y8, x9, y9, x10, y10, x11, y11, myLCD.BLACK);
+	screenReset();
+	
 	std::cout << "Ellipse" << std::endl;
 	myLCD.drawEllipse(42, 24, 18, 12, false, myLCD.BLACK);
 	screenReset();
@@ -550,10 +558,10 @@ void Test502(void) {
 	char testStr1[]= "Sleep      5 secs!\r\n";
 	char testStr2[]= "Awake!\r\n";
 
-	myLCD.LCDdisplayClear();
+	myLCD.LCDclearBuffer();
 	myLCD.setCursor(0, 0);
 	myLCD.print(testStr1);
-	myLCD.LCDdisplayUpdate();
+	myLCD.LCDupdate();
 
 	delayMilliSecRDL(TEST_DELAY2);
 	myLCD.LCDenableSleep();
@@ -561,7 +569,7 @@ void Test502(void) {
 	myLCD.LCDdisableSleep();
 
 	myLCD.print(testStr2);
-	myLCD.LCDdisplayUpdate();
+	myLCD.LCDupdate();
 	delayMilliSecRDL(TEST_DELAY2);
 	screenReset();
 }
@@ -575,7 +583,7 @@ void Test503(void) {
 	char testStr4[]= "Bottom\n";
 
 	// rotation example
-	myLCD.LCDdisplayClear();
+	myLCD.LCDclearBuffer();
 	myLCD.setCursor(0, 0);
 
 	myLCD.setRotation(myLCD.BC_Degrees_90); // rotate 90 degrees counter clockwise,
@@ -626,16 +634,15 @@ void Test504(void)
 
 void Test501(void){
 	std::cout << "Test 501 fill screen" << std::endl;
+	myLCD.LCDfillScreen(0x71);
+	delayMilliSecRDL(TEST_DELAY5);
 	myLCD.LCDfillScreen();
-	screenReset();
-	myLCD.LCDfillScreenPattern(0x71);
-	screenReset();
 }
 
 void screenReset(void) {
-	myLCD.LCDdisplayUpdate();
+	myLCD.LCDupdate();
 	delayMilliSecRDL(TEST_DELAY5);
-	myLCD.LCDdisplayClear();
+	myLCD.LCDclearBuffer();
 }
 
 // *************** EOF ****************

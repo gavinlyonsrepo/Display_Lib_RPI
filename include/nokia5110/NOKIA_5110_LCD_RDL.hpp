@@ -39,25 +39,24 @@ public:
 	void LCDenableSleep(void);
 	void LCDdisableSleep(void);
 	bool LCDIsSleeping(void);
-
 	rdlib::Return_Codes_e LCDSPIoff(void);
 	void LCDPowerDown(void);
-
-	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) override;
-
-	void LCDSetContrast(uint8_t con);
-	void LCDdisplayUpdate(void);
-	void LCDdisplayClear(void);
-	void LCDfillScreen(void);
-	void LCDfillScreenPattern(uint8_t);
-	void LCDinvertDisplay(bool inv);
-
 	uint16_t LCDHighFreqDelayGet(void);
 	void LCDHighFreqDelaySet(uint16_t);
 	bool isHardwareSPI(void);
 
+	rdlib::Return_Codes_e LCDSetBufferPtr(std::span<uint8_t> buffer);
+	rdlib::Return_Codes_e LCDupdate(void);
+	rdlib::Return_Codes_e LCDclearBuffer(uint8_t pattern = 0x00);
+	void LCDfillScreen(uint8_t pattern = 0x00);
+	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) override;
+
+	void LCDSetContrast(uint8_t con);
+	void LCDinvertDisplay(bool inv);
+
 private:
 
+	void LCDBuffer(std::span<uint8_t> data);
 	void LCDWriteData(uint8_t data);
 	void LCDWriteCommand(uint8_t command);
 	void LCDInit(void);
@@ -107,7 +106,7 @@ private:
 	int16_t _LCD_HEIGHT = 48; /**< height of LCD in pixels*/
 	int16_t _LCD_WIDTH = 84; /**< width of LCD in pixels*/
 	uint16_t _LCD_Display_size = _LCD_WIDTH * (_LCD_HEIGHT/8);/**< size of display in pixels 504 (LCDWIDTH*(LCDHEIGHT / 8)*/
-	uint8_t LCDDisplayBuffer[504]; /**< buffer which holds screen data */
+	std::span<uint8_t> _LCDbuffer;  /**< Buffer to hold screen data */
 }; //end of class
 
 

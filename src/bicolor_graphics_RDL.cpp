@@ -158,115 +158,153 @@ size_t bicolor_graphics::write(uint8_t character)
 
 /*!
 	@brief draws a circle where (x0,y0) are center coordinates an r is circle radius.
-	@param x0 circle center x position
-	@param y0 circle center y position
-	@param r radius of circle
+	@param centerX The x-coordinate of the circle's center.
+	@param centerY The y-coordinate of the circle's center.
+	@param radius The radius of the circle.
 	@param color The color of the circle
 */
-void bicolor_graphics::drawCircle(int16_t x0, int16_t y0, int16_t r,
+void bicolor_graphics::drawCircle(int16_t centerX, int16_t centerY, int16_t radius,
 	uint8_t color) {
-	int16_t f = 1 - r;
-	int16_t ddF_x = 1;
-	int16_t ddF_y = -2 * r;
+	// Initial decision parameter for the circle drawing algorithm
+	int16_t decisionParam = 1 - radius;
+	// Differences for circle drawing in the x and y directions
+	int16_t deltaX = 1;
+	int16_t deltaY = -2 * radius;
+	// Starting coordinates
 	int16_t x = 0;
-	int16_t y = r;
-
-	drawPixel(x0  , y0+r, color);
-	drawPixel(x0  , y0-r, color);
-	drawPixel(x0+r, y0  , color);
-	drawPixel(x0-r, y0  , color);
-
-	while (x<y) {
-	if (f >= 0) {
-		y--;
-		ddF_y += 2;
-		f += ddF_y;
-	}
-	x++;
-	ddF_x += 2;
-	f += ddF_x;
-
-	drawPixel(x0 + x, y0 + y, color);
-	drawPixel(x0 - x, y0 + y, color);
-	drawPixel(x0 + x, y0 - y, color);
-	drawPixel(x0 - x, y0 - y, color);
-	drawPixel(x0 + y, y0 + x, color);
-	drawPixel(x0 - y, y0 + x, color);
-	drawPixel(x0 + y, y0 - x, color);
-	drawPixel(x0 - y, y0 - x, color);
+	int16_t y = radius;
+	// Draw the initial points on the circle (4 points)
+	drawPixel(centerX, centerY + radius, color);
+	drawPixel(centerX, centerY - radius, color);
+	drawPixel(centerX + radius, centerY, color);
+	drawPixel(centerX - radius, centerY, color);
+	// Apply the circle drawing algorithm to plot points around the circle
+	while (x < y)
+	{
+		// If the decision parameter is positive or zero, adjust y and deltaY
+		if (decisionParam >= 0)
+		{
+			y--;
+			deltaY += 2;
+			decisionParam += deltaY;
+		}
+		// Always adjust x and deltaX
+		x++;
+		deltaX += 2;
+		decisionParam += deltaX;
+		// Draw the 8 symmetrical points of the circle for each iteration
+		drawPixel(centerX + x, centerY + y, color);
+		drawPixel(centerX - x, centerY + y, color);
+		drawPixel(centerX + x, centerY - y, color);
+		drawPixel(centerX - x, centerY - y, color);
+		drawPixel(centerX + y, centerY + x, color);
+		drawPixel(centerX - y, centerY + x, color);
+		drawPixel(centerX + y, centerY - x, color);
+		drawPixel(centerX - y, centerY - x, color);
 	}
 }
 
 /// @cond
 /*!
 	@brief Used internally by drawRoundRect
+	@param centerX The x-coordinate of the circle's center.
+	@param centerY The y-coordinate of the circle's center.
+	@param radius The radius of the circle.
+	@param cornerFlags A bitmask indicating which corners of the circle to draw.
+	@param color The color of the circle.
 */
-void bicolor_graphics::drawCircleHelper( int16_t x0, int16_t y0,
-				 int16_t r, uint8_t cornername, uint8_t color) {
-	int16_t f     = 1 - r;
-	int16_t ddF_x = 1;
-	int16_t ddF_y = -2 * r;
-	int16_t x     = 0;
-	int16_t y     = r;
-
-	while (x<y) {
-	if (f >= 0) {
-		y--;
-		ddF_y += 2;
-		f     += ddF_y;
-	}
-	x++;
-	ddF_x += 2;
-	f     += ddF_x;
-	if (cornername & 0x4) {
-		drawPixel(x0 + x, y0 + y, color);
-		drawPixel(x0 + y, y0 + x, color);
-	}
-	if (cornername & 0x2) {
-		drawPixel(x0 + x, y0 - y, color);
-		drawPixel(x0 + y, y0 - x, color);
-	}
-	if (cornername & 0x8) {
-		drawPixel(x0 - y, y0 + x, color);
-		drawPixel(x0 - x, y0 + y, color);
-	}
-	if (cornername & 0x1) {
-		drawPixel(x0 - y, y0 - x, color);
-		drawPixel(x0 - x, y0 - y, color);
-	}
+void bicolor_graphics::drawCircleHelper( int16_t centerX, int16_t centerY,
+				 int16_t radius, uint8_t cornerFlags, uint8_t color) {
+	// Initial decision parameter for the circle drawing algorithm
+	int16_t decisionParam = 1 - radius;
+	// Differences for circle drawing in the x and y directions
+	int16_t deltaX = 1;
+	int16_t deltaY = -2 * radius;
+	// Starting coordinates
+	int16_t x = 0;
+	int16_t y = radius;
+	// Apply the circle drawing algorithm to plot points in the specified corners
+	while (x < y)
+	{
+		// If the decision parameter is positive or zero, adjust y and deltaY
+		if (decisionParam >= 0)
+		{
+			y--;
+			deltaY += 2;
+			decisionParam += deltaY;
+		}
+		// Always adjust x and deltaX
+		x++;
+		deltaX += 2;
+		decisionParam += deltaX;
+		// Draw the points for each corner based on the cornerFlags
+		if (cornerFlags & 0x4) // Top-right corner
+		{
+			drawPixel(centerX + x, centerY + y, color);
+			drawPixel(centerX + y, centerY + x, color);
+		}
+		if (cornerFlags & 0x2) // Bottom-right corner
+		{
+			drawPixel(centerX + x, centerY - y, color);
+			drawPixel(centerX + y, centerY - x, color);
+		}
+		if (cornerFlags & 0x8) // Top-left corner
+		{
+			drawPixel(centerX - y, centerY + x, color);
+			drawPixel(centerX - x, centerY + y, color);
+		}
+		if (cornerFlags & 0x1) // Bottom-left corner
+		{
+			drawPixel(centerX - y, centerY - x, color);
+			drawPixel(centerX - x, centerY - y, color);
+		}
 	}
 }
 
 /*!
-	@brief Used internally by fill circle fillRoundRect and fillcircle
+	@brief Internal helper function used by fillCircle and fillRoundRect to fill parts of a circle.
+	@param centerX The x-coordinate of the circle's center.
+	@param centerY The y-coordinate of the circle's center.
+	@param radius The radius of the circle.
+	@param cornerFlags A bitmask indicating which parts of the circle to fill.
+	@param verticalOffset An additional vertical offset to adjust the line length.
+	@param color The color to fill the circle with.
 */
-void bicolor_graphics::fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
-	uint8_t cornername, int16_t delta, uint8_t color) {
-
-	int16_t f     = 1 - r;
-	int16_t ddF_x = 1;
-	int16_t ddF_y = -2 * r;
-	int16_t x     = 0;
-	int16_t y     = r;
-
-	while (x<y) {
-	if (f >= 0) {
-		y--;
-		ddF_y += 2;
-		f     += ddF_y;
-	}
-	x++;
-	ddF_x += 2;
-	f     += ddF_x;
-
-	if (cornername & 0x1) {
-		drawFastVLine(x0+x, y0-y, 2*y+1+delta, color);
-		drawFastVLine(x0+y, y0-x, 2*x+1+delta, color);
-	}
-	if (cornername & 0x2) {
-		drawFastVLine(x0-x, y0-y, 2*y+1+delta, color);
-		drawFastVLine(x0-y, y0-x, 2*x+1+delta, color);
-	}
+void bicolor_graphics::fillCircleHelper(int16_t centerX, int16_t centerY, int16_t radius,
+										   uint8_t cornerFlags, int16_t verticalOffset, uint8_t color){
+	// Initial decision parameter for the circle filling algorithm
+	int16_t decisionParam = 1 - radius;
+	// Differences for circle drawing in the x and y directions
+	int16_t deltaX = 1;
+	int16_t deltaY = -2 * radius;
+	// Starting coordinates
+	int16_t x = 0;
+	int16_t y = radius;
+	// Apply the circle filling algorithm to plot vertical lines at the specified points
+	while (x < y)
+	{
+		// If the decision parameter is positive or zero, adjust y and deltaY
+		if (decisionParam >= 0)
+		{
+			y--;
+			deltaY += 2;
+			decisionParam += deltaY;
+		}
+		// Always adjust x and deltaX
+		x++;
+		deltaX += 2;
+		decisionParam += deltaX;
+		// Draw the vertical lines for each part of the circle based on the cornerFlags
+		if (cornerFlags & 0x1) // Bottom-right corner
+		{
+			drawFastVLine(centerX + x, centerY - y, 2 * y + 1 + verticalOffset, color);
+			drawFastVLine(centerX + y, centerY - x, 2 * x + 1 + verticalOffset, color);
+		}
+		if (cornerFlags & 0x2) // Bottom-left corner
+		{
+			drawFastVLine(centerX - x, centerY - y, 2 * y + 1 + verticalOffset, color);
+			drawFastVLine(centerX - y, centerY - x, 2 * x + 1 + verticalOffset, color);
+		}
 	}
 }
 
@@ -471,75 +509,94 @@ void bicolor_graphics::drawTriangle(int16_t x0, int16_t y0,
 }
 
 /*!
-	@brief Fills a triangle of coordinates (x0,y0), (x1,y1) and (x2,y2).
-	@param x0 x start coordinate point 1
-	@param y0 y start coordinate point 1
-	@param x1 x start coordinate point 2
-	@param y1 y start coordinate point 2
-	@param x2 x start coordinate point 3
-	@param y2 y start coordinate point 3
-	@param color color to fill  triangle
+	@brief Fills a triangle defined by the coordinates (x0, y0), (x1, y1), and (x2, y2).
+	@param startX0 The x-coordinate of the first vertex.
+	@param startY0 The y-coordinate of the first vertex.
+	@param startX1 The x-coordinate of the second vertex.
+	@param startY1 The y-coordinate of the second vertex.
+	@param startX2 The x-coordinate of the third vertex.
+	@param startY2 The y-coordinate of the third vertex.
+	@param color The color to fill the triangle.
 */
-void bicolor_graphics::fillTriangle ( int16_t x0, int16_t y0,
-					int16_t x1, int16_t y1,
-					int16_t x2, int16_t y2, uint8_t color) {
-
-	int16_t a, b, y, last;
-
-	if (y0 > y1) {
-	swapint16t(y0, y1); swapint16t(x0, x1);
+void bicolor_graphics::fillTriangle (int16_t startX0, int16_t startY0,
+									int16_t startX1, int16_t startY1,
+									int16_t startX2, int16_t startY2, uint8_t color) {
+	// Temporary variables for line drawing
+	int16_t leftX, rightX, y, lastY;
+	// Sort vertices by their Y-coordinates to ensure the top-to-bottom orientation
+	if (startY0 > startY1)
+	{
+		swapint16t(startY0, startY1);
+		swapint16t(startX0, startX1);
 	}
-	if (y1 > y2) {
-	swapint16t(y2, y1); swapint16t(x2, x1);
+	if (startY1 > startY2)
+	{
+		swapint16t(startY2, startY1);
+		swapint16t(startX2, startX1);
 	}
-	if (y0 > y1) {
-	swapint16t(y0, y1); swapint16t(x0, x1);
+	if (startY0 > startY1)
+	{
+		swapint16t(startY0, startY1);
+		swapint16t(startX0, startX1);
 	}
-
-	if(y0 == y2) {
-	a = b = x0;
-	if(x1 < a)      a = x1;
-	else if(x1 > b) b = x1;
-	if(x2 < a)      a = x2;
-	else if(x2 > b) b = x2;
-	drawFastHLine(a, y0, b-a+1, color);
-	return;
+	// If the triangle is flat (top and bottom vertices are the same y-coordinate)
+	if (startY0 == startY2)
+	{
+		leftX = rightX = startX0;
+		if (startX1 < leftX)
+			leftX = startX1;
+		else if (startX1 > rightX)
+			rightX = startX1;
+		if (startX2 < leftX)
+			leftX = startX2;
+		else if (startX2 > rightX)
+			rightX = startX2;
+		drawFastHLine(leftX, startY0, rightX - leftX + 1, color);
+		return;
 	}
+	// Differences in x and y for the edges of the triangle
+	int16_t dx01 = startX1 - startX0,
+			dy01 = startY1 - startY0,
+			dx02 = startX2 - startX0,
+			dy02 = startY2 - startY0,
+			dx12 = startX2 - startX1,
+			dy12 = startY2 - startY1;
+	// Accumulated error terms for drawing the triangle
+	int32_t sa = 0, sb = 0;
+	// Determine the last y-coordinate for the top part of the triangle
+	if (startY1 == startY2)
+		lastY = startY1;
+	else
+		lastY = startY1 - 1;
+	// Draw the upper part of the triangle
+	for (y = startY0; y <= lastY; y++)
+	{
+		leftX = startX0 + sa / dy01;
+		rightX = startX0 + sb / dy02;
+		sa += dx01;
+		sb += dx02;
+		// Ensure leftX is always less than rightX
+		if (leftX > rightX)
+			swapint16t(leftX, rightX);
 
-	int16_t
-	dx01 = x1 - x0,
-	dy01 = y1 - y0,
-	dx02 = x2 - x0,
-	dy02 = y2 - y0,
-	dx12 = x2 - x1,
-	dy12 = y2 - y1;
-	int32_t
-	sa   = 0,
-	sb   = 0;
-
-	if(y1 == y2) last = y1;
-	else         last = y1-1;
-
-	for(y=y0; y<=last; y++) {
-	a   = x0 + sa / dy01;
-	b   = x0 + sb / dy02;
-	sa += dx01;
-	sb += dx02;
-
-	if(a > b) swapint16t(a,b);
-	drawFastHLine(a, y, b-a+1, color);
+		// Draw the horizontal line for this y-coordinate
+		drawFastHLine(leftX, y, rightX - leftX + 1, color);
 	}
-
-
-	sa = dx12 * (y - y1);
-	sb = dx02 * (y - y0);
-	for(; y<=y2; y++) {
-	a   = x1 + sa / dy12;
-	b   = x0 + sb / dy02;
-	sa += dx12;
-	sb += dx02;
-	if(a > b) swapint16t(a,b);
-	drawFastHLine(a, y, b-a+1, color);
+	// Reset error terms for the lower part of the triangle
+	sa = dx12 * (y - startY1);
+	sb = dx02 * (y - startY0);
+	// Draw the lower part of the triangle
+	for (; y <= startY2; y++)
+	{
+		leftX = startX1 + sa / dy12;
+		rightX = startX0 + sb / dy02;
+		sa += dx12;
+		sb += dx02;
+		// Ensure leftX is always less than rightX
+		if (leftX > rightX)
+			swapint16t(leftX, rightX);
+		// Draw the horizontal line for this y-coordinate
+		drawFastHLine(leftX, y, rightX - leftX + 1, color);
 	}
 }
 
@@ -952,16 +1009,21 @@ void bicolor_graphics::drawQuadrilateral(int16_t x0, int16_t y0,int16_t x1, int1
 	@param x3 The x-coordinate of the fourth vertex.
 	@param y3 The y-coordinate of the fourth vertex.
 	@param color The color used to fill the quadrilateral.
-	@param useTriangleSplit A boolean flag that determines whether the quadrilateral should be divided into
-		   two or three triangles.
  */
-void bicolor_graphics::fillQuadrilateral(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t color, bool useTriangleSplit)
+void bicolor_graphics::fillQuadrilateral(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t color)
 {
-	fillTriangle(x0,y0,x1,y1,x2,y2,color);
-	if (useTriangleSplit){
+	// Compute the cross product of vectors (x1-x0, y1-y0) and (x2-x0, y2-y0)
+	// to determine convexity
+	int32_t crossProduct = (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+	if (crossProduct >= 0) {
+		// Convex case (or degenerate, treat as convex)
+		fillTriangle(x0, y0, x1, y1, x2, y2, color);
 		fillTriangle(x2, y2, x3, y3, x0, y0, color);
+	} else {
+		// Concave case: Choose the alternative diagonal
+		fillTriangle(x1, y1, x2, y2, x3, y3, color);
+		fillTriangle(x3, y3, x0, y0, x1, y1, color);
 	}
-	fillTriangle(x1,y1,x2,y2,x3,y3,color);
 }
 
 /*!

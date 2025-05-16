@@ -1,6 +1,6 @@
 /*!
 	@file examples/st7735/text_graphics_functions/main.cpp
-	@brief Library test file, tests Text,graphics & functions.
+	@brief Library test file, tests Text,graphics & functions, 128x128 ST7735R Red Tab.
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test
@@ -757,7 +757,7 @@ void Test907() {
 	int16_t x5 = 75, y5 = 75;
 	int16_t x6 = 70, y6 = 100;
 	int16_t x7 = 40, y7 = 95;
-	myTFT.fillQuadrilateral(x4, y4, x5, y5, x6, y6, x7, y7, myTFT.RDLC_GREEN, true);
+	myTFT.fillQuadrilateral(x4, y4, x5, y5, x6, y6, x7, y7, myTFT.RDLC_GREEN);
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	// Trapezoid 1 

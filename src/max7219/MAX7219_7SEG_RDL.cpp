@@ -271,10 +271,16 @@ void MAX7219_SS_RPI::SetSegment(uint8_t digit, uint8_t segment)
 	@brief Displays a text string on display
 	@param text pointer to character array containg text string
 	@param TextAlignment  left or right alignment or leading zeros
+	@return error if string is null or if option AlignRightZeros entered , 0 for success
 	@note This method is overloaded, see also DisplayText(char *)
 */
-void MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e TextAlignment){
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e TextAlignment){
 
+	if (text == nullptr) 
+	{
+		printf("Error: DisplayText 1: String is null.\n");
+		return rdlib::CharArrayNullptr;
+	}
 	char character;
 	char pos =0;
 
@@ -295,7 +301,7 @@ void MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e TextAlignment){
 			{
 				case AlignLeft  : DisplayChar((_NoDigits-1)- pos ,character, DecPointOn); break;
 				case AlignRight : DisplayChar((LengthOfStr-1)- pos ,character, DecPointOn); break;
-				case AlignRightZeros: return; break;
+				case AlignRightZeros: return rdlib::GenericError; break;
 			}
 			pos++;
 			text++;
@@ -305,21 +311,27 @@ void MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e TextAlignment){
 			{
 				case AlignLeft  : DisplayChar((_NoDigits-1) -pos, character, DecPointOff); break;
 				case AlignRight : DisplayChar((LengthOfStr-1) - pos, character, DecPointOff); break;
-				case AlignRightZeros : return; break;
+				case AlignRightZeros : return rdlib::GenericError; break;
 			}
 			pos++;
 		}
 	}
+	return rdlib::Success;
 }
 
 
 /*!
 	@brief Displays a text string on display
 	@param text  pointer to character array containg text string
+	@return error if string is null , 0 for success 
 	@note This method is overloaded, see also DisplayText(char *, TextAlignment_e )
 */
-void MAX7219_SS_RPI::DisplayText(char *text){
-
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(char *text){
+	if (text == nullptr) 
+	{
+		printf("Error: DisplayText 1: String is null.\n");
+		return rdlib::CharArrayNullptr;
+	}
 	char character;
 	char pos = _NoDigits-1;
 
@@ -330,21 +342,26 @@ void MAX7219_SS_RPI::DisplayText(char *text){
 			DisplayChar(pos  ,character, DecPointOn);
 			pos--;
 			text++;
-		}  else
-		{
+		}else{
 			DisplayChar(pos  ,character, DecPointOff);
 			pos--;
 		}
 	}
+	return rdlib::Success;
 }
 
 /*!
 	@brief Displays a BCD text string on display using MAX7219 Built in BCD code B font
 	@param text  pointer to character array containg text string
+	@return error if string is null , 0 for success 
 	@note sets BCD code B font (0-9, E, H, L,P, and -) Built-in font
 */
-void MAX7219_SS_RPI::DisplayBCDText(char *text){
-
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayBCDText(char *text){
+	if (text == nullptr) 
+	{
+		printf("Error: DisplayText 1: String is null.\n");
+		return rdlib::CharArrayNullptr;
+	}
 	char character;
 	char pos =_NoDigits-1;
 
@@ -384,6 +401,7 @@ void MAX7219_SS_RPI::DisplayBCDText(char *text){
 		}
 	pos--;
 	}
+	return rdlib::Success;
 }
 
 /*!
@@ -551,7 +569,8 @@ uint8_t MAX7219_SS_RPI::ASCIIFetch(uint8_t character, DecimalPoint_e decimalPoin
 
 	
 	uint8_t returnCharValue =0;
-	returnCharValue = flipBitsPreserveMSB(pFontSevenSegptr[character - AsciiOffset]);
+	const uint8_t *font = SevenSegmentFont::pFontSevenSegptr();
+	returnCharValue = flipBitsPreserveMSB(font[character - AsciiOffset]);
 	switch (decimalPoint)
 	{
 		case DecPointOn  :  returnCharValue |= (1<<7); break;

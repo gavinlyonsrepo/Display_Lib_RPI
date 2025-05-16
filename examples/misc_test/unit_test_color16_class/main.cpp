@@ -174,10 +174,10 @@ bool Test803(void)
 	{
 		rdlib::Success,
 		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, //icon
-		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, //sprite
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, rdlib::BitmapSize, //sprite
 		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, rdlib::BitmapHorizontalSize, //1-bit bitmap
-		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, //16-bit bitmap
-		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty  //24-bit bitmap
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, rdlib::BitmapSize, //16-bit bitmap
+		rdlib::BitmapScreenBounds, rdlib::BitmapScreenBounds, rdlib::BitmapDataEmpty, rdlib::BitmapSize //24-bit bitmap
 	};
 	// Vector to store return values
 	std::vector<uint8_t> returnValues; 
@@ -203,6 +203,7 @@ bool Test803(void)
 	returnValues.push_back(myTFT.drawSprite(350, 50, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE));
 	returnValues.push_back(myTFT.drawSprite(40, 350, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE));
 	returnValues.push_back(myTFT.drawSprite(40, 180, emptyBitmap, 32, 32, myTFT.RDLC_LBLUE));
+	returnValues.push_back(myTFT.drawSprite(40, 40, SpriteTest16, 48, 32, myTFT.RDLC_LBLUE, false));
 	delayMilliSecRDL(1000);
 	//TFTdrawBitmap
 	returnValues.push_back(myTFT.drawBitmap(350, 65, 128, 128, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, BackupMenuBitmap));
@@ -214,11 +215,13 @@ bool Test803(void)
 	returnValues.push_back(myTFT.drawBitmap16(350, 50, SpriteTest16, 32, 32));
 	returnValues.push_back(myTFT.drawBitmap16(40, 350, SpriteTest16, 32, 32));
 	returnValues.push_back(myTFT.drawBitmap16(40, 180,  emptyBitmap, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap16(40, 40,  SpriteTest16, 50, 32));
 	delayMilliSecRDL(1000);
 	//TFTdrawBitmap24
 	returnValues.push_back(myTFT.drawBitmap24(340, 50, SpriteTest16, 32, 32));
 	returnValues.push_back(myTFT.drawBitmap24(40, 310, SpriteTest16, 32, 32));
 	returnValues.push_back(myTFT.drawBitmap24(40, 180,  emptyBitmap, 32, 32));
+	returnValues.push_back(myTFT.drawBitmap24(40, 40,  SpriteTest16, 50, 32));
 	delayMilliSecRDL(1000);
 	//== SUMMARY SECTION===
 	printf("Unit testing Summary.\n");

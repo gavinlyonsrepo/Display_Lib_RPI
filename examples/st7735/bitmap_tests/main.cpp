@@ -1,6 +1,6 @@
 /*!
 	@file examples/st7735/bitmap_tests/main.cpp
-	@brief Library test file, bitmaps
+	@brief Library test file, bitmaps , 128x128 ST7735R Red Tab.
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test
@@ -13,7 +13,6 @@
 
 // Section ::  libraries
 #include <iostream> // cout
-
 #include <ctime> // for test301
 #include "Bitmap_test_data.hpp" // Data for test 301-302
 #include "ST7735_TFT_LCD_RDL.hpp"

@@ -19,7 +19,7 @@
 /*!
 	@brief  Drive MAX7219 seven segment displays
 */
-class MAX7219_SS_RPI
+class MAX7219_SS_RPI : public SevenSegmentFont 
 {
 public:
 	MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect ,uint8_t data, int gpioDev);
@@ -124,12 +124,12 @@ public:
 	void SetCurrentDisplayNumber(uint8_t);
 
 	void DisplayChar(uint8_t digit, uint8_t value, DecimalPoint_e decimalPoint);
-	void DisplayText(char *text, TextAlignment_e TextAlignment);
-	void DisplayText(char *text);
+	rdlib::Return_Codes_e DisplayText(char *text, TextAlignment_e TextAlignment);
+	rdlib::Return_Codes_e DisplayText(char *text);
 	void DisplayIntNum(unsigned long number, TextAlignment_e TextAlignment);
 	void DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numberLower, TextAlignment_e TextAlignment);
 	void DisplayBCDChar(uint8_t digit, CodeBFont_e value);
-	void DisplayBCDText(char *text);
+	rdlib::Return_Codes_e DisplayBCDText(char *text);
 	void SetSegment(uint8_t digit, uint8_t segment);
 
 protected:

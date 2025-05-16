@@ -18,7 +18,8 @@
 # Display 11 = ST7735X  TFT LCD SPI
 # Display 12 = ST7789   TFT LCD SPI
 # Display 13 = ILI9341  TFT LCD SPI
-# Display 14 = SSD1331  LCD SPI
+# Display 14 = SSD1331  OLED SPI
+# Display 15 = GC9A01A  TFT LCD SPI
 # ==================================
 
 # ***********************************************
@@ -94,10 +95,12 @@
 # =============== ST7735 TFT LCD SPI =============
 #SRC=st7735/hello_world
 #SRC=st7735/hello_world_swspi
+#SRC=st7735/hello_world_128x160
 #SRC=st7735/text_graphics_functions
-#RC=st7735/bitmap_tests
+#SRC=st7735/bitmap_tests
 #SRC=st7735/framerate_test
 #SRC=st7735/demos
+#SRC=st7735/advanced_screen_buffer_mode
 #=================================================
 
 # =============== ST7789 TFT LCD SPI =============
@@ -126,14 +129,22 @@
 #SRC=ssd1331/demos
 #=================================================
 
+# =============== GC9A01A TFT LCD SPI =============
+#SRC=gc9a01/hello_world
+#SRC=gc9a01/hello_world_swspi
+#SRC=gc9a01/bitmap_tests
+#SRC=gc9a01/text_graphics_functions
+#SRC=gc9a01/demos
+#=================================================
+
 # =========== XPT2046 touchscreen basic test =====
 #SRC=xpt2046/xpt_test
 #=================================================
 
 #========= Other misc Test ======================
 #SRC=misc_test/utilities_test
-#SRC=misc_test/unit_test_bicolor_class
 #SRC=misc_test/multiple_displays_test
+#SRC=misc_test/unit_test_bicolor_class
 #SRC=misc_test/unit_test_color16_class
 #================================================
  

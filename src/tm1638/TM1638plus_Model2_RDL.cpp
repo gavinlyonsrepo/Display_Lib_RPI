@@ -155,6 +155,7 @@ rdlib::Return_Codes_e TM1638plus_Model2::DisplayStr(const char* string, uint16_t
 		fprintf(stderr ,"Error: DisplayStr1: String is a null pointer.\n");
 		return rdlib::CharArrayNullptr;
 	}
+	const uint8_t *font = SevenSegmentFont::pFontSevenSegptr();
 	uint8_t values[_TMDisplaySize];
 	bool done = false;
 	std::fill(values, values + _TMDisplaySize, 0);
@@ -162,11 +163,11 @@ rdlib::Return_Codes_e TM1638plus_Model2::DisplayStr(const char* string, uint16_t
 	{
 	 if (!done && string[i] != '\0') {
 		if (dots >> (7-i) & 1){  //if dots bit is set for that position apply the mask to turn on dot(0x80).
-			uint8_t Result = pFontSevenSegptr[string[i] - TM_ASCII_OFFSET];
+			uint8_t Result = font[string[i] - TM_ASCII_OFFSET];
 			values[i] = (Result | TM_DOT_MASK_DEC); //apply the Dot bitmask to value extracted from ASCII table
 			}
 		else
-			values[i] = pFontSevenSegptr[string[i] - TM_ASCII_OFFSET] ;
+			values[i] = font[string[i] - TM_ASCII_OFFSET] ;
 		}
 	else {
 		done = true;

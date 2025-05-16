@@ -312,7 +312,8 @@ rdlib::Return_Codes_e HT16K33plus_Model1::displayChar(uint8_t digitPosition, cha
 			return displayMultiSegNum(digitPosition, character, decimalOnPoint);
 	} else {
 		uint8_t characterConverted;
-		characterConverted = pFontSevenSegptr[character- _HT_ASCIIOffset];
+		const uint8_t* font = SevenSegmentFont::pFontSevenSegptr();
+		characterConverted = font[character- _HT_ASCIIOffset];
 		if (decimalOnPoint ==  DecPointOn) characterConverted |= _HT_DEC_POINT_7_MASK;
 		uint8_t txDataBuffer[2];
 		size_t length = sizeof(txDataBuffer);
@@ -341,17 +342,23 @@ rdlib::Return_Codes_e HT16K33plus_Model1::displayMultiSegNum(uint8_t digitPositi
 		case SegType7:
 			return rdlib::GenericError; // this will never occur in normal user operation
 		break; 
-		case SegType9:
-			characterConverted = pFontNineSegptr[character- _HT_ASCIIOffset];
+		case SegType9:{
+			const uint16_t* fontNine = NineSegmentFont::pFontNineSegptr();
+			characterConverted = fontNine[character- _HT_ASCIIOffset];
 			if (decimalOnPoint ==  DecPointOn) characterConverted |= _HT_DEC_POINT_9_MASK;
+			}
 		break;
-		case SegType14:
-			characterConverted = pFontFourteenSegptr[character- _HT_ASCIIOffset];
+		case SegType14:{
+			const uint16_t* fontFourteen = FourteenSegmentFont::pFontFourteenSegptr();
+			characterConverted = fontFourteen[character- _HT_ASCIIOffset];
 			if (decimalOnPoint ==  DecPointOn) characterConverted |= _HT_DEC_POINT_14_MASK;
+			}
 		break;
-		case SegType16:
-			characterConverted = pFontSixteenSegptr[character- _HT_ASCIIOffset];
+		case SegType16:{
+			const uint16_t* fontSixteen = SixteenSegmentFont::pFontSixteenSegptr();
+			characterConverted = fontSixteen[character- _HT_ASCIIOffset];
 			(void)decimalOnPoint;
+			}
 		break;
 	}
 	uint8_t txDataBuffer[3];

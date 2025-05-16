@@ -7,6 +7,7 @@
 	-# Test 500 RGB color OK?
 	-# Test 502 Rotate
 	-# Test 503 change modes test -> Invert, display on/off and Sleep.
+	-# Test 504 scroll
 	-# Test 705 print method all fonts
 	-# Test 706 Misc print class tests (string object, println invert, wrap, base nums)
 	-# Test 707 Vectors with print class
@@ -602,8 +603,8 @@ void Test907() {
 	int16_t x14 = 85, y14 = 242;
 	int16_t x15 = 46, y15 = 207;
 
-	myTFT.fillQuadrilateral(x4, y4, x5, y5, x6, y6, x7, y7, myTFT.RDLC_GREEN, true);
-	myTFT.fillQuadrilateral(x8, y8, x9, y9, x10, y10, x11, y11, myTFT.RDLC_BLUE, true);
+	myTFT.fillQuadrilateral(x4, y4, x5, y5, x6, y6, x7, y7, myTFT.RDLC_GREEN);
+	myTFT.fillQuadrilateral(x8, y8, x9, y9, x10, y10, x11, y11, myTFT.RDLC_BLUE);
 	myTFT.drawQuadrilateral(x12, y12, x13, y13, x14, y14, x15, y15, myTFT.RDLC_YELLOW);
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(myTFT.RDLC_BLACK);

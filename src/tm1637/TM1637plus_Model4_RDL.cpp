@@ -202,7 +202,7 @@ void TM1637plus_Model4::DisplayDecimalwDot(int number, uint8_t dots,  bool leadi
 	@return codes
 		-# Success
 		-# CharArrayNullptr
-		-# GenericError ( if The number of digits to set is greater than DisplaySzie)
+		-# GenericError text array length is not equal to specified length parameter\
 */
 rdlib::Return_Codes_e  TM1637plus_Model4::DisplayString(const char* numStr, uint8_t dots, uint8_t length, uint8_t position)
 {
@@ -211,9 +211,9 @@ rdlib::Return_Codes_e  TM1637plus_Model4::DisplayString(const char* numStr, uint
 		fprintf(stderr ,"Error: DisplayString 1: String is  null.\n");
 		return rdlib::CharArrayNullptr;
 	}
-	if (length >  _DisplaySize) 
+	if (strlen(numStr) != length) 
 	{
-		fprintf(stderr ,"Error: DisplayString 2: Length of array is greater than Display Size\n");
+		printf("Error: DisplayString 2: Text array length is not equal to specified length parameter\n");
 		return rdlib::GenericError;
 	}
 	uint8_t digits[_DisplaySize] = {0}; // Initialize all segments to 0
@@ -243,7 +243,8 @@ rdlib::Return_Codes_e  TM1637plus_Model4::DisplayString(const char* numStr, uint
 */
 unsigned char TM1637plus_Model4::encodeCharacter(unsigned char digit)
 {
-	unsigned char ascii = pFontSevenSegptr[digit- _ASCIIOffset ];
+	const uint8_t *font = SevenSegmentFont::pFontSevenSegptr();
+	unsigned char ascii = font[digit- _ASCIIOffset];
 	return ascii;
 }
 

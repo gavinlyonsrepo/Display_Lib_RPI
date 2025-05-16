@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <lgpio.h>
+#include <cstring>  // for strlen
 #include "common_data_RDL.hpp"
 #include "led_segment_font_data_RDL.hpp"
 
@@ -16,8 +17,8 @@
 /*!
 	@brief Class for TM1637 Model 4
 */
-class TM1637plus_Model4 {
-
+class TM1637plus_Model4 : public SevenSegmentFont
+{
 public:
 
 	TM1637plus_Model4 (uint8_t clock, uint8_t data ,int gpioDev, int delay, int DisplaySize) ;

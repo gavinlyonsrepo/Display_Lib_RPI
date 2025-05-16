@@ -58,6 +58,7 @@ private:
 
 	rdlib::Return_Codes_e TFTDataCommandPin(void);
 	rdlib::Return_Codes_e TFTClock_Data_ChipSelect_Pins(void);
+	void TFTSetupResetPin(int8_t rst);
 	rdlib::Return_Codes_e TFTST7789Initialize(void);
 	void cmd89(void);
 	void AdjustWidthHeight(void);
@@ -75,6 +76,7 @@ private:
 	int _spiChan = 0;     /**< A SPI channel, >= 0. */
 	int _spiBaud = 50000; /**< The speed of serial communication in bits per second. */
 	int _spiFlags = 0;    /**<The flags 2 LSB defines SPI mode */
+	bool _resetPinOn = true; /**< reset pin? true:hw rst pin, false:sw rt*/
 
 	// ST7789 registers + Commands
 

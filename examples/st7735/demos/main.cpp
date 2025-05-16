@@ -1,6 +1,6 @@
 /*!
 	@file examples/st7735/demos/main.cpp
-	@brief  Various demos see test list
+	@brief  Various demos see test list , 128x128 ST7735R Red Tab.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test
 		-# test 440 Round Gauge random value
@@ -83,7 +83,7 @@ int main()
 			continue;
 		}
 		switch (choice) {
-			case 1: gaugeDemo(20); break;
+			case 1: gaugeDemo(100); break;
 			case 2: drawGaugeDemoTwo(75); break;
 			case 3: demoRadar(7); break;
 			case 4: arcGauge(100); break;
@@ -163,8 +163,10 @@ void gaugeDemo(uint16_t countLimit)
 	myTFT.setCursor(0,100);
 	myTFT.println(" Count :: ");
 	myTFT.print(" Value :: ");
-	int16_t currentValue = 0;
-	int16_t oldValue = 0;
+	int16_t currentValue = 150;
+	int16_t oldValue = 150;
+	const int16_t minValue = 1;
+	const int16_t maxValue = 255;
 	myTFT.setFont(font_default);
 	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
 	char buffer[10];
@@ -179,11 +181,13 @@ void gaugeDemo(uint16_t countLimit)
 	// Random number setup
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> dist(1, 254);
+	std::uniform_int_distribution<int> stepDist(-10, 10); // Small step changes
 
 	while(count++ < countLimit)
 	{
-		currentValue = dist(gen);
+		int step = stepDist(gen);
+		currentValue += step;
+		currentValue = std::clamp(currentValue, minValue, maxValue);
 		myTFT.setCursor(0,100);
 		if (oldValue != currentValue) {
 			drawPointer(currentValue, oldValue,  x, y, radius, myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
@@ -319,12 +323,18 @@ void updateGauges(float phase) {
 	float val1 = (std::sin(phase) + 1) / 2;
 	float val2 = (std::cos(phase) + 1) / 2;
 	float val3 = ((std::sin(phase) * std::cos(phase)) + 1) / 2;
-	// Display values only if they change
+	// Convert float (0 to 1) to integer (1 to 127) range for color mapping
+	uint8_t mappedVal1 = rdlib_maths::mapValue(static_cast<int>(val1 * 100), 0, 100, 1, 127);
+	uint8_t mappedVal2 = rdlib_maths::mapValue(static_cast<int>(val2 * 100), 0, 100, 1, 127);
+	uint8_t mappedVal3 = rdlib_maths::mapValue(static_cast<int>(val3 * 100), 0, 100, 1, 127);
+	// Generate dynamic colors
+	uint16_t color1 = rdlib_maths::generateColor(mappedVal1);
+	uint16_t color2 = rdlib_maths::generateColor(mappedVal2);
+	uint16_t color3 = rdlib_maths::generateColor(mappedVal3);
 	char buffer[6]; // To store formatted text
 	// Draw gauges only if values changed
-	
 	if (val1 != prevVal1) {
-		drawGauge(GAUGE_X_START, GAUGE_Y_START, myTFT.RDLC_RED, val1);
+		drawGauge(GAUGE_X_START, GAUGE_Y_START, color1, val1);
 		sprintf(buffer, "%.2f", val1);
 		myTFT.fillRectangle(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK); // Clear previous text
 		myTFT.setCursor(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10);
@@ -332,7 +342,7 @@ void updateGauges(float phase) {
 		prevVal1 = val1;
 	}
 	if (val2 != prevVal2) {
-		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, myTFT.RDLC_GREEN, val2);
+		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, color2, val2);
 		sprintf(buffer, "%.2f", val2);
 		myTFT.fillRectangle(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
@@ -340,7 +350,7 @@ void updateGauges(float phase) {
 		prevVal2 = val2;
 	}
 	if (val3 != prevVal3) {
-		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, myTFT.RDLC_BLUE, val3);
+		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, color3, val3);
 		sprintf(buffer, "%.2f", val3);
 		myTFT.fillRectangle(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);

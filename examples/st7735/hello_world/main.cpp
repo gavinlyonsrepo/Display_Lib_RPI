@@ -1,6 +1,6 @@
 /*! 
 	@file examples/st7735/hello_world/main.cpp
-	@brief Hello World hardware  SPI test
+	@brief Hello World hardware  SPI test , 128x128 ST7735R Red Tab.
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test 

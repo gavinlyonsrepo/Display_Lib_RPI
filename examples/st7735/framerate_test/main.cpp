@@ -1,13 +1,14 @@
 /*! 
 	@file examples/st7735/framerate_test/main.cpp
-	@brief Frame rate test. FPS text + graphics
+	@brief Frame rate test. FPS bitmap, text + graphics , 128x128 ST7735R Red Tab.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@details This test (601) is setup for a 128by128 bitmaps 
 		Five files 128by128 pixels are loaded and displayed as many times as possible in 
 		10 seconds to calculate FPS. 
 	@test 
 		-# Test 601 Frame rate per second (FPS) test. 24 bit bitmaps.
-		-# Test 603 Frame rate per second (FPS) test text + graphics
+		-# Test 603 Frame rate per second (FPS) test text
+		-# Test 604 Frame rate per second (FPS) test graphics
 */
 
 // Section ::  libraries 
@@ -55,16 +56,21 @@ void TestBMP_FPS(int64_t runtime_us);
 int64_t getTime(); // Utility for FPS test
 std::vector<uint8_t>   loadImage(const char*); // Utility for FPS test
 
-// Test 603 text and graphics
-void TestFPS(int64_t runtime_us);
-void display(double fps, uint32_t frames);
+// Test 603 604 text and graphics
+void TestFPS(int64_t runtime_us, uint8_t testNumber);
+void displayText(double fps, uint32_t frames);
+void displayGraphics(void);
 
 // ======================= Main ===================
 int main()
 {
 	if(Setup() != 0)return -1;
 	std::cout << "=============" << std::endl;
-	TestFPS(runtime);
+	std::cout << "Test 603 FPS test: text" << std::endl;
+	TestFPS(runtime, 1 );
+	std::cout << "=============" << std::endl;
+	std::cout << "Test 604 FPS test: graphics" << std::endl;
+	TestFPS(runtime, 2 );
 	std::cout << "=============" << std::endl;
 	TestBMP_FPS(runtimeBmp);
 	std::cout << "=============" << std::endl;
@@ -80,15 +86,12 @@ uint8_t Setup(void)
 	std::cout << "TFT Start" << std::endl;
 	std::cout << "Display_Lib_RPI library version :" << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
-
 // ** USER OPTION 1 GPIO HW SPI **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
-
 // ** USER OPTION 2 Screen Setup **
 	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
-// ***********************************
-
+// **********************************
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
 	// pass enum to param1 ,4 choices,see README
 	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
@@ -97,6 +100,7 @@ uint8_t Setup(void)
 	}
 //*****************************
 	delayMilliSecRDL(50);
+	myTFT.setFont(font_pico);
 	return 0;
 }
 
@@ -120,14 +124,13 @@ void EndTests(void)
  * @brief Measures the FPS (frames per second) of a display test.
  * Runs for the specified duration, rendering frames and calculating FPS.
  * @param runtime_us Duration of the test in microseconds (e.g., 20000000 for 20 seconds).
+ * @param testNumber , which test to run 1 for text 2 for graphics
  */
-void TestFPS(int64_t runtime_us) {
+void TestFPS(int64_t runtimeUs, uint8_t testNumber = 1) {
 	// Initialize display settings
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
-	myTFT.setFont(font_default);
-	// Print test start message
-	std::cout << "Test 601 FPS test: text + graphics :: " 
-			  << (runtime_us / 1000000) << " seconds" << std::endl;
+	myTFT.setFont(font_pico);
+	std::cout << (runtimeUs / 1000000) << " seconds" << std::endl;
 	// Initialize timing and FPS calculation variables
 	int64_t start = getTime();  // Get start time in microseconds
 	int64_t duration = 0;       // Track elapsed time
@@ -135,9 +138,13 @@ void TestFPS(int64_t runtime_us) {
 	double fps = 0;             // Store calculated FPS
 
 	// Run the test for the specified duration
-	while (duration < runtime_us) {
+	while (duration < runtimeUs) {
 		// Call display function to test
-		display(fps, frames);
+		switch (testNumber)
+		{
+			case 1 : displayText(fps, frames); break;
+			case 2 : displayGraphics(); break;
+		}
 		// Update elapsed time
 		duration = getTime() - start;
 		// Calculate and print FPS every 50 frames
@@ -157,7 +164,7 @@ void TestFPS(int64_t runtime_us) {
 void TestBMP_FPS(int64_t runtime_us) {
 	myTFT.fillScreen(myTFT.RDLC_RED);
 	myTFT.TFTsetRotation(myTFT.Degrees_0);
-	std::cout << "Test 603 FPS test: bitmaps ::" << (runtime_us / 1000000) << " seconds" << std::endl;
+	std::cout << "Test 601 FPS test: bitmaps ::" << (runtime_us / 1000000) << " seconds" << std::endl;
 	// Load images into buffers
 	std::vector<uint8_t> img[5] = {
 		loadImage("bitmap/bitmap24images/24pic1.bmp"),
@@ -197,25 +204,33 @@ void TestBMP_FPS(int64_t runtime_us) {
 }
 
 
-void  display(double fps, uint32_t frames)
+void  displayText(double fps, uint32_t frames)
 {
-	myTFT.setCursor(5, 15);
-	myTFT.print("G Lyons");
-	myTFT.setCursor(5, 25);
-	myTFT.print(frames);
+	myTFT.setCursor(5, 5);
+	myTFT.println("Frames:");
+	myTFT.println(frames);
+	myTFT.println("FPS:");
+	myTFT.println(fps);
+	myTFT.println("SPI speed:");
+	myTFT.println(SPI_SPEED);
+	myTFT.println("Testing!");
+	myTFT.println(rdlib::LibraryVersion());
+}
 
-	myTFT.setCursor(5, 35);
-	myTFT.print(fps, 2);
-	myTFT.print(" fps");
-	myTFT.setCursor(5, 45);
-	myTFT.print(rdlib::LibraryVersion());
-
+void  displayGraphics(void)
+{
 	myTFT.drawFastVLine(63, 0, 127, myTFT.RDLC_BLUE);
 	myTFT.drawFastHLine(0, 63, 127, myTFT.RDLC_BLUE);
+	myTFT.fillQuadrilateral(
+		20, 20,  // P0: top-left
+		60, 20,  // P1: top-right
+		50, 40,  // P2: bottom-right (offset x by -10)
+		10, 40,  // P3: bottom-left  (offset x by -10)
+	myTFT.RDLC_CYAN
+	);
 	myTFT.fillRect(20, 70, 20, 20, myTFT.RDLC_RED);
 	myTFT.fillCircle(100, 30, 10, myTFT.RDLC_GREEN);
 	myTFT.fillTriangle(70,90, 90, 70 , 110, 90, myTFT.RDLC_YELLOW);
-
 }
 
 /**

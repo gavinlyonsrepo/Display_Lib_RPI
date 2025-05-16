@@ -292,7 +292,6 @@ rdlib::Return_Codes_e  NOKIA_5110_RPI::LCDSPIoff(void)
 	return rdlib::Success;
 }
 
-
 /*!
 	@brief Call when powering down LCD
 */
@@ -364,24 +363,6 @@ void NOKIA_5110_RPI::LCDSetContrast(uint8_t contrast) {
 }
 
 /*!
-	@brief Writes the buffer to the LCD
-*/
-void NOKIA_5110_RPI::LCDdisplayUpdate(void) {
-	uint16_t i;
-	LCDWriteCommand(LCD_SETYADDR);  // set y = 0
-	LCDWriteCommand(LCD_SETXADDR);  // set x = 0
-
-	Display_DC_SetHigh; //Data send
-	if (isHardwareSPI() == false) Display_CS_SetLow;
-
-	for(i = 0; i < _LCD_Display_size; i++)  
-	LCDWriteData( LCDDisplayBuffer[i] );
-
-	if (isHardwareSPI() == false)Display_CS_SetHigh;
-}
-
-
-/*!
 	@brief Set a single pixel in the buffer
 	@param x  x coordinate
 	@param y  y coordinate
@@ -408,44 +389,33 @@ void NOKIA_5110_RPI::drawPixel(int16_t x, int16_t y, uint8_t color) {
 			std::swap(x, y);
 			x = WIDTH - 1 - x;
 	}
-
+	uint16_t tc = (_LCD_WIDTH * (y / 8)) + x;
 	switch (color)
 	{
-		case WHITE:   LCDDisplayBuffer[x + (y / 8) * WIDTH] &= ~(1 << (y & 7)); break;
-		case BLACK:   LCDDisplayBuffer[x + (y / 8) * WIDTH] |= (1 << (y & 7)); break;
-		case INVERSE: LCDDisplayBuffer[x + (y / 8) * WIDTH] ^= (1 << (y & 7)); break;
+		case WHITE:   this->_LCDbuffer[tc] &= ~(1 << (y & 7)); break;
+		case BLACK:   this->_LCDbuffer[tc] |= (1 << (y & 7));  break;
+		case INVERSE: this->_LCDbuffer[tc] ^= (1 << (y & 7));  break;
 	}
-}
-
-
-/*!
-	@brief Writes the buffer (full of zeros) to the LCD
-*/
-void NOKIA_5110_RPI::LCDdisplayClear(void) {
-	uint16_t i;
-	for (i = 0; i < _LCD_Display_size ; i++)
-		LCDDisplayBuffer[i] = 0x00;
-}
-
-/*!
-	@brief Writes the buffer (full of ones(0xFF)) to the LCD
-*/
-void NOKIA_5110_RPI::LCDfillScreen() {
-	uint16_t i;
-	for (i = 0; i < _LCD_Display_size; i++)
-		LCDDisplayBuffer[i] = 0xFF;
 }
 
 /*!
 	@brief Writes the buffer (with pattern) to the LCD
-	@param Pattern The pattern to send 0x00 to 0xFF
+	@param Pattern The pattern to send 0x00 to 0xFF, by default 0x00
+	@note writes directly to screen, not buffer.s
 */
-void NOKIA_5110_RPI::LCDfillScreenPattern(uint8_t Pattern) {
+void NOKIA_5110_RPI::LCDfillScreen(uint8_t Pattern)
+{
 	uint16_t i;
+	LCDWriteCommand(LCD_SETYADDR); // set y = 0
+	LCDWriteCommand(LCD_SETXADDR); // set x = 0
+	Display_DC_SetHigh;			   // Data send
+	if (isHardwareSPI() == false) Display_CS_SetLow;
 	for (i = 0; i < _LCD_Display_size; i++)
-		LCDDisplayBuffer[i] = Pattern;
+	{
+		LCDWriteData(Pattern);
+	}
+	if (isHardwareSPI() == false) Display_CS_SetHigh;
 }
-
 
 /*!
 	@brief inverts color on display
@@ -515,5 +485,85 @@ uint16_t NOKIA_5110_RPI::LCDHighFreqDelayGet(void){return _LCDHighFreqDelay;}
 */
 void  NOKIA_5110_RPI::LCDHighFreqDelaySet(uint16_t CommDelay){_LCDHighFreqDelay = CommDelay;}
 
+/*!
+	@brief sets the buffer pointer to the users screen data buffer
+	@param buffer span object for the buffer data.
+	@return Will return:
+		-# 0. Success
+		-# 2. Buffer size calculations are incorrect BufferSize = w * (h/8),
+		-# 3. Not a valid pointer object, buffer empty.
+*/
+rdlib::Return_Codes_e NOKIA_5110_RPI::LCDSetBufferPtr(std::span<uint8_t> buffer)
+{
+	if (buffer.size() != static_cast<size_t>( _LCD_WIDTH * (_LCD_HEIGHT / 8)))
+	{
+		printf("NOKIA_5110::LCDSetBufferPtr Error 2: buffer size does not equal w * (h/8))\r\n");
+		return rdlib::BufferSize;
+	}
+	_LCDbuffer = buffer;
+
+	if (buffer.empty())
+	{
+		printf("NOKIA_5110::LCDSetBufferPtr Error 3: Problem assigning buffer, received empty buffer\r\n");
+		return rdlib::BufferEmpty;
+	}
+	return rdlib::Success;
+}
+
+/*!
+	 @brief updates the LCD  i.e. writes the  shared buffer to the active screen
+		pointed to by Active Buffer
+	@return
+		-# Success
+		-# BufferEmpty if buffer is empty object
+*/
+rdlib::Return_Codes_e NOKIA_5110_RPI::LCDupdate()
+{
+	if (_LCDbuffer.empty())
+	{
+		printf("NOKIA_5110 ::LCDupdate Error Buffer is empty, cannot update screen\r\n");
+		return rdlib::BufferEmpty;
+	}
+	LCDBuffer(_LCDbuffer);
+	return rdlib::Success;
+}
+
+/*!
+	@brief clears the buffer of the active screen pointed to by Active Buffer
+	@param pattern to fill buffer, by default Zero
+	@return
+		-# Success
+		-# BufferEmpty if buffer is empty object
+	 @note Does NOT write to the screen
+*/
+rdlib::Return_Codes_e  NOKIA_5110_RPI::LCDclearBuffer(uint8_t pattern)
+{
+	if (_LCDbuffer.empty())
+	{
+		printf("NOKIA_5110::LCDclearBuffer Error: Buffer is empty, cannot clear\r\n");
+		return rdlib::BufferEmpty;
+	}
+
+	std::fill(_LCDbuffer.begin(), _LCDbuffer.end(), pattern);
+	return rdlib::Success;
+}
+
+/*!
+	 @brief Draw an  array  to the screen
+	 @param data span to the buffer array
+	 @note Called by LCDupdate internally to write buffer to screen
+*/
+void NOKIA_5110_RPI::LCDBuffer(std::span<uint8_t> data)
+{
+	LCDWriteCommand(LCD_SETYADDR); // set y = 0
+	LCDWriteCommand(LCD_SETXADDR); // set x = 0
+	Display_DC_SetHigh;			   // Data send
+	if (isHardwareSPI() == false) Display_CS_SetLow;
+	for (uint16_t i = 0; i < _LCD_Display_size; i++)
+	{
+		LCDWriteData(data[i]);
+	}
+	if (isHardwareSPI() == false)Display_CS_SetHigh;
+}
 
 /* ------------- EOF ------------------ */

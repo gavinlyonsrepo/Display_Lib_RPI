@@ -1,6 +1,6 @@
 /*! 
 	@file examples/st7735/hello_world_swspi/main.cpp
-	@brief Hello World software SPI test
+	@brief Hello World software SPI test, 128x128 ST7735R Red Tab.
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function
 	@test 
