@@ -6,8 +6,6 @@
 			-# Display one shows time 
 			-# Display two shows Date
 			-# Hardware SPI Project Name: MAX7219_7SEG_RPI
-	
-	@note not fully tested as only one display available
 	@test
 		-# Test 403 Clock demonstration 
 */
@@ -30,9 +28,10 @@ int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
 int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
 int HWSPI_SPEED =  1000000; // The speed of serial communication in bits per second.
 int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+uint8_t NumberOfDisplays = 2; // Number of displays connected
 
 // Constructor object 
-MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS);
+MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, NumberOfDisplays);
 
 // Function Prototypes
 std::string UTC_string(void);

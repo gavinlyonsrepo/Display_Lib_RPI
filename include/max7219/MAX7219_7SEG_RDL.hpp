@@ -22,8 +22,8 @@
 class MAX7219_SS_RPI : public SevenSegmentFont 
 {
 public:
-	MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect ,uint8_t data, int gpioDev);
-	MAX7219_SS_RPI(int device, int channel, int speed, int flags);
+	MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect ,uint8_t data, int gpioDev, uint8_t totalDisplays);
+	MAX7219_SS_RPI(int device, int channel, int speed, int flags, uint8_t totalDisplays);
 
 	/*! The decode-mode register sets BCD code B or no-decode operation for each digit */
 	enum DecodeMode_e : uint8_t
@@ -156,6 +156,7 @@ private:
 	DecodeMode_e CurrentDecodeMode; /**< Enum to store current decode mode  */
 
 	uint8_t _CurrentDisplayNumber = 1; /**< Which display the user wishes to write to in a cascade of connected displays*/
+	uint8_t _NoDisplays = 1; /**< Number of displays in cascade, default is 1 */
 
 	void HighFreqshiftOut(uint8_t value);
 	void WriteDisplay(uint8_t RegisterCode, uint8_t data);

@@ -23,9 +23,10 @@ int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
 int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
 int HWSPI_SPEED =  1000000; // The speed of serial communication in bits per second.
 int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+uint8_t NumberOfDisplays = 1; // Number of displays connected
 
 // Constructor object 
-MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS);
+MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, NumberOfDisplays);
 
 // Function Prototypes
 bool Setup(void);

@@ -32,6 +32,7 @@ uint8_t  CLK =16;  // clock GPIO, connected to clock line of module
 uint8_t  CS =20;   // Chip Select GPIO, connected to CS line of module
 uint8_t  DIN =21;  // data in GPIO, connected to DIN line of module
 int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
+uint8_t NumberOfDisplays = 1; // Number of displays connected 
 
 
 // Delays for testing
@@ -40,7 +41,7 @@ int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 #define TEST_DELAY1 1000
 
 // Constructor object 
-MAX7219_SS_RPI myMAX(CLK, CS ,DIN, GPIO_CHIP_DEVICE);
+MAX7219_SS_RPI myMAX(CLK, CS ,DIN, GPIO_CHIP_DEVICE, NumberOfDisplays );
 
 // Function Prototypes
 bool Setup(void);

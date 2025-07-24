@@ -1,7 +1,7 @@
 /*!
 	@file     TM1637plus_Model4_RDL.hpp
 	@author   Gavin Lyons
-	@brief    RPI library Tm1637plus, Header file for for TM1637 module. Model 4
+	@brief    RPI library Tm1637plus, Header file for for TM1637 module. Model 4 
 */
 
 #pragma once
@@ -21,6 +21,8 @@ class TM1637plus_Model4 : public SevenSegmentFont
 {
 public:
 
+	static constexpr uint8_t SEMI_COLON_ON = 0x40; /**< Switch on SEMI_COLON on model 4A */
+	
 	TM1637plus_Model4 (uint8_t clock, uint8_t data ,int gpioDev, int delay, int DisplaySize) ;
 	rdlib::Return_Codes_e displayBegin(void);
 	rdlib::Return_Codes_e displayClose(void);

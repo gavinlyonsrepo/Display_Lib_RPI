@@ -24,22 +24,30 @@ Connections to RPI:
 
 NOTE : If VCC is set to 5V, level shift GPIO to 3.3V or damage could result.
 
-This library is tested on one variant of the TM1637 (model 4)
-which has 4 digits with centred semi-colon , the library should work with other models
-(six digit, decimal points, etc) but is untested.
+
+NOTE : If VCC is set to 5V, level shift GPIO to 3.3V or damage could result.
+
+This library is tested on two variant of the TM1637. 
+
+1. TM1637 (model 4) which has 4 digits with centred semi-colon.
+2. TM1637 (model 6) which has 4 digits and decimal points for each digit.
 
 
 Model 4: 
 
 [![ model4 ](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/tm1637.jpg)](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/tm1637.jpg)
 
+Model 6:
+
+[![ model6 ](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/tm1637a.png)](https://github.com/gavinlyonsrepo/pic_16F1619_projects/blob/master/images/tm1637a.png)
 
 ## Software
 
-There is one example file. A table in file 'tm163X_font_data_RDL.cpp' provides ASCII to Seven Segment data.
+There is two example file. A table in file 'tm163X_font_data_RDL.cpp' provides ASCII to Seven Segment data.
 . gfedcba (seven segments ) In the gfedcba representation,
 a byte value of 0x06 would turn on segments "c" and "b",
 which would display a "1". https://en.wikipedia.org/wiki/Seven-segment_display
+
 
 ### GPIO_CHIP_DEVICE
 

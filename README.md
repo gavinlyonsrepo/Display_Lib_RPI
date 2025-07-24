@@ -56,14 +56,14 @@ sudo make install
 	* Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.4.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.4.1.tar.gz | tar xz
 ```
 
 3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. 
 	* It will be installed to usr/local/lib and usr/local/include by default. 
 
 ```sh
-cd Display_Lib_RPI-2.4.0
+cd Display_Lib_RPI-2.4.1
 make
 sudo make install
 ```

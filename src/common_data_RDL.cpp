@@ -12,7 +12,7 @@ namespace rdlib {
 */
 uint16_t LibraryVersion(void)
 {
-	return 240;
+	return 241;
 }
 
 /*! 

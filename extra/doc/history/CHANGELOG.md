@@ -10,7 +10,7 @@ Version control history
 	* Added Support for ST7789 LCD.
 	* Added Support for ILI9341 LCD with XPT2046 touchscreen support.
 
-* Version 1.3.0 03-2024
+* Version 1.3.0 04-2024
 	* Added Support for Sh1106 & Sh1107 OLED I2C.
 
 * Version 2.0.0 12-2024
@@ -46,7 +46,11 @@ Version control history
 
 * Version 2.4.0 05-2025
 	* Added Support for GC9A01A 16 bit Colour Graphic TFT LCD.
-	* Added optional frame buffer mode. 
+	* Added optional frame buffer mode.
+
+* Version 2.4.1 07-2025
+	* Corrected code so Max7219 cascade examples works, just acquired second display
+	* Added tm1637 example for version with decimal points in addition to semi-colon version
 
 
 

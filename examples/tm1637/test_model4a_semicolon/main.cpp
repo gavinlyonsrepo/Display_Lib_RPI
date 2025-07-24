@@ -1,7 +1,7 @@
 /*!
-	@file examples/tm1637/test_model4/main.cpp
+	@file examples/tm1637/test_model4a_semicolon/main.cpp
 	@author Gavin Lyons
-	@brief A demo file library for TM1637 module Works on Model 4
+	@brief A demo file library for TM1637 module Works on Model 4A semi colon :
 		Carries out series of tests demonstrating arduino library TM1637plus.
 		Project Name: Display_Lib_RPI
 	@details
@@ -12,7 +12,7 @@
 			https://en.wikipedia.org/wiki/Seven-segment_display
 			URL: https://github.com/gavinlyonsrepo/Display_Lib_RPI
 	@note
-			Only tested on 4 digit + semi colon model, 
+			Only tested on 4 digit + semi colon model, Model 4A
 	@test
 		-# Test 1 setSegments and encode digit functions
 		-# Test 2 decimal number testing
@@ -30,7 +30,6 @@
 #define  GPIO_CHIP_DEVICE 0 // try 0 or 4 , ls /dev/gpio*
 #define  COMM_DELAY_US 75 // Internal Serial Communications delay in uS
 #define  NUM_OF_DIGITS 4 // number of digits in display.
-#define  SEMI_COLON_ON (0x40)
 
 // Constructor object
 TM1637plus_Model4 tm(CLOCK_TM , DIO_TM, GPIO_CHIP_DEVICE, COMM_DELAY_US, NUM_OF_DIGITS);
@@ -66,7 +65,7 @@ int main(void)
 // ************** Function Space ***********
 bool Setup(void)
 {
-	printf("Test Begin :: Model 4 :: TM1637plus\r\n");
+	printf("Test Begin :: Model 4A :: TM1637plus\r\n");
 	delaySecRDL(myTestDelay1);
 	if (tm.displayBegin() != rdlib::Success)
 	{
@@ -108,6 +107,14 @@ void Test1(void)
 	tm.setSegments(data,4,0);
 	delaySecRDL(myTestDelay);
 
+	printf("Test 1D: SetSegments  semi-colon only   :   \r\n");
+	data[0] = 0x00;
+	data[1] = 0x80;
+	data[2] = 0x00;
+	data[3] = 0x00;
+	tm.setSegments(data,4,0);
+	delaySecRDL(myTestDelay);
+
 }
 
 void Test2(void)
@@ -134,23 +141,23 @@ void Test2(void)
 	delaySecRDL(myTestDelay);
 
 	printf("Test 2C: decimal number leading zeros off,  with semi:colon on \r\n");
-	tm.DisplayDecimalwDot(1, SEMI_COLON_ON, false, 4, 0);
+	tm.DisplayDecimalwDot(1, tm.SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(23, SEMI_COLON_ON, false, 4, 0);
+	tm.DisplayDecimalwDot(23, tm.SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(784, SEMI_COLON_ON, false, 4, 0);
+	tm.DisplayDecimalwDot(784, tm.SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(6281, SEMI_COLON_ON, false, 4, 0);
+	tm.DisplayDecimalwDot(6281, tm.SEMI_COLON_ON, false, 4, 0);
 	delaySecRDL(myTestDelay);
 
 	printf("Test 2D: decimal number leading zeros on ,  with semi:colon on\r\n");
-	tm.DisplayDecimalwDot(1, SEMI_COLON_ON, true, 4, 0);
+	tm.DisplayDecimalwDot(1, tm.SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(23, SEMI_COLON_ON, true, 4, 0);
+	tm.DisplayDecimalwDot(23, tm.SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(784, SEMI_COLON_ON, true, 4, 0);
+	tm.DisplayDecimalwDot(784, tm.SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
-	tm.DisplayDecimalwDot(6281, SEMI_COLON_ON, true, 4, 0);
+	tm.DisplayDecimalwDot(6281, tm.SEMI_COLON_ON, true, 4, 0);
 	delaySecRDL(myTestDelay);
 	tm.displayClear();
 }
@@ -165,13 +172,19 @@ void Test3(void)
 	printf("Test 3B: string 2 digit + semi colon\r\n");
 	char min[] = "07";
 	char sec[] = "53";
-	tm.DisplayString(min, SEMI_COLON_ON, 2, 0); // Display "07" starting at position 0
-	tm.DisplayString(sec, SEMI_COLON_ON, 2, 2); // Display "53" starting at position 2
+	tm.DisplayString(min, tm.SEMI_COLON_ON, 2, 0); // Display "07" starting at position 0
+	tm.DisplayString(sec, tm.SEMI_COLON_ON, 2, 2); // Display "53" starting at position 2
 	delaySecRDL(myTestDelay);
 
 	printf("Test 3C: string 4 digit\r\n");
 	char string[] = "OPEN";
 	tm.DisplayString(string, 0, 4, 0); // Display "OPEN" starting at position 0
+	delaySecRDL(myTestDelay);
+	tm.displayClear();
+
+	printf("Test 3D: string 1 digit\r\n");
+	char Astring[] = "2";
+	tm.DisplayString(Astring, 0,  1, 3); // Display "   2" starting at position 4
 	delaySecRDL(myTestDelay);
 
 }

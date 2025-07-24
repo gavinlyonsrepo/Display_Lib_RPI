@@ -13,15 +13,17 @@
 	@param clock CLk pin
 	@param chipSelect CS pin
 	@param data DIO pin
-	@param gpioDev The device number of a gpiochip.  @
+	@param gpioDev The device number of a gpiochip.
+	@param totalDisplays Total number of displays in cascade
 	@note overloaded this one is for Software SPI
 */
-MAX7219_SS_RPI::MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect , uint8_t data, int gpioDev)
+MAX7219_SS_RPI::MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect , uint8_t data, int gpioDev, uint8_t totalDisplays)
 {
 	_Display_SCLK = clock;
 	_Display_CS  = chipSelect;
 	_Display_SDATA = data;
 	_HardwareSPI = false;
+	_NoDisplays = totalDisplays;
 	_DeviceNumGpioChip = gpioDev;
 }
 
@@ -31,14 +33,16 @@ MAX7219_SS_RPI::MAX7219_SS_RPI(uint8_t clock, uint8_t chipSelect , uint8_t data,
 	@param channel A SPI channel, >= 0. 
 	@param speed The speed of serial communication in bits per second. 
 	@param flags The flags may be used to modify the default behaviour. Set to 0(mode 0) for this device.
+	@param totalDisplays Total number of displays in cascade
 	@note overloaded this one is for Hardware SPI 
 */
-MAX7219_SS_RPI::MAX7219_SS_RPI(int device, int channel, int speed, int flags)
+MAX7219_SS_RPI::MAX7219_SS_RPI(int device, int channel, int speed, int flags, uint8_t totalDisplays)
 {
 	_spiDev = device;
 	_spiChan = channel;
 	_spiBaud = speed;
 	_spiFlags = flags;
+	_NoDisplays = totalDisplays;
 	_HardwareSPI = true;
 }
 
@@ -591,12 +595,14 @@ void MAX7219_SS_RPI::WriteDisplay( uint8_t RegisterCode, uint8_t data)
 	if (_HardwareSPI == false)
 	{
 		Display_CS_SetLow;
-		HighFreqshiftOut(RegisterCode);
-		HighFreqshiftOut(data);
-		if (_CurrentDisplayNumber  > 1)
+		// Loop over all displays, from last to first in chain
+		for (int8_t i = _NoDisplays; i >= 1; i--)
 		{
-			for (uint8_t i= 1 ; i <_CurrentDisplayNumber; i++)
+			if (i == _CurrentDisplayNumber)
 			{
+				HighFreqshiftOut(RegisterCode);
+				HighFreqshiftOut(data);
+			}else{
 				HighFreqshiftOut(MAX7219_REG_NOP);
 				HighFreqshiftOut(0x00);
 			}
@@ -604,16 +610,16 @@ void MAX7219_SS_RPI::WriteDisplay( uint8_t RegisterCode, uint8_t data)
 		Display_CS_SetHigh;
 	}else
 	{
-		char TransmitBuffer[_CurrentDisplayNumber*2];
-		TransmitBuffer[0] = RegisterCode;
-		TransmitBuffer[1] = data;
-		if (_CurrentDisplayNumber  > 1)
-		{
-			for (uint8_t i= 2 ; i < (_CurrentDisplayNumber*2) ; i++)
-			{
-				TransmitBuffer[i] = 0x00;
-			}
+		char TransmitBuffer[_NoDisplays * 2];
+		// Fill all with NOPs
+		for (uint8_t i = 0; i < _NoDisplays; i++) {
+			TransmitBuffer[i * 2]     = MAX7219_REG_NOP;
+			TransmitBuffer[i * 2 + 1] = 0x00;
 		}
+		// Place real command for the target display
+		uint8_t displayIndex = _NoDisplays - _CurrentDisplayNumber;
+		TransmitBuffer[displayIndex * 2]     = RegisterCode;
+		TransmitBuffer[displayIndex * 2 + 1] = data;
 		int spiErrorStatus = 0;
 		spiErrorStatus = Display_SPI_WRITE(_spiHandle, static_cast<const char*>(TransmitBuffer), sizeof(TransmitBuffer));
 		if (spiErrorStatus <0)
@@ -651,7 +657,7 @@ void MAX7219_SS_RPI::SetScanLimit(ScanLimit_e numDigits)
 	in following order : dp-abcdefg but the font we use is dp-gfedcba where
 	letters represent seven segment LEDS, and dp represents decimal point.. 
 	We flip the bits in the code rather than change the font data in font file because
-	the font data is used by other modules(TM1638 + TM1637) and they use dp-gfedcba order.
+	the font data is used by other modules(TM1638 + TM1637 etc) and they use dp-gfedcba order.
 	Thus we can share same font file between all seven segment modules.
 */
 uint8_t MAX7219_SS_RPI::flipBitsPreserveMSB(uint8_t byte) 

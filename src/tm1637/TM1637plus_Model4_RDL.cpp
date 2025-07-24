@@ -141,6 +141,7 @@ void TM1637plus_Model4::DisplayDecimal(int number,  bool leading_zero ,uint8_t l
 		  leftmost dot of the digit being update. For example, if pos is 1, the MSB of dots
 		  will correspond the dot near digit no. 2 from the left. Dots are updated only on
 		  those digits actually being update (that is, no more than len digits)
+		  For Model 4A the semi-colon set to 0x40 to turn colon on
 	@param leading_zero When true, leading zeros are displayed. Otherwise unnecessary digits are
 		  blank
 	@param length The number of digits to set. The user must ensure that the number to be shown
@@ -196,6 +197,7 @@ void TM1637plus_Model4::DisplayDecimalwDot(int number, uint8_t dots,  bool leadi
 		  leftmost dot of the digit being update. For example, if pos is 1, the MSB of dots
 		  will correspond the dot near digit no. 2 from the left. Dots are updated only on
 		  those digits actually being update (that is, no more than len digits)
+		  For Model 4A the semi-colon set to 0x40 to turn colon on
 	@param length The number of digits to set. The user must ensure that the number to be shown
 		  fits to the number of digits requested
 	@param position The position most significant digit (0 - leftmost, 3 - rightmost)
