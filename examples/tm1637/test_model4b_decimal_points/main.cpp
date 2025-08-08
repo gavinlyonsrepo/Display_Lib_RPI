@@ -2,7 +2,7 @@
 	@file examples/tm1637/test_model4b_decimal_points/main.cpp
 	@author Gavin Lyons
 	@brief A demo file library for TM1637 module Works on Model 4 B, decimal points
-		Carries out series of tests demonstrating arduino library TM1637plus.
+		Carries out series of tests demonstrating library TM1637plus.
 		Project Name: Display_Lib_RPI
 	@details
 			setSegments function those not touch the ASCII font table and takes raw data
