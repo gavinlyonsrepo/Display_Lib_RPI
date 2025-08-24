@@ -27,7 +27,7 @@ bicolor_graphics::bicolor_graphics(int16_t w, int16_t h):
 /*!
 	@brief Write 1 character on display
 	@param  x character starting position on x-axis.
-	@param  y character starting position on x-axis.
+	@param  y character starting position on y-axis.
 	@param  value Character to be written.
 	@note Horizontal font addressing 
 	@return Will return rdlib::Return_Codes_e enum
