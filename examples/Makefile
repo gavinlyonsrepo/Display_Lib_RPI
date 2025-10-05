@@ -115,11 +115,12 @@
 
 # =============== ILI9341 TFT LCD SPI ============
 #SRC=ili9341/hello_world
-#SRC=ili9341/hello_world_swspi
 #SRC=ili9341/bitmap_tests
 #SRC=ili9341/text_graphics_functions
 #SRC=ili9341/demos
 #SRC=ili9341/touch_screen
+#SRC=ili9341/hello_world_swspi
+#SRC=ili9341/read_diagnostic_swspi
 #=================================================
 
 # =============== SSD1331 TFT LCD SPI ============

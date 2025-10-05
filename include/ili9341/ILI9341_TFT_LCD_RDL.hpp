@@ -19,11 +19,28 @@ public:
 	ILI9341_TFT();
 	~ILI9341_TFT(){};
 
+	/*!
+		@brief  Register addresses for ILI9341 diagnostic read commands.
+	 			These constants can be used with readDiagByte() to query
+				the controller for internal status and diagnostic information.
+				See datasheet section 8.2.3 for more details
+	 */
+	enum ILI9341_ReadRegister_e : uint8_t {
+		ILI9341_RDID        = 0x04, /**< Read Display Identification Information, 3 bytes*/
+		ILI9341_RDSTATUS    = 0x09, /**< Read Display Status, 4 bytes */
+		ILI9341_RDMODE      = 0x0A, /**< Read Display Power Mode */
+		ILI9341_RDMADCTL    = 0x0B, /**< Read MADCTL */
+		ILI9341_RDPIXFMT    = 0x0C, /**< Read Display Pixel Format */
+		ILI9341_RDIMGFMT    = 0x0D, /**< Read Display Image Mode */
+		ILI9341_RDSIGNAL    = 0x0E, /**< Read Display Signal Mode */
+		ILI9341_RDSELFDIAG  = 0x0F  /**< Read Display Self-Diagnostic Result */
+	};
+
 	//Functions
 	virtual void setAddrWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) override;
 
 	//Init Setup related
-	void SetupGPIO(int8_t RST, int8_t DC, int8_t CS, int8_t SCLK, int8_t MOSI, int8_t MISO); //SW SPI
+	void SetupGPIO(int8_t RST, int8_t DC, int8_t CS, int8_t SCLK, int8_t MOSI, int8_t MISO = -1); //SW SPI
 	void SetupGPIO(int8_t RST, int8_t DC); // HW SPI
 	void InitScreenSize(uint16_t w, uint16_t h);
 	rdlib::Return_Codes_e InitSPI(uint16_t CommDelay, int gpioDev); // SW SPI
@@ -42,31 +59,32 @@ public:
 	void setScrollMargins(uint16_t top, uint16_t bottom);
 	void NormalMode(void);
 	rdlib::Return_Codes_e TFTResetPin(void);
-	void PrintDiagnostic(void);
+	uint8_t readDiagByte(ILI9341_ReadRegister_e cmd, uint8_t indexs);
 
 protected:
 
 private:
 
 	rdlib::Return_Codes_e TFTDataCommandPin(void);
+	rdlib::Return_Codes_e TFTMISOPin(void);
 	rdlib::Return_Codes_e TFTClock_Data_ChipSelect_Pins(void);
 	rdlib::Return_Codes_e ILI9341Initialize(void);
 	void TFTSetupResetPin(int8_t rst);
+	void TFTSetupMISOPin(int8_t miso);
 	void cmdInit(void);
 
 	// SPI
 	bool _resetPinOn = true; /**< reset pin? true:hw rst pin, false:sw rt*/
-	
-	// SPI related 
+	bool _MISOPinOn = false; /**< MISO pin used? true:use MISO pin, false: not used*/
 	int _spiDev = 0; /**< A SPI device, >= 0. */
 	int _spiChan = 0; /**< A SPI channel, >= 0. */
 	int _spiBaud = 50000;   /**< The speed of serial communication in bits per second. */
 	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode */ 
-	
+
 	// Screen 
 	uint16_t _widthStartTFT = 240;  /**< never change after first init */
 	uint16_t _heightStartTFT = 320; /**< never change after first init */
-	
+
 	// Registers & command Set
 	static constexpr uint8_t ILI9341_NOP      = 0x00; /**< No-op register */
 	static constexpr uint8_t ILI9341_SWRESET  = 0x01; /**< Software reset register */

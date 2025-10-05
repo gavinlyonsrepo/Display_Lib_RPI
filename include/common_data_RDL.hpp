@@ -49,12 +49,13 @@ enum Return_Codes_e : uint8_t
 	WrongModeChosen = 26,       /**< Wrong SPI communication mode chosen by user */
 	GenericError = 27,          /**< Generic Error message, for minor errors */
 	UnknownError = 28,          /**< For Unknown Errors */
-	InvalidRAMLocation = 29     /**< Invalid Display RAM location */
+	InvalidRAMLocation = 29,    /**< Invalid Display RAM location */
+	SPIWriteFailure = 30        /**< Failure to write SPI, lgpio*/
 };
 
 /*! String array to hold error data so user if in possession of an error code can print out message ,
  *  the message consists of the enum label and its associated comment */
-constexpr std::array<const char*, 30> ReturnCodesStrings = {
+constexpr std::array<const char*, 31> ReturnCodesStrings = {
 	"Success, Function ran without defined Error",
 	"Reserved, Reserved for future use",
 	"WrongFont, Wrong Font selected",
@@ -84,7 +85,8 @@ constexpr std::array<const char*, 30> ReturnCodesStrings = {
 	"WrongModeChosen, Wrong SPI communication mode chosen by user",
 	"GenericError, Generic error message , for minor errors",
 	"UnknownError, For unknown error events",
-	"InvalidRAMLocation, Invalid RAM location"
+	"InvalidRAMLocation, Invalid RAM location",
+	"SPIWriteFailure, Failed to write to SPI, lgpio"
 };
 
 std::string ReturnCodetoText(Return_Codes_e);
@@ -120,7 +122,7 @@ uint16_t LibraryVersion(void);
 #define _XPT_RST_SetLow  lgGpioWrite(_GpioHandle, _RESET_PIN , 0)
 // GPIO read levels 
 #define Display_MISO_Read  lgGpioRead(_GpioHandle, _Display_MISO)
-#define Display_SDATA_Read  lgGpioRead(_GpioHandle, _Display_SDATA) //tm163X
+#define Display_SDATA_Read  lgGpioRead(_GpioHandle, _Display_SDATA)
 #define _XPT_IRQ_Read lgGpioRead(_GpioHandle, _IRQ_PIN)
 // GPIO claim output
 #define Display_RST_SetDigitalOutput lgGpioClaimOutput(_GpioHandle, 0, _Display_RST,  0);

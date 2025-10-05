@@ -7,6 +7,7 @@
 		-# test 441 Vertical Gauge Based on sin(x), cos(x), & sin(x)*cos(x). Updates over time to create a dynamic effect.
 		-# test 442 Radar, draw a line at angle function
 		-# test 443 arc Gauge
+		-# test 444 Simulated VU meter demo
 */
 
 // Section ::  libraries
@@ -59,10 +60,18 @@ float prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
 void updateGauges(float phase);
 void drawGauge(int x, int y, uint16_t color, float value);
 void drawGaugeDemoTwo(uint16_t  countLimit = 50);
+void drawGaugeBorder(int x, int y);
+
 // Demo 3
 void demoRadar(uint16_t sweeps=7);
 // Demo 4
 void arcGauge(uint16_t count=100);
+// Demo 5
+void VUmeterGradient(uint16_t secondsDisplay);
+void drawVerticalVU(uint8_t x, uint8_t y, uint8_t w, uint8_t val, uint16_t color);
+#define _BARS       7
+#define _BARWIDTH   12
+#define _BARSPACE    4
 
 //  Section ::  MAIN loop
 
@@ -79,7 +88,7 @@ int main()
 		if (std::cin.fail()) {
 			std::cin.clear(); // Clear error flag
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
-			std::cout << "Invalid input. Please enter a number between 1 and 4.\n\n";
+			std::cout << "Invalid input. Please enter a number between 1 and 5.\n\n";
 			continue;
 		}
 		switch (choice) {
@@ -87,7 +96,8 @@ int main()
 			case 2: drawGaugeDemoTwo(75); break;
 			case 3: demoRadar(7); break;
 			case 4: arcGauge(100); break;
-			case 5:
+			case 5: VUmeterGradient(100); break;
+			case 6:
 				std::cout << "Exiting menu\n";
 				break;
 			default:
@@ -95,7 +105,7 @@ int main()
 				break;
 		}
 		std::cout << std::endl;
-	} while (choice != 5);
+	} while (choice != 6);
 	EndTests();
 	return 0;
 }
@@ -143,7 +153,8 @@ void displayMenu() {
 	std::cout << "2. Vertical Gauges \n";
 	std::cout << "3. Radar \n";
 	std::cout << "4. Arc Gauge \n";
-	std::cout << "5. Quit\n";
+	std::cout << "5. VU meter \n";
+	std::cout << "6. Quit\n";
 	std::cout << "Enter your choice: ";
 }
 
@@ -221,14 +232,14 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 		outerY = sin(angleRad) * radius;
 		// Draw marker line from inner to outer radius
 		myTFT.drawLine(1 + centerX + innerX, 1 + centerY + innerY, 
-					   1 + centerX + outerX, 1 + centerY + outerY, 
-					   myTFT.RDLC_WHITE);
+						 1 + centerX + outerX, 1 + centerY + outerY, 
+						 myTFT.RDLC_WHITE);
 	}
 }
 
 void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour) 
 {
-	uint8_t i;
+	uint16_t i;
 	// If the current value is increasing
 	if (currentValue > oldValue) 
 	{
@@ -290,11 +301,20 @@ void drawPointerHelper(int16_t value, uint8_t centerX, uint8_t centerY, uint8_t 
 
 // Demo 2
 
+void drawGaugeBorder(int x, int y) { // Draw border once 
+	myTFT.drawRectWH(x - 2, y - 2, GAUGE_WIDTH + 4, GAUGE_HEIGHT + 4, myTFT.RDLC_WHITE);
+}
+
 void drawGaugeDemoTwo(uint16_t countLimit)
 {
 	std::cout << "Gauge Demo 2  ends at : " << countLimit << std::endl;
 	myTFT.setFont(font_default);
 	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
+	// Draw borders once
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	drawGaugeBorder(GAUGE_X_START, GAUGE_Y_START);
+	drawGaugeBorder(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START);
+	drawGaugeBorder(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START);
 	float phase = 0;
 	while (countLimit-- > 1 ) 
 	{
@@ -304,53 +324,73 @@ void drawGaugeDemoTwo(uint16_t countLimit)
 		delayMilliSecRDL(250);
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
 	std::cout << "Gauge Demo 2 Over " << std::endl;
 }
 
-void drawGauge(int x, int y, uint16_t color, float value) {
-	// Draw border
-	myTFT.drawRectWH(x - 2, y - 2, GAUGE_WIDTH + 4, GAUGE_HEIGHT + 4, myTFT.RDLC_WHITE);
-	// Clear inside
-	myTFT.fillRectangle(x, y, GAUGE_WIDTH, GAUGE_HEIGHT, myTFT.RDLC_BLACK);
-	// Draw fill
+// Gauge update 
+void drawGauge(int x, int y, float value, float prevVal) {
 	int fillHeight = static_cast<int>(GAUGE_HEIGHT * value);
-	if (fillHeight == 0) fillHeight =1;
-	myTFT.fillRectangle(x, y + (GAUGE_HEIGHT - fillHeight), GAUGE_WIDTH, fillHeight, color);
+	int prevFillHeight = (prevVal < 0) ? 0 : static_cast<int>(GAUGE_HEIGHT * prevVal);
+
+	if (fillHeight == prevFillHeight) return;  // nothing to update
+
+	// If shrinking, clear the difference 
+	if (fillHeight < prevFillHeight) {
+	int clearHeight = prevFillHeight - fillHeight;
+	myTFT.fillRectangle(
+		x,
+		y + (GAUGE_HEIGHT - prevFillHeight),
+		GAUGE_WIDTH,
+		clearHeight,
+		myTFT.RDLC_BLACK);
+	}
+	// If growing, draw gradient for the new part
+	if (fillHeight > prevFillHeight) {
+	int growHeight = fillHeight - prevFillHeight;
+	for (int i = 0; i < growHeight; i++) {
+		uint8_t val = rdlib_maths::mapValue(static_cast<int>(prevFillHeight + i), 0, GAUGE_HEIGHT - 1, 1, 127);
+		uint16_t color = rdlib_maths::generateColor(val);
+		myTFT.fillRectangle(
+		x,
+		y + (GAUGE_HEIGHT - fillHeight) + (growHeight - 1 - i),
+		GAUGE_WIDTH,
+		1,
+		color);
+	}
+	}
 }
 
+// Update all gauges + numeric readouts
 void updateGauges(float phase) {
-	// Calculate values
+	// Calculate values (0 → 1)
 	float val1 = (std::sin(phase) + 1) / 2;
 	float val2 = (std::cos(phase) + 1) / 2;
 	float val3 = ((std::sin(phase) * std::cos(phase)) + 1) / 2;
-	// Convert float (0 to 1) to integer (1 to 127) range for color mapping
-	uint8_t mappedVal1 = rdlib_maths::mapValue(static_cast<int>(val1 * 100), 0, 100, 1, 127);
-	uint8_t mappedVal2 = rdlib_maths::mapValue(static_cast<int>(val2 * 100), 0, 100, 1, 127);
-	uint8_t mappedVal3 = rdlib_maths::mapValue(static_cast<int>(val3 * 100), 0, 100, 1, 127);
-	// Generate dynamic colors
-	uint16_t color1 = rdlib_maths::generateColor(mappedVal1);
-	uint16_t color2 = rdlib_maths::generateColor(mappedVal2);
-	uint16_t color3 = rdlib_maths::generateColor(mappedVal3);
-	char buffer[6]; // To store formatted text
-	// Draw gauges only if values changed
+
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
+	char buffer[6];  // formatted text
+	// --- Gauge 1 ---
 	if (val1 != prevVal1) {
-		drawGauge(GAUGE_X_START, GAUGE_Y_START, color1, val1);
+		drawGauge(GAUGE_X_START, GAUGE_Y_START, val1, prevVal1);
 		sprintf(buffer, "%.2f", val1);
-		myTFT.fillRectangle(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK); // Clear previous text
+		myTFT.fillRectangle(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10);
 		myTFT.print(buffer);
 		prevVal1 = val1;
 	}
+	// --- Gauge 2 ---
 	if (val2 != prevVal2) {
-		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, color2, val2);
+		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, val2, prevVal2);
 		sprintf(buffer, "%.2f", val2);
 		myTFT.fillRectangle(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
 		myTFT.print(buffer);
 		prevVal2 = val2;
 	}
+	// --- Gauge 3 ---
 	if (val3 != prevVal3) {
-		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, color3, val3);
+		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, val3, prevVal3);
 		sprintf(buffer, "%.2f", val3);
 		myTFT.fillRectangle(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
@@ -438,5 +478,41 @@ void arcGauge(uint16_t countLimit)
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout << "Arc Gauge Demo Over " << std::endl;
+}
+
+// demo 5
+void VUmeterGradient(uint16_t secondsDisplay){
+	std::cout << "VU meter Demo 5 start, ends in : " << secondsDisplay << std::endl;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> dist(1, 254);
+	while (secondsDisplay-- > 1)
+		{
+		for (uint8_t i=0;i<_BARS;i++)
+		{
+			drawVerticalVU(_BARWIDTH*i+_BARSPACE*i,_BARS,_BARWIDTH, dist(gen),0);
+		}
+		delayMilliSecRDL(500);
+		std::cout<< secondsDisplay << "\r" << std::flush;
+	}
+	std::cout << "VU meter Demo 2 over : " << std::endl;
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+}
+
+// For each bar, the random value value is used to map a color using generateColor.
+// This will create a gradient color between blue and red based on the value.
+// The color is then applied to each bar, giving the VU meter a dynamic 
+// visual effect with varying colors that smoothly transition from blue (low values) to red (high values).
+void drawVerticalVU(uint8_t x, uint8_t y, uint8_t width, uint8_t value, uint16_t color) {
+	uint8_t height = rdlib_maths::mapValue(value, 0, 255, 120- y, 1);
+	if (color < 1) {
+		color = rdlib_maths::generateColor(rdlib_maths::mapValue(value, 0, 255, 1, 127));
+	}
+	myTFT.fillRectangle(x, 1, width, height, myTFT.RDLC_GREY);
+	// Draw colored VU meter segment
+	if (value > 4) {
+			myTFT.fillRect(x, height + 1, width, 120 - (height + y + 2), color); // Draw colored bar
+		
+	}
 }
 /// @endcond

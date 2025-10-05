@@ -35,3 +35,4 @@ The enum has a utility function that can print out the label and its comment, (R
 | rdlib::GenericError           | 27     |  Generic Error message, for minor misc errors                                                    |
 | rdlib::UnknownError           | 28     |  For unknown error events                                                                        |
 | rdlib::InvalidRAMLocation     | 29     |  Invalid Display RAM location                                                                    |
+| rdlib::SPIWriteFailure        | 30     |  Failed to write to HW SPI , lgpio                                                               |

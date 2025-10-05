@@ -34,10 +34,10 @@ To check the  spidev buf size setting on your device run command:
 cat /sys/module/spidev/parameters/bufsiz
 ```
 
-If it is lower than 65536(or value indictaed by Error 99 message report) you can change it by adding 
+If it is lower than 65536(or value indicated by Error 99 message report) you can change it by adding 
 this to the start of line in file /boot/firmware/cmdline.txt.
 Make sure everything is on one line and there is space ' ' between this parameter and next one.
-Then reboot machine. Verify again by running last cat command above
+Then reboot machine. Verify again by running last cat command above(after reboot)
 
 ```sh
 spidev.bufsiz=65536

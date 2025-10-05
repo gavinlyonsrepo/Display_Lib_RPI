@@ -220,7 +220,7 @@ void color16_graphics::drawCircle(int16_t centerX, int16_t centerY, int16_t radi
 	@param color The color of the circle.
 */
 void color16_graphics::drawCircleHelper(int16_t centerX, int16_t centerY,
-										   int16_t radius, uint8_t cornerFlags, uint16_t color)
+											 int16_t radius, uint8_t cornerFlags, uint16_t color)
 {
 	// Initial decision parameter for the circle drawing algorithm
 	int16_t decisionParam = 1 - radius;
@@ -278,7 +278,7 @@ void color16_graphics::drawCircleHelper(int16_t centerX, int16_t centerY,
 	@param color The color to fill the circle with.
 */
 void color16_graphics::fillCircleHelper(int16_t centerX, int16_t centerY, int16_t radius,
-											  uint8_t cornerFlags, int16_t verticalOffset, uint16_t color)
+												uint8_t cornerFlags, int16_t verticalOffset, uint16_t color)
 {
 	// Initial decision parameter for the circle filling algorithm
 	int16_t decisionParam = 1 - radius;
@@ -889,14 +889,17 @@ void color16_graphics::writeData(uint8_t spidatabyte) {
 	@brief  Write a buffer to SPI, both Software and hardware SPI supported
 	@param spidata to send
 	@param len length of buffer
+	@return rdlib::success on success , rdlib::SPIWriteFailure on write failure
+			 rdlib::GenericError for buffer too small.
 	@note The maximum size of an SPI transaction by default in lgpio library
 	is 65536 or _Display_SPI_BLK_SIZE. SO a buffer larger than this
 	must be sent in blocks of 65536 bytes. 
 	The largest current expected size is for a full screen write to a 240x320 display currently
-	which is 240x320x2 = 153600 bytes. spidev.bufsiz must also be set to 65536 or higher see 
+	which is 240x320x2 = 153600 bytes. spidev.bufsiz must also be set to 65536 or higher: see 
 	Readme for display for more details.
 */
-void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
+rdlib::Return_Codes_e  color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
+	rdlib::Return_Codes_e returnCode = rdlib::Success;
 	Display_DC_SetHigh;
 	if (_hardwareSPI == false) 
 	{
@@ -916,10 +919,11 @@ void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 				// Perform SPI write
 				spiErrorStatus = Display_SPI_WRITE(_spiHandle, reinterpret_cast<const char*>(currentData), writeSize);
 				if (spiErrorStatus < 0) {
-					fprintf(stderr, "\n\n Error 99: spiWriteDataBuffer: Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
+					fprintf(stderr, "\n\n Error 99: spiWriteDataBuffer: :SPIWriteFailure : Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
 					fprintf(stderr, "The problem MAYBE: The spidev buf size setting must be equal or greater than %i bytes.\n", writeSize) ;
 					fprintf(stderr, "See readme, note section, of relevant display at https://github.com/gavinlyonsrepo/Display_Lib_RPI for more details\n");
 					fprintf(stderr, "spidev buf defines the number of bytes that the SPI driver will use as a buffer for data transfers.\n\n");
+					returnCode = rdlib::SPIWriteFailure;
 					break; // Exit loop on error
 				}
 				// Update pointers and counters
@@ -928,16 +932,19 @@ void color16_graphics::spiWriteDataBuffer(uint8_t* spidata, int len) {
 			}
 		} else {
 			fprintf(stderr, "Error : spiWriteDataBuffer :: Buffer wrong size to draw = %i. Allowed size = 1 or greater.\n", len);
+			returnCode = rdlib::GenericError;
 		}
 	}
+	return returnCode;
 }
 
 /*!
 	@brief  Write byte to SPI
 	@param spidata byte to write
+	@return rdlib::success on success , rdlib::SPIWriteFailure on write failure
 	@note uses _HIGHFREQ_DELAY to slowdown software SPI if CPU frequency too fast
 */
-void color16_graphics::spiWrite(uint8_t spidata) {
+rdlib::Return_Codes_e color16_graphics::spiWrite(uint8_t spidata) {
 	if (_hardwareSPI == false)
 	{
 		uint8_t i;
@@ -960,11 +967,41 @@ void color16_graphics::spiWrite(uint8_t spidata) {
 		if (spiErrorStatus <0) 
 		{
 			fprintf(stderr, "Error: spiWrite :Failure to Write  SPI :(%s)\n", lguErrorText(spiErrorStatus));
+			return rdlib::SPIWriteFailure;
 		}
 	}
+	return rdlib::Success;
 }
 
-
+/*!
+	@brief  read a byte with SPI from MISO pin
+	@return SPI data byte read
+*/
+uint8_t color16_graphics::spiRead(void) {
+	uint8_t result=0;
+	if (_hardwareSPI == false)
+	{
+		uint8_t i;
+		for (i = 0; i < 8; ++i)
+		{
+			Display_SCLK_SetHigh;
+			delayMicroSecRDL(_HighFreqDelay);
+			result |= (Display_MISO_Read << (7 - i)); // Read MISO and shift into result
+			Display_SCLK_SetLow;
+			delayMicroSecRDL(_HighFreqDelay);
+		 }
+	} else { // not used or tested anywhere as of version 2.4.2
+		char rx[1];
+		int spiErrorStatus = lgSpiRead(_spiHandle,   reinterpret_cast<char *>(rx), 1);
+		if (spiErrorStatus < 0) {
+			fprintf(stderr, "Error: readDiagByte: SPI read failed: (%s)\n",
+					lguErrorText(spiErrorStatus));
+		} else {
+			result = rx[0];
+		}
+	}
+	return result;
+}
 
 /*!
 	@brief Set the Cursor Position on screen

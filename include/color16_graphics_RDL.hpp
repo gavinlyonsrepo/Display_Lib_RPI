@@ -140,8 +140,9 @@ protected:
 	void pushColor(uint16_t color);
 	void writeCommand(uint8_t);
 	void writeData(uint8_t);
-	void spiWrite(uint8_t);
-	void spiWriteDataBuffer(uint8_t* spidata, int len);
+	uint8_t spiRead(void);
+	rdlib::Return_Codes_e  spiWrite(uint8_t);
+	rdlib::Return_Codes_e  spiWriteDataBuffer(uint8_t* spidata, int len);
 
 	bool _textwrap = true;           /**< wrap text around the screen on overflow*/
 	uint16_t _textcolor = 0xFFFF ;   /**< 16 bit ForeGround color for text*/

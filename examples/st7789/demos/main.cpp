@@ -7,6 +7,7 @@
 		-# test 432 Vertical Gauge Based on sin(x), cos(x), & sin(x)*cos(x). Updates over time to create a dynamic effect.
 		-# test 433 Menu Demo
 		-# test 434 Slider and buttons demo
+		-# test 435 Demo blobs animation 
 */
 
 // Section ::  libraries
@@ -18,6 +19,7 @@
 #include <csignal> //catch user Ctrl+C
 #include <termios.h> //key press
 #include <fcntl.h> //key press
+#include <numbers> // for std::numbers::pi_v
 #include "ST7789_TFT_LCD_RDL.hpp"
 
 /// @cond
@@ -30,9 +32,8 @@ int  GPIO_CHIP_DEVICE = 0;
 
 uint8_t OFFSET_COL = 0;  // These offsets can be adjusted for any issues
 uint8_t OFFSET_ROW = 0; // with manufacture tolerance/defects at edge of display
-uint16_t TFT_WIDTH = 240;// Screen width in pixels
-uint16_t TFT_HEIGHT = 280
-; // Screen height in pixels
+uint16_t TFT_WIDTH = 240; // Screen width in pixels
+uint16_t TFT_HEIGHT = 280; // Screen height in pixels
 
 int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
 int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
@@ -53,15 +54,18 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 void drawPointer(int16_t &val, int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
 
 // === Demo 2 ===
+// Gauge properties
 const int GAUGE_WIDTH = 20;
 const int GAUGE_HEIGHT = 140;
 const int GAUGE_X_START = 20;
 const int GAUGE_Y_START = 40;
 const int GAUGE_SPACING = 70;
-
-void updateGauges(float t);
+// Store previous values to prevent redundant redraws
+float prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
+void updateGauges(float phase);
 void drawGauge(int x, int y, uint16_t color, float value);
 void drawGaugeDemoTwo(uint16_t  countLimit = 50);
+void drawGaugeBorder(int x, int y);
 
 // === Demo 3 ===
 constexpr uint16_t SCREEN_WIDTH = 240;
@@ -93,6 +97,27 @@ void drawButtons();
 void drawSlider(int sliderValue);
 void drawValueLabel(int value);
 
+// === Demo 5 ===
+// Constants
+// Total number of 3D points ("dots") in the animation
+constexpr int NDOTS = 256;
+// Lookup table size for sine/cosine waveforms
+constexpr int SCALE = 4096;
+// Variables
+// Precomputed sine wave lookup table; cosi points to sine phase-shifted by π/2
+int16_t sine[SCALE + (SCALE / 4)];
+int16_t* cosi = &sine[SCALE / 4];
+// 3D coordinates of each dot: xyz[axis][dotIndex]
+int16_t xyz[3][NDOTS];
+// Per-dot color values (16-bit RGB565 or library-dependent)
+uint16_t col[NDOTS];
+// Function Declarations
+void runBlobDemo(uint16_t count);
+void matrix(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
+void rotate(int16_t xyz[3][NDOTS], uint16_t , uint16_t , uint16_t );
+void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
+
+
 // Section :: MAIN loop
 int main()
 {
@@ -106,7 +131,7 @@ int main()
 		if (std::cin.fail()) {
 			std::cin.clear(); // Clear error flag
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
-			std::cout << "Invalid input. Please enter a number between 1 and 4.\n\n";
+			std::cout << "Invalid input. Please enter a number between 1 and 5.\n\n";
 			continue;
 		}
 		switch (choice) {
@@ -114,7 +139,8 @@ int main()
 			case 2: drawGaugeDemoTwo(100); break;
 			case 3: menuDemo(); break;
 			case 4: slidersAndButtonsDemo(); break;
-			case 5:
+			case 5: runBlobDemo(300); break;
+			case 6:
 				std::cout << "Exiting menu\n";
 				break;
 			default:
@@ -122,7 +148,7 @@ int main()
 				break;
 		}
 		std::cout << std::endl;
-	} while (choice != 5);
+	} while (choice != 6);
 
 	EndTests();
 	return 0;
@@ -166,7 +192,8 @@ void displayMenu() {
 	std::cout << "2. Vertical Gauges  \n";
 	std::cout << "3. Menu Graphic input\n";
 	std::cout << "4. Sliders and Buttons\n";
-	std::cout << "5. Quit\n";
+	std::cout << "5. Blob Demo\n";
+	std::cout << "6. Quit\n";
 	std::cout << "Enter your choice: ";
 }
 
@@ -197,7 +224,7 @@ void gaugeDemo(uint16_t countLimit)
 	char buffer[10];
 	// Draw Gauge
 	uint16_t count = 1;
-	uint8_t x =100;
+	uint8_t x = 100;
 	uint8_t y = 100;
 	const int16_t minValue = 1;
 	const int16_t maxValue = 255;
@@ -247,14 +274,14 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 		outerY = sin(angleRad) * radius;
 		// Draw marker line from inner to outer radius
 		myTFT.drawLine(1 + centerX + innerX, 1 + centerY + innerY, 
-					   1 + centerX + outerX, 1 + centerY + outerY, 
-					   myTFT.RDLC_WHITE);
+						 1 + centerX + outerX, 1 + centerY + outerY, 
+						 myTFT.RDLC_WHITE);
 	}
 }
 
 void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour) 
 {
-	uint8_t i;
+	uint16_t i;
 	// If the current value is increasing
 	if (currentValue > oldValue) 
 	{
@@ -316,65 +343,101 @@ void drawPointerHelper(int16_t value, uint8_t centerX, uint8_t centerY, uint8_t 
 
 // === Demo 2 ===
 
+void drawGaugeBorder(int x, int y) { // Draw border once 
+	myTFT.drawRectWH(x - 2, y - 2, GAUGE_WIDTH + 4, GAUGE_HEIGHT + 4, myTFT.RDLC_WHITE);
+}
+
 void drawGaugeDemoTwo(uint16_t countLimit)
 {
 	std::cout << "Gauge Demo 2  ends at : " << countLimit << std::endl;
-	myTFT.setFont(font_mega);
+	myTFT.setFont(font_default);
 	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
-	float t = 0;
+	// Draw borders once
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	drawGaugeBorder(GAUGE_X_START, GAUGE_Y_START);
+	drawGaugeBorder(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START);
+	drawGaugeBorder(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START);
+	float phase = 0;
 	while (countLimit-- > 1 ) 
 	{
-		updateGauges(t);
-		t += 0.1;
+		updateGauges(phase);
+		phase += 0.1;
 		std::cout<< countLimit << "\r" << std::flush;
-		delayMilliSecRDL(100);
+		delayMilliSecRDL(250);
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
 	std::cout << "Gauge Demo 2 Over " << std::endl;
 }
 
-void drawGauge(int x, int y, uint16_t color, float value) {
-	// Draw border
-	myTFT.drawRectWH(x - 2, y - 2, GAUGE_WIDTH + 4, GAUGE_HEIGHT + 4, myTFT.RDLC_WHITE);
-	// Clear inside
-	myTFT.fillRectangle(x, y, GAUGE_WIDTH, GAUGE_HEIGHT, myTFT.RDLC_BLACK);
-	// Draw fill
+void drawGauge(int x, int y, float value, float prevVal) {
 	int fillHeight = static_cast<int>(GAUGE_HEIGHT * value);
-	if (fillHeight == 0) fillHeight =1;
-	myTFT.fillRectangle(x, y + (GAUGE_HEIGHT - fillHeight), GAUGE_WIDTH, fillHeight, color);
+	int prevFillHeight = (prevVal < 0) ? 0 : static_cast<int>(GAUGE_HEIGHT * prevVal);
+
+	if (fillHeight == prevFillHeight) return;  // nothing to update
+
+	// If shrinking, clear the difference 
+	if (fillHeight < prevFillHeight) {
+	int clearHeight = prevFillHeight - fillHeight;
+	myTFT.fillRectangle(
+		x,
+		y + (GAUGE_HEIGHT - prevFillHeight),
+		GAUGE_WIDTH,
+		clearHeight,
+		myTFT.RDLC_BLACK);
+	}
+	// If growing, draw gradient for the new part
+	if (fillHeight > prevFillHeight) {
+	int growHeight = fillHeight - prevFillHeight;
+	for (int i = 0; i < growHeight; i++) {
+		uint8_t val = rdlib_maths::mapValue(static_cast<int>(prevFillHeight + i), 0, GAUGE_HEIGHT - 1, 1, 127);
+		uint16_t color = rdlib_maths::generateColor(val);
+		myTFT.fillRectangle(
+		x,
+		y + (GAUGE_HEIGHT - fillHeight) + (growHeight - 1 - i),
+		GAUGE_WIDTH,
+		1,
+		color);
+	}
+	}
 }
 
-void updateGauges(float t) {
-	// Calculate values
-	float val1 = (std::sin(t) + 1) / 2;
-	float val2 = (std::cos(t) + 1) / 2;
-	float val3 = ((std::sin(t) * std::cos(t)) + 1) / 2;
-	// Convert float (0 to 1) to integer (1 to 127) range for color mapping
-	uint8_t mappedVal1 = rdlib_maths::mapValue(static_cast<int>(val1 * 100), 0, 100, 1, 127);
-	uint8_t mappedVal2 = rdlib_maths::mapValue(static_cast<int>(val2 * 100), 0, 100, 1, 127);
-	uint8_t mappedVal3 = rdlib_maths::mapValue(static_cast<int>(val3 * 100), 0, 100, 1, 127);
-	// Generate dynamic colors
-	uint16_t color1 = rdlib_maths::generateColor(mappedVal1);
-	uint16_t color2 = rdlib_maths::generateColor(mappedVal2);
-	uint16_t color3 = rdlib_maths::generateColor(mappedVal3);
+// Update all gauges + numeric readouts
+void updateGauges(float phase) {
+	// Calculate values (0 → 1)
+	float val1 = (std::sin(phase) + 1) / 2;
+	float val2 = (std::cos(phase) + 1) / 2;
+	float val3 = ((std::sin(phase) * std::cos(phase)) + 1) / 2;
 
-	drawGauge(GAUGE_X_START, GAUGE_Y_START, color1, val1);
-	drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, color2, val2);
-	drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, color3, val3);
-
-	char buffer[6]; // To store formatted text
-	sprintf(buffer, "%.2f", val1);
-	myTFT.fillRect(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10, 40, 10, myTFT.RDLC_BLACK); // Clear previous text
-	myTFT.setCursor(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10);
-	myTFT.print(buffer);
-	sprintf(buffer, "%.2f", val2);
-	myTFT.fillRect(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 40, 10, myTFT.RDLC_BLACK);
-	myTFT.setCursor(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
-	myTFT.print(buffer);
-	sprintf(buffer, "%.2f", val3);
-	myTFT.fillRect(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 40, 10,  myTFT.RDLC_BLACK);
-	myTFT.setCursor(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
-	myTFT.print(buffer);
+	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
+	char buffer[6];  // formatted text
+	// --- Gauge 1 ---
+	if (val1 != prevVal1) {
+		drawGauge(GAUGE_X_START, GAUGE_Y_START, val1, prevVal1);
+		sprintf(buffer, "%.2f", val1);
+		myTFT.fillRectangle(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
+		myTFT.setCursor(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10);
+		myTFT.print(buffer);
+		prevVal1 = val1;
+	}
+	// --- Gauge 2 ---
+	if (val2 != prevVal2) {
+		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, val2, prevVal2);
+		sprintf(buffer, "%.2f", val2);
+		myTFT.fillRectangle(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
+		myTFT.setCursor(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
+		myTFT.print(buffer);
+		prevVal2 = val2;
+	}
+	// --- Gauge 3 ---
+	if (val3 != prevVal3) {
+		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, val3, prevVal3);
+		sprintf(buffer, "%.2f", val3);
+		myTFT.fillRectangle(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
+		myTFT.setCursor(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
+		myTFT.print(buffer);
+		prevVal3 = val3;
+	}
 }
 
 // === Demo 3 ===
@@ -563,6 +626,193 @@ void drawUI(int sliderValue) {
 	drawSlider(sliderValue);
 	drawValueLabel(sliderValue);
 	drawButtons();
+}
+
+// === Demo 5 ===
+
+/**
+ * @brief Runs the 3D blob demo animation.
+ *
+ * Generates a rotating, sine-wave-based 3D "blob" pattern projected onto
+ * the TFT display. The function animates color, depth, and rotation over time.
+ *
+ * @param countLimit Number of frames (iterations) to render before stopping.
+ */
+void runBlobDemo(uint16_t countLimit)
+{
+	std::cout << "Blob demo Start\n";
+	std::cout << "Count limit: " << countLimit << std::endl;
+	uint16_t count = 0;
+	// Rotation angles and speeds for X, Y, Z axes.
+	int16_t angleX = 0, angleY = 0, angleZ = 0;
+	int16_t speedX = 0, speedY = 0, speedZ = 0;
+	// 2π constant (used for sine table generation)
+	const double TWO_PI = std::numbers::pi_v<double> * 2.0;
+	// Precompute sine lookup table for faster animation updates.
+	for (uint16_t i = 0; i < SCALE + (SCALE / 4); i++){
+		sine[i] = static_cast<int16_t>(sinf(TWO_PI * i / SCALE) * SCALE);
+	}
+	// Main animation loop
+	while (count++ < countLimit)
+	{
+		// Display progress in console
+		std::cout << count << "\r" << std::flush;
+		// Step 1: Generate 3D point cloud and color map for this frame
+		matrix(xyz, col);
+		// Step 2: Apply 3D rotation transformations
+		rotate(xyz, angleX, angleY, angleZ);
+		// Step 3: Render updated points to display
+		draw(xyz, col);
+		// Step 4: Gradually enable rotation on each axis
+		if (count > 75)	speedY = 1;
+		if (count > 150)	speedX = 1;
+		if (count > 250)	speedZ = 1;
+		// Step 5: Increment rotation angles
+		angleX += speedX;
+		angleY += speedY;
+		angleZ += speedZ;
+		// Step 6: Wrap angles to stay within valid range [0, SCALE)
+		auto wrapAngle = [](int16_t &angle) {
+			if (angle >= SCALE) angle -= SCALE;
+			else if (angle < 0) angle += SCALE;
+		};
+		wrapAngle(angleX);
+		wrapAngle(angleY);
+		wrapAngle(angleZ);
+	}
+	std::cout << "Blob demo End\n";
+
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+}
+
+
+/*!
+ * @brief Generate a dynamic 3D sine-wave surface ("blob") and color map.
+ * This function computes the 3D positions (xyz) and corresponding
+ * RGB565 color values (col) for each point in the NDOTS grid.
+ * It uses time-based sine modulation to animate the surface over time.
+ * @param xyz  Output array of 3D coordinates [3][NDOTS]
+ * @param col  Output color buffer (16-bit RGB565 values)
+ */
+void matrix(int16_t xyz[3][NDOTS], uint16_t col[NDOTS])
+{
+	// Color component resolution (used to map sine values to color channels)
+	constexpr int RED_COLORS   = 32;
+	constexpr int GREEN_COLORS = 64;
+	constexpr int BLUE_COLORS  = 32;
+	// Step increment between points in the virtual XY grid
+	constexpr int INCREMENT = 512;
+	// Time accumulator for animation progression
+	static uint32_t timeAccumulator = 0;
+	int16_t x = -SCALE;
+	int16_t y = -SCALE;
+
+	for (uint16_t i = 0; i < NDOTS; i++)
+	{
+		// Assign current X,Y coordinates to point i
+		xyz[0][i] = x;
+		xyz[1][i] = y;
+		// Compute radial distance from origin (for circular wave propagation)
+		uint16_t d = static_cast<uint16_t>(sqrt(x * x + y * y));
+		// Phase shift based on time accumulator
+		uint16_t s = sine[(timeAccumulator * 30) % SCALE] + SCALE;
+		// Compute Z coordinate using time- and distance-modulated sine waves
+		xyz[2][i] = (sine[(d + s) % SCALE] * sine[(timeAccumulator * 10) % SCALE]) / (SCALE * 2);
+		// Compute RGB color based on Z position (phase-shifted cosine functions)
+		uint8_t red =  (cosi[xyz[2][i] + SCALE / 2] % SCALE + SCALE) 
+		               * (RED_COLORS - 1) / SCALE / 2;
+		uint8_t grn =  (cosi[(xyz[2][i] + SCALE / 2 + 2 * SCALE / 3) % SCALE] + SCALE)
+		               * (GREEN_COLORS - 1) / SCALE / 2;
+		uint8_t blu =  (cosi[(xyz[2][i] + SCALE / 2 + SCALE / 3) % SCALE] + SCALE)
+		               * (BLUE_COLORS - 1) / SCALE / 2;
+		// Pack into 16-bit RGB565 format
+		col[i] = static_cast<uint16_t>((red << 11) | (grn << 5) | blu);
+		// Advance to next grid position
+		x += INCREMENT;
+		if (x >= SCALE)
+		{
+			x = -SCALE;
+			y += INCREMENT;
+		}
+	}
+	timeAccumulator++;
+}
+
+
+/*!
+ * @brief Apply 3D rotation to a set of points around the X, Y, and Z axes.
+ * Each point in the xyz array is rotated in-place using precomputed
+ * sine and cosine lookup tables.
+ * @param xyz     3D coordinates of all points (axis-major layout: xyz[3][NDOTS])
+ * @param angleX  Rotation angle index around X-axis (0–SCALE range)
+ * @param angleY  Rotation angle index around Y-axis (0–SCALE range)
+ * @param angleZ  Rotation angle index around Z-axis (0–SCALE range)
+ */
+void rotate(int16_t xyz[3][NDOTS], uint16_t angleX, uint16_t angleY, uint16_t angleZ)
+{
+	// Precompute sine/cosine values for each axis from lookup tables
+	const int16_t sinx = sine[angleX];
+	const int16_t cosx = cosi[angleX];
+	const int16_t siny = sine[angleY];
+	const int16_t cosy = cosi[angleY];
+	const int16_t sinz = sine[angleZ];
+	const int16_t cosz = cosi[angleZ];
+	// Temporary storage for intermediate values during rotation
+	int16_t tmpX, tmpY;
+	for (uint16_t i = 0; i < NDOTS; i++)
+	{
+		// X-axis 
+		tmpX      = (xyz[0][i] * cosx - xyz[2][i] * sinx) / SCALE;
+		xyz[2][i] = (xyz[0][i] * sinx + xyz[2][i] * cosx) / SCALE;
+		xyz[0][i] = tmpX;
+		// Y-axis 
+		tmpY      = (xyz[1][i] * cosy - xyz[2][i] * siny) / SCALE;
+		xyz[2][i] = (xyz[1][i] * siny + xyz[2][i] * cosy) / SCALE;
+		xyz[1][i] = tmpY;
+		// Z-axis 
+		tmpX      = (xyz[0][i] * cosz - xyz[1][i] * sinz) / SCALE;
+		xyz[1][i] = (xyz[0][i] * sinz + xyz[1][i] * cosz) / SCALE;
+		xyz[0][i] = tmpX;
+	}
+}
+
+/*!
+ * @brief Render a frame of the rotating blobs demo.
+ * This function projects 3D coordinates (xyz) into 2D screen space,
+ * draws each point as a small circle, and erases its previous position.
+ * A simple perspective division is used based on the Z coordinate.
+ * @param xyz  3D coordinates of all points (axis-major layout: xyz[3][NDOTS])
+ * @param col  Per-dot color values (RGB565 or driver-specific format)
+ */
+void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS])
+{
+	// Screen dimensions for projection (should match your display area)
+	constexpr uint16_t WIDTH  = 140;
+	constexpr uint16_t HEIGHT = 140;
+	// Persistent arrays store previous positions and sizes for erasing old dots
+	static uint16_t oldProjX[NDOTS] = {0};
+	static uint16_t oldProjY[NDOTS] = {0};
+	static uint8_t  oldDotSize[NDOTS] = {0};
+	for (uint16_t i = 0; i < NDOTS; i++)
+	{
+		// Perspective scaling based on Z-depth (simple camera model)
+		uint16_t projZ = SCALE - (xyz[2][i] + SCALE) / 4;
+		// Project 3D coordinates into 2D screen space
+		uint16_t projX = WIDTH  / 2 + (xyz[0][i] * projZ / SCALE) / 25;
+		uint16_t projY = HEIGHT / 2 + (xyz[1][i] * projZ / SCALE) / 25;
+		// Compute apparent dot size (smaller when farther away)
+		uint8_t dotSize = 3 - (xyz[2][i] + SCALE) * 2 / SCALE;
+		// Erase previous dot position (draw in black)
+		myTFT.drawCircle(oldProjX[i], oldProjY[i], oldDotSize[i], myTFT.RDLC_BLACK);
+		// Only draw if fully within visible bounds
+		if (projX > dotSize && projY > dotSize && projX < WIDTH - dotSize && projY < HEIGHT - dotSize)
+		{
+			myTFT.drawCircle(projX, projY, dotSize, col[i]);
+			oldProjX[i]  = projX;
+			oldProjY[i]  = projY;
+			oldDotSize[i] = dotSize;
+		}
+	}
 }
 
 /// @endcond

@@ -29,7 +29,7 @@
 7. NB The Spidev buffer size setting must be larger than biggest buffer the code will attempt
     to write If not you will get 'Error 99'. See Notes section for more details.
 8. Make sure SPI is enabled in your computers configuration.
-9. Tested on 240x240 pxiel Round Display
+9. Tested on 240x240 pixel round display.
 
 * Author: Gavin Lyons
 

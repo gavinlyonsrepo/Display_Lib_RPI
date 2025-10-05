@@ -3,6 +3,9 @@
 	@author   Gavin Lyons
 	@brief    Library header file for GC9A01_TFT_RPI library.
 	@details tested and developed on 240 x 240 circular display
+	@todo
+		-# Investigate brightness mode, not working?
+		-# Investigate idle mode on , some lines on screen missing?
 */
 
 #pragma once
@@ -78,14 +81,11 @@ private:
 	rdlib::Return_Codes_e TFTGC9A01Initialize(void);
 	void cmdInitSequence(void);
 
-	// Screen
-		// Display
+	// Display
 	PowerState_e _currentPowerState = PowerState_e::NormalIdleOff; /**< Enum to hold display mode */
 	bool _displayOn = false; /**< Enum to hold display on/off status */
 	const uint16_t _sleepDelay = 120; /**< Sleep delay in ms ? */
 	// Screen
-	uint8_t _colstart = 0;			/**< Used to offset column in the event of defect at edge of screen */
-	uint8_t _rowstart = 0;			/**< Used to offset row in the event of defect at edge of screen */
 	uint16_t _widthStartTFT = 240;	/**<  never change after first init */
 	uint16_t _heightStartTFT = 240; /**< never change after first init */
 

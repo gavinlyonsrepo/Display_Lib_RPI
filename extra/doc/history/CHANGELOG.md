@@ -52,5 +52,7 @@ Version control history
 	* Corrected code so Max7219 cascade examples works, just acquired second display
 	* Added tm1637 example for version with decimal points in addition to semi-colon version
 
-
+* Version 2.4.2 10-2025
+	* Added read diagnostic function to ili9341 LCD display.
+	* Added more demos in examples files for 16-bit displays.
 

@@ -25,19 +25,19 @@ void ILI9341_TFT::SetupGPIO(int8_t rst, int8_t dc)
 
 /*!
 	@brief  sets up TFT GPIO for software SPI
-	@param rst reset GPIO
+	@param rst reset GPIO (pass -1 to use software reset if applicable to your display)
 	@param dc data or command GPIO.
 	@param cs chip select GPIO
 	@param sclk Data clock GPIO
 	@param mosi Data to TFT GPIO
-	@param miso Data from TFT GPIO read diagnostics
+	@param miso Data from TFT GPIO read diagnostics (pass -1 to disable: default)
 	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
 void ILI9341_TFT::SetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, int8_t mosi, int8_t miso)
 {
 	_hardwareSPI = false;
 	TFTSetupResetPin(rst);
-	_Display_MISO = miso;
+	TFTSetupMISOPin(miso);
 	_Display_DC = dc;
 	_Display_CS = cs;
 	_Display_SCLK = sclk;
@@ -57,6 +57,22 @@ void ILI9341_TFT::TFTSetupResetPin(int8_t rst)
 		_resetPinOn = true;
 	}else{
 		_resetPinOn  = false;
+	}
+}
+
+/*!
+	@brief sets up TFT GPIO MISO pin
+	@param miso master in slave out SPI GPIO
+	@details only needed for read diagnostic function & software spi
+*/
+void ILI9341_TFT::TFTSetupMISOPin(int8_t miso)
+{
+	if (miso != -1)
+	{
+		_Display_MISO = miso;
+		_MISOPinOn = true;
+	}else{
+		_MISOPinOn = false;
 	}
 }
 
@@ -130,7 +146,9 @@ rdlib::Return_Codes_e ILI9341_TFT::ILI9341Initialize()
 	if (TFTResetPin() != rdlib::Success){return rdlib::GpioPinClaim;}
 	// Data or command routine  GPIO pin 
 	if (TFTDataCommandPin() != rdlib::Success){return rdlib::GpioPinClaim;}
-
+	// miso routine GPIO pin
+	if (TFTMISOPin() != rdlib::Success){return rdlib::GpioPinClaim;}
+	
 	if (_hardwareSPI == false)
 	{
 		// Setup Software SPI for the 3 other GPIO : SCLK, Data & CS
@@ -480,6 +498,29 @@ rdlib::Return_Codes_e ILI9341_TFT ::TFTResetPin()
 }
 
 /*!
+	@brief Method for Hardware MISO  pin control set up as input if used
+	@details if miso not used returns success by default
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# rdlib::GpioPinClaim
+*/
+rdlib::Return_Codes_e ILI9341_TFT ::TFTMISOPin() 
+{
+	if (_MISOPinOn == true)
+	{
+		// Claim GPIO as input for MISO line
+		int GpioMISOErrorStatus = 0;
+		GpioMISOErrorStatus= Display_MISO_SetDigitalInput;
+		if (GpioMISOErrorStatus < 0 )
+		{
+			fprintf(stderr,"Error : Can't claim MISO GPIO for input (%s)\n", lguErrorText(GpioMISOErrorStatus));
+			return rdlib::GpioPinClaim;
+		}
+	}
+	return rdlib::Success;
+}
+
+/*!
 	@brief: Method for Data or Command pin setup
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
@@ -537,53 +578,37 @@ rdlib::Return_Codes_e ILI9341_TFT::TFTClock_Data_ChipSelect_Pins(void)
 	return rdlib::Success;
 }
 
+
 /*!
-	@brief: Print out diagnostics
-	@note not working TODO
-	@todo Not working, v 2.1.0, reading back 00 and 255 instead of valid values.
-*/
-void  ILI9341_TFT::PrintDiagnostic(void) 
-{
-	/*! Enum to hold Read diagnostics commands */
-	enum ILI9341_Read_diags_e : uint8_t{
-		ILI9341_RDMODE     = 0x0A, /**< Read the power mode */
-		ILI9341_RDMADCTL   = 0x0B, /**< Read MADCTL */
-		ILI9341_RDPIXFMT   = 0x0C, /**< Read pixel Format */
-		ILI9341_RDIMGFMT   = 0x0D, /**< Read image format */
-		ILI9341_RDSELFDIAG = 0x0F /**< Read self-diagnostic result */
-	};
-
-	if (_hardwareSPI == false)
-	{
-		// Software SPI
-	} else 
-	{
-		// List of command bytes
-		const uint8_t commandList[] = {
-			ILI9341_RDMODE,     // 0x0A
-			ILI9341_RDMADCTL,   // 0x0B
-			ILI9341_RDPIXFMT,   // 0x0C
-			ILI9341_RDIMGFMT,   // 0x0D
-			ILI9341_RDSELFDIAG  // 0x0F
-		};
-
-		// Iterate over each command
-		for (int i = 0; i < 5; i++) 
+	@brief  Read a single diagnostic byte from the ILI9341 controller.
+			This function sends a diagnostic read command and retrieves
+			the corresponding status or mode byte from the display controller.
+	@param reg The diagnostic register to read
+	@param index Optional index offset (usually zero).
+	@return The diagnostic byte read from the specified register. Will
+			return early in software SPI if MISO pin not set and if user tries
+			to run hardware SPI
+	@note This is primarily intended for debugging and testing.
+			Only works for Software SPI, as the library is currently configured,
+			complete software control of chip select line required.  
+ */
+uint8_t ILI9341_TFT::readDiagByte(ILI9341_ReadRegister_e reg, uint8_t index) {
+	uint8_t result = 0;
+	if (_hardwareSPI) { 
+			fprintf(stderr, "Warning: readDiagByte not configured for Hardware SPI, exiting \n");
+			return 0xFF;
+	} else { // software SPI 
+		if (!_MISOPinOn) 	// check if MISO pin set 
 		{
-			uint8_t commandByte = commandList[i];
-			int SPINumOfBytes = 0;
-			char RxBuffer[1] = {0x00};
-			// Send the sequence of commands and data
-			writeCommand(0xD9);    //  register access
-			writeData(0x10);       // Set index
-			writeCommand(commandByte); // Send the command byte
-			// Read the response
-			Display_DC_SetHigh;    // Set DC to high for reading data
-			SPINumOfBytes = Display_SPI_READ(_spiHandle, RxBuffer, 1);
-			// Print the results
-			printf("Command Sent: 0x%X\n", commandByte);
-			printf("SPI Number of bytes received: %d\n", SPINumOfBytes);
-			printf("Byte received 0x%0X\n", RxBuffer[0]);
+			fprintf(stderr, "Warning: MISO not set for SW SPI, exiting\n");
+			return 0xFF;
 		}
+		Display_CS_SetLow;
+		Display_DC_SetLow; spiWrite(0xD9);
+		Display_DC_SetHigh; spiWrite(0x10 + index);
+		Display_DC_SetLow; spiWrite(static_cast<uint8_t>(reg));
+		Display_DC_SetHigh; result = spiRead();
+		Display_CS_SetHigh;
 	}
+	return result;
 }

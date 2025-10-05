@@ -6,10 +6,8 @@
 		-# test 440 Round Gauge
 		-# test 441 Arc Meter
 		-# test 442 Rotary Menu Dial (Keyboard Input)
-		-# test 443 Music Visualizer Dial
 		-# test 444 analog Clock Demo
 		-# test 445 volume Knob Demo (Keyboard Input)
-	@todo GC9A01 music visualize
 */
 
 // Section ::  libraries
@@ -53,13 +51,11 @@ void drawPointerHelper(int16_t val, uint8_t x, uint8_t y, uint8_t r, uint16_t co
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor, uint16_t color);
 void drawPointer(int16_t &val, int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
 // === Demo 3 ===
-void rotaryMenuDemo(void) ; //demo 3
-int getchar_timeout(int timeout_ms); // demo 3
+void rotaryMenuDemo(void);
+int getchar_timeout(int timeout_ms);
 // === Demo 4 ===
-void musicVisualizerDialDemo(uint16_t  countLimit = 50);
-// === Demo 5 ===
 void analogClockDemo(uint16_t countLimit = 50);
-// === Demo 6 ===
+// === Demo 5 ===
 void volumeKnobDemo(void);
 
 // Section :: MAIN loop
@@ -75,17 +71,16 @@ int main()
 		if (std::cin.fail()) {
 			std::cin.clear(); // Clear error flag
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
-			std::cout << "Invalid input. Please enter a number between 1 and 4.\n\n";
+			std::cout << "Invalid input. Please enter a number between 1 and 5.\n\n";
 			continue;
 		}
 		switch (choice) {
 			case 1: gaugeDemo(100); break;
 			case 2: arcGauge(100); break;
 			case 3: rotaryMenuDemo() ; break;
-			case 4: musicVisualizerDialDemo(50); break;
-			case 5: analogClockDemo(50); break;
-			case 6: volumeKnobDemo(); break;
-			case 7:
+			case 4: analogClockDemo(50); break;
+			case 5: volumeKnobDemo(); break;
+			case 6:
 				std::cout << "Exiting menu\n";
 				break;
 			default:
@@ -93,7 +88,7 @@ int main()
 				break;
 		}
 		std::cout << std::endl;
-	} while (choice != 7);
+	} while (choice != 6);
 
 	EndTests();
 	return 0;
@@ -135,10 +130,9 @@ void displayMenu() {
 	std::cout << "1. Round Gauge Demo\n";
 	std::cout << "2. Arc Gauge Demo\n";
 	std::cout << "3. Rotary Menu Demo\n";
-	std::cout << "4. Music Visualizer Dial Demo\n";
-	std::cout << "5. Analog Clock Demo\n";
-	std::cout << "6. Volume Knob Demo\n";
-	std::cout << "7. Quit\n";
+	std::cout << "4. Analog Clock Demo\n";
+	std::cout << "5. Volume Knob Demo\n";
+	std::cout << "6. Quit\n";
 	std::cout << "Enter your choice: ";
 }
 
@@ -163,8 +157,8 @@ void signal_callback_handler(int signum)
 void gaugeDemo(uint16_t countLimit) // Demo 1
 {
 	std::cout << "Gauge Demo 1 ends at seconds: " << countLimit << std::endl;
-	int16_t currentValue = 100;
-	int16_t oldValue = 100;
+	int16_t currentValue = 120;
+	int16_t oldValue = 120;
 	myTFT.setFont(font_mega);
 	char buffer[10];
 	// Draw Gauge
@@ -213,7 +207,7 @@ void arcGauge(uint16_t countLimit) // demo 2
 	// Draw Gauge
 	uint16_t count = 1;
 	uint16_t x = 120;
-	uint16_t y = 120;
+	uint16_t y =120;
 	uint16_t radius = 90;
 	const int16_t minValue = 1;
 	const int16_t maxValue = 255;
@@ -250,79 +244,6 @@ void arcGauge(uint16_t countLimit) // demo 2
 	std::cout <<  "Arc Gauge Demo Over" << std::endl;
 }
 
-void rotaryMenuDemo()
-{
-	std::cout << "Demo 3 Start: press a or d to move pointer , q to quit" << std::endl;
-	myTFT.setFont(font_default);
-	constexpr uint8_t centerX = 120;
-	constexpr uint8_t centerY = 120;
-	constexpr uint8_t radius = 60;
-	constexpr uint8_t itemCount = 6;
-	constexpr uint8_t nodeRadius = 16;
-	struct MenuItem { const char* label; };
-	MenuItem items[itemCount] = {
-		{"Volts"}, {"Power"}, {"Amps"},
-		{"Watts"}, {"System"}, {"Diode"}
-	};
-
-	auto drawItem = [&](uint8_t index, bool selected) {
-		float angle = 2.0f * std::numbers::pi * index / itemCount;
-		int x = centerX + static_cast<int>(radius * std::cos(angle));
-		int y = centerY + static_cast<int>(radius * std::sin(angle));
-
-		uint16_t color = selected ? myTFT.RDLC_RED : myTFT.RDLC_WHITE;
-		myTFT.fillCircle(x, y, nodeRadius, color);
-		myTFT.setTextColor(myTFT.RDLC_BLACK, color);
-
-		char c[2] = { items[index].label[0], '\0' };
-		myTFT.writeCharString(x - 3, y - 4, c);
-	};
-
-	auto drawPointer = [&](uint8_t index, uint16_t color) {
-		float angle = 2.0f * std::numbers::pi * index / itemCount;
-	constexpr uint8_t pointerLength = radius - 10;
-	int x1 = centerX + static_cast<int>(pointerLength * std::cos(angle));
-	int y1 = centerY + static_cast<int>(pointerLength * std::sin(angle));
-		myTFT.drawLine(centerX, centerY, x1, y1, color);
-		myTFT.fillCircle(centerX, centerY, 2, myTFT.RDLC_GREEN);
-	};
-	myTFT.fillScreen(myTFT.RDLC_BLACK);
-	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
-	myTFT.drawArc(centerX, centerY, radius+40, 10 ,135.0f, 45.0f, myTFT.RDLC_GREEN);
-	for (uint8_t i = 0; i < itemCount; ++i){
-		drawItem(i, i == 0);}
-	uint8_t selected = 0;
-	int8_t oldSelected = -1;
-	drawPointer(selected, myTFT.RDLC_YELLOW);
-	while (true) {
-		int ch = getchar_timeout(1000);
-		if (ch == 'q' || ch == 'Q') break;
-		oldSelected = selected;
-		if (ch == 'a' || ch == 'A')
-			selected = (selected + itemCount - 1) % itemCount;
-		if (ch == 'd' || ch == 'D')
-			selected = (selected + 1) % itemCount;
-		if (selected != oldSelected) {
-			drawPointer(oldSelected, myTFT.RDLC_BLACK); // erase
-			drawItem(oldSelected, false);
-			drawItem(selected, true);
-			drawPointer(selected, myTFT.RDLC_YELLOW);   // draw new
-			// label below
-			myTFT.setFont(font_mega);
-			myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
-			myTFT.fillRect(centerX - 30, centerY + radius + 35, 80, 16, myTFT.RDLC_BLACK);
-			char buf[20];
-			std::strncpy(buf, items[selected].label, sizeof(buf));
-			buf[sizeof(buf) - 1] = '\0';
-			myTFT.writeCharString(centerX-50, centerY + radius + 35, buf);
-			myTFT.setFont(font_default);
-		}
-	}
-	myTFT.fillScreen(myTFT.RDLC_BLACK);
-	std::cout << "Demo 3 Over" << std::endl;
-}
-
-
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor, uint16_t color)
 {
 	float angleRad, innerX, innerY, outerX, outerY;
@@ -347,7 +268,7 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 
 void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour)
 {
-	uint8_t i;
+	uint16_t i;
 	// If the current value is increasing
 	if (currentValue > oldValue)
 	{
@@ -434,67 +355,90 @@ int getchar_timeout(int timeout_ms) {
 	return ch;
 }
 
-/*!
-	@brief demo 4 Music visualizer radial dial demo.
-	@param count Duration in seconds to run the animation.
-	@details This creates a circular music visualizer using randomized bar heights and color gradients.
-	A pulsing center circle and a rotating rainbow arc enhance visual rhythm.
-	Includes a simulated BPM counter for additional display dynamics.
-*/
-void musicVisualizerDialDemo(uint16_t count)
+void rotaryMenuDemo()
 {
-	std::cout << "Music Visualizer Dial Start : Ends in Seconds : " << count << std::endl;
-	constexpr uint16_t timeDelay = 200; // ms
+	std::cout << "Demo 3 Start: press a or d to move pointer , q to quit" << std::endl;
+	myTFT.setFont(font_default);
 	constexpr uint8_t centerX = 120;
 	constexpr uint8_t centerY = 120;
-	constexpr uint8_t radiusInner = 20;
-	constexpr uint8_t radiusOuter = 100;
-	constexpr uint8_t barCount = 32;
-	constexpr float angleStep = 2.0f * std::numbers::pi / barCount;
+	constexpr uint8_t radius = 60;
+	constexpr uint8_t itemCount = 6;
+	constexpr uint8_t nodeRadius = 16;
+	struct MenuItem { const char* label; };
+	MenuItem items[itemCount] = {
+		{"Volts"}, {"Power"}, {"Amps"},
+		{"Watts"}, {"System"}, {"Diode"}
+	};
+	// Lambda to draw each node
+	auto drawItem = [&](uint8_t index, bool selected) {
+		float angle = 2.0f * std::numbers::pi * index / itemCount;
+		int x = centerX + static_cast<int>(radius * std::cos(angle));
+		int y = centerY + static_cast<int>(radius * std::sin(angle));
+		uint16_t color = selected ? myTFT.RDLC_RED : myTFT.RDLC_WHITE;
+		myTFT.fillCircle(x, y, nodeRadius, color);
+		myTFT.setTextColor(myTFT.RDLC_BLACK, color);
+		char c[2] = { items[index].label[0], '\0' };
+		myTFT.writeCharString(x - 3, y - 4, c);
+	};
+	// Lambda to draw pointer from center to selected node
+	auto drawPointer = [&](uint8_t index, uint16_t color) {
+		float angle = 2.0f * std::numbers::pi * index / itemCount;
+		constexpr uint8_t pointerLength = radius - 10;
+		int x1 = centerX + static_cast<int>(pointerLength * std::cos(angle));
+		int y1 = centerY + static_cast<int>(pointerLength * std::sin(angle));
+		myTFT.drawLine(centerX, centerY, x1, y1, color);
+		myTFT.fillCircle(centerX, centerY, 2, myTFT.RDLC_GREEN);
+	};
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
-	srand(time(NULL));
-	uint8_t hueOffset = 0;
-
-	while (count-- > 0)
-	{
-		// Outer dynamic rainbow arc
-		for (uint8_t i = 0; i < barCount; ++i) {
-			float angleStart = i * angleStep * 180.0f / std::numbers::pi;
-			float angleEnd = angleStart + angleStep * 180.0f / std::numbers::pi;
-			uint16_t arcColor = rdlib_maths::generateColor((i + hueOffset) % 128);
-			myTFT.drawSimpleArc(centerX, centerY, radiusOuter + 18, angleStart, angleEnd, arcColor);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
+	myTFT.drawArc(centerX, centerY, radius + 40, 10, 135.0f, 45.0f, myTFT.RDLC_GREEN);
+	// Draw all menu nodes, initially selecting the first
+	for (uint8_t i = 0; i < itemCount; ++i){
+		drawItem(i, i == 0);}
+	uint8_t selected = 0;
+	int8_t oldSelected = -1;
+	// Draw pointer to initial selection
+	drawPointer(selected, myTFT.RDLC_YELLOW);
+	// inline label drawing
+	myTFT.setFont(font_mega);
+	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
+	myTFT.fillRectangle(centerX - 30, centerY + radius + 35, 80, 16, myTFT.RDLC_YELLOW);
+	char buf[20];
+	std::strncpy(buf, items[selected].label, sizeof(buf));
+	buf[sizeof(buf) - 1] = '\0';
+	myTFT.writeCharString(centerX - 50, centerY + radius + 35, buf);
+	// --- Main input loop ---
+	while (true) {
+		int ch = getchar_timeout(1000);
+		if (ch == 'q' || ch == 'Q') break;
+		oldSelected = selected;
+		if (ch == 'a' || ch == 'A')
+			selected = (selected + itemCount - 1) % itemCount;
+		if (ch == 'd' || ch == 'D')
+			selected = (selected + 1) % itemCount;
+		if (selected != oldSelected)
+		{
+			// Erase old pointer and node
+			drawPointer(oldSelected, myTFT.RDLC_BLACK);
+			drawItem(oldSelected, false);
+			// Draw new pointer and node
+			drawItem(selected, true);
+			drawointer(selected, myTFT.RDLC_YELLOW);
+			// Draw updated label below the new selection
+			myTFT.setFont(font_mega);
+			myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
+			myTFT.fillRectangle(centerX - 30, centerY + radius + 35, 80, 16, myTFT.RDLC_YELLOW);
+			std::strncpy(buf, items[selected].label, sizeof(buf));
+			buf[sizeof(buf) - 1] = '\0';
+			myTFT.writeCharString(centerX - 50, centerY + radius + 35, buf);
+			myTFT.setFont(font_default);
 		}
-		hueOffset += 3;
-		// Audio bars
-		for (uint8_t i = 0; i < barCount; ++i) {
-			float angle = i * angleStep - std::numbers::pi / 2.0f;
-			uint8_t level = rand() % 128;
-			uint16_t color = rdlib_maths::generateColor(level);
-			float magnitude = static_cast<float>(level) / 127.0f;
-			uint8_t dynamicOuter = radiusInner + static_cast<uint8_t>((radiusOuter - radiusInner) * magnitude);
-			int16_t x0 = centerX + radiusInner * cos(angle);
-			int16_t y0 = centerY + radiusInner * sin(angle);
-			int16_t x1 = centerX + dynamicOuter * cos(angle);
-			int16_t y1 = centerY + dynamicOuter * sin(angle);
-			myTFT.drawLine(x0, y0, x1, y1, color);
-		}
-		// Center pulse
-		uint8_t pulseRadius = 5 + (rand() % 10);
-		uint16_t pulseColor = rdlib_maths::generateColor(rand() % 128);
-		myTFT.fillCircle(centerX, centerY, pulseRadius, pulseColor);
-		// Simulated BPM display
-		//char bpmBuf[12];
-		//snprintf(bpmBuf, sizeof(bpmBuf), "BPM %03d", 60 + rand() % 60);
-		//std::cout << "\r" << bpmBuf << std::flush;
-
-		delayMilliSecRDL(timeDelay);
-		myTFT.fillScreen(myTFT.RDLC_BLACK);
 	}
-
-	std::cout << "Music Visualizer Dial end" << std::endl;
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	std::cout << "Demo 3 Over" << std::endl;
 }
 
-// Demo 5
+// Demo 4
 void analogClockDemo(uint16_t countLimit)
 {
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
@@ -553,7 +497,7 @@ void analogClockDemo(uint16_t countLimit)
 	std::cout << "Clock Demo over : " <<std::endl;
 }
 
-// Demo 6
+// Demo 5
 void volumeKnobDemo(void)
 {
 	myTFT.fillScreen(myTFT.RDLC_BLACK);

@@ -7,7 +7,6 @@
 		-# Test 408 Analog clock demo
 		-# Test 409 Digital Clock demo
 		-# Test 410 Simulated VU meter demo 1
-		-# Test 411 Simulated VU meter demo 2
 		-# Test 412 Signal Generator 
 		-# Test 414 Radar
 */
@@ -58,24 +57,17 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_int_distribution<int> dist(10, 99);
 
-//demo 3 
-void VUmeterGradient(uint16_t secondsDisplay);
-void drawVerticalVU(uint8_t x, uint8_t y, uint8_t w, uint8_t val, uint16_t color);
-#define _BARS       7
-#define _BARWIDTH   10
-#define _BARSPACE    2
-
-//demo 4 
+//demo 3
 void DigitalClock(uint16_t count);
 
-//demo 5
+//demo 4
 void SignalGen(uint16_t secondsDisplay);
 #define _WAVE_AMPLITUDE  20  // Max height of the waveform
 #define _WAVE_FREQUENCY  3   // Number of cycles per screen width
 #define _SWEEP_SPEED     4   // Pixels per update
 int sweepPos = 0;
 
-// Demo 6
+// Demo 5
 void demoRadar(uint16_t sweeps=7);
 
 //  Section ::  MAIN loop
@@ -92,23 +84,22 @@ int main()
 		if (std::cin.fail()) {
 			std::cin.clear(); // Clear error flag
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
-			std::cout << "Invalid input. Please enter a number between 1 and 4.\n\n";
+			std::cout << "Invalid input. Please enter a number between 1 and 5.\n\n";
 			continue;
 		}
 		switch (choice) {
 			case 1: ClockDemo(30); break;
 			case 2: DigitalClock(2000); break;
 			case 3: VUmeter(75); break;
-			case 4: VUmeterGradient(100); break;
-			case 5: SignalGen(100);break;
-			case 6: demoRadar(5); break;
-			case 7: std::cout << "Exiting menu\n"; break;
+			case 4: SignalGen(100);break;
+			case 5: demoRadar(5); break;
+			case 6: std::cout << "Exiting menu\n"; break;
 			default:
 				std::cout << "Invalid choice. Please try again.\n";
 				break;
 		}
 		std::cout << std::endl;
-	} while (choice != 7);
+	} while (choice != 6);
 	EndTests();
 	return 0;
 }
@@ -248,43 +239,8 @@ void drawVuMeter() {
 	}
 }
 
-// demo 3 
-void VUmeterGradient(uint16_t secondsDisplay){
-	std::cout << "VU meter Demo 2 start, ends in : " << secondsDisplay << std::endl;
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> dist(1, 254);
-	while (secondsDisplay-- > 1)
-		{
-		for (uint8_t i=0;i<_BARS;i++)
-		{
-			drawVerticalVU(_BARWIDTH*i+_BARSPACE*i,_BARS,_BARWIDTH, dist(gen),0);
-		}
-		delayMilliSecRDL(250);
-		std::cout<< secondsDisplay << "\r" << std::flush;
-	}
-	std::cout << "VU meter Demo 2 over : " << std::endl;
-	myOLED.fillScreen(myOLED.RDLC_BLACK);
-}
 
-// For each bar, the random value value is used to map a color using generateColor.
-// This will create a gradient color between blue and red based on the value.
-// The color is then applied to each bar, giving the VU meter a dynamic 
-// visual effect with varying colors that smoothly transition from blue (low values) to red (high values).
-void drawVerticalVU(uint8_t x, uint8_t y, uint8_t width, uint8_t value, uint16_t color) {
-	uint8_t height = rdlib_maths::mapValue(value, 0, 255, 63- y, 1);
-	if (color < 1) {
-		color = rdlib_maths::generateColor(rdlib_maths::mapValue(value, 0, 255, 1, 127));
-	}
-	myOLED.fillRectangle(x, 1, width, height, myOLED.RDLC_GREY);
-	// Draw colored VU meter segment
-	if (value > 4) {
-			myOLED.fillRect(x, height + 1, width, 63 - (height + y + 2), color); // Draw colored bar
-		
-	}
-}
-
-//Demo 4
+//Demo 3
 void DigitalClock(uint16_t count)
 {
 	std::cout << "Digital Clock demo , icons, small bitmap" << std::endl;
@@ -342,7 +298,7 @@ void DigitalClock(uint16_t count)
 	std::cout << "Clock demo over" << std::endl;
 }
 
-//demo 5
+//demo 4
 void SignalGen(uint16_t secondsDisplay) {
 	std::cout << "oscilloscope Start" << std::endl;
 	myOLED.setTextColor(myOLED.RDLC_WHITE, myOLED.RDLC_BLUE);
@@ -400,7 +356,7 @@ void SignalGen(uint16_t secondsDisplay) {
 	std::cout << "oscilloscope demo over" << std::endl;
 }
 
-// demo 6
+// demo 5
 void demoRadar(uint16_t sweeps)
 {
 	std::cout << "Demo Radar: Draw line at angle function, ends at: " << sweeps << std::endl;
@@ -464,10 +420,9 @@ void displayMenu() {
 	std::cout << "1. Clock Analog\n";
 	std::cout << "2. Clock Digital \n";
 	std::cout << "3. VU meter 1\n";
-	std::cout << "4. VU meter 2\n";
-	std::cout << "5. Signal Generator \n";
-	std::cout << "6. Radar \n";
-	std::cout << "7. Quit\n";
+	std::cout << "4. Signal Generator \n";
+	std::cout << "5. Radar \n";
+	std::cout << "6. Quit\n";
 	std::cout << "Enter your choice: ";
 }
 
