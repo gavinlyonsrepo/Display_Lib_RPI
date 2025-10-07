@@ -31,8 +31,8 @@ VRAM of display.
 3. All Draw text functions only IF **textCharPixelOrBuffer = true** 
 
 The situation with graphic functions is complicated as some use 
-fast draw methods of drawFastVLine() and drawFastHLine().
-and fillRectangle() uses a local buffer in function to write to display VRAM.
+fast draw methods of drawFastVLine() and drawFastHLine()
+and fillRectangle(): which use a local buffer in function to write to display VRAM.
 So depending on the graphic function code may write to screenBuffer and/or VRAM. 
 Note fillRectangle() is wrapped by fillScreen.
 

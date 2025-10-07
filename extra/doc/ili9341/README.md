@@ -166,8 +166,11 @@ screen do not connect these. The touch screen and TFT share the SPI bus but have
 
 Four-Byte Burger 240x320 16-bit bitmap test image, Credits [Ahoy](https://www.youtube.com/watch?v=i4EFkspO5p4)
 
-[![output pic](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output2.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output2.jpg)
+[![output pic 1](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output2.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output2.jpg)
 
+Output screenshots of some of the demo examples.
+
+[![output pic 2](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output3.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/ili9341output3.jpg)
 
 ## Touchscreen
 
