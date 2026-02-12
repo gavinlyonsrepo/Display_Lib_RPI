@@ -36,3 +36,4 @@ The enum has a utility function that can print out the label and its comment, (R
 | rdlib::UnknownError           | 28     |  For unknown error events                                                                        |
 | rdlib::InvalidRAMLocation     | 29     |  Invalid Display RAM location                                                                    |
 | rdlib::SPIWriteFailure        | 30     |  Failed to write to HW SPI , lgpio                                                               |
+| rdlib::WrongBufferMode        | 31     |  Wrong Buffer mode selected for function see Advanced Screen Buffer                                                               |

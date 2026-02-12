@@ -103,8 +103,6 @@ if (_hardwareSPI == false)
 
 /*!
 	@brief Method for Hardware Reset pin control
-	@details If you have a display with no reset pin this will issue the software reset command
-		this software reset is untested on actual hardware.
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::GpioPinClaim
@@ -124,9 +122,6 @@ rdlib::Return_Codes_e GC9A01_TFT ::TFTResetPin() {
 		Display_RST_SetLow;
 		delayMilliSecRDL(20);
 		Display_RST_SetHigh;
-		delayMilliSecRDL(150);
-	}else {
-		writeCommand(GC9A01_SWRESET); // no hw reset pin, software reset. untested
 		delayMilliSecRDL(150);
 	}
 	return rdlib::Success;

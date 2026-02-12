@@ -1,13 +1,12 @@
 /*!
-	@file   examples/st7735/advanced_screen_buffer_mode/main.cpp
-	@author Gavin Lyons
-	@brief  Example cpp file for st7735 library, 128x128 ST7735R Red Tab. Tests : advanced screen buffer mode,
-		various tests.
-	@note   See USER OPTIONS 0-3 in SETUP function
-			dislib16_ADVANCED_SCREEN_BUFFER_ENABLE must be enabled for this example
-			or it will not compile, see readme for more details
+	@file    examples/st7735/advanced_screen_buffer_mode/main.cpp
+	@author  Gavin Lyons
+	@brief   Example cpp file for st7735 library, 128x128 ST7735R Red Tab.
+			 Tests : advanced screen buffer mode,various tests.
+	@details See USER OPTIONS 0-3 in SETUP function
+			 Uses advanced screen buffer mode.
 	@test
-		-# Advanced screen buffer mode various tests.
+		-# 2000 Advanced screen buffer mode various tests.
 */
 
 // Section ::  libraries 
@@ -19,26 +18,12 @@
 /// @cond
 // Section :: Globals
 ST7735_TFT myTFT;
-int8_t RST_TFT  = 25; // Reset GPIO
-int8_t DC_TFT   = 24; // DC GPIO
-int  GPIO_CHIP_DEV = 0; // GPIO chip device number
-
-uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
-uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
-uint16_t MY_TFT_WIDTH = 128;// Screen width in pixels
+uint16_t MY_TFT_WIDTH = 128;  // Screen width in pixels
 uint16_t MY_TFT_HEIGHT = 128; // Screen height in pixels
-
-int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
-int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-int SPI_SPEED =  8000000; // The speed of serial communication in bits per second.
-int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
-
-#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
-#pragma message("gll: color16_ADVANCED_SCREEN_BUFFER_ENABLE is not defined. it is required for this example")
-#endif
 
 //  Section ::  Function Headers
 uint8_t Setup(void);
+uint8_t SetupBufferMode(void);
 void TestBasic(void);
 void TestRotate(void);
 void TestBitmap(void);
@@ -51,6 +36,10 @@ static uint64_t counter( void );
 //  Section ::  MAIN loop
 int main(void)
 {
+	//rdlib_config::loadConfig(); // optional
+	std::cout << "TFT Start Test " << std::endl;
+	std::cout << "Display_Lib_RPI library version : " << rdlib::LibraryVersion()<< std::endl;
+	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
 	if (Setup() != 0)
 		return -1;
 	TestBasic();
@@ -65,9 +54,16 @@ int main(void)
 //  Section ::  Function Space
 uint8_t Setup(void)
 {
-	std::cout << "TFT Start Test " << std::endl;
-	std::cout << "Display_Lib_RPI library version : " << rdlib::LibraryVersion()<< std::endl;
-	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
+	int8_t RST_TFT  = 25; // Reset GPIO
+	int8_t DC_TFT   = 24; // DC GPIO
+	int  GPIO_CHIP_DEV = 0; // GPIO chip device number
+	uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
+	uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
+	int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
+	int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+	int SPI_SPEED =  8000000; // The speed of serial communication in bits per second.
+	int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+
 // ** USER OPTION 1 GPIO HW SPI **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
@@ -81,13 +77,29 @@ uint8_t Setup(void)
 		return -2;
 	}
 //*****************************
-	if (myTFT.setBuffer() != rdlib::Success)
-		return -3;					  // set up buffer
-	myTFT.setTextCharPixelOrBuffer(true); // set to use pixel mode for text
+
 	delayMilliSecRDL(50);
-	return 0;
+	return SetupBufferMode();
 }
 
+// Set up advanced screen buffer mode
+uint8_t SetupBufferMode(void)
+{
+	// 1. Turn it on!
+	myTFT.setAdvancedScreenBuffer_e(myTFT.AdvancedScreenBuffer_e::On);
+	// 2. Check its on, optional!
+	if (myTFT.getAdvancedScreenBuffer_e() == myTFT.AdvancedScreenBuffer_e::Off)
+	{
+		std::cout << "Error: Setup: Wrong Mode. This example is for Advanced Screen Buffer Mode" << std::endl;
+		return 4;
+	}
+	// 3. Set up buffer
+	if (myTFT.setBuffer() != rdlib::Success) 
+		return 5;
+	// 4. Turn on Text pixel mode(instead of local buffer mode:default)
+	myTFT.setTextCharPixelOrBuffer(true); // set to use pixel mode for text
+	return 0;
+}
 
 void EndTests(void)
 {
@@ -171,29 +183,29 @@ void TestBitmap(void)
 
 	// Bitmap 1-bit
 	printf("Bitmap 1-bit\n");
-	myTFT.drawBitmap(0, 0, 128, 128, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, BackupMenuBitmap );
+	myTFT.drawBitmap(0, 0, MY_TFT_WIDTH, MY_TFT_HEIGHT, myTFT.RDLC_WHITE, myTFT.RDLC_GREEN, BackupMenuBitmap );
 	ScreenReset();
 
 	// Bitmap 16-bit, no error handling see examples/st7735/bitmap_tests/main.cpp for this.
 	printf("Bitmap 16-bit\n");
 	FILE *pFile ;
 	std::vector<uint8_t> bmpBuffer;
-	bmpBuffer.resize((128 * 128) * 2);
+	bmpBuffer.resize((MY_TFT_WIDTH*MY_TFT_HEIGHT) * 2);
 	pFile = fopen("bitmap/bitmap16images/16pic1.bmp", "r");
 	fseek(pFile, 132, 0); // 132 = bmp offset
-	fread(bmpBuffer.data(), 2, 128 * 128, pFile);
+	fread(bmpBuffer.data(), 2, MY_TFT_WIDTH*MY_TFT_HEIGHT, pFile);
 	fclose(pFile);
-	myTFT.drawBitmap16(0, 0, bmpBuffer, 128, 128);
+	myTFT.drawBitmap16(0, 0, bmpBuffer, MY_TFT_WIDTH, MY_TFT_HEIGHT);
 	ScreenReset();
 
 	// Bitmap 24-bit, no error handling see examples/st7735/bitmap_tests/main.cpp for this.
 	printf("Bitmap 24-bit\n");
-	bmpBuffer.resize((128 * 128) * 3);
+	bmpBuffer.resize((MY_TFT_WIDTH*MY_TFT_HEIGHT) * 3);
 	pFile = fopen("bitmap/bitmap24images/24pic2.bmp", "r");
 	fseek(pFile, 54, 0); // 54 = bmp offset
-	fread(bmpBuffer.data(), 3, 128 * 128, pFile);
+	fread(bmpBuffer.data(), 3, MY_TFT_WIDTH*MY_TFT_HEIGHT, pFile);
 	fclose(pFile);
-	myTFT.drawBitmap24(0, 0, bmpBuffer, 128, 128);
+	myTFT.drawBitmap24(0, 0, bmpBuffer, MY_TFT_WIDTH, MY_TFT_HEIGHT);
 	ScreenReset();
 }
 
@@ -215,10 +227,10 @@ void TestBitmapFPS(void)
 	myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_RED);
 	FILE *pFile ;
 	std::vector<uint8_t> bmpBuffer;
-	bmpBuffer.resize((128 * 128) * 2);
+	bmpBuffer.resize((MY_TFT_WIDTH*MY_TFT_HEIGHT) * 2);
 	pFile = fopen("bitmap/bitmap16images/16pic1.bmp", "r");
 	fseek(pFile, 132, 0); // 132 = bmp offset
-	fread(bmpBuffer.data(), 2, 128 * 128, pFile);
+	fread(bmpBuffer.data(), 2, MY_TFT_WIDTH*MY_TFT_HEIGHT, pFile);
 	fclose(pFile);
 	while (1)
 	{
@@ -235,7 +247,7 @@ void TestBitmapFPS(void)
 		currentFramerate++;
 		count++;
 		//  ** Code to test **
-		myTFT.drawBitmap16(0, 0, bmpBuffer, 128, 128);
+		myTFT.drawBitmap16(0, 0, bmpBuffer, MY_TFT_WIDTH, MY_TFT_HEIGHT);
 		myTFT.setCursor(0, 0);
 		myTFT.print(fps);
 		myTFT.writeBuffer();

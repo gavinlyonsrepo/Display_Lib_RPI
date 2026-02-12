@@ -1,9 +1,13 @@
 /*!
-	@file examples/ssd1331/text_graphics_functions/main.cpp
-	@brief Library test file, tests Text,graphics & functions.
+	@file examples/ssd1331/tests/main.cpp
+	@brief Library test file, tests bitmaps, text,graphics & functions.
 	@author Gavin Lyons.
 	@note See USER OPTIONS 1-3 in SETUP function and in myOLED constructor
 	@test
+	-# Test 300 Sprites demo, small bitmap
+	-# Test 302 bi-color image 64x64
+	-# Test 303 24 bit color image bitmaps from the file system
+	-# Test 304 16 bit color image bitmaps from the file system
 	-# Test 500 RGB color OK?
 	-# Test 501 change modes test -> Invert, display on/off and Sleep.
 	-# Test 502 Rotate
@@ -23,6 +27,7 @@
 
 // Section ::  libraries
 #include <iostream> // cout
+#include "Bitmap_test_data.hpp" // Data for bitmap tests
 #include "SSD1331_OLED_RDL.hpp"
 
 /// @cond
@@ -30,7 +35,7 @@
 //  Test timing related defines
 #define TEST_DELAY5 5000
 #define TEST_DELAY2 2000
-#define TEST_DELAY  1000
+#define TEST_DELAY1 1000
 
 // Set contrast values at startup, range 0-0xFF
 SSD1331_OLED::Constrast_values_t userContrast = { 0x7D, 0x7D, 0x7D };        //normal mode
@@ -55,6 +60,11 @@ int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for 
 uint8_t Setup(void);
 void EndTests(void);
 void DisplayReset(void);
+
+void Test300(void); // Sprite 
+void Test302(void); // 2 color bitmap
+void Test303(void); // 24 color bitmap
+void Test304(void); // 16 color bitmap
 
 void Test500(void);
 void Test501(void);
@@ -82,6 +92,10 @@ int main(void)
 {
 	if(Setup() != 0)return -1;
 
+	Test300();
+	Test302();
+	Test303();
+	Test304();
 	Test500();
 	Test501();
 	Test502();
@@ -130,6 +144,166 @@ uint8_t Setup(void)
 	delayMilliSecRDL(100);
 	return 0;
 }
+
+void Test300(void)
+{
+	std::cout << "Test 300: Sprites demo" << std::endl;
+	// Test 300-A test 16-bit color Sprite 
+	// Draw as sprite, without background , 32 X 32 .background color = myOLED.RDLC_LBLUE
+	// Green background screen
+	myOLED.fillScreen(myOLED.RDLC_GREEN);
+	delayMilliSecRDL(TEST_DELAY1);
+	myOLED.drawSprite(10, 10, SpriteTest16, 32, 32, myOLED.RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY2);
+	myOLED.fillScreen(myOLED.RDLC_BLACK);
+	// Test 300-B test 16-bit color Sprite 
+	// Draw as sprite, without background , 32 X 32 .background color =myOLED.RDLC_LBLUE
+	// Bitmap background screen
+	if(myOLED.drawBitmap(0, 0, 64 , 64, myOLED.RDLC_WHITE , myOLED.RDLC_RED, bigImage64x64 ) != rdlib::Success)
+		return;
+	delayMilliSecRDL(TEST_DELAY1);
+
+	myOLED.drawSprite(10, 10, SpriteTest16, 32, 32, myOLED.RDLC_LBLUE);
+	myOLED.drawSprite(30, 30, SpriteTest16, 32, 32, myOLED.RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY2);
+	myOLED.fillScreen(myOLED.RDLC_BLACK);
+}
+
+
+// bitmap 2 colour , 128x128 bi color bitmap
+void Test302(void)
+{
+	std::cout << "Test 302: Bi-color bitmap 64X64 pixels" << std::endl;
+	myOLED.fillScreen(myOLED.RDLC_BLACK);
+	myOLED.setTextColor(myOLED.RDLC_WHITE, myOLED.RDLC_BLACK);
+	myOLED.setFont(font_default);
+	char teststr1[] = "Bitmap 2";
+	myOLED.writeCharString(0, 25, teststr1);
+	delayMilliSecRDL(TEST_DELAY2);
+	
+	if(myOLED.drawBitmap(0, 0, 64 , 64, myOLED.RDLC_WHITE , myOLED.RDLC_GREEN, bigImage64x64 ) != rdlib::Success)
+		return;
+	delayMilliSecRDL(TEST_DELAY2);
+}
+
+// bitmap 24 colour , All file format = Windows BITMAPINFOHEADER offset 54
+// bitmaps are 96X64
+void Test303(void)
+{
+	std::cout << "Test 303: 24 bit color image bitmaps from the file system" << std::endl;
+	myOLED.fillScreen(myOLED.RDLC_BLACK);
+	char teststr1[] = "Bitmap 24";
+	myOLED.setTextColor(myOLED.RDLC_WHITE, myOLED.RDLC_BLACK);
+	myOLED.writeCharString(0, 0, teststr1);
+	delayMilliSecRDL(TEST_DELAY1);
+
+	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
+	uint8_t FileHeaderOffset = 54;
+	uint8_t NumberOfFiles = 2;
+	uint8_t bitmapWidth = 96;
+	uint8_t bitmapHeight = 64;
+
+	// Use std::vector for safe memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try 
+	{
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize(bitmapWidth * bitmapHeight * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 303: Memory allocation failed for bmpBuffer" << std::endl;
+		return;
+	}
+
+	for (uint8_t i = 0; i < NumberOfFiles; i++)
+	{
+		FILE *pFile = nullptr;
+
+		// Select file
+		switch (i)
+		{
+			case 0:pFile = fopen("bitmap/bitmap24images/24pic8_96X64.bmp", "r"); break;
+			case 1:pFile = fopen("bitmap/bitmap24images/24pic9_96X64.bmp", "r"); break;
+		}
+
+		if (pFile == nullptr) // Check if file exists
+		{
+			std::cout << "Error Test 303: File does not exist" << std::endl;
+			return;
+		}
+
+		// Read bitmap data into buffer
+		fseek(pFile, FileHeaderOffset, 0);
+		fread(bmpBuffer.data(), pixelSize, bitmapWidth * bitmapHeight, pFile);
+		fclose(pFile);
+
+		// Draw bitmap
+		if (myOLED.drawBitmap24(0, 0, bmpBuffer, bitmapWidth, bitmapHeight) != rdlib::Success)
+		{
+			std::cout << "Warning: An error occurred in drawBitmap24" << std::endl;
+			return;
+		}
+
+		delayMilliSecRDL(TEST_DELAY5);
+	}
+}
+
+// bitmap 16 colour
+// bitmaps are 96X64
+// BITMAPV5HEADERoffset 138(124+14) Made in The GIMP
+void Test304(void)
+{
+	std::cout << "Test 304: 16 bit color image bitmaps from the file system" << std::endl;
+	myOLED.fillScreen(myOLED.RDLC_BLACK);
+	char teststr1[] = "Bitmap 16";
+	myOLED.writeCharString(0, 0, teststr1);
+	delayMilliSecRDL(TEST_DELAY2);
+
+	FILE *pFile ;
+	size_t pixelSize = 2; // 16 bit 2 bytes per pixel
+	uint8_t NumberOfFiles  = 2;
+	uint8_t offsetBMPHeader = 138;
+	uint8_t bitmapWidth = 96;
+	uint8_t bitmapHeight = 64;
+
+	// Use std::vector for safe memory management of buffer
+	std::vector<uint8_t> bmpBuffer1;
+	try 
+	{
+		// Attempt to allocate memory for the vector
+		bmpBuffer1.resize((bitmapWidth * bitmapHeight) * pixelSize);
+	} catch (const std::bad_alloc&) 
+	{
+		std::cout << "Error Test 303: Memory allocation failed for bmpBuffer1" << std::endl;
+		return;
+	}
+
+	for (uint8_t i = 0 ; i < NumberOfFiles ; i++)
+	{
+		switch (i) // select file
+		{
+			case 0:pFile = fopen("bitmap/bitmap16images/16pic4_96x64.bmp", "r");break;
+			case 1:pFile = fopen("bitmap/bitmap16images/16pic5_96x64.bmp", "r");break;
+		}
+		if (pFile == nullptr)
+		{
+			std::cout << "Error Test 404 : File does not exist" << std::endl;
+			return;
+		}
+		fseek(pFile, offsetBMPHeader, 0);
+		fread(bmpBuffer1.data(), pixelSize, bitmapWidth * bitmapHeight, pFile);
+		fclose(pFile);
+
+		if (myOLED.drawBitmap16(0, 0, bmpBuffer1, bitmapWidth, bitmapHeight) != rdlib::Success)
+		{
+			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
+			return;
+		}
+		delayMilliSecRDL(TEST_DELAY5);
+	} // end of for loop
+
+	myOLED.fillScreen(myOLED.RDLC_BLACK);
+} // end of test 
 
 void Test500(void)
 {
@@ -209,13 +383,13 @@ void Test502(void)
 	std::cout << "Test 502-5 Window copy command" << std::endl;
 	myOLED.fillScreen(myOLED.RDLC_BLACK);
 	myOLED.fillRect(0, 0, 20, 20, myOLED.RDLC_GREEN);
-	delayMilliSecRDL(TEST_DELAY);
+	delayMilliSecRDL(TEST_DELAY1);
 	myOLED.OLEDCopyWindowCmd(0,0, 20, 20, 76,0);
 	delayMilliSecRDL(TEST_DELAY5);
 
 	std::cout << "Test 502-6 Window Dim command" << std::endl;
 	myOLED.fillScreen(myOLED.RDLC_GREEN);
-	delayMilliSecRDL(TEST_DELAY);
+	delayMilliSecRDL(TEST_DELAY1);
 	myOLED.OLEDDimWindowCmd(0, 0, 40, 40);
 	delayMilliSecRDL(TEST_DELAY5);
 	

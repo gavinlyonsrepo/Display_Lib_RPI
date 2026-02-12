@@ -20,7 +20,7 @@
 * Description:
 
 0. C++ Library for a TFT SPI LCD, GC9A01A Driver
-1. Dynamic install-able Raspberry Pi C++ library.
+1. Dynamic install-able Linux C++ library.
 2. Power modes, Invert , Scroll, Rotate, Bitmaps supported.
 3. Graphics + print class included.
 4. 24 bit colour , 16 bit color, bi-color Bitmaps & sprites supported.
@@ -77,38 +77,21 @@ down SW SPI further.
 
 ### File system
 
-In example folder:
-The Main.cpp file contains tests showing library functions.
+In example sub folders:
+The main.cpp file contains tests showing library functions.
 A bitmap data file contains data for bi-color bitmaps and icons tests.
 The color bitmaps used in testing are in bitmap folder.
+Hello world can be setup for software or hardware SPI by changing "HardwareSPI" at top of file.
 
-| # | example file name  | Desc|
+| # | example sub folder name  | Description |
 | ------ | ------ |  ------ |
-| 1 | hello_world| Basic use case |
-| 2 | text_graphic_functions | Tests text,graphics & function testing  |
-| 3 | bitmap_Tests | bitmap | bitmap testing|
-| 4 | hello_world_swspi | Basic use case, software SPI |
-| 5 | demos | Various demos |
+| 1 | hello_world | Basic use case |
+| 2 | tests | Tests bitmap, text,graphics & function testing |
+| 3 | demos | Various demos |
 
 ### Bitmap
 
-Functions to support drawing bitmaps
-
-| Function Name | Colour support | Pixel size KiB|  Note |
-| ------ | ------ | ------ | ------ |
-| drawIcon | bi-colour array | (0-240) X 8  | Data vertically addressed |
-| drawBitmap | bi-colour array |  7 | Data horizontally  addressed |
-| drawBitmap16 | 16 bit color 565 BMP files or array | 112.5 | ------ |
-| drawBitmap24  | 24 bit color BMP files or array  | 168.8 | Converted by software to 16-bit color  |
-| drawSprite| 16 bit color 565 array | 112.5 | Does not use a buffer , draws pixel by pixel , ignores background chosen color|
-
-1. Bitmap size in kiloBytes = (screenWidth * screenHeight * bitsPerPixel)/(1024 * 8)
-2. Pixel size column assumes 240 by 240 bitmap.
-3. The data array for 1 and 2 is created from image files using file data conversion tool [link](https://javl.github.io/image2cpp/)
-4. The data array for 3 - 5  is created from BMP files using file data conversion tool [link](https://notisrac.github.io/FileToCArray/)
-5. For 3 and 4 better just to use bmp files direct from file system see examples.
-
-These class functions will return an error code in event of error see API for more details.
+[Bitmap Documentation](../bitmap_16/README.md)
 
 ###  Color codes 
 

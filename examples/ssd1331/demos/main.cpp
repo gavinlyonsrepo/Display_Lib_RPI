@@ -14,16 +14,19 @@
 // Section ::  libraries
 #include <iostream>
 #include <ctime>
-#include <csignal> //catch user Ctrl+C
 #include <random>
 #include <algorithm> // For std::clamp
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
 
-#include "Bitmap_test_data.hpp" // Data for tests 
+#include "Bitmap_test_data.hpp" // Data for bitmap tests used by
 #include "SSD1331_OLED_RDL.hpp"
 
 /// @cond
 
 // Section :: setup device
+std::atomic<bool> stopRequested{false}; // Stop signal , Ctrl + c etc
 // Set contrast values at startup, range 0-0xFF
 SSD1331_OLED::Constrast_values_t userContrast = { 0x7D, 0x7D, 0x7D };        //normal mode
 SSD1331_OLED::Dim_Constrast_values_t userDimContrast = { 0x1E, 0x1E, 0x1E }; // dim mode
@@ -35,8 +38,10 @@ uint16_t OLED_HEIGHT = 64; // Screen height in pixels
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
 void displayMenu(void);
 std::string UTC_string(void);
-void signal_callback_handler(int signum);
 void EndTests(void);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 
 //demo 1
 void ClockDemo(uint16_t secondsDisplay);
@@ -76,8 +81,10 @@ int main()
 	if(SetupHWSPI() != 0) return -1; 
 	myOLED.fillScreen(myOLED.RDLC_BLACK);
 	int choice;
-	signal(SIGINT, signal_callback_handler); //Ctrl+ c
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
 	do {
+		if (stopRequested) break;
 		displayMenu();
 		std::cin >> choice;
 		// Check if input is valid
@@ -100,6 +107,8 @@ int main()
 		}
 		std::cout << std::endl;
 	} while (choice != 6);
+	if (stopRequested)
+		std::cout << "Exit Signal received" << std::endl;
 	EndTests();
 	return 0;
 }
@@ -186,6 +195,7 @@ void ClockDemo(uint16_t secondsDisplay)
 			myOLED.drawLine(centerX, centerY, xSecond, ySecond, myOLED.RDLC_YELLOW);
 			lastSecond = second;
 			secondsDisplay--;
+			if (stopRequested) return;
 		}
 		delayMilliSecRDL(10);
 		std::cout<< utcTime << "\r" << std::flush;
@@ -206,6 +216,7 @@ void VUmeter(uint16_t secondsDisplay)
 		delayMilliSecRDL(500); // Smooth animation
 		secondsDisplay--;
 		std::cout<< secondsDisplay << "\r" << std::flush;
+		if (stopRequested) return;
 	}; 
 	myOLED.fillScreen(myOLED.RDLC_BLACK);
 	std::cout << "VU meter Demo over : " << std::endl;
@@ -292,6 +303,7 @@ void DigitalClock(uint16_t count)
 		myOLED.setCursor(0,28);
 		myOLED.print(count);
 		count--;
+		if (stopRequested) return;
 	}
 	delayMilliSecRDL(2000);
 	myOLED.fillScreen(myOLED.RDLC_BLACK);
@@ -346,6 +358,7 @@ void SignalGen(uint16_t secondsDisplay) {
 			}
 			myOLED.drawPixel(x, y, myOLED.RDLC_GREEN);
 			prevY = y;
+			if (stopRequested) return;
 		}
 		// Smooth phase shift
 		phaseShift += (_SWEEP_SPEED * 2.0f * std::numbers::pi) / (OLED_WIDTH / _WAVE_FREQUENCY);
@@ -385,6 +398,7 @@ void demoRadar(uint16_t sweeps)
 			myOLED.setCursor(68, 5);
 			myOLED.print(angle);
 			delayMilliSecRDL(15);
+			if (stopRequested) return;
 		}
 		std::cout << +j << "\r" << std::flush;
 	}
@@ -398,13 +412,6 @@ std::string UTC_string()
 	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
 	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
 	return timeString;
-}
-
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	EndTests();
-	exit(signum);
 }
 
 void EndTests(void)

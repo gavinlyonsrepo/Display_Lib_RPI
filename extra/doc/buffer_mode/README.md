@@ -12,7 +12,13 @@ mode have some form of local buffered writes already.
 
 ## Enabling Advanced Buffer Mode
 
-To enable advanced buffer mode, you need to define the macro `color16_ADVANCED_SCREEN_BUFFER_ENABLE`. This macro is located in the file `color16_graphics_RDL.hpp` (line 22 USER OPTION ). By default, this macro is commented out or undefined. Once enabled, the library will use the `_screenBuffer` for many drawing operations instead of writing directly to the display VRAM. NOTE :: The library will have to be recompiled and reinstalled as per installation section in main readme. 
+To enable advanced buffer mode, you need turn it on
+
+```
+myTFT.setAdvancedScreenBuffer_e(myTFT.AdvancedScreenBuffer_e::On);
+```
+By default it is OFF, See function SetupBufferMode() in relevant examples for full example code.
+Once enabled, the library will use the `_screenBuffer` for many drawing operations instead of writing directly to the display VRAM. 
 
 ## Usage
 
@@ -23,19 +29,20 @@ To enable advanced buffer mode, you need to define the macro `color16_ADVANCED_S
 
 ## Functions 
 
-Once enabled The following functions will write to screen Buffer instead of 
-VRAM of display.
+Once enabled The following functions will write to screen Buffer instead of VRAM of display.
 
 1. drawPixel()
 2. All Bitmap functions.
-3. All Draw text functions only IF **textCharPixelOrBuffer = true** 
-
-The situation with graphic functions is complicated as some use 
-fast draw methods of drawFastVLine() and drawFastHLine()
-and fillRectangle(): which use a local buffer in function to write to display VRAM.
-So depending on the graphic function code may write to screenBuffer and/or VRAM. 
-Note fillRectangle() is wrapped by fillScreen.
+3. All Draw text functions only IF **textCharPixelOrBuffer = true** : non default.
+4. All graphics functions except fillRectBuffer. It uses a local buffer in function to write to display VRAM. fillRectBuffer is wrapped by fillScreen. So fillRectBuffer and fillscreen will still write directly to VRAM of display.
 
 ## Examples
 
-There is only one example for Advanced screen buffer mode, for st7735. Path =  examples/st7735/advanced_screen_buffer_mode.
+There is one example for Advanced screen buffer mode, for st7735. Path =  examples/st7735/advanced_screen_buffer_mode.
+
+All examples for GC9D01 display are for Advanced screen buffer mode.
+This is because at time of writing there are issues
+with this display when attempting to draw pixel by pixel into the VRAM made worse by rotation.
+See my arduino port (GC9D01_LTSM) on github for details.
+
+

@@ -14,7 +14,6 @@
 */
 
 // Section ::  libraries
-#include <ctime> // for test301
 #include <iostream> // cout
 #include "Bitmap_test_data.hpp" // Data for test 301-302
 #include "GC9A01_TFT_LCD_RDL.hpp"
@@ -47,12 +46,11 @@ int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for 
 //  Section ::  Function Headers
 uint8_t Setup(void); // setup + user options
 void Test300(void); // Sprite 
-void Test301(void); // "clock demo" icons, small bi-color bitmaps
+void Test301(void); // icons, small bi-color bitmaps
 void Test302(void); // 2 color bitmap
 void Test303(void); // 24 color bitmap
 void Test304(void); // 16 color bitmap
 void Test305(void); // 16 color bitmap (from data)
-std::string UTC_string(void); // for clock demo
 void EndTests(void);
 
 //  Section ::  MAIN loop
@@ -298,15 +296,6 @@ void Test304(void)
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 } // end of test 
 
-
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string() 
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
 
 // bitmap 16 colour , Data from array as opposed to file system, When creating data flip image upside down
 void Test305(void)

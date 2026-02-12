@@ -12,40 +12,36 @@
 
 // Section ::  libraries
 #include <ctime>
-#include <random> // gauge
-#include <iostream> // cout cin
+#include <random>    // gauge
+#include <iostream>  // cout cin
 #include <algorithm> // For std::clamp
-#include <limits> // menu limits
-#include <csignal> //catch user Ctrl+C
+#include <limits>    // menu limits
 #include <termios.h> //key press
-#include <fcntl.h> //key press
-#include <numbers> // for std::numbers::pi_v
+#include <fcntl.h>   //key press
+#include <numbers>   // for std::numbers::pi_v
+
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
+
 #include "ST7789_TFT_LCD_RDL.hpp"
 
 /// @cond
 
 // Section :: Globals
 ST7789_TFT myTFT;
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 0;
-
-uint8_t OFFSET_COL = 0;  // These offsets can be adjusted for any issues
-uint8_t OFFSET_ROW = 0; // with manufacture tolerance/defects at edge of display
-uint16_t TFT_WIDTH = 240; // Screen width in pixels
-uint16_t TFT_HEIGHT = 280; // Screen height in pixels
-
-int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
-int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-int HWSPI_SPEED =  24000000; // The speed of serial communication in bits per second.
-int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+constexpr uint16_t TFT_WIDTH = 240; // Screen width in pixels
+constexpr uint16_t TFT_HEIGHT = 280; // Screen height in pixels
+std::atomic<bool> stopRequested{false}; // Stop signal , Ctrl + c etc
 
 //  Section ::  Function Headers
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
 std::string UTC_string(void);
-void signal_callback_handler(int signum);
 void displayMenu(void);
 void EndTests(void);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 
 // === Demo 1 ===
 void gaugeDemo(uint16_t  countLimit = 50);
@@ -63,18 +59,16 @@ const int GAUGE_SPACING = 70;
 // Store previous values to prevent redundant redraws
 float prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
 void updateGauges(float phase);
-void drawGauge(int x, int y, uint16_t color, float value);
+void drawGauge(int x, int y, uint16_t color, float value, uint8_t gaugeNum);
 void drawGaugeDemoTwo(uint16_t  countLimit = 50);
 void drawGaugeBorder(int x, int y);
 
 // === Demo 3 ===
-constexpr uint16_t SCREEN_WIDTH = 240;
-constexpr uint16_t SCREEN_HEIGHT = 280;
 constexpr uint8_t FONT_HEIGHT = 20;
 constexpr uint16_t TEXT_COLOR = ST7789_TFT::RDLC_WHITE;
 constexpr uint16_t BG_COLOR = ST7789_TFT::RDLC_BLACK;
 constexpr uint16_t HIGHLIGHT_COLOR = ST7789_TFT::RDLC_YELLOW;
-constexpr size_t VISIBLE_ITEMS = SCREEN_HEIGHT / FONT_HEIGHT;
+constexpr size_t VISIBLE_ITEMS = TFT_HEIGHT / FONT_HEIGHT;
 
 void menuDemo(void);
 char getKeyPress(); // also used by demo 4
@@ -117,14 +111,17 @@ void matrix(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
 void rotate(int16_t xyz[3][NDOTS], uint16_t , uint16_t , uint16_t );
 void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
 
+void animatedFade(uint16_t c1, uint16_t c2);
 
 // Section :: MAIN loop
 int main()
 {
 	if(SetupHWSPI() != 0) return -1; //Hardware SPI
 	int choice;
-	signal(SIGINT, signal_callback_handler); //Ctrl+ c
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
 	do {
+		if (stopRequested) break;
 		displayMenu();
 		std::cin >> choice;
 		// Check if input is valid
@@ -150,6 +147,8 @@ int main()
 		std::cout << std::endl;
 	} while (choice != 6);
 
+	if (stopRequested)
+		std::cout << "Exit Signal received" << std::endl;
 	EndTests();
 	return 0;
 }
@@ -161,12 +160,19 @@ int main()
 // Hardware SPI setup
 uint8_t SetupHWSPI(void)
 {
-	std::cout << "TFT Start Test " << std::endl;
+	std::cout << "TFT Start Demo Test: Ctrl+c to quit " << std::endl;
+	int8_t RST_TFT  = 25;
+	int8_t DC_TFT   = 24;
+	int  GPIO_CHIP_DEVICE = 0;
+	int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
+	int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+	int HWSPI_SPEED =  24000000; // The speed of serial communication in bits per second.
+	int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 // ** USER OPTION 1 GPIO HW SPI **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
 // ** USER OPTION 2 Screen SetupHWSPI **
-	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
+	myTFT.TFTInitScreenSize(0, 0 , TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
 // ** USER OPTION 3 SPI **
 	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
@@ -204,13 +210,6 @@ std::string UTC_string()
 	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
 	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
 	return timeString;
-}
-
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	EndTests();
-	exit(signum);
 }
 
 // === Demo 1 ===
@@ -252,6 +251,7 @@ void gaugeDemo(uint16_t countLimit)
 		myTFT.print(" Value :: ");
 		sprintf(buffer, "%03d", currentValue);
 		myTFT.print(buffer);
+		if (stopRequested) return;
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout << "Gauge Demo Over " << std::endl;
@@ -364,16 +364,17 @@ void drawGaugeDemoTwo(uint16_t countLimit)
 		phase += 0.1;
 		std::cout<< countLimit << "\r" << std::flush;
 		delayMilliSecRDL(250);
+		if (stopRequested) return;
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
 	std::cout << "Gauge Demo 2 Over " << std::endl;
 }
 
-void drawGauge(int x, int y, float value, float prevVal) {
+void drawGauge(int x, int y, float value, float prevVal, uint8_t gaugeNum) {
 	int fillHeight = static_cast<int>(GAUGE_HEIGHT * value);
 	int prevFillHeight = (prevVal < 0) ? 0 : static_cast<int>(GAUGE_HEIGHT * prevVal);
-
+	uint16_t color = 0;
 	if (fillHeight == prevFillHeight) return;  // nothing to update
 
 	// If shrinking, clear the difference 
@@ -391,7 +392,21 @@ void drawGauge(int x, int y, float value, float prevVal) {
 	int growHeight = fillHeight - prevFillHeight;
 	for (int i = 0; i < growHeight; i++) {
 		uint8_t val = rdlib_maths::mapValue(static_cast<int>(prevFillHeight + i), 0, GAUGE_HEIGHT - 1, 1, 127);
-		uint16_t color = rdlib_maths::generateColor(val);
+		switch (gaugeNum)
+		{
+			case 1: 
+				color = rdlib_maths::generateColor(val);
+			break;
+			case 2:
+				color = rdlib_maths::blend565(myTFT.RDLC_BLUE, myTFT.RDLC_RED, val*2);
+			break;
+			case 3:
+				color = rdlib_maths::blend565(myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, val*2);
+			break;
+			default:
+				color = rdlib_maths::generateColor(val);
+			break;
+		}
 		myTFT.fillRectangle(
 		x,
 		y + (GAUGE_HEIGHT - fillHeight) + (growHeight - 1 - i),
@@ -413,7 +428,7 @@ void updateGauges(float phase) {
 	char buffer[6];  // formatted text
 	// --- Gauge 1 ---
 	if (val1 != prevVal1) {
-		drawGauge(GAUGE_X_START, GAUGE_Y_START, val1, prevVal1);
+		drawGauge(GAUGE_X_START, GAUGE_Y_START, val1, prevVal1, 1);
 		sprintf(buffer, "%.2f", val1);
 		myTFT.fillRectangle(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START, GAUGE_Y_START + GAUGE_HEIGHT + 10);
@@ -422,7 +437,7 @@ void updateGauges(float phase) {
 	}
 	// --- Gauge 2 ---
 	if (val2 != prevVal2) {
-		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, val2, prevVal2);
+		drawGauge(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START, val2, prevVal2, 2);
 		sprintf(buffer, "%.2f", val2);
 		myTFT.fillRectangle(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START + GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
@@ -431,7 +446,7 @@ void updateGauges(float phase) {
 	}
 	// --- Gauge 3 ---
 	if (val3 != prevVal3) {
-		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, val3, prevVal3);
+		drawGauge(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START, val3, prevVal3, 3);
 		sprintf(buffer, "%.2f", val3);
 		myTFT.fillRectangle(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10, 36, 8, myTFT.RDLC_BLACK);
 		myTFT.setCursor(GAUGE_X_START + 2 * GAUGE_SPACING, GAUGE_Y_START + GAUGE_HEIGHT + 10);
@@ -481,6 +496,7 @@ const std::array<std::string, 6> menuItems = {
 			break;
 		}
 		usleep(200000); // debounce
+		if (stopRequested) return;
 	}
 
 	std::cout << "Exiting menu demo 3.\n";
@@ -571,6 +587,7 @@ void slidersAndButtonsDemo (void)
 			break;
 		}
 	usleep(200000); // debounce
+	if (stopRequested) return;
 	}
 	std::cout << "Exiting menu demo 4.\n";
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
@@ -608,7 +625,7 @@ void drawSlider (int sliderValue) {
 }
 
 void drawValueLabel(int value) {
-	myTFT.fillRect(116, 100, 60, 20, BG_COLOR);
+	myTFT.fillRectangle(116, 100, 35, 16, BG_COLOR);
 	myTFT.setCursor(116, 100);
 	myTFT.setTextColor(TEXT_COLOR, BG_COLOR);
 	myTFT.setFont(font_mega);
@@ -679,6 +696,7 @@ void runBlobDemo(uint16_t countLimit)
 		wrapAngle(angleX);
 		wrapAngle(angleY);
 		wrapAngle(angleZ);
+		if (stopRequested) return;
 	}
 	std::cout << "Blob demo End\n";
 
@@ -814,5 +832,6 @@ void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS])
 		}
 	}
 }
+
 
 /// @endcond

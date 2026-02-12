@@ -53,6 +53,7 @@ public:
 	void TFTsetScrollDefinition(uint16_t th, uint16_t tb, bool sd);
 	void TFTVerticalScroll(uint16_t vsp);
 	rdlib::Return_Codes_e TFTResetPin(void);
+	void TFTsoftwareReset(void);
 
 private:
 

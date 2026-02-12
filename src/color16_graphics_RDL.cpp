@@ -19,23 +19,23 @@ color16_graphics::color16_graphics(){}
 	@param y  row co-ord
 	@param color 565 16-bit
 	@details By default uses spiWriteDataBuffer method to write each pixel direct to VRAM of display
-			If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
+			If _AdvancedScreenBuffer == AdvancedScreenBuffer_e::On then the function 
 			will draw the pixel into the screen buffer.
 */
 void color16_graphics::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	if ((x >= _width) || (y >= _height))
 		return;
-#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::On){
 	// Calculate the index in the buffer
 	size_t index = (y * _width + x) * 2; // 2 bytes per pixel for RGB565
 	// Write the color to the buffer
 	_screenBuffer[index] = (uint8_t)(color >> 8);     // High byte
 	_screenBuffer[index + 1] = (uint8_t)(color & 0xFF); // Low byte
-#else
+}else{
 	setAddrWindow(x, y, x + 1, y + 1);
 	uint8_t TransmitBuffer[2] {(uint8_t)(color >> 8), (uint8_t)(color & 0xFF)};
 	spiWriteDataBuffer(TransmitBuffer, 2);
-#endif
+}
 }
 
 
@@ -79,13 +79,13 @@ rdlib::Return_Codes_e color16_graphics::fillRectangle(uint16_t x, uint16_t y, ui
 		rdlib_log::logData< int> error("Memory allocation failed", static_cast<int>(w * h * sizeof(uint16_t)));
 		return rdlib::MemoryAError;
 	}
-	
+
 	for (size_t i = 0; i < buffer.size(); ) 
 	{
 		buffer[i++] = hi;
 		buffer[i++] = lo;
 	}
-	
+
 
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
@@ -113,23 +113,32 @@ void color16_graphics::fillScreen(uint16_t color) {
 		-# rdlib::ShapeScreenBounds Error
 */
 rdlib::Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color) {
-	uint8_t hi, lo;
+
 	if ((x >= _width) || (y >= _height))
 		return rdlib::ShapeScreenBounds;
 	if ((y + h - 1) >= _height)
 		h = _height - y;
-	hi = color >> 8;
-	lo = color;
-	setAddrWindow(x, y, x, y + h - 1);
-	Display_DC_SetHigh;
+	if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::On){
+		for (uint16_t i = 0; i < h; i++)
+		{
+			drawPixel(x, y + i, color);
+		}
+	}else{
+		uint8_t hi, lo;
+		hi = color >> 8;
+		lo = color;
+		setAddrWindow(x, y, x, y + h - 1);
+		Display_DC_SetHigh;
 
-	if (_hardwareSPI == false){Display_CS_SetLow;}
-	while (h--) {
-		spiWrite(hi);
-		spiWrite(lo);
+		if (_hardwareSPI == false){Display_CS_SetLow;}
+		while (h--) {
+			spiWrite(hi);
+			spiWrite(lo);
+		}
+		if (_hardwareSPI == false){Display_CS_SetHigh;}
 	}
-	if (_hardwareSPI == false){Display_CS_SetHigh;}
 	return rdlib::Success;
+
 }
 
 /*!
@@ -143,21 +152,29 @@ rdlib::Return_Codes_e color16_graphics::drawFastVLine(uint16_t x, uint16_t y, ui
 		-# rdlib::ShapeScreenBounds Error
 */
 rdlib::Return_Codes_e color16_graphics::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color) {
-	uint8_t hi, lo;
+
 	if ((x >= _width) || (y >= _height))
 		return rdlib::ShapeScreenBounds;
 	if ((x + w - 1) >= _width)
 		w = _width - x;
-	hi = color >> 8;
-	lo = color;
-	setAddrWindow(x, y, x + w - 1, y);
-	Display_DC_SetHigh;
-	if (_hardwareSPI == false){Display_CS_SetLow;}
-	while (w--) {
-		spiWrite(hi);
-		spiWrite(lo);
+	if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::On){
+		for (uint16_t i = 0; i < w; i++)
+		{
+			drawPixel(x+i, y, color);
+		}
+	}else{
+		uint8_t hi, lo;
+		hi = color >> 8;
+		lo = color;
+		setAddrWindow(x, y, x + w - 1, y);
+		Display_DC_SetHigh;
+		if (_hardwareSPI == false){Display_CS_SetLow;}
+		while (w--) {
+			spiWrite(hi);
+			spiWrite(lo);
+		}
+		if (_hardwareSPI == false){Display_CS_SetHigh;}
 	}
-	if (_hardwareSPI == false){Display_CS_SetHigh;}
 	return rdlib::Success;
 }
 
@@ -599,8 +616,8 @@ rdlib::Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uint16_
 		-# rdlib::BitmapDataEmpty Error
 		-# rdlib::BitmapHorizontalSize Error
 		-# rdlib::MemoryAError Error
-	@note If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
-			will write to screen Buffer instead of VRAM.
+	@note  If _AdvancedScreenBuffer == AdvancedScreenBuffer_e::On then the function 
+			will draw the pixel into the screen buffer.instead of VRAM.
 */
 rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, uint16_t bgcolor, const std::span<const uint8_t> bitmap) {
 	int16_t byteWidth = (w + 7) / 8;
@@ -622,7 +639,7 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off){
 	uint16_t mycolor = 0;
 	uint32_t ptr;
 	std::vector<uint8_t> buffer; // Create bitmap buffer
@@ -652,7 +669,7 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
-#else
+}else{
 	for (int16_t j = 0; j < h; j++, y++)
 	{
 		for (int16_t i = 0; i < w; i++)
@@ -664,7 +681,7 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 			drawPixel(x + i, y, (byte & 0x80) ? color : bgcolor);
 		}
 	}
-#endif
+}
 	return rdlib::Success;
 }
 
@@ -681,9 +698,9 @@ rdlib::Return_Codes_e color16_graphics::drawBitmap(uint16_t x, uint16_t y, uint1
 		-# rdlib::BitmapDataEmpty Error
 		-# rdlib::BitmapSize Error
 		-# rdlib::MemoryAError Error
-	@note 24 bit color converted to 16 bit color
-	@note If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
-			will write to screen Buffer instead of VRAM.
+	@details 24 bit color converted to 16 bit color
+	@note    If _AdvancedScreenBuffer == AdvancedScreenBuffer_e::On then the function 
+			 will draw the pixel into the screen buffer.instead of VRAM.
 */
 rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, const std::span<const uint8_t> bitmap, uint16_t w, uint16_t h)
 {
@@ -708,7 +725,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off){
 	uint32_t rgb, ptr;
 	std::vector<uint8_t> buffer; 	// Create bitmap buffer
 	try
@@ -736,7 +753,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
-#else
+}else{
 	for (j = 0; j < h; j++)
 	{
 		for (i = 0; i < w; i++)
@@ -749,7 +766,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 			drawPixel(x + i, y + j, color);
 		}
 	}
-#endif
+}
 
 	return rdlib::Success;
 }
@@ -768,8 +785,8 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap24(uint16_t x, uint16_t y, co
 		-# rdlib::BitmapDataEmpty Error
 		-# rdlib::BitmapSize Error
 		-# rdlib::MemoryAError Error
-	@note If color16_ADVANCED_SCREEN_BUFFER_ENABLE is defined then the function 
-			will write to screen Buffer instead of VRAM.
+	@note    If _AdvancedScreenBuffer == AdvancedScreenBuffer_e::On then the function 
+			 will draw the pixel into the screen buffer.instead of VRAM.
 */
 rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, const std::span<const uint8_t> bitmap, uint16_t w, uint16_t h) {
 	uint16_t i, j;
@@ -793,7 +810,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 	}
 	if ((x + w - 1) >= _width) w = _width - x;
 	if ((y + h - 1) >= _height) h = _height - y;
-#ifndef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off){
 	// Create bitmap buffer
 	uint32_t ptr;
 	std::vector<uint8_t> buffer;
@@ -820,7 +837,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 	// Set window and write buffer
 	setAddrWindow(x, y, x + w - 1, y + h - 1);
 	spiWriteDataBuffer(buffer.data(), buffer.size());
-#else
+}else{
 	size_t offset = 0;
 	for (j = 0; j < h; j++)
 	{
@@ -831,7 +848,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 			drawPixel(x + i, y + h - 1 - j, color);
 		}
 	}
-#endif
+}
 	return rdlib::Success;
 }
 
@@ -844,7 +861,7 @@ rdlib::Return_Codes_e  color16_graphics::drawBitmap16(uint16_t x, uint16_t y, co
 	@note 3 byte to 2 byte,  Red Green Blue.
 			RRRR RRRR GGGG GGGG BBBB BBBB => 565 color mode => RRRRR GGGGGG BBBBB
 */
-int16_t color16_graphics::Color565(int16_t r, int16_t g, int16_t b) {
+uint16_t color16_graphics::Color565(int16_t r, int16_t g, int16_t b) {
 	return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
 
@@ -1901,8 +1918,8 @@ bool color16_graphics::getTextCharPixelOrBuffer() const
 }
 
 
-/***************** Buffer mode functions *****************/
-#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+/***** Advanced Screen Buffer mode functions *****************/
+
 /*!
 	@brief Allocates memory for the screen buffer based on display resolution.
 		The buffer size is calculated as width × height × 2 bytes (RGB565 format).
@@ -1910,9 +1927,15 @@ bool color16_graphics::getTextCharPixelOrBuffer() const
 		In debug mode, it prints the allocated buffer size.
 	@return rdlib::Success on successful allocation,
 			rdlib::MemoryAError if allocation fails.
+			rdlib:WrongBufferMode User error not in AdvancedScreenBuffer_e = On
 */
 rdlib::Return_Codes_e color16_graphics::setBuffer(void)
 {
+	if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off)
+	{
+		fprintf(stderr, "Error: setBuffer: This function is for Advanced Screen Buffer Mode\n");
+		return rdlib::WrongBufferMode;
+	}
 	// Allocate memory for the buffer
 	_screenBuffer.resize(_width * _height * 2);
 	if (_screenBuffer.empty())
@@ -1934,9 +1957,15 @@ rdlib::Return_Codes_e color16_graphics::setBuffer(void)
 	@param color The 16-bit RGB565 color to fill the buffer with.
 	@return rdlib::Success on completion.
 			rdlib::BufferEmpty if the buffer is empty.
+			rdlib:WrongBufferMode User error not in AdvancedScreenBuffer_e = On
 */
 rdlib::Return_Codes_e color16_graphics::clearBuffer(uint16_t color)
 {
+	if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off)
+	{
+		fprintf(stderr, "Error: clearBuffer: This function is for Advanced Screen Buffer Mode\n");
+		return rdlib::WrongBufferMode;
+	}
 	if (_screenBuffer.empty())
 	{
 		fprintf(stderr, "Error: clearBuffer: Buffer is empty\n");
@@ -1956,9 +1985,15 @@ rdlib::Return_Codes_e color16_graphics::clearBuffer(uint16_t color)
 		It sets the address window for the entire screen and writes the buffer data.
 	@return rdlib::Success on completion.
 			rdlib::BufferEmpty if the buffer is empty.
+			rdlib:WrongBufferMode User error not in AdvancedScreenBuffer_e = On
 */
 rdlib::Return_Codes_e color16_graphics::writeBuffer(void)
 {
+	if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off)
+	{
+		fprintf(stderr, "Error: writeBuffer: This function is for Advanced Screen Buffer Mode\n");
+		return rdlib::WrongBufferMode;
+	}
 	if (_screenBuffer.empty())
 	{
 		fprintf(stderr, "Error: writeBuffer: Buffer is empty\n");
@@ -1975,9 +2010,15 @@ rdlib::Return_Codes_e color16_graphics::writeBuffer(void)
 		successfully destroyed and prints debug information.
 	@return rdlib::Success on successful destruction,
 			rdlib::MemoryAError if destruction fails.
+			rdlib:WrongBufferMode User error not in AdvancedScreenBuffer_e = On
 */
 rdlib::Return_Codes_e color16_graphics::destroyBuffer(void)
 {
+	if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off)
+	{
+		fprintf(stderr, "Error: destroyBuffer: This function is for Advanced Screen Buffer Mode\n");
+		return rdlib::WrongBufferMode;
+	}
 	_screenBuffer.resize(0);
 	if (_screenBuffer.size() == 0)
 	{
@@ -1991,5 +2032,21 @@ rdlib::Return_Codes_e color16_graphics::destroyBuffer(void)
 	}
 	return rdlib::Success;
 }
-#endif
+
+
+/*!
+ * @brief setter for Advanced Screen Buffer mode
+ */
+void color16_graphics::setAdvancedScreenBuffer_e(AdvancedScreenBuffer_e mode)
+{
+	_AdvancedScreenBuffer = mode;
+}
+
+/*!
+ * @brief getter for Advanced Screen Buffer mode
+ */
+color16_graphics::AdvancedScreenBuffer_e color16_graphics::getAdvancedScreenBuffer_e() const
+{
+	return _AdvancedScreenBuffer;
+}
 // **************** EOF *****************

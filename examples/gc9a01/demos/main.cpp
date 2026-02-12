@@ -16,33 +16,32 @@
 #include <iostream> // cout cin
 #include <algorithm> // For std::clamp
 #include <limits> // menu limits
-#include <csignal> //catch user Ctrl+C
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/select.h>
+
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
+
 #include "GC9A01_TFT_LCD_RDL.hpp"
 
 /// @cond
 
 // Section :: Globals
 GC9A01_TFT myTFT;
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 0;
 uint16_t TFT_WIDTH = 240;// Screen width in pixels
 uint16_t TFT_HEIGHT = 240; // Screen height in pixels
-int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
-int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-int HWSPI_SPEED =  24000000; // The speed of serial communication in bits per second.
-int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+std::atomic<bool> stopRequested{false}; // Stop signal , Ctrl + c etc
 
 //  Section ::  Function Headers
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
-std::string UTC_string(void);
-void signal_callback_handler(int signum);
 void displayMenu(void);
 void EndTests(void);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 
 // === Demo 1 & 2 ===
 void gaugeDemo(uint16_t  countLimit = 50);  // demo1
@@ -55,6 +54,7 @@ void rotaryMenuDemo(void);
 int getchar_timeout(int timeout_ms);
 // === Demo 4 ===
 void analogClockDemo(uint16_t countLimit = 50);
+std::string UTC_string(void);
 // === Demo 5 ===
 void volumeKnobDemo(void);
 
@@ -63,8 +63,10 @@ int main()
 {
 	if(SetupHWSPI() != 0) return -1; //Hardware SPI
 	int choice;
-	signal(SIGINT, signal_callback_handler); //Ctrl+ c
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
 	do {
+		if (stopRequested) break;
 		displayMenu();
 		std::cin >> choice;
 		// Check if input is valid
@@ -90,6 +92,8 @@ int main()
 		std::cout << std::endl;
 	} while (choice != 6);
 
+	if (stopRequested)
+		std::cout << "Ctrl+C pressed" << std::endl;
 	EndTests();
 	return 0;
 }
@@ -100,7 +104,14 @@ int main()
 // Hardware SPI setup
 uint8_t SetupHWSPI(void)
 {
-	std::cout << "TFT Start Test " << std::endl;
+	int8_t RST_TFT  = 25;
+	int8_t DC_TFT   = 24;
+	int  GPIO_CHIP_DEVICE = 0;
+	int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
+	int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+	int HWSPI_SPEED =  24000000; // The speed of serial communication in bits per second.
+	int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+	std::cout << "TFT Start Demo, Ctrl+c to quit " << std::endl;
 // ** USER OPTION 1 GPIO HW SPI **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
@@ -145,13 +156,6 @@ std::string UTC_string()
 	return timeString;
 }
 
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	EndTests();
-	exit(signum);
-}
-
 // === Demo 1 & 2 ===
 
 void gaugeDemo(uint16_t countLimit) // Demo 1
@@ -189,6 +193,7 @@ void gaugeDemo(uint16_t countLimit) // Demo 1
 		}
 		sprintf(buffer, "%03d", currentValue);
 		myTFT.print(buffer);
+		if (stopRequested) break; // for Ctrl + C pressed?
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout << "Gauge Demo Over " << std::endl;
@@ -239,6 +244,7 @@ void arcGauge(uint16_t countLimit) // demo 2
 		myTFT.print(" Value :: ");
 		sprintf(buffer, "%03d", currentValue);
 		myTFT.print(buffer);
+		if (stopRequested) break; // for Ctrl + C pressed?
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout <<  "Arc Gauge Demo Over" << std::endl;
@@ -423,7 +429,7 @@ void rotaryMenuDemo()
 			drawItem(oldSelected, false);
 			// Draw new pointer and node
 			drawItem(selected, true);
-			drawointer(selected, myTFT.RDLC_YELLOW);
+			drawPointer(selected, myTFT.RDLC_YELLOW);
 			// Draw updated label below the new selection
 			myTFT.setFont(font_mega);
 			myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
@@ -432,6 +438,7 @@ void rotaryMenuDemo()
 			buf[sizeof(buf) - 1] = '\0';
 			myTFT.writeCharString(centerX - 50, centerY + radius + 35, buf);
 			myTFT.setFont(font_default);
+			if (stopRequested) break; // for Ctrl + C pressed?
 		}
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
@@ -489,6 +496,7 @@ void analogClockDemo(uint16_t countLimit)
 			myTFT.drawLine(centerX, centerY, xSecond, ySecond, myTFT.RDLC_YELLOW);
 			lastSecond = second;
 			countLimit--;
+			if (stopRequested) break; // for Ctrl + C pressed?
 		}
 		delayMilliSecRDL(10);
 		std::cout<< utcTime << "\r" << std::flush;
@@ -511,6 +519,7 @@ void volumeKnobDemo(void)
 	bool running = true;
 	while (running)
 	{
+		if (stopRequested) break; // for Ctrl + C pressed?
 		char c = getchar_timeout(1000);
 		switch (c)
 		{

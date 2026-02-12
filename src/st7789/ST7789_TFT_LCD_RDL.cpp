@@ -102,9 +102,7 @@ if (_hardwareSPI == false)
 }
 
 /*!
-	@brief Method for Hardware Reset pin control
-	@details If you have a display with no reset pin this will issue the software reset command
-		this software reset is untested on actual hardware. 
+	@brief Method for Hardware Reset pin setup and control
 	@return a rdlib::Return_Codes_e  code
 		-# rdlib::Success
 		-# rdlib::GpioPinClaim
@@ -126,9 +124,6 @@ rdlib::Return_Codes_e ST7789_TFT ::TFTResetPin() {
 		delayMilliSecRDL(TFT_RESET_DELAY);
 		Display_RST_SetHigh;
 		delayMilliSecRDL(TFT_RESET_DELAY);
-	}else {
-		writeCommand(ST7789_SWRESET); // no hw reset pin, software reset. untested maybe not be needed ?
-		delayMilliSecRDL(120);
 	}
 	return rdlib::Success;
 }
@@ -196,7 +191,7 @@ rdlib::Return_Codes_e ST7789_TFT::TFTClock_Data_ChipSelect_Pins(void)
 	@param rst reset GPIO
 	@param dc data or command GPIO.
 	@details for software reset pass -1 to rst
-	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI 
+	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
 void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc)
 {
@@ -213,7 +208,7 @@ void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc)
 	@param sclk Data clock GPIO
 	@param din Data to TFT GPIO
 	@details for software reset pass -1 to rst
-	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI 
+	@note overloaded 2 off, 1 for HW SPI , 1 for SW SPI
 */
 void ST7789_TFT ::TFTSetupGPIO(int8_t rst, int8_t dc, int8_t cs, int8_t sclk, int8_t din)
 {
@@ -585,5 +580,17 @@ void ST7789_TFT::TFTSetupResetPin(int8_t rst)
 	}else{
 		_resetPinOn  = false;
 	}
+}
+
+/*!
+	@brief software reset
+	@details When the Software Reset command is written,
+		it causes a software reset. It resets the commands and parameters to their
+		S/W Reset default values.
+*/
+void ST7789_TFT::TFTsoftwareReset(void)
+{
+	writeCommand(ST7789_SWRESET);
+	delayMilliSecRDL(120);
 }
 //**************** EOF *****************

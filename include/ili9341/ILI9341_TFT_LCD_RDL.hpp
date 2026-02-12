@@ -51,6 +51,7 @@ public:
 	void HighFreqDelaySet(uint16_t);
 	rdlib::Return_Codes_e PowerDown(void);
 	void EnableDisplay(bool enableDisplay);
+	void SoftwareReset(void);
 
 	// screen related
 	void setRotation(display_rotate_e rotation);

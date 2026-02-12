@@ -490,9 +490,6 @@ rdlib::Return_Codes_e ILI9341_TFT ::TFTResetPin()
 		delayMilliSecRDL(20);
 		Display_RST_SetHigh;
 		delayMilliSecRDL(120);
-	}else{
-		writeCommand(ILI9341_SWRESET); // no hw reset pin, software reset.
-		delayMilliSecRDL(120);
 	}
 	return rdlib::Success;
 }
@@ -611,4 +608,16 @@ uint8_t ILI9341_TFT::readDiagByte(ILI9341_ReadRegister_e reg, uint8_t index) {
 		Display_CS_SetHigh;
 	}
 	return result;
+}
+
+/*!
+	@brief software reset
+	@details When the Software Reset command is written,
+		it causes a software reset. It resets the commands and parameters to their
+		S/W Reset default values.
+*/
+void ILI9341_TFT::SoftwareReset(void)
+{
+	writeCommand(ILI9341_SWRESET);
+	delayMilliSecRDL(120);
 }

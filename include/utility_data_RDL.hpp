@@ -40,6 +40,7 @@ namespace rdlib_maths
 	float sineFromDegrees(float angle);
 	float cosineFromDegrees(float angle);
 	uint16_t generateColor(uint8_t value);
+	uint16_t blend565(uint16_t c1, uint16_t c2, uint8_t amount);
 }
 
 /*! @brief Name space for log file related utilities*/

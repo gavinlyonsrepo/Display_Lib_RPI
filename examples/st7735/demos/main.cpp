@@ -16,30 +16,24 @@
 #include <algorithm> // For std::clamp
 #include <iostream> // cout cin
 #include <limits> // menu limits
-#include <csignal> //catch user Ctrl+C
+
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
+
 #include "ST7735_TFT_LCD_RDL.hpp"
 
 /// @cond
 
 // Section :: Globals
 ST7735_TFT myTFT;
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEV = 0;
-
-uint8_t OFFSET_COL = 0;  // These offsets can be adjusted for any issues
-uint8_t OFFSET_ROW = 0; // with manufacture tolerance/defects at edge of display
-uint16_t TFT_WIDTH = 128;// Screen width in pixels
-uint16_t TFT_HEIGHT = 128; // Screen height in pixels
-
-int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
-int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-int SPI_SPEED =  8000000; // The speed of serial communication in bits per second.
-int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+std::atomic<bool> stopRequested{false}; // Stop signal , Ctrl + c etc
 
 //  Section ::  Function Headers
 int8_t Setup(void); // setup + user options for hardware SPI
-void signal_callback_handler(int signum);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 void displayMenu(void);
 void EndTests(void);
 
@@ -80,8 +74,10 @@ int main()
 	if(Setup() != 0) return -1; //Hardware SPI
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	int choice;
-	signal(SIGINT, signal_callback_handler); //Ctrl+ c
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
 	do {
+		if (stopRequested) break;
 		displayMenu();
 		std::cin >> choice;
 		// Check if input is valid
@@ -106,6 +102,8 @@ int main()
 		}
 		std::cout << std::endl;
 	} while (choice != 6);
+	if (stopRequested)
+		std::cout << "Exit Signal received" << std::endl;
 	EndTests();
 	return 0;
 }
@@ -116,6 +114,19 @@ int main()
 
 int8_t Setup(void)
 {
+	int8_t RST_TFT  = 25;
+	int8_t DC_TFT   = 24;
+	int  GPIO_CHIP_DEV = 0;
+
+	uint8_t OFFSET_COL = 0;  // These offsets can be adjusted for any issues
+	uint8_t OFFSET_ROW = 0; // with manufacture tolerance/defects at edge of display
+	uint16_t TFT_WIDTH = 128;// Screen width in pixels
+	uint16_t TFT_HEIGHT = 128; // Screen height in pixels
+
+	int SPI_DEV = 0; // A SPI device, >= 0. which SPI interface to use
+	int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+	int SPI_SPEED =  8000000; // The speed of serial communication in bits per second.
+	int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 	std::cout << "Demos Start" << std::endl;
 // ** USER OPTION 1 GPIO HW SPI **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
@@ -158,13 +169,6 @@ void displayMenu() {
 	std::cout << "Enter your choice: ";
 }
 
-
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	EndTests();
-	exit(signum);
-}
 
 // Demo 1
 
@@ -209,6 +213,7 @@ void gaugeDemo(uint16_t countLimit)
 		myTFT.setCursor(75,110);
 		sprintf(buffer, "%03d", currentValue);
 		myTFT.print(buffer);
+		if (stopRequested) return;
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout << "Gauge Demo Over " << std::endl;
@@ -322,6 +327,7 @@ void drawGaugeDemoTwo(uint16_t countLimit)
 		phase += 0.1;
 		std::cout<< countLimit << "\r" << std::flush;
 		delayMilliSecRDL(250);
+		if (stopRequested) return;
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	prevVal1 = -1, prevVal2 = -1, prevVal3 = -1;
@@ -402,7 +408,7 @@ void updateGauges(float phase) {
 // demo3 
 void demoRadar(uint16_t sweeps)
 {
-	std::cout << "Demo Radar :Draw line at angle function ends at : " << sweeps << std::endl;
+	std::cout << "Demo Radar : ends at : " << sweeps << std::endl;
 	myTFT.setFont(font_default);
 	myTFT.setTextColor(myTFT.RDLC_BLACK, myTFT.RDLC_TAN);
 	myTFT.fillScreen(myTFT.RDLC_TAN);
@@ -425,6 +431,7 @@ void demoRadar(uint16_t sweeps)
 			radians  = angle * (std::numbers::pi / 180);
 			myTFT.print(radians);
 			delayMilliSecRDL(15);
+			if (stopRequested) return;
 		}
 		std::cout<< +j << "\r" << std::flush;
 	}
@@ -475,6 +482,7 @@ void arcGauge(uint16_t countLimit)
 		myTFT.print(" Value :: ");
 		sprintf(buffer, "%03d", currentValue);
 		myTFT.print(buffer);
+		if (stopRequested) return;
 	}
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	std::cout << "Arc Gauge Demo Over " << std::endl;
@@ -494,6 +502,7 @@ void VUmeterGradient(uint16_t secondsDisplay){
 		}
 		delayMilliSecRDL(500);
 		std::cout<< secondsDisplay << "\r" << std::flush;
+		if (stopRequested) return;
 	}
 	std::cout << "VU meter Demo 2 over : " << std::endl;
 	myTFT.fillScreen(myTFT.RDLC_BLACK);

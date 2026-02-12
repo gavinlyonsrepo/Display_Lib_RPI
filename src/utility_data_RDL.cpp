@@ -86,6 +86,38 @@ uint16_t generateColor(uint8_t value)
 	return (red << 11) + (green << 5) + blue;
 }
 
+/*!
+	@brief: Blend two RGB565 colors using 8-bit mix factor
+	@param c1 first 16-bit color (RGB565)
+	@param c2 second 16-bit color (RGB565)
+	@param amount blend level (0–255), 0=c1, 255=c2
+	@return mixed 16-bit RGB565 color
+	@details Performs channel-wise interpolation in 565 space.
+			c1 blended towardc2 using linear scaling.
+*/
+uint16_t blend565(uint16_t c1, uint16_t c2, uint8_t amount)
+{
+	if (amount == 0)   return c1;
+	if (amount == 255) return c2;
+
+	// Extract RGB components
+	uint32_t r1 = (c1 >> 11) & 0x1F;
+	uint32_t g1 = (c1 >> 5)  & 0x3F;
+	uint32_t b1 =  c1        & 0x1F;
+
+	uint32_t r2 = (c2 >> 11) & 0x1F;
+	uint32_t g2 = (c2 >> 5)  & 0x3F;
+	uint32_t b2 =  c2        & 0x1F;
+
+	// Blend each channel
+	r1 = r1 + ((r2 - r1) * amount) / 255;
+	g1 = g1 + ((g2 - g1) * amount) / 255;
+	b1 = b1 + ((b2 - b1) * amount) / 255;
+
+	// Recombine into RGB565
+	return (r1 << 11) | (g1 << 5) | b1;
+}
+
 }
 
 

@@ -20,6 +20,7 @@
 # Display 13 = ILI9341  TFT LCD SPI
 # Display 14 = SSD1331  OLED SPI
 # Display 15 = GC9A01A  TFT LCD SPI
+# Display 16 = GC9D01N  TFT LCD SPI
 # ==================================
 
 # ***********************************************
@@ -95,18 +96,15 @@
 
 # =============== ST7735 TFT LCD SPI =============
 #SRC=st7735/hello_world
-#SRC=st7735/hello_world_swspi
-#SRC=st7735/hello_world_128x160
 #SRC=st7735/text_graphics_functions
 #SRC=st7735/bitmap_tests
-#SRC=st7735/framerate_test
 #SRC=st7735/demos
+#SRC=st7735/framerate_test
 #SRC=st7735/advanced_screen_buffer_mode
 #=================================================
 
 # =============== ST7789 TFT LCD SPI =============
 #SRC=st7789/hello_world
-#SRC=st7789/hello_world_swspi
 #SRC=st7789/bitmap_tests
 #SRC=st7789/text_graphics_functions
 #SRC=st7789/framerate_test
@@ -119,24 +117,25 @@
 #SRC=ili9341/text_graphics_functions
 #SRC=ili9341/demos
 #SRC=ili9341/touch_screen
-#SRC=ili9341/hello_world_swspi
 #SRC=ili9341/read_diagnostic_swspi
 #=================================================
 
 # =============== SSD1331 TFT LCD SPI ============
 #SRC=ssd1331/hello_world
-#SRC=ssd1331/hello_world_swspi
-#SRC=ssd1331/bitmap_tests
-#SRC=ssd1331/text_graphics_functions
+#SRC=ssd1331/tests
 #SRC=ssd1331/demos
 #=================================================
 
-# =============== GC9A01A TFT LCD SPI =============
+# =============== GC9A01A TFT LCD SPI ============
 #SRC=gc9a01/hello_world
-#SRC=gc9a01/hello_world_swspi
-#SRC=gc9a01/bitmap_tests
-#SRC=gc9a01/text_graphics_functions
+#SRC=gc9a01/tests
 #SRC=gc9a01/demos
+#=================================================
+
+# =============== GC9D01N TFT LCD SPI ============
+#SRC=gc9d01/hello_world
+#SRC=gc9d01/tests
+#SRC=gc9d01/demos
 #=================================================
 
 # =========== XPT2046 touchscreen basic test =====

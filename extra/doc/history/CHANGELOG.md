@@ -56,3 +56,7 @@ Version control history
 	* Added read diagnostic function to ili9341 LCD display.
 	* Added more demos in examples files for 16-bit displays.
 
+* Version 2.5.0 02-2026
+	* Added Support for GC9D01N 16 bit Colour Graphic TFT LCD.
+	* Changed frame buffer mode enable to a enum variable rather than macro definition.
+

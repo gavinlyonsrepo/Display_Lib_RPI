@@ -17,11 +17,6 @@
 #include "font_data_RDL.hpp"
 #include "common_data_RDL.hpp"
 
-// ===== USER OPTION turns on advanced screen buffer mode if commented in =
-// Default is off, commented OUT , tested in file examples/st7735/advanced_screen_buffer_mode
-//#define color16_ADVANCED_SCREEN_BUFFER_ENABLE
-// ================================================================
-
 /*!
 	@brief Class to handle fonts and graphics of color 16 bit display
 */
@@ -31,6 +26,16 @@ class color16_graphics:public display_Fonts, public Print  {
 
 	color16_graphics(); // Constructor
 	~color16_graphics(){};
+
+	/*!
+	 * @brief enum to define buffer mode: on or off
+	 * Default is off, commented OUT , tested in file examples/st7735/advanced_screen_buffer_mode
+	 */
+	enum class AdvancedScreenBuffer_e : uint8_t
+	{
+		Off = 0, /**< Advanced screen buffer OFF: default*/
+		On  = 1  /**< Advanced screen buffer ON*/
+	};
 
 	/*!
 	 * @brief 16-bit color definitions (RGB565 format).
@@ -72,19 +77,21 @@ class color16_graphics:public display_Fonts, public Print  {
 		Degrees_270    /**< Rotation 270 degrees*/
 	};
 
-	// buffer screen mode functions
-#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
+	// buffer screen mode functions Only used by AdvancedScreenBuffer mode
+	// ===========
 	rdlib::Return_Codes_e setBuffer(void);
 	rdlib::Return_Codes_e clearBuffer(uint16_t color =RDLC_BLACK);
 	rdlib::Return_Codes_e writeBuffer(void);
 	rdlib::Return_Codes_e destroyBuffer(void);
-#endif
+	//=================
 
 	// Screen related
 	/*! @brief define in the sub class */
 	virtual void setAddrWindow(uint16_t, uint16_t, uint16_t, uint16_t) = 0;
 	void fillScreen(uint16_t color);
 	void setCursor(int16_t x, int16_t y);
+	void setAdvancedScreenBuffer_e(AdvancedScreenBuffer_e mode);
+	AdvancedScreenBuffer_e getAdvancedScreenBuffer_e() const;
 
 	// Shapes and lines
 	void drawPixel(uint16_t, uint16_t, uint16_t);
@@ -129,8 +136,8 @@ class color16_graphics:public display_Fonts, public Print  {
 	rdlib::Return_Codes_e drawBitmap24(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h);
 	rdlib::Return_Codes_e drawBitmap16(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h);
 	rdlib::Return_Codes_e drawSprite(uint16_t x, uint16_t y, const std::span<const uint8_t> data, uint16_t w, uint16_t h, uint16_t backgroundColor, bool printBg = false);
-	// RGB to 565
-	int16_t Color565(int16_t ,int16_t , int16_t );
+	// color 
+	uint16_t Color565(int16_t ,int16_t , int16_t );
 	//SPI 
 	int getDisplaySPIBlockSize() const;
 	void setDisplaySPIBlockSize(int size);
@@ -188,8 +195,9 @@ private:
 /// @endcond
 	int _Display_SPI_BLK_SIZE = 65536; /**< max block size SPI Transaction, lgpio lib default(LG_MAX_SPI_DEVICE_COUNT)*/
 	bool _textCharPixelOrBuffer = false;  /**< Text character is drawn by buffer(false) or pixel(true) */
-#ifdef color16_ADVANCED_SCREEN_BUFFER_ENABLE
-	std::vector <uint8_t> _screenBuffer; /**< Buffer for screen used by advanced screen buffer mode, off by default*/
-#endif
+
+	AdvancedScreenBuffer_e _AdvancedScreenBuffer = AdvancedScreenBuffer_e::Off; /**< Hold state of buffer mode*/
+	std::vector <uint8_t> _screenBuffer; /**< Buffer for screen ONLY used by advanced screen buffer mode, OFF by default*/
+
 };
 // ********************** EOF *********************

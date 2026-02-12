@@ -1,10 +1,12 @@
 /*! 
-	@file examples/st7789/hello_world/main.cpp
-	@brief Hello World hardware SPI test
-	@author Gavin Lyons.
-	@note See USER OPTIONS 1-3 in SETUP function
+	@file    examples/st7789/hello_world/main.cpp
+	@brief   Hello World. hardware or software SPI test.
+	@author  Gavin Lyons.
+	@details See USER OPTIONS 1-3 in SETUP function
+			 to Change between hardware and software SPI set 'bHardwareSPI'
 	@test 
 		-# 101 Hello World Hardware SPI
+		-# 102 Hello World Software SPI
 */
 
 // Section ::  libraries
@@ -14,36 +16,31 @@
 
 /// @cond
 
-// Section :: Globals 
+// Section :: Globals
+bool bHardwareSPI = true;
+
 ST7789_TFT myTFT;
-
-int8_t RST_TFT  = 25;
-int8_t DC_TFT   = 24;
-int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
-
-uint8_t OFFSET_COL = 0;  // 2, These offsets can be adjusted for any issues->
-uint8_t OFFSET_ROW = 0; // 3, with manufacture tolerance/defects at edge of display
-uint16_t TFT_WIDTH = 240;// Screen width in pixels
+uint16_t TFT_WIDTH = 240;  // Screen width in pixels
 uint16_t TFT_HEIGHT = 320; // Screen height in pixels
 
-int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
-int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-int HWSPI_SPEED =  8000000; // The speed of serial communication in bits per second.
-int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
-
 //  Section ::  Function Headers 
-
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
+uint8_t SetupSWSPI(void); // setup + user options for software SPI
 void HelloWorld(void);
 void EndTests(void);
 
 //  Section ::  MAIN loop
-
 int main() 
 {
-	if(SetupHWSPI() != 0) return -1; //Hardware SPI
+	if (bHardwareSPI){
+		if(SetupHWSPI() != 0) return -1; // Hardware SPI
+	}else{
+		if(SetupSWSPI() != 0) return -1; // Software SPI
+	}
+
 	HelloWorld();
 	EndTests();
+
 	return 0;
 }
 // *** End OF MAIN **
@@ -55,14 +52,19 @@ int main()
 uint8_t SetupHWSPI(void)
 {
 	std::cout << "TFT Start Test 101 HWSPI" << std::endl;
-	std::cout << "ST7789 library version : " << rdlib::LibraryVersion()<< std::endl;
-	std::cout << "Lgpio library version :" << lguVersion() << std::endl;
+	int8_t RST_TFT  = 25;
+	int8_t DC_TFT   = 24;
+	int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
+	int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
+	int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+	int HWSPI_SPEED =  8000000; // The speed of serial communication in bits per second.
+	int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 // ** USER OPTION 1 GPIO  **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*******************************************
 // ** USER OPTION 2 Screen Setup**
-	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
+	myTFT.TFTInitScreenSize(0, 0 , TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
 // ** USER OPTION 3 SPI settings **
 	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
@@ -70,6 +72,34 @@ uint8_t SetupHWSPI(void)
 		return 3;
 	}
 //*****************************
+	delayMilliSecRDL(100);
+	return 0;
+}
+
+// Software SPI setup
+uint8_t SetupSWSPI(void)
+{
+	std::cout << "TFT Start Test 102 SWSPI" << std::endl;
+	int8_t RST_TFT  = 25;
+	int8_t DC_TFT   = 24;
+	int8_t SCLK_TFT = 20;
+	int8_t SDIN_TFT = 16;
+	int8_t CS_TFT   = 21;
+	int  GPIO_CHIP_DEVICE = 0; 
+	uint16_t SWSPI_CommDelay = 0; //uS GPIO SW SPI delay
+// ** USER OPTION 1 GPIO/SPI TYPE SW **
+	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT, CS_TFT, SCLK_TFT, SDIN_TFT);
+//*********************************************
+// ** USER OPTION 2 Screen Setup **
+	myTFT.TFTInitScreenSize(0, 0, TFT_WIDTH , TFT_HEIGHT);
+// ***********************************
+// ** USER OPTION 3 SPI **
+	if(myTFT.TFTInitSPI(SWSPI_CommDelay, GPIO_CHIP_DEVICE) != rdlib::Success)
+	{
+		return 3;
+	}
+//*****************************
+	std::cout << "SWSPI Comm GPIO Delay set to : " << myTFT.HighFreqDelayGet()<< "uS" << std::endl;
 	delayMilliSecRDL(100);
 	return 0;
 }

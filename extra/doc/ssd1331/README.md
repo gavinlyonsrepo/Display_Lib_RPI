@@ -83,38 +83,20 @@ down SW SPI further.
 
 ### File system
 
-In example folder:
-The Main.cpp file contains tests showing library functions.
+In examples folders:
+The main.cpp file contains tests showing library functions.
 A bitmap data file contains data for bi-color bitmaps and icons tests.
-The color bitmaps used in testing are in bitmap folder, 2 16-bit and 2 24-bit images.
+The color bitmaps used in testing are in bitmap folder. 
 
-| # | example file name  | Desc|
+| # | example file name  | Description |
 | ------ | ------ |  ------ |
-| 1 | hello_world| Basic use case |
-| 2 | hello_world_SWSPI | Basic use case software SPI |
-| 3 | text_graphic_functions | Tests text,graphics & function testing  |
-| 4 | bitmap_tests | bitmap tests |
-| 5 | demos| various demos |
+| 1 | hello_world | Basic use case, hardware and software SPI options |
+| 2 | tests | Tests bitmaps, text,graphics & function testing  |
+| 3 | demos| various demos |
 
 ### Bitmap
 
-Functions to support drawing bitmaps
-
-| Function Name | Colour support | Pixel size KiB|  Note |
-| ------ | ------ | ------ | ------ |
-| drawIcon | bi-colour array | (0-96) X 8  | Data vertically addressed |
-| drawBitmap | bi-colour array | 6 | Data horizontally  addressed |
-| drawBitmap16 | 16 bit color 565 BMP files or array |12 | ------ |
-| drawBitmap24  | 24 bit color BMP files or array  | 18  | Converted by software to 16-bit color  |
-| drawSprite| 16 bit color 565 array | 12 | Does not use a buffer , draws pixel by pixel , ignores background chosen color|
-
-1. Bitmap size in kiloBytes = (screenWidth * screenHeight * bitsPerPixel)/(1024 * 8)
-2. Pixel size column assumes 96 by 64 bitmap.
-3. The data array for 1 and 2 is created from image files using file data conversion tool [link](https://javl.github.io/image2cpp/)
-4. The data array for 3 - 5  is created from BMP files using file data conversion tool [link](https://notisrac.github.io/FileToCArray/)
-5. For 3 and 4 better just to use bmp files direct from file system see examples.
-
-These class functions will return an error code in event of error see API for more details.
+[Bitmap Documentation](../bitmap_16/README.md)
 
 ###  Color codes 
 
