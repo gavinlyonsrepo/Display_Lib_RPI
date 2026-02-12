@@ -107,21 +107,23 @@ which is in the 'doc' folder [at link.](../buffer_mode/README.md)
 [![pic ](https://github.com/gavinlyonsrepo/displaylib_16bit_PICO/blob/main/extra/image/gc1.png)](https://github.com/gavinlyonsrepo/displaylib_16bit_PICO/blob/main/extra/image/gc1.png)
 
 Connections as setup in main.cpp test file.
+Connections as setup in main.cpp test file.
 
-| Pin desc |  HW SPI |
-| --- | --- |
-| GND Ground | GND |
-| VCC |  3.3 VCC  |
-| SCL Clock | GPIO 18 |
-| SDA Data in | GPIO 19 |
-| RST Reset| GPIO 4 |
-| DC Data or command | GPIO 3  |
-| CS Chip select | GPIO 2 |
-| BL Backlight  | VCC |
+| TFT PinNum | Pindesc | RPI HW SPI | RPI SW SPI |
+| --- | --- | --- | --- |
+| 1 | LED | VCC |  VCC |
+| 2 | CS | SPI_CE0 | GPI21 |
+| 3 | DC | GPIO24 | GPIO24  |
+| 4 | RESET | GPI025  | GPIO25 |
+| 5 | SDA | SPI_MOSI | GPIO16 |
+| 6 | SCLK | SPI_CLK | GPIO20 |
+| 7 | VCC | VCC | VCC  |
+| 8 | GND | GND | GND |
 
 1. This is a 3.3V logic device do NOT connect the I/O logic lines to 5V logic device.
-2. SW SPI pick any GPIO you like , HW SPI SCLK and SDA will be tied to spio interface.
+2. SW SPI pick any GPIO you like , HW SPI CEX, SCLK and SDA will be tied to SPI interface.
 3. Backlight on/off control is left to user.
+
 
 ## Output
 
