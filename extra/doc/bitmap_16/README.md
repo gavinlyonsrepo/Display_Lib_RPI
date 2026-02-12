@@ -1,7 +1,7 @@
 # Bitmap 16 bit color displays Readme
 
 
-##Functions to support drawing bitmaps
+## Functions to support drawing bitmaps
 
 | Function Name | Colour support | Pixel size KiB |  Note |
 | ------ | ------ | ------ | ------ |

@@ -1,4 +1,4 @@
-# GC9D01 Readme
+# GC9D01N Readme
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
 
