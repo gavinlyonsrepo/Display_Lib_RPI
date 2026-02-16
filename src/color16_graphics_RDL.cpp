@@ -2036,6 +2036,9 @@ rdlib::Return_Codes_e color16_graphics::destroyBuffer(void)
 
 /*!
  * @brief setter for Advanced Screen Buffer mode
+ * @param mode The mode to set for the Advanced Screen Buffer.
+ * @details This function sets the mode for the Advanced Screen Buffer, 
+ * 	which can be used to enable or disable the use of a screen buffer for drawing operations.
  */
 void color16_graphics::setAdvancedScreenBuffer_e(AdvancedScreenBuffer_e mode)
 {
@@ -2044,6 +2047,7 @@ void color16_graphics::setAdvancedScreenBuffer_e(AdvancedScreenBuffer_e mode)
 
 /*!
  * @brief getter for Advanced Screen Buffer mode
+ * @return The current mode of the Advanced Screen Buffer.
  */
 color16_graphics::AdvancedScreenBuffer_e color16_graphics::getAdvancedScreenBuffer_e() const
 {
