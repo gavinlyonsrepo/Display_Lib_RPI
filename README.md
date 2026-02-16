@@ -138,7 +138,7 @@ Library naming :
 
 Project class overview :
 
-[![pov img](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/project.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/project.jpg)
+[![pc img](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/project.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/project.png)
 
 ### Error Codes
 
