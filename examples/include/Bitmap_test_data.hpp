@@ -1,7 +1,7 @@
 /*!
  * @file examples/include/Bitmap_test_data.hpp
  * @brief data file to hold bitmap test data for graphic displays
- * @details SW used to make code https://javl.github.io/image2cpp/
+ * @details SW used to make code https://github.com/gavinlyonsrepo/Guardian_LTSM/
 */
 
 # pragma once

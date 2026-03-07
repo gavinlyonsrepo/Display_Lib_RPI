@@ -39,7 +39,7 @@ int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for 
 ERM19264_UC1609 myLCD(MY_LCD_WIDTH ,MY_LCD_HEIGHT , RST, CD) ; 
 
 
-// 192x64px bitmap data,'UC1609' SW used to make https://javl.github.io/image2cpp/ vertical addressing
+// 192x64px bitmap data,'UC1609' SW used to make https://github.com/gavinlyonsrepo/Guardian_LTSM/ vertical addressing
 // The buffer will be assigned this data at init
 // Note this is the screen buffer filled with a Bitmap , can only be used once startup.
 // This is not a bitmap but bitmap data pre-loaded into the screen buffer array.

@@ -98,7 +98,7 @@ There is a few different ways of displaying bitmaps,
 | 4 | drawBitmap() | Vertical | default,  setDrawBitmapAddr(true) | 
 | 5 | drawBitmap() |   Horizontal | setDrawBitmapAddr(false) |
 
-See the bitmap example file for more details on each method. Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/) , Bitmaps should be defined as const  buffers non-const, for methods 3 buffer can be initialised with bitmap data.
+See the bitmap example file for more details on each method. Bitmaps can be turned to data [here at link]( https://github.com/gavinlyonsrepo/Guardian_LTSM/) , Bitmaps should be defined as const  buffers non-const, for methods 3 buffer can be initialised with bitmap data.
 
 ### User Adjustments
 

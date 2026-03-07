@@ -82,7 +82,7 @@ Different bitmaps methods can be used.
 | 1 | drawBitmap() |  Vertical | default, setDrawBitmapAddr(true) |
 | 2 | drawBitmap() |  Horizontal | setDrawBitmapAddr(false) |
 
-Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/)
+Bitmaps can be turned to data [here at link]( https://github.com/gavinlyonsrepo/Guardian_LTSM/)
 See example file "BITMAP" for more details.
 
 ## Output

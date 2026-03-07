@@ -116,7 +116,7 @@ Bitmap excepted size = 128 * (64/8) = 1024 bytes.
 A horizontal addressed Bitmap's width must be divisible by 8. eg, for a bitmap with width=88 and height=48.
 Bitmap excepted size = (88/8) * 48 = 528 bytes.
 
-Bitmaps can be turned to data [here at link]( https://javl.github.io/image2cpp/)
+Bitmaps can be turned to data [here at link]( https://github.com/gavinlyonsrepo/Guardian_LTSM/)
 See example file "BITMAP" for more details.
 
 ### User adjustments
