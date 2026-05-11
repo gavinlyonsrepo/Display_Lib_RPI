@@ -21,10 +21,12 @@ SSD1306_RDL::SSD1306_RDL(int16_t oledwidth, int16_t oledheight) :bicolor_graphic
 }
 
 /*!
-	@brief  begin Method initialise OLED
+	@brief begin Method, initialise OLED
+	@param controller type of controller, SSD1306 default
 */
-void  SSD1306_RDL::OLEDbegin()
+void  SSD1306_RDL::OLEDbegin(OLED_Controller_e controller)
 {
+	_eController = controller;
 	OLEDinit();
 }
 
@@ -128,8 +130,6 @@ void SSD1306_RDL::OLEDinit()
 	I2CWriteByte( SSD1306_SET_DISPLAY_OFFSET );
 	I2CWriteByte(0x00);
 	I2CWriteByte( SSD1306_SET_START_LINE);
-	I2CWriteByte( SSD1306_CHARGE_PUMP );
-	I2CWriteByte(0x14); // Enable Charge Pump
 	I2CWriteByte( SSD1306_MEMORY_ADDR_MODE );
 	I2CWriteByte(0x00);  //Horizontal Addressing Mode is Used
 	I2CWriteByte( SSD1306_SET_SEGMENT_REMAP| 0x01);
@@ -137,23 +137,30 @@ void SSD1306_RDL::OLEDinit()
 
 switch (_OLED_HEIGHT)
 {
-	case 64: 
-		I2CWriteByte( SSD1306_SET_COM_PINS );
-		I2CWriteByte( 0x12 );
-		I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+	case 64:
+		I2CWriteByte(SSD1306_SET_COM_PINS);
+		I2CWriteByte(0x12);
+		I2CWriteByte(SSD1306_SET_CONTRAST_CONTROL);
 		I2CWriteByte(0xCF);
+		I2CWriteByte(SSD1306_CHARGE_PUMP);
+		// SSD1315 benefits from 8.5V on 128x64, SSD1306 uses 7.5V
+		I2CWriteByte(_eController == OLED_Controller_e::SSD1315 ? 0x94 : 0x14);
 	break;
-	case 32: 
-		I2CWriteByte( SSD1306_SET_COM_PINS );
-		I2CWriteByte( 0x02 );
-		I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+	case 32:
+		I2CWriteByte(SSD1306_SET_COM_PINS);
+		I2CWriteByte(0x02);
+		I2CWriteByte(SSD1306_SET_CONTRAST_CONTROL);
 		I2CWriteByte(0x8F);
+		I2CWriteByte(SSD1306_CHARGE_PUMP);
+		I2CWriteByte(0x14);
 	break;
-	case 16: // NOTE: not tested, lacking part.
-		I2CWriteByte( SSD1306_SET_COM_PINS );
-		I2CWriteByte( 0x2 );
-		I2CWriteByte( SSD1306_SET_CONTRAST_CONTROL );
+	case 16:
+		I2CWriteByte(SSD1306_SET_COM_PINS);
+		I2CWriteByte(0x02);
+		I2CWriteByte(SSD1306_SET_CONTRAST_CONTROL);
 		I2CWriteByte(0xAF);
+		I2CWriteByte(SSD1306_CHARGE_PUMP);
+		I2CWriteByte(0x14);
 	break;
 }
 

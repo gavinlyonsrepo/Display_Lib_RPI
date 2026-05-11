@@ -25,6 +25,12 @@ class SSD1306_RDL : public bicolor_graphics  {
 	SSD1306_RDL(int16_t oledwidth, int16_t oledheight);
 	~SSD1306_RDL(){};
 
+	/*! @brief Enum to control controller type */
+	enum class OLED_Controller_e {
+		SSD1306, /**< SSD1306 controller */
+		SSD1315  /**< SSD1315 controller */
+	};
+
 	virtual void drawPixel(int16_t x, int16_t y, uint8_t color) override;
 
 	rdlib::Return_Codes_e OLEDSetBufferPtr(uint8_t width, uint8_t height , std::span<uint8_t> buffer);
@@ -35,7 +41,7 @@ class SSD1306_RDL : public bicolor_graphics  {
 	void OLEDFillScreen(uint8_t pixel, uint8_t mircodelay);
 	void OLEDFillPage(uint8_t page_num, uint8_t pixels,uint8_t delay);
 
-	void OLEDbegin();
+	void OLEDbegin(OLED_Controller_e controller = OLED_Controller_e::SSD1306);
 	void OLEDinit(void);
 	void OLEDPowerDown(void);
 
@@ -58,7 +64,8 @@ class SSD1306_RDL : public bicolor_graphics  {
 	uint8_t OLEDI2CErrorRetryNumGet(void);
 	void OLEDI2CErrorRetryNumSet(uint8_t);
 
-	const uint8_t SSD1306_ADDR  = 0x3C;  /**< I2C address, alt 0x3D */  
+	static constexpr uint8_t SSD1306_ADDR = 0x3C;  /**< I2C address, alt 0x3D */
+	static constexpr uint8_t SSD1315_ADDR = 0x3C; /**<  I2C address, alt 0x3D */
 
   private:
 
@@ -112,6 +119,7 @@ class SSD1306_RDL : public bicolor_graphics  {
 	static constexpr uint8_t SSD1306_DATA_CONTINUE  = 0x40; /**< data byte code with continuation bit clear*/
 	//  === SSD1306 Command Set END ===
 
+	// I2C
 	int _OLEDI2CAddress = SSD1306_ADDR  ; /**< I2C address for I2C module PCF8574 backpack on OLED*/
 	int _OLEDI2CDevice = 1; /**< An I2C device number. */
 	int _OLEDI2CFlags =  0;   /**< Flags which modify an I2C open command. None are currently defined. */
@@ -125,6 +133,7 @@ class SSD1306_RDL : public bicolor_graphics  {
 	uint8_t _OLED_PAGE_NUM=(_OLED_HEIGHT/8); /**< Number of byte size pages OLED screen is divided into */
 
 	std::span<uint8_t> _OLEDbuffer; /**< span to buffer which holds screen data */
+	OLED_Controller_e _eController = OLED_Controller_e::SSD1306; /**< Store controller type */
 
 
 };

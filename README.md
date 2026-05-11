@@ -55,13 +55,13 @@ Open a Terminal in a folder where you want to download,build & test library
 Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.5.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.6.0.tar.gz | tar xz
 ```
 
 3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. It will be installed to usr/local/lib and usr/local/include by default.
 
 ```sh
-cd Display_Lib_RPI-2.5.0
+cd Display_Lib_RPI-2.6.0
 make
 sudo make install
 ```
@@ -94,11 +94,13 @@ make run
 | ST7735 | 16 bit Colour Graphic TFT LCD | SPI HW & SW | [Readme](extra/doc/st7735/README.md) |
 | GC9A01A | 16 bit Colour Graphic TFT LCD | SPI HW & SW | [Readme](extra/doc/gc9a01a/README.md) |
 | GC9D01N | 16 bit Colour Graphic TFT LCD | SPI HW & SW | [Readme](extra/doc/gc9d01n/README.md) |
+| GC9107 | 16 bit Colour Graphic TFT LCD | SPI HW & SW | [Readme](extra/doc/gc9107/README.md) |
 | SSD1331 | 16 bit Colour Graphic OLED | SPI HW & SW | [Readme](extra/doc/ssd1331/README.md) |
 | ERM19264 UC1609 | Bi colour Graphic LCD | SPI HW & SW | [Readme](extra/doc/erm19264/README.md) |
 | PCD8544 | Bi colour Graphic LCD | SPI HW & SW | [Readme](extra/doc/nokia5110/README.md) |
 | ERM1 CH1115 | Bi colour Graphic OLED | SPI HW & SW | [Readme](extra/doc/ch1115/README.md) |
 | SSD1306 | Bi colour Graphic OLED | I2C | [Readme](extra/doc/ssd1306/README.md) |
+| SSD1315 | Bi colour Graphic OLED | I2C | [Readme](extra/doc/ssd1315/README.md) |
 | SH1106 SH1107 | Bi colour Graphic OLED | I2C | [Readme](extra/doc/sh110x/README.md) |
 | HD44780 PCF8574 | Character LCD | I2C | [Readme](extra/doc/hd44780/README.md) |
 | TM1638 | LED 7 segment display | GPIO | [Readme](extra/doc/tm1638/README.md) |
@@ -133,7 +135,7 @@ Library naming :
 2. Linker flags for complier = -lrpidisplaygl (also needs -llgpio for lgpio library)
 3. Library File suffix  = RDL
 4. Project name = Display_Lib_RPI
-5. Installed size = ~500 KiB.
+5. Installed size = ~700 KiB.
 6. Namespaces see API.documentation.
 
 Project class overview :
@@ -151,8 +153,8 @@ is in the 'doc' folder [at link.](extra/doc/error_codes/README.md)
 Development Tool chain:
 
 1. Raspberry PI 5 & Raspberry PI 3 model b
-2. C++, g++ (Debian 12.2.0)
-3. Raspbian , Debian 12 bookworm OS, 64 bit.
+2. C++ 23, g++ (Debian 14.2.0-19) 14.2.0
+3. Raspbian , Debian 12 bookworm OS, 64 bit , Debian 13 Trixie  OS, 64 bit.
 4. lgpio library Version Number :: 131584
 5. Also tested on a raspberry pi 4 see issue number 2 on github.
 

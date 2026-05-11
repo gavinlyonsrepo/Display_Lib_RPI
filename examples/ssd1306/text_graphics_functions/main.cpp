@@ -1,11 +1,9 @@
 /*!
-	@file examples/ssd1306/text_graphics_functions/main.cpp
+	@file   examples/ssd1306/text_graphics_functions/main.cpp
 	@author Gavin Lyons
-	@brief Test file for SSD1306_OLED display showing use of Text, graphics and functions.
-		Project Name: Display_Lib_RPI
-
+	@brief  Test file for SSD1306_OLED display showing use of Text, graphics and functions.
+		    Project Name: Display_Lib_RPI
 	@test
-
 		-# Test 501 Enable and disable Screen (Sleep mode)
 		-# Test 502 Invert screen color
 		-# Test 503 Contrast screen
@@ -52,15 +50,14 @@ SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate  an object
 // Test timing parameters
 #define DisplayDelay1 4000
 #define DisplayDelay2 0
-uint8_t graphicsCountLimit = 25;
+uint8_t graphicsCountLimit = 10;
 
 // I2C related
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
 
-
-// =============== Function prototype ================
+// === Function prototype ===
 bool SetupTest(void);
 void myTests(void);
 void EndTests(void);
@@ -91,7 +88,7 @@ void Test907(void);
 void Test908(void);
 void Test909(void);
 
-// ======================= Main ===================
+// === Main ===
 int main(void)
 {
 	if(!SetupTest()) return -1;
@@ -99,10 +96,10 @@ int main(void)
 	EndTests();
 	return 0;
 }
-// ======================= End of main  ===================
+// === End of main ===
 
 
-// ======================= Function space ===================
+// === Function space ===
 bool SetupTest()
 {
 	printf("OLED Test Begin\r\n");
@@ -152,7 +149,6 @@ void myTests()
 	Test708();
 	Test709();
 	Test710();
-
 	Test711();
 	Test712();
 	Test713();

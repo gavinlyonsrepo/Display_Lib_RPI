@@ -9,16 +9,16 @@ Advanced buffer mode offers several key benefits. It enables double buffering, w
 However, it comes with limitations. It requires heap memory to store the buffer vector object and flushing the buffer to the display can introduce a performance overhead. Use advanced buffer mode when you need complex rendering, visual effects, or performance optimizations. For simpler applications where memory is limited, direct display drawing may be more suitable. Bear in mind many functions in normal
 mode have some form of local buffered writes already. 
 
-
 ## Enabling Advanced Buffer Mode
 
 To enable advanced buffer mode, you need turn it on
 
-```
+```c
 myTFT.setAdvancedScreenBuffer_e(myTFT.AdvancedScreenBuffer_e::On);
 ```
+
 By default it is OFF, See function SetupBufferMode() in relevant examples for full example code.
-Once enabled, the library will use the `_screenBuffer` for many drawing operations instead of writing directly to the display VRAM. 
+Once enabled, the library will use the `_screenBuffer` for many drawing operations instead of writing directly to the display VRAM.
 
 ## Usage
 
@@ -27,7 +27,7 @@ Once enabled, the library will use the `_screenBuffer` for many drawing operatio
 3. clearBuffer, fills buffer with a color, by default black.
 4. writeBuffer, writes buffer contents in a single SPI buffered write to screen.
 
-## Functions 
+## Functions
 
 Once enabled The following functions will write to screen Buffer instead of VRAM of display.
 
@@ -38,11 +38,11 @@ Once enabled The following functions will write to screen Buffer instead of VRAM
 
 ## Examples
 
-There is one example for Advanced screen buffer mode, for st7735. Path =  examples/st7735/advanced_screen_buffer_mode.
+st7735. Path =  examples/st7735/advanced_screen_buffer_mode/
+
+gc9107. Path = /examples/gc9107/tests/
 
 All examples for GC9D01 display are for Advanced screen buffer mode.
 This is because at time of writing there are issues
-with this display when attempting to draw pixel by pixel into the VRAM made worse by rotation.
+with this display when attempting to draw pixel by pixel into the VRAM, made worse by rotation.
 See my arduino port (GC9D01_LTSM) on github for details.
-
-

@@ -10,17 +10,19 @@
 # Display 3 =  TM1637
 # Display 4 =  HD44780 LCD I2C
 # Display 5 =  SSD1306 OLED I2C
-# Display 6 =  ERM19264 LCD SPI
-# Display 7 =  NOKIA5110 LCD SPI
-# Display 8 =  CH1115 OLED I2C
-# Display 9 =  SH1106 OLED I2C
-# Display 10 = SH1107 OLED I2C
-# Display 11 = ST7735X  TFT LCD SPI
-# Display 12 = ST7789   TFT LCD SPI
-# Display 13 = ILI9341  TFT LCD SPI
-# Display 14 = SSD1331  OLED SPI
-# Display 15 = GC9A01A  TFT LCD SPI
-# Display 16 = GC9D01N  TFT LCD SPI
+# Display 6 =  SSD1315 OLED I2C
+# Display 7 =  ERM19264 LCD SPI
+# Display 8 =  NOKIA5110 LCD SPI
+# Display 9 =  CH1115 OLED I2C
+# Display 10 = SH1106 OLED I2C
+# Display 11 = SH1107 OLED I2C
+# Display 12 = ST7735X  TFT LCD SPI
+# Display 13 = ST7789   TFT LCD SPI
+# Display 14 = ILI9341  TFT LCD SPI
+# Display 15 = SSD1331  OLED SPI
+# Display 16 = GC9A01A  TFT LCD SPI
+# Display 17 = GC9D01N  TFT LCD SPI
+# Display 18 = GC9107   TFT LCD SPI
 # ==================================
 
 # ***********************************************
@@ -63,6 +65,10 @@
 #SRC=ssd1306/framerate_test
 #SRC=ssd1306/bitmap
 #SRC=ssd1306/clock_demo
+#=================================================
+
+# ================= SSD1315 OLED I2C =============
+#SRC=ssd1315/hello_world
 #=================================================
 
 # ========== ERM19264_UC1609 LCD SPI==============
@@ -136,6 +142,11 @@
 #SRC=gc9d01/hello_world
 #SRC=gc9d01/tests
 #SRC=gc9d01/demos
+#=================================================
+
+# =============== GC9107 TFT LCD SPI ============
+#SRC=gc9107/hello_world
+#SRC=gc9107/tests
 #=================================================
 
 # =========== XPT2046 touchscreen basic test =====

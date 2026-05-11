@@ -853,7 +853,7 @@ if (_AdvancedScreenBuffer == AdvancedScreenBuffer_e::Off){
 }
 
 /*!
-	@brief: Convert: 24-bit color to 565 16-bit color
+	@brief Convert: 24-bit color to 565 16-bit color
 	@param r color red
 	@param g color green
 	@param b color blue
@@ -881,7 +881,7 @@ void color16_graphics::pushColor(uint16_t color) {
 }
 
 /*!
-	@brief : Write an SPI command to 
+	@brief Write an SPI command to 
 	@param spicmdbyte command byte to send
 */
 void color16_graphics::writeCommand(uint8_t spicmdbyte) {

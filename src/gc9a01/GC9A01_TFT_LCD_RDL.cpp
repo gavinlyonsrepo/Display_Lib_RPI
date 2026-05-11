@@ -1,8 +1,8 @@
 /*!
-	@file GC9A01_TFT_LCD_RDL.cpp
-	@author   Gavin Lyons
-	@brief    Source file for GC9A01 TFT LCD library. Contains driver methods.
-	Project Name: Display_Lib_RPI
+	@file   GC9A01_TFT_LCD_RDL.cpp
+	@author Gavin Lyons
+	@brief  Source file for GC9A01 TFT LCD library. Contains driver methods.
+			Project Name: Display_Lib_RPI
 */
 
 #include "../../include/gc9a01/GC9A01_TFT_LCD_RDL.hpp"

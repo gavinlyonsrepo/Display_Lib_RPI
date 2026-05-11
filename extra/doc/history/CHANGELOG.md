@@ -57,6 +57,10 @@ Version control history
 	* Added more demos in examples files for 16-bit displays.
 
 * Version 2.5.0 02-2026
-	* Added Support for GC9D01N 16 bit Colour Graphic TFT LCD.
+	* Added support for GC9D01N 16 bit Colour Graphic TFT LCD.
 	* Changed frame buffer mode enable to a enum variable rather than macro definition.
 
+* Version 2.6.0 05-2026
+	* Added support for new GC9D01 varients
+	* Added support for GC9107 SSD1315
+	

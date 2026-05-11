@@ -1,10 +1,10 @@
 
 
 /*!
-	@file examples/ssd1306/framerate_test/main.cpp
+	@file   examples/ssd1306/framerate_test/main.cpp
 	@author Gavin Lyons
-	@brief Test file for SSD1306_OLED library,  showing fps frame rate per second
-		Project Name: Display_Lib_RPI
+	@brief  Test file for SSD1306_OLED library,  showing fps frame rate per second
+		    Project Name: Display_Lib_RPI
 	@test
 		-# Test 601 FPS test frame rate per second
 */
@@ -22,20 +22,18 @@
 #define FULLSCREEN (MY_OLED_WIDTH * (MY_OLED_HEIGHT/8))
 uint8_t screenBuffer[FULLSCREEN];
 SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate  an object
-
 // I2C related
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
-
 // vars for the test
 uint16_t count  = 0;
-uint16_t countLimit =700;
+uint16_t countLimit = 300;
 bool colour = 1;
 uint64_t  previousCounter =0;
 
 
-// =============== Function prototype ================
+// === Function prototype ===
 bool SetupTest(void); 
 void myLoop(void);
 void display_buffer(long , int );
@@ -43,7 +41,7 @@ void EndTests(void);
 static uint64_t counter( void );
 
 	
-// ======================= Main ===================
+// === Main ===
 int main(void)
 {
 
@@ -52,7 +50,7 @@ int main(void)
 	EndTests();
 	return 0;
 }
-// ======================= End of main  ===================
+// === End of main  ===
 
 void EndTests()
 {
@@ -63,7 +61,6 @@ void EndTests()
 
 bool SetupTest()
 {
-	
 	printf("OLED Test Begin\r\n");
 	printf("SSD1306 library Version Number :: %u\r\n",rdlib::LibraryVersion());
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
@@ -79,14 +76,12 @@ bool SetupTest()
 		printf("Error 1202 : Cannot See Device on Bus\n");
 		return false;
 	}
-
 	myOLED.OLEDbegin(); // initialize the OLED
 	printf("I2C Debug Error : %u\r\n", myOLED.OLEDI2CErrorGet()); // Print I2C error flag
 	printf("I2C Error Timeout mS : %u \r\n", myOLED.OLEDI2CErrorTimeoutGet()); // Print I2C error Timeout
 	printf("I2C Error retry attempts counts : %u \r\n", myOLED.OLEDI2CErrorRetryNumGet()); // Print I2C error retry count
 	myOLED.OLEDFillScreen(0xF1, 0); // splash screen bars, optional just for effect
 	delayMilliSecRDL(1000);
-	
 	return true;
 }
 

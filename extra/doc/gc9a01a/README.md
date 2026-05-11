@@ -106,7 +106,6 @@ which is in the 'doc' folder [at link.](../buffer_mode/README.md)
 [![pic ](https://github.com/gavinlyonsrepo/displaylib_16bit_PICO/blob/main/extra/image/gc1.png)](https://github.com/gavinlyonsrepo/displaylib_16bit_PICO/blob/main/extra/image/gc1.png)
 
 Connections as setup in main.cpp test file.
-Connections as setup in main.cpp test file.
 
 | TFT PinNum | Pindesc | RPI HW SPI | RPI SW SPI |
 | --- | --- | --- | --- |

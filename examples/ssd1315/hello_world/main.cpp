@@ -1,10 +1,10 @@
 /*!
 	@file   examples/ssd1306/hello_world/main.cpp
 	@author Gavin Lyons
-	@brief  Test file for SSD1306_OLED display, showing  "hello world" basic use case
+	@brief  Test file for SSD1315_OLED display, showing  "hello world" basic use case
 	        Project Name: Display_Lib_RPI
 	@test
-		-# Test 100 Hello World 128x64 screen
+		-# Test 101 Hello World 128x64 screen
 */
 
 #include <cstdio>
@@ -57,8 +57,8 @@ bool SetupTest()
 		return false;
 	}
 	delayMilliSecRDL(500);
-	myOLED.OLEDbegin(); // initialize the OLED
-	myOLED.OLEDFillScreen(0xF0, 0); // splash screen bars, optional just for effect
+	myOLED.OLEDbegin(myOLED.OLED_Controller_e::SSD1315); // initialize the OLED
+	myOLED.OLEDFillScreen(0xFF, 0); // fill screen, optional just for effect
 	delayMilliSecRDL(1000);
 	return true;
 }
@@ -77,8 +77,8 @@ void TestLoop()
 	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer ) != rdlib::Success) return;
 	myOLED.OLEDclearBuffer();
 	myOLED.setFont(font_default);
-	myOLED.setCursor(10, 10);
-	myOLED.print("Hello World.");
+	myOLED.setCursor(10, 20);
+	myOLED.print("Hello, World!");
 	myOLED.OLEDupdate();
 	delayMilliSecRDL(5000);
 }

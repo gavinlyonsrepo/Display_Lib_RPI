@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <stdint.h>
 
 #pragma pack(push, 1)  // Ensure no padding in the struct
 struct BMPFileHeader {
@@ -34,6 +35,6 @@ void readBMPHeader(const char* filename) {
 }
 
 int main() {
-	readBMPHeader("16pic1_96x64.bmp");  // Change to your BMP file
+	readBMPHeader("16pic4_96x64.bmp");  // Change to your BMP file
 	return 0;
 }

@@ -1,8 +1,8 @@
 /*!
-	@file examples/ssd1306/clock_demo/main.cpp
+	@file   examples/ssd1306/clock_demo/main.cpp
 	@author Gavin Lyons
-	@brief Test file for SSD1306_OLED display, Test file showing a "clock demo" , 128X64 screen
-		Project Name: Display_Lib_RPI
+	@brief  Test file for SSD1306_OLED display, Test file showing a "clock demo" , 128X64 screen
+			Project Name: Display_Lib_RPI
 	@test
 		-# Test 401 Clock Demo
 */
@@ -10,7 +10,10 @@
 #include <iostream>
 #include <ctime>
 
-#include <csignal> //catch user Ctrl+C
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
+
 #include "SSD1306_OLED_RDL.hpp"
 #include "Bitmap_test_data.hpp" // Test data for bitmaps
 
@@ -20,17 +23,17 @@
 #define MY_OLED_WIDTH  128
 #define MY_OLED_HEIGHT 64
 #define FULLSCREEN (MY_OLED_WIDTH * (MY_OLED_HEIGHT/8))
-
 // I2C related
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
-
 // Define Screen buffer
 uint8_t screenBuffer[FULLSCREEN];
-
- // instantiate  an object
+// instantiate  an object
 SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ;
+ // Stop signal , Ctrl + c etc
+std::atomic<bool> stopRequested{false};
+
 
 // =============== Function prototype ================
 bool SetupTest(void);
@@ -39,14 +42,20 @@ void EndTests(void);
 void DisplayClock(void);
 void SplashScreen(void);
 std::string UTC_string(void);
-void signal_callback_handler(int signum);
+void handleSignal(int){
+	stopRequested = true; // for CtrL+C
+}
 
 // ======================= Main ===================
 int main()
 {
-	signal(SIGINT, signal_callback_handler);
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
 	if (SetupTest() != true) return -1;
 	Test();
+	if (stopRequested){
+		std::cout << "Exit Signal received" << std::endl;
+	}
 	EndTests();
 	return 0;
 }
@@ -59,7 +68,6 @@ bool SetupTest()
 	std::cout<<"OLED Test Begin" << std::endl;
 	std::cout<<"SSD1306 library Version Number :: " <<  rdlib::LibraryVersion() << std::endl;
 	std::cout<<"lgpio   library Version Number :: "  << lguVersion()   << std::endl;
-
 	// Open  on I2C device
 	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rdlib::Success)
 	{
@@ -72,7 +80,6 @@ bool SetupTest()
 		std::cout<<"Error 1202 : Cannot See Device on Bus"  << std::endl;
 		return false;
 	}
-
 	delayMilliSecRDL(500);
 	myOLED.OLEDbegin(); // initialize the OLED
 	return true;
@@ -100,6 +107,7 @@ void DisplayClock(void)
 	std::cout<<"OLED Clock Demo :: Press Ctrl + c to quit." << std::endl;
 	while(count < 9999)
 	{
+		if (stopRequested) break;
 		std::string TimeString = UTC_string();
 		auto DateInfo = TimeString.substr(2, 8);
 		auto TimeInfo = TimeString.substr(11,8);
@@ -136,11 +144,9 @@ void DisplayClock(void)
 		myOLED.OLEDclearBuffer();
 		count++;
 	}
-
-	delayMilliSecRDL(5000);
+	delayMilliSecRDL(1000);
 	myOLED.OLEDFillScreen(0x00, 0);
 	myOLED.OLEDclearBuffer();
-
 }
 
 void SplashScreen(void)

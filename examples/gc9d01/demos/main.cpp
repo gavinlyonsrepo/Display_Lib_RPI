@@ -3,7 +3,7 @@
 	@brief  Various demos see test list
 	@details Uses advanced screen buffer mode. Hardware SPI
 			Setup for 160X160 dual gate display
-	@note See USER OPTIONS 1-3 in SETUP function
+	@note See USER OPTIONS in SETUP function
 	@test
 		-# test 440 Round Gauge
 		-# test 441 Arc Meter
@@ -100,10 +100,12 @@ uint8_t SetupHWSPI(void)
 	int HWSPI_SPEED =  24000000; // The speed of serial communication in bits per second.
 	int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 	// Screen
-	uint16_t TFT_WIDTH = 160;// Screen width in pixels
-	uint16_t TFT_HEIGHT = 160; // Screen height in pixels
-	uint16_t OFFSET_X   =   0; // Screen X offset in pixels
-	uint16_t OFFSET_Y   =   0; // Screen Y offset in pixels
+	uint16_t TFT_WIDTH =  160;   // Screen width in pixels
+	uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+	uint16_t OFFSET_X_L = 0;  // Landscape Screen X offset in pixels
+	uint16_t OFFSET_Y_L = 0;  // Landscape Screen Y offset in pixels
+	uint16_t OFFSET_X_P = 0;  // Portrait Screen X offset in pixels
+	uint16_t OFFSET_Y_P = 0;  // Portrait Screen Y offset in pixels
 	GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB160x160_DualGate;
 	
 	std::cout << "TFT Start Demos: Ctrl + C quits" << std::endl;
@@ -111,9 +113,12 @@ uint8_t SetupHWSPI(void)
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
 // ** USER OPTION 2 Screen SetupHWSPI **
-	myTFT.TFTInitScreenSize(TFT_WIDTH , TFT_HEIGHT, DisplayType, OFFSET_X, OFFSET_Y);
+	myTFT.TFTInitScreenSize(TFT_WIDTH , TFT_HEIGHT, DisplayType);
 // ***********************************
-// ** USER OPTION 3 SPI **
+// ** USER OPTION 3 Offsets **
+	myTFT.TFTInitOffsets(OFFSET_X_L, OFFSET_Y_L, OFFSET_X_P, OFFSET_Y_P);
+// *********
+// ** USER OPTION 4 SPI **
 	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;

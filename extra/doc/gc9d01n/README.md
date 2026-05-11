@@ -51,11 +51,12 @@ also tested by third party on 40x160 bar display by third party.
 In the example files. There are sections in "Setup()" function
 where user can make adjustments to select for SPI type used, and screen size.
 
-1. USER OPTION 1 GPIO/SPI TYPE
-2. USER OPTION 2 SCREEN SECTION
-3. USER OPTION 3 SPI SETTINGS
+1. USER OPTION  GPIO
+2. USER OPTION  Screen Size & type
+3. USER OPTION  Screen Offsets
+4. USER OPTION  SPI Settings
 
-#### USER OPTION 1 SPI TYPE / GPIO
+#### USER OPTION 1 GPIO
 
 This library supports both Hardware SPI and software SPI.
 The SetupGPIO function is overloaded(2 off one for HW SPI the other for SW SPI).
@@ -68,33 +69,27 @@ There are options here user can adjust:
 1. 2A screen pixel height
 2. 2B screen pixel width
 3. 2C Resolution and gate type.
-4. 2D screen pixel X offset
-5. 2E screen Pixel Y offset
 
 USER OPTION 2C- Resolution & Gate Configuration (Resolution_e)
 
 The GC9D01 controller supports multiple display sizes and gate driving modes.
-Select the correct enum value for your physical module.
-In addition to passing the parameter.
+Select the correct enum value for your physical module. 6 choices and the pixel
+height and width of display.
 
-| Enum Value | Resolution | Gate Mode | Typical Module Description |
-| ---------------------- | ---------- | ------ | --- |
-| `RGB160x160_DualGate` | 160×160 | Dual | Most round GC9D01 displays **Default** |
-| `RGB120x160_DualGate` | 120×160 | Dual | Some rectangular / bar-type modules |
-| `RGB80x160_SingleGate` | 80×160 | Single | Smaller rectangular / bar displays |
-| `RGB40x160_SingleGate` | 40×160 | Single | Very narrow bar-type or specialty modules |
+#### USER OPTION 3 Offsets
 
-#### USER OPTION 2D & 2E
+On some truncated displays offset's are required, As the active pixel area is a subset of the display
+controller video RAM.I made this a user input
+rather than hard-coded due to diversity of variant modules available, and known unknowns.
 
-On some displays an offset is required, I made this a user input
-rather than hard-coded due to diversity of variant modules available.
-
-| Display type | X offset | Y offset | Notes |
-| ------------- | -------- | -------- | ----- |
-| `160x160 Dual Gate` | 0 | 0 | No offsets required in any rotation. Default |
-| `120x160 Dual Gate` | TBD | TBD | Expected to require centering offsets (~20 px) depending on rotation. Not hardware tested. |
-| `80x160 Single Gate` | TBD | TBD | Expected to require centering offsets (~40 px) depending on rotation. Not hardware tested. |
-| `40x160 Single Gate` | -60 | 60 | **Tested**. Offsets required for 90° and 270° rotations due to centered 40-pixel active area. |
+| Display type | offset | Notes |
+| --- | --- | --- |
+| 160x160 Dual Gate | 0,0,0,0 | Round display, Full GRAM exposed. No offsets required in any rotation. *Default* |
+| 120x160 Dual Gate | -20,20,0,0 ? Unknown | Expected to require offsets (~20 px) depending on rotation. Not hardware tested |
+| 80x160 Single Gate | -40,40,0,0 ? unknown | Expected to require offsets (~40 px) depending on rotation. Not hardware tested |
+| 60x160 Single Gate | -40,50,10,0 | Offsets required in all rotation, tested by third party |
+| 50x160 Single Gate | -39,55,16,0 untested | Offsets required in all rotations ,Not hardware tested |
+| 40x160 Single Gate | -60,60,0,0 | Offsets required for 90° and 270° rotations due to centered 40-pixel active area. tested by third party |
 
 #### USER OPTION 3 SPI Settings
 

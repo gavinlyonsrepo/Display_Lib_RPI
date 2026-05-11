@@ -4,15 +4,14 @@
 
 ## Table of contents
 
-  * [Overview](#overview)
-  * [Hardware](#hardware)
-  * [Software](#software)
-	* [File system](#file-system)
-	* [I2C](#i2c)
-	* [Bitmaps](#bitmaps)
-  * [Output](#output)
-  * [Notes and issues](#notes-and-issues)
-
+* [Overview](#overview)
+* [Hardware](#hardware)
+* [Software](#software)
+* [File system](#file-system)
+* [I2C](#i2c)
+* [Bitmaps](#bitmaps)
+* [Output](#output)
+* [Notes and issues](#notes-and-issues)
 
 ## Overview
 
@@ -27,7 +26,6 @@
 4. Hardware I2C
 5. Also tested on 128X32 display size. Should work for 96X16 display size.
 
-
 ## Hardware
 
 Manufacturers diagram showing connections.
@@ -38,22 +36,22 @@ Manufacturers diagram showing connections.
 
 ### File system
 
-Example files 
+Example files
 
 | Filepath | File Function | Screen Size |
 | ---- | ---- | ---- |
 | hello_world | Basic use case | 128x64 |
-| bitmap  | Shows use of bitmaps | 128x64 |
+| bitmap | Shows use of bitmaps | 128x64 |
 | clock_demo | A basic clock Demo | 128x64 |
 | framerate_test | Frame rate per second test | 128x64 |
-| text_graphics_functions |Tests Text,graphics and functions| 128x64 |
+| text_graphics_functions | Tests Text,graphics and functions | 128x64 |
 
 ### I2C
 
 Hardware I2C.
 
-1. I2C Address is set by default to 0x3C(your module could be different, 
-user can change argument passed into OLED class constructor). 
+1. I2C Address is set by default to 0x3C(your module could be different,
+user can change argument passed into OLED class constructor).
 OLED_I2C_FLAGS No flags are currently defined. This parameter should be set to zero.
 The value to set OLED_I2C_DEVICE , can be found by running command, to view available I2C device numbers
 
@@ -62,15 +60,16 @@ i2cdetect -l
 ```
 
 2. I2C Clock rate is set by device installed on. During development and testing on raspberry pi 5
-it was found that by default the baudrate was set to 100,000 baud. By modifying the file 
-/boot/firmware/config.txt baud can be increased 
+it was found that by default the baudrate was set to 100,000 baud. By modifying the file
+/boot/firmware/config.txt baud can be increased. This file will require sudo priviliges
+to edit and maybe also a reboot.
 
 ```sh
 param=i2c_arm=on,i2c_arm_baudrate=400000
 ```
 
-3. In the event of an error writing a byte, debug info with error code will be written to console. 
-Debug configuration flag must be set to true to see this output. User can set error timeout between retry attempts and number of retry attempts 
+3. In the event of an error writing a byte, debug info with error code will be written to console.
+Debug configuration flag must be set to true to see this output. User can set error timeout between retry attempts and number of retry attempts
 and can monitor the Error flag.
 
 ### Bitmaps
@@ -79,8 +78,8 @@ Different bitmaps methods can be used.
 
 | num | Method name | data addressing | Notes |
 | ------ | ------ | ------ | ------ |
-| 1 | drawBitmap() |  Vertical | default, setDrawBitmapAddr(true) |
-| 2 | drawBitmap() |  Horizontal | setDrawBitmapAddr(false) |
+| 1 | drawBitmap() | Vertical | default, setDrawBitmapAddr(true) |
+| 2 | drawBitmap() | Horizontal | setDrawBitmapAddr(false) |
 
 Bitmaps can be turned to data [here at link]( https://github.com/gavinlyonsrepo/Guardian_LTSM/)
 See example file "BITMAP" for more details.

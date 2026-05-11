@@ -12,7 +12,7 @@
 				Setup for 160X160 dual gate display : DUAL_GATE_SETUP (default)
 				Setup for 40X160 Single gate display : SINGLE_GATE_SETUP
 			3.
-				See USER OPTIONS 1-3 in SETUP function
+				See USER OPTIONS in SETUP function
 	@test 
 		-# 101 Hello World Hardware SPI
 		-# 102 Hello World Software SPI
@@ -27,28 +27,65 @@
 //=====================
 // USER SCREEN TYPE SECTION
 // Comment in one and ONE only
-#define DUAL_GATE_SETUP // Setup for 160X160 dual gate display
-//#define SINGLE_GATE_SETUP // 40X160 Single gate display
+#define DUAL_GATE_160x160   // Setup for 160X160 dual gate display
+//#define DUAL_GATE_120x160   // Setup for 120X160 dual gate display
+//#define SINGLE_GATE_40x160  // Setup for  40x160 Single gate display
+//#define SINGLE_GATE_50x160  // Setup for  50x160 Single gate display
+//#define SINGLE_GATE_60x160  // Setup for  60x160 Single gate display
+//#define SINGLE_GATE_80x160  // Setup for  80x160 Single gate display
 
-#if defined(DUAL_GATE_SETUP) == defined(SINGLE_GATE_SETUP)
-#error "Define exactly ONE of DUAL_GATE_SETUP or SINGLE_GATE_SETUP"
-#endif
 //=====================
 
 // Section :: Globals
 
-#ifdef DUAL_GATE_SETUP
-	uint16_t TFT_WIDTH = 160;// Screen width in pixels
-	uint16_t TFT_HEIGHT = 160; // Screen height in pixels
-	uint16_t OFFSET_X   =   0; // Screen X offset in pixels
-	uint16_t OFFSET_Y   =   0; // Screen Y offset in pixels
-	GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB160x160_DualGate;
-#elif defined(SINGLE_GATE_SETUP)
-	uint16_t TFT_WIDTH  =   40; // Screen width in pixels
-	uint16_t TFT_HEIGHT =  160; // Screen height in pixels
-	uint16_t OFFSET_X   =  -60; // Screen X offset in pixels
-	uint16_t OFFSET_Y   =   60; // Screen Y offset in pixels
-	GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB40x160_SingleGate;
+#ifdef DUAL_GATE_160x160
+  uint16_t TFT_WIDTH =  160;   // Screen width in pixels
+  uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+  uint16_t OFFSET_X_L = 0;  // Landscape Screen X offset in pixels
+  uint16_t OFFSET_Y_L = 0;  // Landscape Screen Y offset in pixels
+  uint16_t OFFSET_X_P = 0;  // Portrait Screen X offset in pixels
+  uint16_t OFFSET_Y_P = 0;  // Portrait Screen Y offset in pixels
+  GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB160x160_DualGate;
+#elif defined(DUAL_GATE_120x160)
+  uint16_t TFT_WIDTH =  120;   // Screen width in pixels
+  uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+  uint16_t OFFSET_X_L = -20;  // Landscape Screen X offset in pixels
+  uint16_t OFFSET_Y_L = 20;  // Landscape Screen Y offset in pixels
+  uint16_t OFFSET_X_P = 0;  // Portrait Screen X offset in pixels
+  uint16_t OFFSET_Y_P = 0;  // Portrait Screen Y offset in pixels
+  GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB120x160_DualGate;
+#elif defined(SINGLE_GATE_80x160)
+  uint16_t TFT_WIDTH =  80;   // Screen width in pixels
+  uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+  uint16_t OFFSET_X_L = -40;  // Landscape Screen X offset in pixels
+  uint16_t OFFSET_Y_L = 40;  // Landscape Screen Y offset in pixels
+  uint16_t OFFSET_X_P = 0;  // Portrait Screen X offset in pixels
+  uint16_t OFFSET_Y_P = 0;  // Portrait Screen Y offset in pixels
+  GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB80x160_SingleGate;
+#elif defined(SINGLE_GATE_60x160)
+  uint16_t TFT_WIDTH =  60;   // Screen width in pixels
+  uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+  uint16_t OFFSET_X_L = -40;  // Landscape Screen X offset in pixels
+  uint16_t OFFSET_Y_L = 50;  // Landscape Screen Y offset in pixels
+  uint16_t OFFSET_X_P = 10;  // Portrait Screen X offset in pixels
+  uint16_t OFFSET_Y_P = 0;  // Portrait Screen Y offset in pixels
+  GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB60x160_SingleGate;
+#elif defined(SINGLE_GATE_50x160)
+  uint16_t TFT_WIDTH =  50;   // Screen width in pixels
+  uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+  uint16_t OFFSET_X_L = -39;  // Landscape Screen X offset in pixels
+  uint16_t OFFSET_Y_L = 55;   // Landscape Screen Y offset in pixels
+  uint16_t OFFSET_X_P = 16;   // Portrait Screen X offset in pixels
+  uint16_t OFFSET_Y_P = 0;    // Portrait Screen Y offset in pixels
+  GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB50x160_SingleGate;
+#elif defined(SINGLE_GATE_40x160)
+  uint16_t TFT_WIDTH =  40;   // Screen width in pixels
+  uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+  uint16_t OFFSET_X_L = -60;  // Landscape Screen X offset in pixels
+  uint16_t OFFSET_Y_L =  60;  // Landscape Screen Y offset in pixels
+  uint16_t OFFSET_X_P =   0;  // Portrait Screen X offset in pixels
+  uint16_t OFFSET_Y_P =   0;  // Portrait Screen Y offset in pixels
+  GC9D01_TFT::Resolution_e DisplayType = GC9D01_TFT::Resolution_e::RGB40x160_SingleGate;
 #endif
 
 bool HardwareSPI = true; // Hardware SPI = true, software SPI = false
@@ -102,9 +139,12 @@ uint8_t SetupHWSPI(void)
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*******************************************
 // ** USER OPTION 2 Screen Setup**
-	myTFT.TFTInitScreenSize(TFT_WIDTH , TFT_HEIGHT, DisplayType, OFFSET_X, OFFSET_Y);
+	myTFT.TFTInitScreenSize(TFT_WIDTH , TFT_HEIGHT, DisplayType);
 // ***********************************
-// ** USER OPTION 3 SPI settings **
+// ** USER OPTION 3 Offsets **
+	myTFT.TFTInitOffsets(OFFSET_X_L, OFFSET_Y_L, OFFSET_X_P, OFFSET_Y_P);
+// *********
+// ** USER OPTION 4 SPI settings **
 	if(myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;
@@ -150,9 +190,12 @@ uint8_t SetupSWSPI(void)
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT, CS_TFT, SCLK_TFT, SDIN_TFT);
 //*********************************************
 // ** USER OPTION 2 Screen Setup **
-	myTFT.TFTInitScreenSize(TFT_WIDTH , TFT_HEIGHT, DisplayType, OFFSET_X, OFFSET_Y);
+	myTFT.TFTInitScreenSize(TFT_WIDTH , TFT_HEIGHT, DisplayType);
 // ***********************************
-// ** USER OPTION 3 SPI **
+// ** USER OPTION 3 Offsets **
+	myTFT.TFTInitOffsets(OFFSET_X_L, OFFSET_Y_L, OFFSET_X_P, OFFSET_Y_P);
+// *********
+// ** USER OPTION 4 SPI **
 	if(myTFT.TFTInitSPI(SWSPI_CommDelay, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
 		return 3;

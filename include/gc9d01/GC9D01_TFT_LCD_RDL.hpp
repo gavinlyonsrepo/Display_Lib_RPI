@@ -42,16 +42,17 @@ public:
 		SleepPartialIdleOff,/**< SLPIN + PLTON + IDMOFF */
 		SleepPartialIdleOn	/**< SLPIN + PLTON + IDMON */
 	};
-
 	/*!
 	 * @brief GC9D01 panel resolution and gate configuration
 	 */
 	enum class Resolution_e : uint8_t
 	{
-		RGB160x160_DualGate,	 /**< 160RGB × 160, S1–S240, Dual gate (default) */
-		RGB120x160_DualGate,	 /**< 120RGB × 160, S31–S210, Dual gate */
-		RGB80x160_SingleGate,	 /**< 80RGB × 160, S1–S240, Single gate */
-		RGB40x160_SingleGate	 /**< 40RGB × 160, S61–S180, Single gate */
+		RGB160x160_DualGate,  /**< 160×160, S1–S240, Dual gate (default) */
+		RGB120x160_DualGate,  /**< 120×160, S31–S210, Dual gate */
+		RGB80x160_SingleGate, /**< 80×160, S1–S240, Single gate */
+		RGB60x160_SingleGate, /**< 60×160, Single gate */
+		RGB50x160_SingleGate, /**< 50×160, Single gate */
+		RGB40x160_SingleGate  /**< 40×160, S61–S180, Single gate */
 	};
 
 	display_rotate_e displayRotate = Degrees_0; /**< Enum to hold rotation */
@@ -63,8 +64,8 @@ public:
 	void TFTSetupGPIO(int8_t, int8_t, int8_t, int8_t, int8_t); //SW SPI
 	void TFTSetupGPIO(int8_t, int8_t); // HW SPI
 	void TFTInitScreenSize(uint16_t w = 160, uint16_t h = 160, 
-		Resolution_e r = Resolution_e::RGB160x160_DualGate,
-		uint16_t Xstart= 0, uint16_t Ystart=0);
+		Resolution_e r = Resolution_e::RGB160x160_DualGate);
+	void TFTInitOffsets(uint16_t XLstart = 0, uint16_t YLstart = 0, uint16_t XPstart= 0, uint16_t YPstart = 0);
 	rdlib::Return_Codes_e TFTInitSPI(uint16_t CommDelay, int gpioDev ); // SW SPI
 	rdlib::Return_Codes_e TFTInitSPI(int device, int channel, int speed, int flags, int gpioDev); // HW SPI
 	rdlib::Return_Codes_e  TFTPowerDown(void);
@@ -88,8 +89,13 @@ private:
 	rdlib::Return_Codes_e TFTClock_Data_ChipSelect_Pins(void);
 	void TFTSetupResetPin(int8_t rst);
 	rdlib::Return_Codes_e TFTGC9D01Initialize(void);
-	void DualGatecmdInitSequence(void);
-	void SingleGatecmdInitSequence(void);
+	void TFTinitByResolution(void);
+	void DualGatecmdInitSequence(void); // default
+	void DualGatecmdInitSequence120x160(void);
+	void SingleGatecmdInitSequence40x160(void);
+	void SingleGatecmdInitSequence50x160(void);
+	void SingleGatecmdInitSequence60x160(void);
+	void SingleGatecmdInitSequence80x160(void);
 
 	// Display
 	PowerState_e _currentPowerState = PowerState_e::NormalIdleOff; /**< Enum to hold display mode */
@@ -99,10 +105,13 @@ private:
 	// Screen
 	uint16_t _widthStartTFT =  160; /**<  never change after first init */
 	uint16_t _heightStartTFT = 160; /**< never change after first init */
-	uint16_t  _GC9D01_X_Offset_Start = 0; /**< column offset, never change after first init */
-	uint16_t  _GC9D01_Y_Offset_Start = 0; /**< row offset, never change after first init */
-	uint16_t _GC9D01_X_Offset = 0; /**< Column offset based on rotation, resolution and display type */
-	uint16_t _GC9D01_Y_Offset = 0; /**< Row offset based on rotation, resolution and display type */
+	// Screen Offsets
+	uint16_t _GC9D01_X_Portrait  = 0;  /**< Column offset for 0/180 rotation */
+	uint16_t _GC9D01_Y_Portrait  = 0;  /**< Row offset for 0/180 rotation    */
+	uint16_t _GC9D01_X_Landscape = 0;  /**< Column offset for 90/270 rotation */
+	uint16_t _GC9D01_Y_Landscape = 0;  /**< Row offset for 90/270 rotation   */
+	uint16_t _GC9D01_X_Offset    = 0;  /**< Active offset, set by TFTsetRotation */
+	uint16_t _GC9D01_Y_Offset    = 0;  /**< Active offset, set by TFTsetRotation */
 	// SPI related
 	int _spiDev = 0;       /**< A SPI device, >= 0. */
 	int _spiChan = 0;     /**< A SPI channel, >= 0. */

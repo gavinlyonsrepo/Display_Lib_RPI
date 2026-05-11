@@ -1,9 +1,10 @@
 stuff/
+.vscode/
 bin/
 build/
-display-cppcheck-build-dir/
 examples/Bin
 examples/Build
+display-cppcheck-build-dir/
 display.cppcheck
 geany_test_project
 display_RPI_geany.geany

@@ -1,8 +1,8 @@
 /*!
-	@file examples/ssd1306/bitmap/main.cpp
+	@file   examples/ssd1306/bitmap/main.cpp
 	@author Gavin Lyons
-	@brief Test file for SSD1306_OLED library, showing how to draw bitmaps, 128X64 screen
-		Project Name: Display_Lib_RPI
+	@brief  Test file for SSD1306_OLED library, showing how to draw bitmaps, 128X64 screen
+			Project Name: Display_Lib_RPI
 	@test
 		-# Test 301 bigImage 64x64 pixels
 		-# Test 302 Small icons 16x8 pixels
@@ -27,7 +27,7 @@ SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate  an object
 #define OLED_I2C_DEVICE 1
 #define OLED_I2C_FLAGS 0
 
-// =============== Function prototype ================
+// === Function prototype ===
 bool SetupTest(void);
 void EndTests(void);
 void myTests(void);
@@ -37,7 +37,7 @@ void Test303(void);
 void Test304(void);
 void EndTests(void);
 
-// ======================= Main ===================
+// === Main ===
 int main()
 {
 	if (SetupTest() != true) return -1;
@@ -45,10 +45,9 @@ int main()
 	EndTests();
 	return 0;
 }
-// ======================= End of Main ===================
+// === End of Main ===
 
-
-// ======================= Function space ===================
+// === Function space ===
 bool SetupTest()
 {
 	printf("OLED Test Begin\r\n");
@@ -75,7 +74,6 @@ bool SetupTest()
 	delayMilliSecRDL(1000);
 	return true;
 }
-
 
 void EndTests()
 {
