@@ -111,8 +111,6 @@ private:
 	uint16_t _RAM_HEIGHT = 160;		/**< Physical VRAM height limit of the GC9107 controller */
 	uint8_t _colOffset = 0;			/**< Portrait col (X) dead-RAM offset – user supplied */
 	uint8_t _rowOffset = 0;			/**< Portrait row (Y) dead-RAM offset – user supplied */
-	uint8_t _xstart = 0;			/**< Applied offset for current rotation (X axis) */
-	uint8_t _ystart = 0;			/**< Applied offset for current rotation (Y axis) */
 
 	// GC9107 registers + Commands
 	static constexpr uint8_t GC9107_SLPIN = 0x10;			 /**< Enter Sleep Mode */

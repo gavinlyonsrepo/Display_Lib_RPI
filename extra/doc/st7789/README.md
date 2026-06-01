@@ -84,10 +84,8 @@ Hello world can be setup for software or hardware SPI by changing "HardwareSPI" 
 | # | example file name | Description |
 | ------ | ------ | ------ |
 | 1 | hello_world | Basic use case |
-| 2 | text_graphic_functions | Text,graphics & function testing |
-| 3 | bitmap_Tests | bitmap |
-| 4 | framerate_test | Frame rate per second (FPS) |
-| 5 | demos | Various demos |
+| 2 | tests | Bitmap, text,graphics, function and Frame rate per second (FPS)|
+| 3 | demos | Various demos |
 
 ### Bitmap
 

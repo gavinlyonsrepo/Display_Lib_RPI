@@ -102,18 +102,14 @@
 
 # =============== ST7735 TFT LCD SPI =============
 #SRC=st7735/hello_world
-#SRC=st7735/text_graphics_functions
-#SRC=st7735/bitmap_tests
-#SRC=st7735/demos
-#SRC=st7735/framerate_test
+#SRC=st7735/tests
 #SRC=st7735/advanced_screen_buffer_mode
+#SRC=st7735/demos
 #=================================================
 
 # =============== ST7789 TFT LCD SPI =============
 #SRC=st7789/hello_world
-#SRC=st7789/bitmap_tests
-#SRC=st7789/text_graphics_functions
-#SRC=st7789/framerate_test
+#SRC=st7789/tests
 #SRC=st7789/demos
 #=================================================
 
@@ -121,9 +117,9 @@
 #SRC=ili9341/hello_world
 #SRC=ili9341/bitmap_tests
 #SRC=ili9341/text_graphics_functions
-#SRC=ili9341/demos
 #SRC=ili9341/touch_screen
 #SRC=ili9341/read_diagnostic_swspi
+#SRC=ili9341/demos
 #=================================================
 
 # =============== SSD1331 TFT LCD SPI ============
@@ -147,6 +143,7 @@
 # =============== GC9107 TFT LCD SPI ============
 #SRC=gc9107/hello_world
 #SRC=gc9107/tests
+#SRC=gc9107/demos
 #=================================================
 
 # =========== XPT2046 touchscreen basic test =====

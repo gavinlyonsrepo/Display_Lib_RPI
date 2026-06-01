@@ -1,13 +1,22 @@
 /*!
-	@file examples/st7735/text_graphics_functions/main.cpp
-	@brief Library test file, tests Text,graphics & functions, 128x128 ST7735R Red Tab.
+	@file   examples/st7735/tests/main.cpp
+	@brief  Library test file,
+			tests: Text,graphics & functions, bitmaps, framerate per second (FPS) test
+			Setup for a 128x128 ST7735R Red Tab. See USER OPTIONS 1-3 in SETUP function
 	@author Gavin Lyons.
-	@note See USER OPTIONS 1-3 in SETUP function
 	@test
+	-# Test 300 Sprites demo, small bitmap
+	-# Test 301 "clock demo" , icons, small bitmap
+	-# Test 302 bi-color full screen image 128x128
+	-# Test 303 24 bit color image bitmaps from the file system
+	-# Test 304 16 bit colorimage bitmaps from the file system
 	-# Test 500 RGB color OK?
 	-# Test 501 scroll
 	-# Test 502 Rotate
 	-# Test 503 change modes test -> Invert, display on/off and Sleep.
+	-# Test 601 Frame rate per second (FPS) test. 24 bit bitmaps.
+	-# Test 603 Frame rate per second (FPS) test text
+	-# Test 604 Frame rate per second (FPS) test graphics
 	-# Test 701 print out fonts 1-12
 	-# Test 702 defined 16-bit Colors, text
 	-# Test 703 print entire ASCII font 32 to 127, default font
@@ -29,16 +38,13 @@
 
 // Section ::  libraries
 #include <iostream>
+#include <ctime> // for test301
+#include "Bitmap_test_data.hpp" // Data for test 301-302
 
 #include "ST7735_TFT_LCD_RDL.hpp"
 
 /// @cond
 
-// Section :: Defines
-//  Test timing related defines
-#define TEST_DELAY5 5000
-#define TEST_DELAY2 2000
-#define TEST_DELAY 1000
 
 // Section :: Globals
 ST7735_TFT myTFT;
@@ -56,16 +62,43 @@ int SPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
 int SPI_SPEED =  8000000; // The speed of serial communication in bits per second.
 int SPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 
+// Test parameters
+#define CLOCK_DISPLAY_TIME 300 //test 301 clock demo time in seconds
+#define TEST_DELAY5 5000
+#define TEST_DELAY2 2000
+#define TEST_DELAY 1000
+
+// Test 601
+uint8_t numberOfFiles = 5;
+#define runtimeBmp  10000000 //uS
+// Test 603 604 text and graphics
+#define runtime  20000000 //uS
+
 //  Section ::  Function Headers
 
 uint8_t Setup(void);
 void EndTests(void);
 void DisplayReset(void);
+void displayMenu(void);
+
+void Test300(void); // Sprite
+void Test301(void); // "clock demo" icons, small bi-color bitmaps
+void Test302(void); // 2 color bitmap
+void Test303(void); // 24 color bitmap
+void Test304(void); // 16 color bitmap
+std::string UTC_string(void); // clock demo test 301
 
 void Test500(void);  // Color RGB
 void Test501(void);  // scroll
 void Test502(void);  // Rotate
 void Test503(void); // change modes test -> Invert, display on/off and Sleep.
+
+void Test601(int64_t runtime_us);
+int64_t getTime(); // Utility for 601 FPS test
+std::vector<uint8_t>   loadImage(const char*); // Utility for601 FPS test
+void Test603_604(int64_t runtime_us, uint8_t testNumber);
+void displayText(double fps, uint32_t frames);  // Utility for 603 FPS test
+void displayGraphics(void); // Utility for 604 FPS test
 
 void Test701(void);
 void Test702(void);
@@ -92,27 +125,72 @@ void Test909(void);
 int main(void)
 {
 	if(Setup() != 0)return -1;
-	Test500();
-	Test501();
-	Test502();
-	Test503();
-	Test701();
-	Test702();
-	Test703();
-	Test704();
-	Test705();
-	Test706();
-	Test707();
-	Test708();
-	Test901();
-	Test902();
-	Test903();
-	Test904();
-	Test905();
-	Test906();
-	Test907();
-	Test908();
-	Test909();
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+
+	int choice;
+	do {
+		myTFT.fillScreen(myTFT.RDLC_BLACK);
+		displayMenu();
+		std::cin >> choice;
+		// Check if input is valid
+		if (std::cin.fail()) {
+			std::cin.clear(); // Clear error flag
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Invalid input. Please enter a number from list.\n\n";
+			continue;
+		}
+		switch (choice) {
+			case 1:
+				Test300();
+				Test301();
+				Test302();
+				Test303();
+				Test304();
+			break;
+			case 2:
+				Test500();
+				Test501();
+				Test502();
+				Test503();
+			break;
+			case 3:
+				Test601(runtimeBmp);
+				std::cout << "Test 603 FPS test: text" << std::endl;
+				Test603_604(runtime, 1 );
+				std::cout << "Test 604 FPS test: graphics" << std::endl;
+				Test603_604(runtime, 2 );
+			 break;
+			case 4:
+				Test701();
+				Test702();
+				Test703();
+				Test704();
+				Test705();
+				Test706();
+				Test707();
+				Test708();
+			break;
+			case 5:
+				Test901();
+				Test902();
+				Test903();
+				Test904();
+				Test905();
+				Test906();
+				Test907();
+				Test908();
+				Test909();
+			break;
+			case 6:
+				std::cout << "Exiting menu\n";
+			break;
+			default:
+				std::cout << "Invalid choice. Please try again.\n";
+			break;
+		}
+		std::cout << std::endl;
+	} while (choice != 6);
+
 	EndTests();
 	return 0;
 }
@@ -136,7 +214,7 @@ uint8_t Setup(void)
 // ***********************************
 
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
-	// pass enum to param1 ,4 choices,see README
+	// pass enum to param1 ,5 choices,see README
 	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
@@ -145,6 +223,237 @@ uint8_t Setup(void)
 	delayMilliSecRDL(50);
 	return 0;
 }
+
+void Test300(void)
+{
+	std::cout << "Test 300: Sprites demo" << std::endl;
+	// Test 300-A test 16-bit color Sprite
+	// Draw as sprite, without background , 32 X 32 .background color = myTFT.RDLC_LBLUE
+	// Green background screen
+	myTFT.fillScreen(myTFT.RDLC_GREEN);
+	delayMilliSecRDL(TEST_DELAY);
+	myTFT.drawSprite(20, 20, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	// Test 300-B test 16-bit color Sprite
+	// Draw as sprite, without background , 32 X 32 .background color =myTFT.RDLC_LBLUE
+	// Bitmap background screen
+	if(myTFT.drawBitmap(0, 0, 128 , 128, myTFT.RDLC_WHITE , myTFT.RDLC_RED, BackupMenuBitmap) != rdlib::Success)
+		return;
+	delayMilliSecRDL(TEST_DELAY5);
+
+	myTFT.drawSprite(20, 30, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE);
+	myTFT.drawSprite(30, 60, SpriteTest16, 32, 32, myTFT.RDLC_LBLUE);
+	delayMilliSecRDL(TEST_DELAY5);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+}
+
+void Test301(void)
+{
+	std::cout << "Test 301: clock demo , icons, small bitmap" << std::endl;
+	uint16_t count=CLOCK_DISPLAY_TIME;
+	if (count > 999) count = 999;
+	char teststr1[] = "G Lyons";
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+
+	// Draw top bar of clock
+	myTFT.drawIcon(2, 2, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, SignalIconVa);
+	myTFT.drawIcon(20, 2, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, MsgIconVa);
+	myTFT.drawIcon(40, 2, 8, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, AlarmIconVa);
+	myTFT.drawIcon(102, 2, 16, myTFT.RDLC_BLACK, myTFT.RDLC_WHITE, BatIconVa);
+
+	myTFT.drawIcon(5, 20, 12, myTFT.RDLC_GREEN , myTFT.RDLC_BLACK,PowerIcon);
+	myTFT.drawIcon(20, 20, 12, myTFT.RDLC_RED, myTFT.RDLC_YELLOW, SpeedIcon);
+	myTFT.setCursor(40,20);
+	myTFT.print(rdlib::LibraryVersion());
+	if (myTFT.drawBitmap(80, 20, 40 , 16, myTFT.RDLC_CYAN , myTFT.RDLC_BLACK, SunText) != rdlib::Success)
+	{
+		std::cout << "Warning an Error occurred in drawBitmap." << std::endl;
+		return ;
+	}
+	// Lines
+	myTFT.drawFastHLine(0,12,128,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,36,128,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,72,128,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,95,128,myTFT.RDLC_WHITE);
+	myTFT.drawFastHLine(0,120,128,myTFT.RDLC_WHITE);
+	// draw clock
+	while(count > 99)
+	{
+		std::string TimeString = UTC_string();
+		std::cout<< TimeString << "\r" << std::flush;
+		auto DateInfo = TimeString.substr(0, 10);
+		auto TimeInfo = TimeString.substr(11,8);
+
+		myTFT.setFont(font_mega);
+		//print time
+		myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_BLACK);
+		myTFT.setCursor(0,50);
+		myTFT.print(TimeInfo);
+		myTFT.setFont(font_retro);
+		//print date
+		myTFT.setTextColor(myTFT.RDLC_GREEN, myTFT.RDLC_BLACK);
+		myTFT.setCursor(20,75);
+		myTFT.print(DateInfo);
+
+		myTFT.setFont(font_default);
+		// print count
+		myTFT.setTextColor(myTFT.RDLC_YELLOW, myTFT.RDLC_BLACK);
+		myTFT.setCursor(90,110);
+		myTFT.print(count);
+		count--;
+		//print name
+		myTFT.setCursor(10,110);
+		myTFT.setTextColor(myTFT.RDLC_CYAN, myTFT.RDLC_BLACK);
+		myTFT.print(teststr1);
+	}
+	delayMilliSecRDL(TEST_DELAY2);
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+
+}
+
+void Test302(void)
+{
+	std::cout << "Test 302: Bi-color bitmap" << std::endl;
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
+	myTFT.setFont(font_default);
+	char teststr1[] = "Bitmap 2 ";
+	myTFT.writeCharString(5, 5, teststr1);
+	delayMilliSecRDL(TEST_DELAY2);
+
+	if(myTFT.drawBitmap(0, 0, TFT_WIDTH , TFT_HEIGHT, myTFT.RDLC_WHITE , myTFT.RDLC_GREEN, BackupMenuBitmap) != rdlib::Success)
+		return;
+	delayMilliSecRDL(TEST_DELAY5);
+}
+
+// bitmap 24 colour , All files format = Windows BITMAPINFOHEADER offset 54
+// All bitmaps are 128 by 128 , same size as test screen
+void Test303(void)
+{
+	std::cout << "Test 303: 24 bit color image bitmaps from the file system" << std::endl;
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	char teststr1[] = "Bitmap 24";
+	myTFT.setTextColor(myTFT.RDLC_WHITE, myTFT.RDLC_BLACK);
+	myTFT.writeCharString(5, 5, teststr1);
+	delayMilliSecRDL(TEST_DELAY);
+
+	FILE *pFile ;
+	size_t pixelSize = 3; // 24 bit 3 bytes per pixel
+	uint8_t FileHeaderOffset = 54;
+	uint8_t NumberOfFiles  = 5;
+
+	// Use std::vector for safe memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try
+	{
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize((TFT_WIDTH * TFT_HEIGHT) * pixelSize);
+	} catch (const std::bad_alloc&)
+	{
+		std::cout << "Error Test 303: Memory allocation failed for bmpBuffer" << std::endl;
+		return;
+	}
+
+	for (uint8_t i = 0 ; i < NumberOfFiles ; i++)
+	{
+		switch (i) // select file
+		{
+			case 0: pFile = fopen("bitmap/bitmap24images/24pic1.bmp", "r"); break;
+			case 1: pFile = fopen("bitmap/bitmap24images/24pic2.bmp", "r"); break;
+			case 2: pFile = fopen("bitmap/bitmap24images/24pic3.bmp", "r"); break;
+			case 3: pFile = fopen("bitmap/bitmap24images/24pic4.bmp", "r"); break;
+			case 4: pFile = fopen("bitmap/bitmap24images/24pic5.bmp", "r"); break;
+		}
+
+		if (pFile == nullptr)  // Check file exists
+		{
+			std::cout << "Error Test 303: File does not exist" << std::endl;
+			return;
+		}
+
+		fseek(pFile, FileHeaderOffset, 0); // Put file in Buffer
+		fread(bmpBuffer.data(), pixelSize, TFT_WIDTH * TFT_HEIGHT, pFile);
+		fclose(pFile);
+
+		if(myTFT.drawBitmap24(0, 0, bmpBuffer, TFT_WIDTH, TFT_HEIGHT) != rdlib::Success)
+		{// Check for success 0x00
+			std::cout << "Warning an Error occurred in drawBitmap24" << std::endl;
+			return;
+		}
+		delayMilliSecRDL(TEST_DELAY5);
+	}
+}
+
+// test function for 16 bit color bitmaps made in GIMP (RGB 565 16 bit color)
+// 3 files
+// File 1 16pic1.bmp BITMAPV5HEADER offset 132
+// Color space information written
+// File 2&3 16pic2.bmp & 16pic3.bmp
+// OS/2 OS22XBITMAPHEADER (BITMAPINFOHEADER2) offset 72
+// NO color space information written
+// All bitmaps are 128 by 128 , same size as test screen
+void Test304(void)
+{
+	std::cout << "Test 304: 16 bit color image bitmaps from the file system" << std::endl;
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	char teststr1[] = "Bitmap 16";
+	myTFT.writeCharString(5, 5, teststr1);
+	delayMilliSecRDL(TEST_DELAY2);
+
+	FILE *pFile ;
+	size_t pixelSize = 2; // 16 bit 2 bytes per pixel
+	uint8_t NumberOfFiles  = 3;
+	uint8_t offsetBMPHeader = 0;
+	uint8_t offsetNoColSpace = 72;
+	uint8_t offsetColSpace = 132;
+	// Use std::vector for safe memory management of buffer
+	std::vector<uint8_t> bmpBuffer;
+	try
+	{
+		// Attempt to allocate memory for the vector
+		bmpBuffer.resize((TFT_WIDTH * TFT_HEIGHT) * pixelSize);
+	} catch (const std::bad_alloc&)
+	{
+		std::cout << "Error Test 304: Memory allocation failed for bmpBuffer" << std::endl;
+		return;
+	}
+
+	for (uint8_t i = 0 ; i < NumberOfFiles ; i++)
+	{
+		switch (i) // select file
+		{
+			case 0:
+				pFile = fopen("bitmap/bitmap16images/16pic1.bmp", "r");
+				offsetBMPHeader = offsetColSpace ;
+			break;
+			case 1: pFile = fopen("bitmap/bitmap16images/16pic2.bmp", "r");
+				offsetBMPHeader = offsetNoColSpace;
+			break;
+			case 2: pFile = fopen("bitmap/bitmap16images/16pic3.bmp", "r");
+				offsetBMPHeader = offsetNoColSpace;
+			break;
+		}
+		if (pFile == nullptr)
+		{
+			std::cout << "Error Test 404 : File does not exist" << std::endl;
+			return;
+		}
+		fseek(pFile, offsetBMPHeader, 0);
+		fread(bmpBuffer.data(), pixelSize, TFT_WIDTH * TFT_HEIGHT, pFile);
+		fclose(pFile);
+
+		if (myTFT.drawBitmap16(0, 0, bmpBuffer, TFT_WIDTH, TFT_HEIGHT) != rdlib::Success)
+		{
+		// Check for success 0x00
+			std::cout << "Warning an Error occurred in drawBitmap16" << std::endl;
+			return;
+		}
+		delayMilliSecRDL(TEST_DELAY5);
+	} // end of for loop
+
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+} // end of test
 
 void Test500(void)
 {
@@ -260,6 +569,167 @@ void Test503()
 }
 
 
+
+/**
+ * @brief Measures the FPS (frames per second) of a display test.
+ * Runs for the specified duration, rendering frames and calculating FPS.
+ * @param runtime_us Duration of the test in microseconds (e.g., 20000000 for 20 seconds).
+ * @param testNumber , which test to run 1 for text 2 for graphics
+ */
+void Test603_604(int64_t runtimeUs, uint8_t testNumber = 1) {
+	// Initialize display settings
+	myTFT.fillScreen(myTFT.RDLC_BLACK);
+	myTFT.setFont(font_pico);
+	std::cout << (runtimeUs / 1000000) << " seconds" << std::endl;
+	// Initialize timing and FPS calculation variables
+	int64_t start = getTime();  // Get start time in microseconds
+	int64_t duration = 0;       // Track elapsed time
+	uint32_t frames = 0;        // Count number of frames
+	double fps = 0;             // Store calculated FPS
+
+	// Run the test for the specified duration
+	while (duration < runtimeUs) {
+		// Call display function to test
+		switch (testNumber)
+		{
+			case 1 : displayText(fps, frames); break;
+			case 2 : displayGraphics(); break;
+		}
+		// Update elapsed time
+		duration = getTime() - start;
+		// Calculate and print FPS every 50 frames
+		if ((++frames % 50) == 0) {
+			fps = (double)frames / ((double)duration / 1000000);  // FPS = frames / elapsed seconds
+			std::cout << fps << std::endl;
+		}
+	}
+	// Compute final FPS and display results
+	duration = getTime() - start;
+	fps = (double)frames / ((double)duration / 1000000);
+	std::cout << frames << " frames, " << duration / 1000000 << " sec, " << fps << " fps" << std::endl;
+}
+
+
+// Frames per second test , 24 color bitmap test,
+void Test601(int64_t runtime_us) {
+	myTFT.fillScreen(myTFT.RDLC_RED);
+	myTFT.TFTsetRotation(myTFT.Degrees_0);
+	std::cout << "Test 601 FPS test: bitmaps ::" << (runtime_us / 1000000) << " seconds" << std::endl;
+	// Load images into buffers
+	std::vector<uint8_t> img[5] = {
+		loadImage("bitmap/bitmap24images/24pic1.bmp"),
+		loadImage("bitmap/bitmap24images/24pic2.bmp"),
+		loadImage("bitmap/bitmap24images/24pic3.bmp"),
+		loadImage("bitmap/bitmap24images/24pic4.bmp"),
+		loadImage("bitmap/bitmap24images/24pic5.bmp")
+	};
+
+	// Check if any loadImage call failed
+	for (size_t i = 0; i < 5; ++i) {
+		if (img[i].empty()) {
+			std::cout << "Error: Image " << i + 1 << " failed to load." << std::endl;
+			return;
+		}
+	}
+
+	int64_t start = getTime(), duration = 0;
+	uint32_t frames = 0;
+	double fps = 0;
+
+	// Run for ~10 seconds
+	while (duration < runtime_us)
+	{
+		myTFT.drawBitmap24(0, 0, img[frames % 5], TFT_WIDTH, TFT_HEIGHT);
+		duration = getTime() - start;
+		if ((++frames % 50) == 0) {
+			fps = (double)frames / ((double)duration / 1000000);
+			std::cout << fps << std::endl;
+		}
+	}
+
+	// Get final stats and print
+	duration = getTime() - start;
+	fps = (double)frames / ((double)duration / 1000000);
+	std::cout << frames << " frames, " << duration / 1000000 << " sec, " << fps << " fps" << std::endl;
+}
+
+
+void  displayText(double fps, uint32_t frames)
+{
+	myTFT.setCursor(5, 5);
+	myTFT.println("Frames:");
+	myTFT.println(frames);
+	myTFT.println("FPS:");
+	myTFT.println(fps);
+	myTFT.println("SPI speed:");
+	myTFT.println(SPI_SPEED);
+	myTFT.println("Testing!");
+	myTFT.println(rdlib::LibraryVersion());
+}
+
+void  displayGraphics(void)
+{
+	myTFT.drawFastVLine(63, 0, 127, myTFT.RDLC_BLUE);
+	myTFT.drawFastHLine(0, 63, 127, myTFT.RDLC_BLUE);
+	myTFT.fillQuadrilateral(
+		20, 20,  // P0: top-left
+		60, 20,  // P1: top-right
+		50, 40,  // P2: bottom-right (offset x by -10)
+		10, 40,  // P3: bottom-left  (offset x by -10)
+	myTFT.RDLC_CYAN
+	);
+	myTFT.fillRect(20, 70, 20, 20, myTFT.RDLC_RED);
+	myTFT.fillCircle(100, 30, 10, myTFT.RDLC_GREEN);
+	myTFT.fillTriangle(70,90, 90, 70 , 110, 90, myTFT.RDLC_YELLOW);
+}
+
+/**
+ * @brief Gets the current time in microseconds since the Unix epoch.
+ * Uses clock_gettime with CLOCK_REALTIME to fetch the system time.
+ * @return int64_t Time in microseconds, or -1 on failure.
+ */
+int64_t getTime() {
+	// Structure to store the current time
+	struct timespec tms;
+	// Get the current real-world time; return -1 if the call fails
+	if (clock_gettime(CLOCK_REALTIME, &tms)) return -1;
+	// Convert seconds to microseconds
+	int64_t micros = tms.tv_sec * 1000000;
+	// Convert nanoseconds to microseconds and add
+	micros += tms.tv_nsec / 1000;
+	// Round up if the nanosecond remainder is >= 500
+	if (tms.tv_nsec % 1000 >= 500) ++micros;
+	// Return the time in microseconds
+	return micros;
+}
+
+
+std::vector<uint8_t> loadImage(const char* name) {
+	size_t pixelSize = 3; // 24-bit color = 3 bytes per pixel
+	uint8_t FileHeaderOffset = 54;
+
+	FILE *pFile = fopen(name, "r");
+	if (pFile == nullptr) {
+		std::cout << "Error: File does not exist" << std::endl;
+		return {}; // Return empty vector on failure
+	}
+
+	std::vector<uint8_t> bmpBuffer;
+	try {
+		bmpBuffer.resize(TFT_WIDTH * TFT_HEIGHT * pixelSize);
+	} catch (const std::bad_alloc&) {
+		std::cout << "Error: Could not allocate memory" << std::endl;
+		fclose(pFile);
+		return {};
+	}
+
+	fseek(pFile, FileHeaderOffset, SEEK_SET);
+	fread(bmpBuffer.data(), pixelSize, TFT_WIDTH * TFT_HEIGHT, pFile);
+	fclose(pFile);
+
+	return bmpBuffer; // Return by value (RVO applies)
+}
+
 void Test701(void) {
 
 	std::cout << "Test 701: Print out some fonts with writeCharString" << std::endl;
@@ -317,7 +787,7 @@ void Test701(void) {
 	myTFT.setFont(font_inconsola);
 	myTFT.writeCharString(5, 60, teststr14);
 	DisplayReset();
-	
+
 	myTFT.setFont(font_groTeskBig);
 	myTFT.writeCharString(5, 5, teststr15);
 	myTFT.setFont(font_mint);
@@ -387,8 +857,6 @@ void Test703(void) {
 	DisplayReset();
 
 }
-
-
 
 void Test704(void) {
 	std::cout << "Test 704: font invert + test character draw using draw functions" << std::endl;
@@ -485,8 +953,8 @@ void Test705(void)
 	myTFT.print(124);
 
 	DisplayReset();
-	
-	// Test font seven segment 
+
+	// Test font seven segment
 	myTFT.setCursor(5,5);
 	myTFT.setFont(font_sevenSeg);
 	myTFT.println(12);
@@ -654,7 +1122,7 @@ void Test708(void)
 	// For a vector of integers
 	std::vector<int> intVec = {47, 11, 34};
 	myTFT.setCursor(5, 5);
-	myTFT.println( intVec[0]);  // print 47 
+	myTFT.println( intVec[0]);  // print 47
 	myTFT.println( intVec[0], myTFT.RDL_HEX); // print 2F
 	myTFT.println( intVec[0] ,myTFT.RDL_OCT); //print 57
 	myTFT.println( intVec[0], myTFT.RDL_BIN); // print 101111
@@ -752,7 +1220,7 @@ void Test906(void) {
 void Test907() {
 	std::cout << "Test 907 : quadrilateral" << std::endl;
 	// Define the  quadrilateral vertices for different shapes
-	// Parallelogram 
+	// Parallelogram
 	int16_t x4 = 45, y4 = 70;   // First vertex
 	int16_t x5 = 75, y5 = 75;
 	int16_t x6 = 70, y6 = 100;
@@ -760,7 +1228,7 @@ void Test907() {
 	myTFT.fillQuadrilateral(x4, y4, x5, y5, x6, y6, x7, y7, myTFT.RDLC_GREEN);
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
-	// Trapezoid 1 
+	// Trapezoid 1
 	int16_t x8 = 30, y8 = 30;   // First vertex
 	int16_t x9 = 35, y9 = 50;
 	int16_t x10 = 60, y10 = 50;
@@ -836,6 +1304,26 @@ void EndTests(void)
 
 	myTFT.TFTPowerDown(); // Power down device
 	std::cout << "TFT End" << std::endl;
+}
+
+//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
+std::string UTC_string()
+{
+	std::time_t time = std::time({});
+	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
+	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
+	return timeString;
+}
+
+void displayMenu() {
+	std::cout << "Tests Menu:\n";
+	std::cout << "1. Bitmap Tests\n";
+	std::cout << "2. Function Tests\n";
+	std::cout << "3. FrameRate Tests\n";
+	std::cout << "4. Text Tests\n";
+	std::cout << "5. Graphic Tests\n";
+	std::cout << "6. Quit\n";
+	std::cout << "Enter your choice: ";
 }
 
 // *************** EOF ****************

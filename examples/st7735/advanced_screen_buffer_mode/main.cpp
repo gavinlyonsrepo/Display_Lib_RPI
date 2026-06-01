@@ -71,7 +71,7 @@ uint8_t Setup(void)
 	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , MY_TFT_WIDTH , MY_TFT_HEIGHT);
 // ***********************************
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
-	// pass enum to param one ,4 choices,see README
+	// pass enum to param one ,5 choices,see README
 	if(myTFT.TFTInitPCBType(myTFT.TFT_ST7735R_Red, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return -2;

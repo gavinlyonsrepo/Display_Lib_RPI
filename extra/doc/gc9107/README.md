@@ -116,6 +116,7 @@ Hello world can be setup for software or hardware SPI by changing "HardwareSPI" 
 | --- | --- | --- | --- |
 | 1 | hello_world | Basic use case | |
 | 2 | tests | Tests bitmap, text,graphics & function testing | Uses Advanced Screen Buffer Mode |
+| 3 | demos | System monitor demo(fake data) | |
 
 ### Bitmap
 

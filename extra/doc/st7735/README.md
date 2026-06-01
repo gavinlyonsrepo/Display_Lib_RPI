@@ -75,7 +75,7 @@ TFTInitPCBType function is overloaded(2 off, one for HW SPI the other for SW SPI
 
 PCB_TYPE: In the main.cpp in USER OPTION 3 PCB_TYPE select your display type,
 by passing an enum type to function  TFTInitPCBType.
-Default is "TFT_ST7735R_Red". There are 4 types of the ST7735 TFT display supported.
+Default is "TFT_ST7735R_Red". There are 5 types of the ST7735 TFT display supported.
 If your display works but RGB colors are wrong you may have chosen wrong display type.
 
 | Number | Description | Enum label | Tested |
@@ -84,6 +84,9 @@ If your display works but RGB colors are wrong you may have chosen wrong display
 | 2 | ST7735R Green Tab | TFT_ST7735R_Green | n/a |
 | 3 | ST7735R Red Tab | TFT_ST7735R_Red | RED PCB v1.1, 1.44, 128x128 pixels |
 | 4 | ST7735S Black Tab | TFT_ST7735S_Black | RED PCB v1.2, 1.8, 128 x 160 pixels |
+| 5 | ST7735S 80x160 | TFT_ST7735S_80160 | Blue PCB .96 inch, 80x160 pixels |
+
+The ST7735S 80x160 requires an offset of (26,1) or (24,0)
 
 ### File system
 
@@ -91,23 +94,23 @@ In example folder sub-folders:
 The main.cpp file contains tests showing library functions.
 A bitmap data file contains data for bi-color bitmaps and icons tests.
 The color bitmaps used in testing are in bitmap folder, 3 16-bit and 5 24-bit images.
+
 Hello world can be setup for software or hardware SPI by changing "HardwareSPI" at top of file.
 It also has a 'USER SCREEN TYPE SECTION' where user can switch PCB type:
-For both types tested with library, There are other options see User options.
+For types tested with library, There are other options see User options.
 
 ```c
 #define REDTAB_SETUP // Setup for 128x128 ST7735R Red Tab display.
 //#define BLACKTAB_SETUP //  Setup for 120x160 ST7735S Black Tab display.
+//#define S5P80160_SETUP // Setup for 80x160 ST7735S BOE/HSD (buydisplay) display.
 ```
 
 | # | example folder name | Description |
 | ------ | ------ | ------ |
 | 1 | hello_world | Basic use case |
-| 2 | text_Graphic_Functions | Tests text,graphics & function testing |
-| 3 | bitmap_Tests | bitmap |
-| 4 | framerate_test | Frame rate per second (FPS) |
-| 5 | demos | various demos |
-| 6 | advanced_screen_buffer_mode | advanced screen buffer mode test |
+| 2 | test | Tests bitmap, text,graphics, function and Frame rate per second (FPS) |
+| 3 | advanced_screen_buffer_mode | advanced screen buffer mode test |
+| 4 | demos | various demos |
 
 ### Bitmap
 

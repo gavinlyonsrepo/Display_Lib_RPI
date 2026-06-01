@@ -25,13 +25,15 @@ bool bHardwareSPI= true;
 
 //=====================
 // USER SCREEN TYPE SECTION
-// Only two types defined here, there are others, see readme. 
+// Only three types defined here, there are others, see readme. 
 // Comment in one and ONE only
 #define REDTAB_SETUP // Setup for 128x128 ST7735R Red Tab display.
 //#define BLACKTAB_SETUP //  Setup for 120x160 ST7735S Black Tab display.
+//#define S5P80160_SETUP // Setup for 80x160 ST7735S BOE/HSD (buydisplay) display.
+//=====================
 
-#if defined(REDTAB_SETUP) == defined(BLACKTAB_SETUP)
-#error "Define exactly ONE of REDTAB_SETUP  or BLACKTAB_SETUP"
+#if (defined(REDTAB_SETUP) + defined(BLACKTAB_SETUP) + defined(S5P80160_SETUP)) != 1
+#error "Define exactly ONE display setup"
 #endif
 
 #ifdef REDTAB_SETUP
@@ -46,6 +48,12 @@ bool bHardwareSPI= true;
 	uint16_t TFT_WIDTH = 128;  // Screen width in pixels
 	uint16_t TFT_HEIGHT = 160; // Screen height in pixels
 	ST7735_TFT::TFT_PCBtype_e  DISPLAY_TYPE = ST7735_TFT::TFT_ST7735S_Black;
+#elif defined(S5P80160_SETUP)
+	uint8_t OFFSET_COL = 26;    // buydisplay says 24
+	uint8_t OFFSET_ROW = 1;     // buydisplay says 0
+	uint16_t TFT_WIDTH = 80;    // Screen width in pixels
+	uint16_t TFT_HEIGHT = 160;  // Screen height in pixels
+	ST7735_TFT::TFT_PCBtype_e  DISPLAY_TYPE = ST7735_TFT::TFT_ST7735S_80160;
 #endif
 //=====================
 
@@ -93,13 +101,11 @@ uint8_t SetupHWSPI(void)
 // ** USER OPTION 1 GPIO **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
 //*********************************************
-
 // ** USER OPTION 2 Screen Setup**
 	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
-
 // ** USER OPTION 3 PCB_TYPE + SPI settings**
-	// pass enum to param1 ,4 choices,see README
+	// pass enum to param1 ,5 choices,see README
 	if(myTFT.TFTInitPCBType( DISPLAY_TYPE, SPI_DEV, SPI_CHANNEL, SPI_SPEED, SPI_FLAGS, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;
@@ -128,7 +134,7 @@ uint8_t SetupSWSPI(void)
 	myTFT.TFTInitScreenSize(OFFSET_COL, OFFSET_ROW , TFT_WIDTH , TFT_HEIGHT);
 // ***********************************
 // ** USER OPTION 3 PCB_TYPE **
-	// pass enum to param1 ,4 choices,see README
+	// pass enum to param1 ,5 choices,see README
 	if(myTFT.TFTInitPCBType(DISPLAY_TYPE, SWSPI_CommDelay, GPIO_CHIP_DEV) != rdlib::Success)
 	{
 		return 3;

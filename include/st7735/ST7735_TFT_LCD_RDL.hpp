@@ -48,6 +48,7 @@ public:
 		TFT_ST7735R_Green,   /**<  ST7735R Green Tab */
 		TFT_ST7735S_Black,   /**<  ST7735S Black Tab */
 		TFT_ST7735B,         /**<  ST7735B controller */
+		TFT_ST7735S_80160    /**<  ST7735S 80x160 display BOE/HSD (buydisplay)*/
 	};
  
 	TFT_modes_e TFT_mode;                    /**< Enum to hold display mode */
@@ -78,6 +79,7 @@ public:
 
 private:
 	rdlib::Return_Codes_e TFTST7735BInitialize(void);
+	rdlib::Return_Codes_e TFTST7735S_80160Initialize(void);
 	rdlib::Return_Codes_e TFTGreenTabInitialize(void);
 	rdlib::Return_Codes_e TFTBlackTabInitialize(void);
 	rdlib::Return_Codes_e TFTRedTabInitialize(void);
@@ -90,6 +92,7 @@ private:
 	void Rcmd3(void);
 	void Bcmd(void);
 	void Rcmd2green(void);
+	void Scmd(void);
 
 	//screen 
 	uint8_t _colstart;        /**< Used to offset column in the event of defect at edge of screen */
