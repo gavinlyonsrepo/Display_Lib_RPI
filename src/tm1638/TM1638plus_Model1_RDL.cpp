@@ -73,9 +73,9 @@ void TM1638plus_Model1::displayIntNum(unsigned long number, AlignTextType_e Text
 {
 	char values[_TMDisplaySize + 1];
 	char TextDisplay[6] = "%";
-	char TextRight[4] = "8ld";
-	char TextLeft[3] = "ld";
-	char TextLeadZero[5] = "08ld";
+	const char TextRight[4] = "8ld";
+	const char TextLeft[3] = "ld";
+	const char TextLeadZero[5] = "08ld";
 	
 	switch(TextAlignment) 
 	{
@@ -102,9 +102,9 @@ void TM1638plus_Model1::DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numb
 	char valuesUpper[_TMDisplaySize + 1];
 	char valuesLower[_TMDisplaySize/2 + 1];
 	char TextDisplay[5] = "%";
-	char TextRight[3] = "4d";
-	char TextLeft[4] = "-4d";
-	char TextLeadZero[4] = "04d";
+	const char TextRight[3] = "4d";
+	const char TextLeft[4] = "-4d";
+	const char TextLeadZero[4] = "04d";
 	
 	switch(TextAlignment) 
 	{

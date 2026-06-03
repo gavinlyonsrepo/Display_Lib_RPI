@@ -51,9 +51,9 @@ public:
 		TFT_ST7735S_80160    /**<  ST7735S 80x160 display BOE/HSD (buydisplay)*/
 	};
  
-	TFT_modes_e TFT_mode;                    /**< Enum to hold display mode */
-	display_rotate_e displayRotate = Degrees_0; /**< Enum to hold rotation */
-	TFT_PCBtype_e TFT_PCBtype;               /**< Enum to hold TFT type  */
+	TFT_modes_e TFT_mode = TFT_Normal_mode;        /**< Enum to hold display mode */
+	display_rotate_e displayRotate = Degrees_0;    /**< Enum to hold rotation */
+	TFT_PCBtype_e TFT_PCBtype = TFT_ST7735S_Black; /**< Enum to hold TFT type  */
 
 	// Functions
 	// From graphics virtual
@@ -95,10 +95,10 @@ private:
 	void Scmd(void);
 
 	//screen 
-	uint8_t _colstart;        /**< Used to offset column in the event of defect at edge of screen */
-	uint8_t _rowstart;        /**< Used to offset row in the event of defect at edge of screen */
-	uint16_t _widthStartTFT; /**<  never change after first init */
-	uint16_t _heightStartTFT; /**< never change after first init */
+	uint8_t _colstart = 0;          /**< Used to offset column in the event of defect at edge of screen */
+	uint8_t _rowstart = 0;          /**< Used to offset row in the event of defect at edge of screen */
+	uint16_t _widthStartTFT = 128;  /**<  never change after first init */
+	uint16_t _heightStartTFT = 128; /**< never change after first init */
 
 	//SPI
 	int _spiDev = 0;      /**< A SPI device, >= 0. */

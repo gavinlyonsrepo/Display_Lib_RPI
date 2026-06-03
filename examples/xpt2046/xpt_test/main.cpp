@@ -7,11 +7,15 @@
 		-# 1001 Touch screen example XPT2046
 */
 
-#include <csignal> //catch user Ctrl+C
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
 
 #include "XPT2046_TS_TFT_LCD_RDL.hpp"
 
 /// @cond
+
+std::atomic<bool> stopRequested{false}; // Stop signal , Ctrl + c etc
 
 // Touchscreen device XPT 2046
 XPT_2046_RDL myXPT;
@@ -25,14 +29,18 @@ int8_t RESPIN = 11; // // MOSI used to init device on init ,T_CLK reset pin if n
 int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
 
 void EndTest();
-void signal_callback_handler(int signum);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 
 int main ()
 {
 	printf("lgpio library Version Number :: %i\r\n",lguVersion());
 	// Setup
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
 	printf("Start, Press ctrl + c to quit\n");
-	signal(SIGINT, signal_callback_handler);
+
 	if (myXPT.XPTSPIInit(HWSPI_DEVICE, HWSPI_CHANNEL_XPT, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE, IRQPIN, RESPIN) != rdlib::Success)
 	{
 		printf("ERROR :: Could not Start XPT 2046 sensor\n");
@@ -41,19 +49,21 @@ int main ()
 
 	// Test Touch Pad
 	int x, y;
-	bool TouchPenIRQ = false;
-	for (;;) {
+
+	for (;;) 
+	{
 		delayMilliSecRDL(10); // Settle time
-		TouchPenIRQ = myXPT.XPTIRQIsPressed();
+		bool TouchPenIRQ = myXPT.XPTIRQIsPressed();
 		if (TouchPenIRQ == true){ // touch pen is down
 			myXPT.XPTReadXY(&x, &y);
 			printf("Touch : x=%5d y=%5d\n", x, y);
 			delayMilliSecRDL(10);
-		} else { // touch pen is up
-
-		}
+		} else { }// touch pen is up
+		if (stopRequested) break;
 	} // end for
 
+	if (stopRequested)
+		std::cout << "Exit Signal received" << std::endl;
 	EndTest();
 	return 0;
 }
@@ -64,11 +74,5 @@ void EndTest(void)
 	printf("End\n");
 }
 
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	EndTest();
-	exit(signum);
-}
 
 /// @endcond

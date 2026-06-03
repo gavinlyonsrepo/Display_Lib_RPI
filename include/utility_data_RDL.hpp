@@ -18,11 +18,18 @@
 #include <fstream>
 #include <source_location>
 #include <chrono>
+#include <format>
 #include <iomanip>
 #include <ctime>
 #include <cstdlib>
 #include <filesystem>
 #include <cmath>  // For std::cos, std::sin  std::lerp
+
+/*! @brief Name space for time related utilities*/
+namespace rdlib_time
+{
+	std::string UTC_string();
+}
 
 /*! @brief Name space for config file related utilities*/
 namespace rdlib_config 

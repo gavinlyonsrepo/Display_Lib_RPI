@@ -102,6 +102,7 @@ void myLoop()
 void display_buffer(long currentFramerate, int count)
 {
 	// Values to count frame rate per second
+	// cppcheck-suppress variableScope
 	static long lastFramerate = 0;
 	static uint16_t fps;
 	uint64_t currentCounter = counter();

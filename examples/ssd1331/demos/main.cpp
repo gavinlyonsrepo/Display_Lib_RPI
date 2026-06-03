@@ -13,7 +13,6 @@
 
 // Section ::  libraries
 #include <iostream>
-#include <ctime>
 #include <random>
 #include <algorithm> // For std::clamp
 #include <atomic>  // Ctrl + C exit
@@ -37,7 +36,6 @@ uint16_t OLED_HEIGHT = 64; // Screen height in pixels
 //  Section ::  Function Headers 
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
 void displayMenu(void);
-std::string UTC_string(void);
 void EndTests(void);
 void handleSignal(int){
 	stopRequested = true; // for CtrL +C
@@ -166,7 +164,7 @@ void ClockDemo(uint16_t secondsDisplay)
 	while(secondsDisplay >1) 
 	{
 		// Get UTC time as string
-		std::string utcTime = UTC_string();  // UTC_string() returns a string like "YYYY-MM-DD HH:MM:SS"
+		std::string utcTime = rdlib_time::UTC_string();  // UTC_string() returns a string like "YYYY-MM-DD HH:MM:SS"
 		// Parse the time string to extract hour, minute, and second
 		int hour = std::stoi(utcTime.substr(11, 2));  // Extract hour
 		int minute = std::stoi(utcTime.substr(14, 2)); // Extract minute
@@ -281,7 +279,7 @@ void DigitalClock(uint16_t count)
 	// draw clock
 	while(count > 1)
 	{
-		std::string TimeString = UTC_string();
+		std::string TimeString = rdlib_time::UTC_string();
 		std::cout<< TimeString << "\r" << std::flush;
 		auto DateInfo = TimeString.substr(0, 10);
 		auto TimeInfo = TimeString.substr(11,8);
@@ -403,15 +401,6 @@ void demoRadar(uint16_t sweeps)
 		std::cout << +j << "\r" << std::flush;
 	}
 	myOLED.fillScreen(myOLED.RDLC_BLACK);
-}
-
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string() 
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
 }
 
 void EndTests(void)

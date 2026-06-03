@@ -220,7 +220,7 @@ void HD44780PCF8574LCD::LCDInit(LCDCursorType_e CursorType) {
 		-# CharArrayNullptr
 		-# CustomCharLen
 */
-rdlib::Return_Codes_e HD44780PCF8574LCD::LCDSendString(char *str) 
+rdlib::Return_Codes_e HD44780PCF8574LCD::LCDSendString(const char *str) 
 {
 	// Check for null pointer
 	if (str == nullptr) 
@@ -335,7 +335,7 @@ void HD44780PCF8574LCD::LCDGOTO(LCDLineNumber_e line, uint8_t col) {
 		-# CharArrayNullptr
 		-# InvalidRAMLocation
 */
-rdlib::Return_Codes_e  HD44780PCF8574LCD::LCDCreateCustomChar(uint8_t location, uint8_t * charmap)
+rdlib::Return_Codes_e  HD44780PCF8574LCD::LCDCreateCustomChar(uint8_t location, const uint8_t * charmap)
 {
 	if (charmap == nullptr) 
 	{

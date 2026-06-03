@@ -1,6 +1,6 @@
 /*!
 	@file utility_data_RDL.cpp
-	@brief A file to hold some utilities(maths, config, file logging etc) , included in common_data_RDL.
+	@brief A file to hold some utilities(maths, config, file logging, time etc) , included in common_data_RDL.
 
 	@details
 		Implements the operator<< function for std::source_location.
@@ -120,6 +120,25 @@ uint16_t blend565(uint16_t c1, uint16_t c2, uint8_t amount)
 
 }
 
+namespace rdlib_time
+{
+/*!
+	@brief Returns the current UTC time as a formatted string.
+	@return std::string containing the current UTC time in "yyyy-mm-dd hh:mm:ss UTC" format.
+	@note Requires C++20 for std::format and std::chrono::floor support.
+	@details Uses std::chrono::system_clock to get the current time, truncates
+		to second precision with std::chrono::floor, then formats the result
+		using std::format with the ISO 8601 date and time specifiers.
+		std::string time = UTC_string();
+		// Returns e.g. "2026-06-02 19:13:21 UTC"
+*/
+std::string UTC_string()
+{
+	auto now = std::chrono::system_clock::now();
+	auto seconds = std::chrono::floor<std::chrono::seconds>(now);
+	return std::format("{:%F %T UTC}", seconds);
+}
+}
 
 namespace rdlib_log 
 {

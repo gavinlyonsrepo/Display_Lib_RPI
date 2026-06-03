@@ -123,7 +123,7 @@ class color16_graphics:public display_Fonts, public Print  {
 	// Text related functions
 	virtual size_t write(uint8_t) override;
 	rdlib::Return_Codes_e writeChar( int16_t x, int16_t y, char value );
-	rdlib::Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
+	rdlib::Return_Codes_e writeCharString( int16_t x, int16_t y, const char *text);
 	void setTextWrap(bool w);
 	void setTextColor(uint16_t c, uint16_t bg);
 	void setTextColor(uint16_t c);
@@ -158,19 +158,19 @@ protected:
 
 	int16_t _cursorX = 0; /**< Current X co-ord cursor position */
 	int16_t _cursorY = 0; /**< Current Y co-ord cursor position */
-	uint16_t _width;      /**< Display w as modified by current rotation*/
-	uint16_t _height;     /**< Display h as modified by current rotation*/
-	uint8_t _XStart= 0;   /**< Used to store _colstart changed by current rotation */
-	uint8_t _YStart= 0;   /**< Used to store _rowstart changed by current rotation */
+	uint16_t _width  = 0; /**< Display w as modified by current rotation*/
+	uint16_t _height = 0; /**< Display h as modified by current rotation*/
+	uint8_t _XStart  = 0; /**< Used to store _colstart changed by current rotation */
+	uint8_t _YStart  = 0; /**< Used to store _rowstart changed by current rotation */
 	float _arcAngleMax = 360.0f; /**< Maximum angle of Arc , used by drawArc*/
 	int _arcAngleOffset= 0; /**< used by drawArc, offset for adjusting the starting angle of arc. default positive X-axis (0°)*/
 
-	int8_t _Display_DC;    /**< GPIO for data or command line */
-	int8_t _Display_RST;   /**< GPIO for reset line */
-	int8_t _Display_CS;    /**< GPIO for chip select line,  Software SPI only */
-	int8_t _Display_SCLK;  /**< GPIO for Clock line,  Software SPI only */
-	int8_t _Display_SDATA; /**< GPIO for MOSI line,  Software SPI only */
-	int8_t _Display_MISO;  /**< GPIO for  MISO line, Software SPI only*/
+	int8_t _Display_DC    = 0; /**< GPIO for data or command line */
+	int8_t _Display_RST   = 0; /**< GPIO for reset line */
+	int8_t _Display_CS    = 0; /**< GPIO for chip select line, Software SPI only */
+	int8_t _Display_SCLK  = 0; /**< GPIO for Clock line, Software SPI only */
+	int8_t _Display_SDATA = 0; /**< GPIO for MOSI line, Software SPI only */
+	int8_t _Display_MISO  = 0; /**< GPIO for MISO line, Software SPI only*/
 
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0;        /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */

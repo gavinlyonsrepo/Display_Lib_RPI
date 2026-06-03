@@ -8,7 +8,6 @@
 */
 
 #include <iostream>
-#include <ctime>
 
 #include <atomic>  // Ctrl + C exit
 #include <csignal> // Ctrl + C exit
@@ -41,7 +40,6 @@ void Test(void);
 void EndTests(void);
 void DisplayClock(void);
 void SplashScreen(void);
-std::string UTC_string(void);
 void handleSignal(int){
 	stopRequested = true; // for CtrL+C
 }
@@ -108,7 +106,7 @@ void DisplayClock(void)
 	while(count < 9999)
 	{
 		if (stopRequested) break;
-		std::string TimeString = UTC_string();
+		std::string TimeString = rdlib_time::UTC_string();
 		auto DateInfo = TimeString.substr(2, 8);
 		auto TimeInfo = TimeString.substr(11,8);
 
@@ -158,20 +156,5 @@ void SplashScreen(void)
 	myOLED.OLEDclearBuffer();
 }
 
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string() 
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
-
-// Terminate program on ctrl + C 
-void signal_callback_handler(int signum)
-{
-	EndTests();
-	exit(signum);
-}
 
 /// @endcond

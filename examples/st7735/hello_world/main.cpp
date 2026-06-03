@@ -13,7 +13,6 @@
 
 // Section ::  libraries 
 #include <iostream>
-
 #include "ST7735_TFT_LCD_RDL.hpp"
 
 /// @cond

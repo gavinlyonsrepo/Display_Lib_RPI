@@ -1,28 +1,37 @@
 /*!
 	@file examples/misc_test/unit_test_bicolor_class/main.cpp
-	@brief Test file for SSD1306_OLED display 
-		showing unit testing bi-color graphics class , graphics text and bitmaps.
+	@brief Test file showing unit testing bi-color graphics class, graphics text and bitmaps.
 	@test
 		-# Test 806 Unit testing graphics bi-color library
 		-# Test 805 Unit testing Bitmap  bi-color library
 		-# Test 804 Unit testing Text bi-color library
 */
 
+#include <cassert>
 #include "Bitmap_test_data.hpp" // Bitmap test data file
-#include "SSD1306_OLED_RDL.hpp"
+#include "ERM1_CH1115_OLED_RDL.hpp"
 
 /// @cond
 
-// Screen related
-#define MY_OLED_WIDTH  128
-#define MY_OLED_HEIGHT 64
-#define FULLSCREEN (MY_OLED_WIDTH * (MY_OLED_HEIGHT/8))
-uint8_t screenBuffer[FULLSCREEN];
-SSD1306_RDL myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT) ; // instantiate  an object
-// I2C related
-#define OLED_I2C_ADDRESS 0x3C
-#define OLED_I2C_DEVICE 1
-#define OLED_I2C_FLAGS 0
+//GPIO
+const uint8_t RES = 25; // GPIO pin number pick any you want
+const uint8_t DC = 24; // GPIO pin number pick any you want
+int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
+
+// Screen
+const uint8_t MY_OLED_WIDTH  = 128;
+const uint8_t MY_OLED_HEIGHT = 64;
+#define myScreenSize (MY_OLED_WIDTH * (MY_OLED_HEIGHT/8)) // 1024 bytes = 128 * 64/8
+const uint8_t OLEDcontrast = 0x80; //Constrast 00 to FF , 0x80 is default.
+
+// SPi
+// Hardware SPI setup
+int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
+int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+int HWSPI_SPEED =  1000000; // The speed of serial communication in bits per second.
+int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+
+ERMCH1115 myOLED(MY_OLED_WIDTH ,MY_OLED_HEIGHT, RES, DC); // instantiate an object
 
 // =============== Function prototype ================
 bool SetupTest(void);
@@ -46,22 +55,15 @@ int main(void)
 // ======================= Function space ===================
 bool SetupTest()
 {
-	printf("Test Begin\r\n\n");
-	// Open  on I2C device
-	if(myOLED.OLED_I2C_ON(OLED_I2C_DEVICE, OLED_I2C_ADDRESS,OLED_I2C_FLAGS) != rdlib::Success)
+	printf("OLED Begin\r\n");
+	delayMilliSecRDL(50);
+	if(myOLED.OLEDbegin(OLEDcontrast, HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE ) != rdlib::Success) // initialize the OLED
 	{
-		printf("Error 1201:Cannot open I2C device bus\n");
+		printf("Error 1202: Setup : Cannot start spi \r\n");
 		return false;
 	}
-	// Check if OLED on Bus
-	if(myOLED.OLEDCheckConnection() < 0)
-	{
-		printf("Error 1202 : Cannot See Device on Bus\n");
-		return false;
-	}
-	delayMilliSecRDL(500);
-	myOLED.OLEDbegin(); // initialize the OLED
-	myOLED.OLEDFillScreen(0xF0, 0); // splash screen bars, optional just for effect
+	delayMilliSecRDL(50);
+	myOLED.OLEDFillScreen(0x0F); //splash screen bars
 	delayMilliSecRDL(1000);
 	return true;
 }
@@ -69,15 +71,16 @@ bool SetupTest()
 
 void EndTests()
 {
-	myOLED.OLEDPowerDown(); //Switch off display
-	myOLED.OLED_I2C_OFF(); // Switch off I2C , optional may effect other programs & devices
-	printf("OLED Test End\r\n");
+	myOLED.OLEDPowerDown();
+	myOLED.OLEDSPIoff();
+	printf("OLED End\r\n");
 }
 
 void myTests()
 {
-	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer ) != rdlib::Success) return;
-	myOLED.OLEDclearBuffer();
+	uint8_t screenBuffer[myScreenSize]; 
+	if (myOLED.OLEDSetBufferPtr(MY_OLED_WIDTH, MY_OLED_HEIGHT, screenBuffer) != rdlib::Success) return;
+	myOLED.OLEDclearBuffer(); // Clear buffer
 	bool result804 = Test804();
 	bool result805 = Test805();
 	bool result806 = Test806();
@@ -98,7 +101,6 @@ void TestReset(void){
 //  Bitmap Unit testing test
 bool Test805(void)
 {
-
 	// === Setup tests ===
 	// Define the expected return values
 	std::vector<uint8_t> expectedErrors = 
@@ -121,7 +123,7 @@ bool Test805(void)
 	myOLED.setFont(font_default);
 	returnValues.push_back(myOLED.writeCharString(0, 0, testString5)); 
 	delayMilliSecRDL(2000);
-	myOLED.OLEDFillScreen(0x00, 0);
+	myOLED.OLEDFillScreen(0x00);
 	myOLED.OLEDclearBuffer();
 	myOLED.setDrawBitmapAddr(false);
 	returnValues.push_back(myOLED.drawBitmap(140, 0, SignalIconHa, 16, 8, myOLED.BLACK, myOLED.WHITE));
@@ -136,11 +138,12 @@ bool Test805(void)
 	//== SUMMARY SECTION===
 	printf("\nUnit testing Summary.\n");
 	// Check return values against expected errors
+	assert(returnValues.size() == expectedErrors.size());
 	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+		if (returnValues[i] != expectedErrors[i]) {
 			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n",
+				returnValues[i], i + 1, expectedErrors[i]);
 		}
 	}
 
@@ -227,11 +230,12 @@ bool Test804(void)
 	//== SUMMARY SECTION===
 	printf("\nUnit testing Summary.\n");
 	// Check return values against expected errors
+	assert(returnValues.size() == expectedErrors.size());
 	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+		if (returnValues[i] != expectedErrors[i]) {
 			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n",
+				returnValues[i], i + 1, expectedErrors[i]);
 		}
 	}
 		// Print all expectedErrors for summary
@@ -301,11 +305,12 @@ bool Test806(void)
 	//== SUMMARY SECTION===
 	printf("Unit testing Summary.\n");
 	// Check return values against expected errors
+	assert(returnValues.size() == expectedErrors.size());
 	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+		if (returnValues[i] != expectedErrors[i]) {
 			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n",
+				returnValues[i], i + 1, expectedErrors[i]);
 		}
 	}
 	// Print all expectedErrors for summary

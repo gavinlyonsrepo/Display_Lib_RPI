@@ -11,7 +11,6 @@
 */
 
 // Section ::  libraries
-#include <ctime>
 #include <random> // gauge
 #include <iostream> // cout cin
 #include <algorithm> // For std::clamp
@@ -48,13 +47,12 @@ void gaugeDemo(uint16_t  countLimit = 50);  // demo1
 void arcGauge(uint16_t count=100); // demo 2
 void drawPointerHelper(int16_t val, uint8_t x, uint8_t y, uint8_t r, uint16_t color);
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor, uint16_t color);
-void drawPointer(int16_t &val, int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
+void drawPointer(const int16_t &val, const int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
 // === Demo 3 ===
 void rotaryMenuDemo(void);
 int getchar_timeout(int timeout_ms);
 // === Demo 4 ===
 void analogClockDemo(uint16_t countLimit = 50);
-std::string UTC_string(void);
 // === Demo 5 ===
 void volumeKnobDemo(void);
 
@@ -147,14 +145,6 @@ void displayMenu() {
 	std::cout << "Enter your choice: ";
 }
 
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string()
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
 
 // === Demo 1 & 2 ===
 
@@ -252,11 +242,11 @@ void arcGauge(uint16_t countLimit) // demo 2
 
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor, uint16_t color)
 {
-	float angleRad, innerX, innerY, outerX, outerY;
 	int angle;
 	// Loop through the specified angle range, drawing ticks every 30 degrees
 	for (angle = startAngle; angle <= endAngle; angle += 30)
 	{
+		float angleRad, innerX, innerY, outerX, outerY;
 		// Convert degrees to radians
 		angleRad = angle * (std::numbers::pi / 180);
 		// inner marker position
@@ -272,7 +262,7 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 	}
 }
 
-void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour)
+void drawPointer(const int16_t &currentValue, const int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour)
 {
 	uint16_t i;
 	// If the current value is increasing
@@ -371,7 +361,7 @@ void rotaryMenuDemo()
 	constexpr uint8_t itemCount = 6;
 	constexpr uint8_t nodeRadius = 16;
 	struct MenuItem { const char* label; };
-	MenuItem items[itemCount] = {
+	const MenuItem items[itemCount] = {
 		{"Volts"}, {"Power"}, {"Amps"},
 		{"Watts"}, {"System"}, {"Diode"}
 	};
@@ -387,7 +377,7 @@ void rotaryMenuDemo()
 		myTFT.writeCharString(x - 3, y - 4, c);
 	};
 	// Lambda to draw pointer from center to selected node
-	auto drawPointer = [&](uint8_t index, uint16_t color) {
+	auto drawPointerLambda = [&](uint8_t index, uint16_t color) {
 		float angle = 2.0f * std::numbers::pi * index / itemCount;
 		constexpr uint8_t pointerLength = radius - 10;
 		int x1 = centerX + static_cast<int>(pointerLength * std::cos(angle));
@@ -402,9 +392,9 @@ void rotaryMenuDemo()
 	for (uint8_t i = 0; i < itemCount; ++i){
 		drawItem(i, i == 0);}
 	uint8_t selected = 0;
-	int8_t oldSelected = -1;
+	
 	// Draw pointer to initial selection
-	drawPointer(selected, myTFT.RDLC_YELLOW);
+	drawPointerLambda(selected, myTFT.RDLC_YELLOW);
 	// inline label drawing
 	myTFT.setFont(font_mega);
 	myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
@@ -415,6 +405,7 @@ void rotaryMenuDemo()
 	myTFT.writeCharString(centerX - 50, centerY + radius + 35, buf);
 	// --- Main input loop ---
 	while (true) {
+		int8_t oldSelected = -1;
 		int ch = getchar_timeout(1000);
 		if (ch == 'q' || ch == 'Q') break;
 		oldSelected = selected;
@@ -425,11 +416,11 @@ void rotaryMenuDemo()
 		if (selected != oldSelected)
 		{
 			// Erase old pointer and node
-			drawPointer(oldSelected, myTFT.RDLC_BLACK);
+			drawPointerLambda(oldSelected, myTFT.RDLC_BLACK);
 			drawItem(oldSelected, false);
 			// Draw new pointer and node
 			drawItem(selected, true);
-			drawPointer(selected, myTFT.RDLC_YELLOW);
+			drawPointerLambda(selected, myTFT.RDLC_YELLOW);
 			// Draw updated label below the new selection
 			myTFT.setFont(font_mega);
 			myTFT.setTextColor(myTFT.RDLC_RED, myTFT.RDLC_YELLOW);
@@ -468,7 +459,7 @@ void analogClockDemo(uint16_t countLimit)
 	while(countLimit >1)
 	{
 		// Get UTC time as string
-		std::string utcTime = UTC_string();  // UTC_string() returns a string like "YYYY-MM-DD HH:MM:SS"
+		std::string utcTime = rdlib_time::UTC_string();  // UTC_string() returns a string like "YYYY-MM-DD HH:MM:SS"
 		// Parse the time string to extract hour, minute, and second
 		int hour = std::stoi(utcTime.substr(11, 2));  // Extract hour
 		int minute = std::stoi(utcTime.substr(14, 2)); // Extract minute
@@ -549,7 +540,7 @@ void volumeKnobDemo(void)
 			uint16_t arcColor = rdlib_maths::generateColor(colorIndex);
 			myTFT.drawArc(centerX, centerY, radius, arcThickness, oldEndAngle, newEndAngle, arcColor);
 		}
-		else if (value < lastValue)
+		else 
 		{// Clear only the excess arc segment
 			myTFT.drawArc(centerX, centerY, radius, arcThickness, newEndAngle, oldEndAngle, myTFT.RDLC_BLACK);
 		}

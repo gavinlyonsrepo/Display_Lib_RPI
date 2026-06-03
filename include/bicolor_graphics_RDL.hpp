@@ -92,7 +92,7 @@ class bicolor_graphics : public display_Fonts, public Print{
 	// Text related functions 
 	virtual size_t write(uint8_t) override;
 	rdlib::Return_Codes_e writeChar( int16_t x, int16_t y, char value );
-	rdlib::Return_Codes_e writeCharString( int16_t x, int16_t y, char *text);
+	rdlib::Return_Codes_e writeCharString( int16_t x, int16_t y, const char *text);
 	void setTextWrap(bool w);
 	
 	// Bitmap related
@@ -115,7 +115,7 @@ protected:
 	bool _textwrap = true;  /**< If set, text at right edge of display will wrap, print method*/
 
 private:
-	bool _drawBitmapAddr; /**< data addressing mode for method drawBitmap, True-vertical , false-horizontal */
+	bool _drawBitmapAddr = true; /**< data addressing mode for method drawBitmap, True-vertical , false-horizontal */
 
 	/// @cond
 	void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint8_t color);

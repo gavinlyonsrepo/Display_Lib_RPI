@@ -1,10 +1,10 @@
 /*!
-	@file examples/max7219/bcdmode/main.cpp
+	@file   examples/max7219/bcdmode/main.cpp
 	@author Gavin Lyons
-	@brief A demo file library for Max7219 seven segment displays
-	Carries out tests on BCD decode mode 3. BCD mode uses the built in font Code B
-	this font has BCD code B (0-9, E, H, L, P, and -) 
-	Hardware SPI , Project Name: Display_Lib_RPI
+	@brief  A demo file library for Max7219 seven segment displays
+			Carries out tests on BCD decode mode 3. BCD mode uses the built in font Code B
+			this font has BCD code B (0-9, E, H, L, P, and -) 
+			Hardware SPI , Project Name: Display_Lib_RPI
 
 	@test
 		-# Test 1000 BCD character

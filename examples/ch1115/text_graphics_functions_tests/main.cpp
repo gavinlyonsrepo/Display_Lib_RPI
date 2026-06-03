@@ -1,5 +1,5 @@
 /*!
-	@file examples/ch1115/text_graphics_functions/main.cpp
+	@file examples/ch1115/text_graphics_functions_tests/main.cpp
 	@author Gavin Lyons
 	@brief Test file for  ER_OLEDM1_CH1115 display showing use of Text,graphics & functions.
 		Project Name: Display_Lib_RPI

@@ -595,7 +595,6 @@ rdlib::Return_Codes_e color16_graphics::drawIcon(uint16_t x, uint16_t y, uint16_
 			{
 				drawPixel(x + byte, y + mybit, color);
 			}
-			value = 0;
 		}
 	}
 	return rdlib::Success;
@@ -924,7 +923,6 @@ rdlib::Return_Codes_e  color16_graphics::spiWriteDataBuffer(uint8_t* spidata, in
 		for(int i=0; i<len; i++) {spiWrite(spidata[i]);}
 		Display_CS_SetHigh;
 	} else {
-		int spiErrorStatus = 0;
 		if (len >= 1) 
 		{ // Remove the upper limit constraint
 			int remainingLen = len;
@@ -934,6 +932,7 @@ rdlib::Return_Codes_e  color16_graphics::spiWriteDataBuffer(uint8_t* spidata, in
 				// Determine how much to write in this iteration
 				int writeSize = (remainingLen > _Display_SPI_BLK_SIZE) ? _Display_SPI_BLK_SIZE : remainingLen;
 				// Perform SPI write
+				int spiErrorStatus;
 				spiErrorStatus = Display_SPI_WRITE(_spiHandle, reinterpret_cast<const char*>(currentData), writeSize);
 				if (spiErrorStatus < 0) {
 					fprintf(stderr, "\n\n Error 99: spiWriteDataBuffer: :SPIWriteFailure : Failure to Write SPI :(%s)\n", lguErrorText(spiErrorStatus));
@@ -1060,7 +1059,6 @@ rdlib::Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char val
 		fprintf(stderr, "Error 2: writeChar16 : Character out of Font bounds %c : %u  <--> %u \n",value, _FontOffset, (unsigned int)(_FontOffset + _FontNumChars));
 		return rdlib::CharFontASCIIRange;
 	}
-	int16_t cx, cy;
 	uint16_t ltextcolor = 0; 
 	uint16_t ltextbgcolor = 0; 
 	if (getInvertFont()== true)
@@ -1108,9 +1106,9 @@ rdlib::Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char val
 		}
 		colByte = _FontSelect[fontIndex];
 		colbit = 7;
-		for (cx = 0; cx < _Font_X_Size; cx++)
+		for (int16_t cx = 0; cx < _Font_X_Size; cx++)
 		{
-			for (cy = 0; cy < _Font_Y_Size; cy++)
+			for (int16_t cy = 0; cy < _Font_Y_Size; cy++)
 			{
 				if ((colByte & (1 << colbit)) != 0) {
 					buffer[bufferIndex++] = (ltextcolor >> 8) & 0xFF; // High byte
@@ -1145,7 +1143,7 @@ rdlib::Return_Codes_e color16_graphics::writeChar(int16_t x, int16_t y, char val
 		-# rdlib::CharArrayNullptr  String pText Array invalid pointer object
 		-# Failure code from  writeChar method upstream
  */
-rdlib::Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
+rdlib::Return_Codes_e  color16_graphics::writeCharString(int16_t x, int16_t y, const char * pText) {
 	uint8_t count=0;
 	uint8_t MaxLength=0;
 	// Check for null pointer
@@ -1374,9 +1372,8 @@ rdlib::Return_Codes_e color16_graphics::drawPolygon(int16_t x, int16_t y, uint8_
 	// Convert degrees to radians
 	const float degreesToRadians = std::numbers::pi / 180.0;
 	const float angleBetweenPoints = 360.0 / sides;
-	// Dynamic arrays for polygon vertices and intersections
-	std::vector<int16_t> vx(sides), vy(sides); // Dynamic size based on sides
-	std::vector<int16_t> intersectX(sides);    // Maximum sides intersections
+	// Dynamic array for polygon vertices, Dynamic size based on sides
+	std::vector<int16_t> vx(sides), vy(sides);
 	// Calculate polygon vertex positions
 	for (uint8_t i = 0; i < sides; i++) {
 		vx[i] = x + (sin((i * angleBetweenPoints + rotation) * degreesToRadians) * diameter);
@@ -1391,6 +1388,8 @@ rdlib::Return_Codes_e color16_graphics::drawPolygon(int16_t x, int16_t y, uint8_
 	}
 	// If filling, use scanline algorithm to fill the polygon
 	else {
+		// Dynamic array for polygon vertices and intersections, Maximum sides intersections
+		std::vector<int16_t> intersectX(sides);
 		// Scanline fill algorithm
 		int16_t minY = vy[0], maxY = vy[0];
 		for (uint8_t i = 1; i < sides; i++) {
@@ -1460,11 +1459,9 @@ rdlib::Return_Codes_e color16_graphics::drawDotGrid(int16_t x, int16_t y, int16_
 		w = _width - x;
 	if ((y + h - 1) >= _height)
 		h = _height - y;
-	//Swap coordinates if the width or height are smaller than the starting point
-	int16_t dotGapWidth, dotGapHeight;
-	if (w < x) { dotGapWidth = w; w = x; x = dotGapWidth; }
-	if (h < y) { dotGapHeight = h; h = y; y = dotGapHeight; }
-
+	// Swap coordinates if the width or height are smaller than the starting point
+	if (w < x) { swapint16t(w, x); }
+	if (h < y) { swapint16t(h, y); }
 	// Draw the grid of pixels
 	for (int16_t row = y; row <= h; row += DotGridGap) 
 	{
@@ -1682,43 +1679,53 @@ void color16_graphics::ellipseHelper(uint16_t cx, uint16_t cy, uint16_t x, uint1
 */
 void color16_graphics::drawArcHelper(uint16_t centerX, uint16_t centerY, uint16_t radius, uint16_t thickness, float start, float end, uint16_t color) 
 {
-	// Define bounding box variables
-	int16_t minX = 65535;
-	int16_t maxX = -32767;
-	int16_t minY = 32767;
-	int16_t maxY = -32767;
-	// Trigonometric values
-	float cosStart, sinStart, cosEnd, sinEnd;
-	float outerRadius, tempValue;
-	float startAngle, endAngle;
-	// Squared radius values for comparison
-	int16_t innerRadiusSquared, outerRadiusSquared;
-	// Loop variables
-	int16_t x, y, xSquared, ySquared;
-	int16_t y1Start, y2End, y2Start;
-	// Slope calculations
-	float startSlope, endSlope;
-	// Boolean flags for arc filling logic
-	bool y1StartFound, y2StartFound, y1EndFound, y2EndSearching;
 	// Convert arc angles to degrees from the normalized input range
-	startAngle = (start / _arcAngleMax) * 360;
-	endAngle = (end / _arcAngleMax) * 360;
+	float startAngle = (start / _arcAngleMax) * 360;
+	float endAngle = (end / _arcAngleMax) * 360;
+
 	// Normalize angles to stay within the 0-360 range
 	while (startAngle < 0) startAngle += 360;
-	while (endAngle < 0) endAngle += 360;
+	while (endAngle < 0)   endAngle += 360;
 	while (startAngle > 360) startAngle -= 360;
-	while (endAngle > 360) endAngle -= 360;
+	while (endAngle > 360)   endAngle -= 360;
+
 	// Handle cases where the arc wraps around 0 degrees
-	if (startAngle > endAngle) {
+	if (startAngle > endAngle)
+	{
 		drawArcHelper(centerX, centerY, radius, thickness, ((startAngle / 360.0) * _arcAngleMax), _arcAngleMax, color);
 		drawArcHelper(centerX, centerY, radius, thickness, 0, ((endAngle / 360.0) * _arcAngleMax), color);
-	} else {// Compute trigonometric values for start and end angles
-		cosStart = rdlib_maths::cosineFromDegrees(startAngle);
-		sinStart = rdlib_maths::sineFromDegrees(startAngle);
-		cosEnd = rdlib_maths::cosineFromDegrees(endAngle);
-		sinEnd = rdlib_maths::sineFromDegrees(endAngle);
+	}
+	else
+	{
+		// Compute trigonometric values for start and end angles
+		float cosStart = rdlib_maths::cosineFromDegrees(startAngle);
+		float sinStart = rdlib_maths::sineFromDegrees(startAngle);
+		float cosEnd   = rdlib_maths::cosineFromDegrees(endAngle);
+		float sinEnd   = rdlib_maths::sineFromDegrees(endAngle);
+
 		// Determine the bounding box of the arc
-		outerRadius = radius;
+		int16_t minX = std::numeric_limits<int16_t>::max();
+		int16_t maxX = std::numeric_limits<int16_t>::min();
+		int16_t minY = std::numeric_limits<int16_t>::max();
+		int16_t maxY = std::numeric_limits<int16_t>::min();
+
+		float outerRadius = radius;
+		float tempValue = outerRadius * cosStart;
+		if (tempValue < minX) minX = tempValue;
+		if (tempValue > maxX) maxX = tempValue;
+		tempValue = outerRadius * sinStart;
+		if (tempValue < minY) minY = tempValue;
+		if (tempValue > maxY) maxY = tempValue;
+
+		tempValue = outerRadius * cosEnd;
+		if (tempValue < minX) minX = tempValue;
+		if (tempValue > maxX) maxX = tempValue;
+		tempValue = outerRadius * sinEnd;
+		if (tempValue < minY) minY = tempValue;
+		if (tempValue > maxY) maxY = tempValue;
+
+		// Adjust bounding box for inner arc
+		outerRadius = radius - thickness;
 		tempValue = outerRadius * cosStart;
 		if (tempValue < minX) minX = tempValue;
 		if (tempValue > maxX) maxX = tempValue;
@@ -1732,88 +1739,90 @@ void color16_graphics::drawArcHelper(uint16_t centerX, uint16_t centerY, uint16_
 		tempValue = outerRadius * sinEnd;
 		if (tempValue < minY) minY = tempValue;
 		if (tempValue > maxY) maxY = tempValue;
-		// Adjust bounding box for inner arc
-		outerRadius = radius - thickness;
-		tempValue = outerRadius * cosStart;
-		if (tempValue < minX) minX = tempValue;
-		if (tempValue > maxX) maxX = tempValue;
-		tempValue  = outerRadius * sinStart;
-		if (tempValue < minY) minY = tempValue;
-		if (tempValue > maxY) maxY = tempValue;
 
-		tempValue = outerRadius * cosEnd;
-		if (tempValue < minX) minX = tempValue;
-		if (tempValue > maxX) maxX = tempValue;
-		tempValue = outerRadius * sinEnd;
-		if (tempValue < minY) minY = tempValue;
-		if (tempValue > maxY) maxY = tempValue;
 		// Special cases for quarter-circle boundary adjustments
-		if ((startAngle < 90) && (endAngle > 90)) maxY = radius;
+		if ((startAngle < 90)  && (endAngle > 90))  maxY = radius;
 		if ((startAngle < 180) && (endAngle > 180)) minX = -radius;
 		if ((startAngle < 270) && (endAngle > 270)) minY = -radius;
+
 		// Calculate slopes for boundary conditions
-		startSlope = (float)cosStart / (float)sinStart;
-		endSlope = (float)cosEnd / (float)sinEnd;
-		if (endAngle == 360) endSlope = -1000000; // Force slope to an extreme value
-		innerRadiusSquared = (radius - thickness) * (radius - thickness);
-		outerRadiusSquared = radius * radius;
+		float startSlope = (float)cosStart / (float)sinStart;
+		float endSlope   = (float)cosEnd   / (float)sinEnd;
+		if (endAngle == 360) endSlope = -1000000;
+
+		int16_t innerRadiusSquared = (radius - thickness) * (radius - thickness);
+		int16_t outerRadiusSquared = radius * radius;
+
 		// Scan through bounding box to determine which pixels to fill
-		for (x = minX; x <= maxX; x++) {
-			y1StartFound 	= false;
-			y2StartFound 	= false;
-			y1EndFound 		= false;
-			y2EndSearching 	= false;
-			y1Start = 0;
-			y2End = 0;
-			y2Start = 0;
-			for (y = minY; y <= maxY; y++) {
-				xSquared = x * x;
-				ySquared = y * y;
-				// Check if pixel is within the arc boundaries
+		for (int16_t x = minX; x <= maxX; x++)
+		{
+			bool    y1StartFound   = false;
+			bool    y2StartFound   = false;
+			bool    y1EndFound     = false;
+			bool    y2EndSearching = false;
+			int16_t y1Start = 0;
+			int16_t y2End   = 0;
+			int16_t y2Start = 0;
+
+			for (int16_t y = minY; y <= maxY; y++)
+			{
+				int16_t xSquared = x * x;
+				int16_t ySquared = y * y;
+
 				if (
-					(xSquared + ySquared < outerRadiusSquared && xSquared + ySquared >= innerRadiusSquared) && (
-					(y > 0 && startAngle < 180 && x <= y * startSlope) ||
-					(y < 0 && startAngle > 180 && x >= y * startSlope) ||
-					(y < 0 && startAngle <= 180) ||
-					(y == 0 && startAngle <= 180 && x < 0) ||
-					(y == 0 && startAngle == 0 && x > 0)
-					) && (
-					(y > 0 && endAngle < 180 && x >= y * endSlope) ||
-					(y < 0 && endAngle > 180 && x <= y * endSlope) ||
-					(y > 0 && endAngle >= 180) ||
-					(y == 0 && endAngle >= 180 && x < 0) ||
-					(y == 0 && startAngle == 0 && x > 0)))
-				{ // Find start and end points for vertical line drawing
-					if (!y1StartFound) {
+					(xSquared + ySquared < outerRadiusSquared && xSquared + ySquared >= innerRadiusSquared) &&
+					((y > 0 && startAngle < 180 && x <= y * startSlope) ||
+					 (y < 0 && startAngle > 180 && x >= y * startSlope) ||
+					 (y < 0 && startAngle <= 180) ||
+					 (y == 0 && startAngle <= 180 && x < 0) ||
+					 (y == 0 && startAngle == 0 && x > 0)) &&
+					((y > 0 && endAngle < 180 && x >= y * endSlope) ||
+					 (y < 0 && endAngle > 180 && x <= y * endSlope) ||
+					 (y > 0 && endAngle >= 180) ||
+					 (y == 0 && endAngle >= 180 && x < 0) ||
+					 (y == 0 && startAngle == 0 && x > 0)))
+				{
+					if (!y1StartFound)
+					{
 						y1StartFound = true;
 						y1Start = y;
-					} else if (y1EndFound && !y2StartFound) {
+					}
+					else if (y1EndFound && !y2StartFound)
+					{
 						y2StartFound = true;
 						y2Start = y;
 						y += y2End - y1Start - 1;
-						if (y > maxY - 1) {
+						if (y > maxY - 1)
+						{
 							y = y2Start;
 							y2EndSearching = true;
 						}
-					} else if (y2StartFound && !y2EndSearching) {
+					}
+					else if (y2StartFound && !y2EndSearching)
+					{
 						y2EndSearching = true;
 					}
-				} else {
-					if (y1StartFound && !y1EndFound) {
+				}
+				else
+				{
+					if (y1StartFound && !y1EndFound)
+					{
 						y1EndFound = true;
 						y2End = y - 1;
 						drawFastVLine(centerX + x, centerY + y1Start, y - y1Start, color);
-						if (y < 0) {
-							y = abs(y);
-						} else {
-							break;
-						}
-					} else if (y2StartFound) {
-						if (y2EndSearching) {
+						if (y < 0) y = abs(y);
+						else break;
+					}
+					else if (y2StartFound)
+					{
+						if (y2EndSearching)
+						{
 							drawFastVLine(centerX + x, centerY + y2Start, y - y2Start, color);
 							y2EndSearching = false;
 							break;
-						} else {
+						}
+						else
+						{
 							y = y2Start;
 							y2EndSearching = true;
 						}
@@ -1823,7 +1832,8 @@ void color16_graphics::drawArcHelper(uint16_t centerX, uint16_t centerY, uint16_
 			if (y1StartFound && !y1EndFound){
 				y2End = maxY;
 				drawFastVLine(centerX + x, centerY + y1Start, y2End - y1Start + 1, color);
-			} else if (y2StartFound && y2EndSearching){
+			}
+			else if (y2StartFound && y2EndSearching){
 				drawFastVLine(centerX + x, centerY + y2Start, maxY - y2Start + 1, color);
 			}
 		}
@@ -2019,18 +2029,25 @@ rdlib::Return_Codes_e color16_graphics::destroyBuffer(void)
 		fprintf(stderr, "Error: destroyBuffer: This function is for Advanced Screen Buffer Mode\n");
 		return rdlib::WrongBufferMode;
 	}
-	_screenBuffer.resize(0);
-	if (_screenBuffer.size() == 0)
+	// Force release of heap memory by swapping with a blank temporary vector
+	// decltype(_screenBuffer)() automatically creates an empty vector of the exact same type
+	decltype(_screenBuffer)().swap(_screenBuffer);
+	// Verify the vector is empty and memory is deallocated
+	if (_screenBuffer.empty() && _screenBuffer.capacity() == 0)
 	{
-		if (rdlib_config::isDebugEnabled()){
-			printf("Buffer has been successfully destroyed.\n");
+		if (rdlib_config::isDebugEnabled())
+		{
+			printf("Buffer successfully annihilated. Memory returned to heap.\n");
 		}
 		return rdlib::Success;
-	}else {
-			fprintf(stderr, "Error: destroyBuffer : Buffer annihilation failed.\n");
+	}
+	else 
+	{
+		// Note: With the swap trick, this is technically impossible, 
+		// but offers an explicit safety check.
+		fprintf(stderr, "Error: destroyBuffer: Deallocation failed.\n");
 		return rdlib::MemoryAError;
 	}
-	return rdlib::Success;
 }
 
 

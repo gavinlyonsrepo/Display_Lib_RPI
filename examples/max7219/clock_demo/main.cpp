@@ -1,7 +1,7 @@
 /*!
-	@file examples/max7219/clock_demo/main.cpp
+	@file   examples/max7219/clock_demo/main.cpp
 	@author Gavin Lyons
-	@brief A demo file library for Max7219 seven segment displays
+	@brief  A demo file library for Max7219 seven segment displays
 			-# Clock Demo Shows sexample with two cascades displays
 			-# Display one shows time 
 			-# Display two shows Date
@@ -13,8 +13,9 @@
 // Libraries
 
 #include <cstdio> //printf
-#include <ctime>
-#include <csignal> //catch user Ctrl+C
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
 #include <string> // for string type
 #include <algorithm> // for replace
 
@@ -33,15 +34,21 @@ uint8_t NumberOfDisplays = 2; // Number of displays connected
 // Constructor object 
 MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, NumberOfDisplays);
 
+// Stop signal , Ctrl + c etc
+std::atomic<bool> stopRequested{false};
+
 // Function Prototypes
-std::string UTC_string(void);
-void signal_callback_handler(int signum);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 void endTest(void);
 
 // Main loop
 int main()
 {
-	signal(SIGINT, signal_callback_handler);
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
+
 	printf("Test Begin :: MAX7219_7SEG\r\n");
 	printf("lgpio library Version Number :: %i\r\n", lguVersion());
 	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
@@ -62,20 +69,20 @@ int main()
 
 	while(1)
 	{
-		std::string TimeString = UTC_string(); //2023-05-25 17:27:15 UTC
+		std::string TimeString = rdlib_time::UTC_string(); //2023-05-25 17:27:15 UTC
 		std::string DateInfo = TimeString.substr(0, 10); // 2023-05-25 
 		std::string TimeInfo = TimeString.substr(11, 8); // 17:27:15
 		// Write time to Display one
 		std::replace(TimeInfo.begin(), TimeInfo.end(), ':', '-'); // replace all ':' to '-'
 		const char *cstrTimeInfo = TimeInfo.c_str(); //convert timeinfo to c string
 		myMAX.SetCurrentDisplayNumber(1);
-		myMAX.DisplayText((char*)cstrTimeInfo, myMAX.AlignRight);
+		myMAX.DisplayText(cstrTimeInfo, myMAX.AlignRight);
 		// Write date to Display two
 		std::replace(DateInfo.begin(), DateInfo.end(), '-', '.'); // replace all '-' to '.'
 		const char *cstrDateInfo = DateInfo.c_str(); //convert dateinfo to c string
 		myMAX.SetCurrentDisplayNumber(2);
-		myMAX.DisplayText((char*)cstrDateInfo, myMAX.AlignRight);
-
+		myMAX.DisplayText(cstrDateInfo, myMAX.AlignRight);
+		if (stopRequested) break;
 		delayMilliSecRDL(1000);
 	}
 
@@ -87,6 +94,8 @@ int main()
 
 void endTest(void)
 {
+	if (stopRequested)
+		printf("Exit Signal received\n");
 	// Clear the displays
 	printf("Clear the displays\r\n");
 	// -Clear Display one
@@ -102,21 +111,6 @@ void endTest(void)
 
 }
 
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string()
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
-
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	endTest();
-	exit(signum);
-}
 
 // EOF
 

@@ -37,8 +37,7 @@
 # ================================================
 
 # ================= MAX7219_7SEG ================
-#SRC=max7219/tests_hwspi
-#SRC=max7219/tests_swspi
+#SRC=max7219/tests
 #SRC=max7219/bcdmode
 #SRC=max7219/clock_demo
 #SRC=max7219/cascade_demo
@@ -55,8 +54,7 @@
 # ================================================
 
 # ================= HD44780 LCD I2C ==============
-#SRC=hd44780/test_16x02
-#SRC=hd44780/test_20x04
+#SRC=hd44780/tests
 #=================================================
 
 # ================= SSD1306 OLED I2C =============
@@ -72,27 +70,18 @@
 #=================================================
 
 # ========== ERM19264_UC1609 LCD SPI==============
-#SRC=erm19264/hello_world
-#SRC=erm19264/text_graphics_functions
-#SRC=erm19264/framerate_per_sec
-#SRC=erm19264/bitmap
-#SRC=erm19264/software_spi
+#SRC=erm19264/tests
 #=================================================
 
 # ================ NOKIA5110 LCD SPI=============
 #SRC=nokia5110/helloworld
-#SRC=nokia5110/text_graphics_functions
-#SRC=nokia5110/framerate_test
-#SRC=nokia5110/framerate_test_swspi
-#SRC=nokia5110/bitmap
+#SRC=nokia5110/tests
 #=================================================
 
 # ============= CH1115 OLED SPI ==================
-#SRC=ch1115/hello_world
-#SRC=ch1115/text_graphics_functions
+#SRC=ch1115/text_graphics_functions_tests
+#SRC=ch1115/bitmap_test
 #SRC=ch1115/framerate_test
-#SRC=ch1115/framerate_test_swspi
-#SRC=ch1115/bitmap
 #================================================
 
 # =========== SH1106 or SH1107 OLED I2C ==========
@@ -115,10 +104,9 @@
 
 # =============== ILI9341 TFT LCD SPI ============
 #SRC=ili9341/hello_world
-#SRC=ili9341/bitmap_tests
-#SRC=ili9341/text_graphics_functions
-#SRC=ili9341/touch_screen
+#SRC=ili9341/tests
 #SRC=ili9341/read_diagnostic_swspi
+#SRC=ili9341/touch_screen
 #SRC=ili9341/demos
 #=================================================
 

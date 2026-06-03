@@ -60,6 +60,7 @@ int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for 
 uint8_t Setup(void);
 void EndTests(void);
 void DisplayReset(void);
+void displayMenu(void);
 
 void Test300(void); // Sprite 
 void Test302(void); // 2 color bitmap
@@ -92,26 +93,56 @@ int main(void)
 {
 	if(Setup() != 0)return -1;
 
-	Test300();
-	Test302();
-	Test303();
-	Test304();
-	Test500();
-	Test501();
-	Test502();
-	Test503();
-	Test504();
-	Test701();
-	Test705();
-	Test706();
-	Test902();
-	Test903();
-	Test904();
-	Test905();
-	Test906();
-	Test907();
-	Test908();
-	Test909();
+	int choice;
+	do {
+		myOLED.fillScreen(myOLED.RDLC_BLACK);
+		displayMenu();
+		std::cin >> choice;
+		// Check if input is valid
+		if (std::cin.fail()) {
+			std::cin.clear(); // Clear error flag
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Invalid input. Please enter a number from list.\n\n";
+			continue;
+		}
+		switch (choice) {
+			case 1:
+				Test300();
+				Test302();
+				Test303();
+				Test304();
+			break;
+			case 2:
+				Test500();
+				Test501();
+				Test502();
+				Test503();
+				Test504();
+			break;
+			case 3:
+				Test701();
+				Test705();
+				Test706();
+			 break;
+			case 4:
+				Test902();
+				Test903();
+				Test904();
+				Test905();
+				Test906();
+				Test907();
+				Test908();
+				Test909();
+			break;
+			case 5:
+				std::cout << "Exiting menu\n";
+			break;
+			default:
+				std::cout << "Invalid choice. Please try again.\n";
+			break;
+		}
+		std::cout << std::endl;
+	} while (choice != 5);
 
 	EndTests();
 	return 0;
@@ -143,6 +174,16 @@ uint8_t Setup(void)
 //*****************************
 	delayMilliSecRDL(100);
 	return 0;
+}
+
+void displayMenu() {
+	std::cout << "Tests Menu:\n";
+	std::cout << "1. Bitmap Tests\n";
+	std::cout << "2. Function Tests\n";;
+	std::cout << "3. Text Tests\n";
+	std::cout << "4. Graphic Tests\n";
+	std::cout << "5. Quit\n";
+	std::cout << "Enter your choice: ";
 }
 
 void Test300(void)

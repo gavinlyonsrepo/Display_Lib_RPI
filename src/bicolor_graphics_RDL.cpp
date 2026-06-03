@@ -91,7 +91,7 @@ rdlib::Return_Codes_e bicolor_graphics::writeChar(int16_t x, int16_t y, char val
 		-# rdlib::CharArrayNullptr  String pText Array invalid pointer object
 		-# 3 Failure in writeChar method upstream
  */
-rdlib::Return_Codes_e  bicolor_graphics::writeCharString(int16_t x, int16_t y, char * pText) {
+rdlib::Return_Codes_e  bicolor_graphics::writeCharString(int16_t x, int16_t y, const char * pText) {
 	uint8_t count=0;
 	uint8_t MaxLength=0;
 	// Check for null pointer
@@ -705,12 +705,11 @@ if (_drawBitmapAddr== true)
 		return rdlib::BitmapSize;
 	}
 	// Vertical byte bitmaps mode
-	uint8_t vline;
 	int16_t i, j, r = 0, yin = y;
 
 	for (i=0; i<(w+1); i++ ) {
 		if (r == (h+7)/8 * w) break;
-		vline = bitmap [ r] ;
+		uint8_t vline = bitmap [ r] ;
 		r++;
 		if (i == w) {
 			y = y+8;
@@ -831,9 +830,8 @@ rdlib::Return_Codes_e bicolor_graphics::drawPolygon(int16_t x, int16_t y, uint8_
 	// Convert degrees to radians
 	const float degreesToRadians = std::numbers::pi / 180.0;
 	const float angleBetweenPoints = 360.0 / sides;
-	// Dynamic arrays for polygon vertices and intersections
-	std::vector<int16_t> vx(sides), vy(sides); // Dynamic size based on sides
-	std::vector<int16_t> intersectX(sides);    // Maximum sides intersections
+	// Dynamic array for polygon vertices, Dynamic size based on sides
+	std::vector<int16_t> vx(sides), vy(sides);
 	// Calculate polygon vertex positions
 	for (uint8_t i = 0; i < sides; i++) {
 		vx[i] = x + (sin((i * angleBetweenPoints + rotation) * degreesToRadians) * diameter);
@@ -848,6 +846,8 @@ rdlib::Return_Codes_e bicolor_graphics::drawPolygon(int16_t x, int16_t y, uint8_
 	}
 	// If filling, use scanline algorithm to fill the polygon
 	else {
+		// Dynamic array for polygon vertices and intersections, Maximum sides intersections
+		std::vector<int16_t> intersectX(sides);
 		// Scanline fill algorithm
 		int16_t minY = vy[0], maxY = vy[0];
 		for (uint8_t i = 1; i < sides; i++) {
@@ -917,10 +917,9 @@ rdlib::Return_Codes_e bicolor_graphics::drawDotGrid(int16_t x, int16_t y, int16_
 		w = _width - x;
 	if ((y + h - 1) >= _height)
 		h = _height - y;
-	//Swap coordinates if the width or height are smaller than the starting point
-	int16_t dotGapWidth, dotGapHeight;
-	if (w < x) { dotGapWidth = w; w = x; x = dotGapWidth; }
-	if (h < y) { dotGapHeight = h; h = y; y = dotGapHeight; }
+	// Swap coordinates if the width or height are smaller than the starting point
+	if (w < x) { swapint16t(w, x); }
+	if (h < y) { swapint16t(h, y); }
 
 	// Draw the grid of pixels
 	for (int16_t row = y; row <= h; row += DotGridGap) 
@@ -1133,34 +1132,16 @@ void bicolor_graphics::ellipseHelper(uint16_t cx, uint16_t cy, uint16_t x, uint1
 	@param start Starting angle of arc
 	@param end End angle of arc
 	@param color The color of the arc.
-	@details @details This function uses a modified midpoint circle algorithm combined with scanline filling
+	@details This function uses a modified midpoint circle algorithm combined with scanline filling
 		to efficiently draw an arc with a specified thickness. It calculates pixel positions using 
 		trigonometric boundary checks and slopes for accurate rendering. 
 		For more information, see: https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
 */
 void bicolor_graphics::drawArcHelper(uint16_t centerX, uint16_t centerY, uint16_t radius, uint16_t thickness, float start, float end, uint8_t color) 
 {
-	// Define bounding box variables
-	int16_t minX = 65535;
-	int16_t maxX = -32767;
-	int16_t minY = 32767;
-	int16_t maxY = -32767;
-	// Trigonometric values
-	float cosStart, sinStart, cosEnd, sinEnd;
-	float outerRadius, tempValue;
-	float startAngle, endAngle;
-	// Squared radius values for comparison
-	int16_t innerRadiusSquared, outerRadiusSquared;
-	// Loop variables
-	int16_t x, y, xSquared, ySquared;
-	int16_t y1Start, y2End, y2Start;
-	// Slope calculations
-	float startSlope, endSlope;
-	// Boolean flags for arc filling logic
-	bool y1StartFound, y2StartFound, y1EndFound, y2EndSearching;
 	// Convert arc angles to degrees from the normalized input range
-	startAngle = (start / _arcAngleMax) * 360;
-	endAngle = (end / _arcAngleMax) * 360;
+	float startAngle = (start / _arcAngleMax) * 360;
+	float endAngle = (end / _arcAngleMax) * 360;
 	// Normalize angles to stay within the 0-360 range
 	while (startAngle < 0) startAngle += 360;
 	while (endAngle < 0) endAngle += 360;
@@ -1170,63 +1151,70 @@ void bicolor_graphics::drawArcHelper(uint16_t centerX, uint16_t centerY, uint16_
 	if (startAngle > endAngle) {
 		drawArcHelper(centerX, centerY, radius, thickness, ((startAngle / 360.0) * _arcAngleMax), _arcAngleMax, color);
 		drawArcHelper(centerX, centerY, radius, thickness, 0, ((endAngle / 360.0) * _arcAngleMax), color);
-	} else {// Compute trigonometric values for start and end angles
-		cosStart = rdlib_maths::cosineFromDegrees(startAngle);
-		sinStart = rdlib_maths::sineFromDegrees(startAngle);
-		cosEnd = rdlib_maths::cosineFromDegrees(endAngle);
-		sinEnd = rdlib_maths::sineFromDegrees(endAngle);
+	} else {
+		int16_t minX = std::numeric_limits<int16_t>::max();
+		int16_t maxX = std::numeric_limits<int16_t>::min();
+		int16_t minY = std::numeric_limits<int16_t>::max();
+		int16_t maxY = std::numeric_limits<int16_t>::min();
+		// Compute trigonometric values for start and end angles
+		float cosStart = rdlib_maths::cosineFromDegrees(startAngle);
+		float sinStart = rdlib_maths::sineFromDegrees(startAngle);
+		float cosEnd = rdlib_maths::cosineFromDegrees(endAngle);
+		float sinEnd = rdlib_maths::sineFromDegrees(endAngle);
 		// Determine the bounding box of the arc
-		outerRadius = radius;
+		float outerRadius = radius;
+		float tempValue = outerRadius * cosStart;
+		if (tempValue < minX) minX = tempValue;
+		if (tempValue > maxX) maxX = tempValue;
+		tempValue = outerRadius * sinStart;
+		if (tempValue < minY) minY = tempValue;
+		if (tempValue > maxY) maxY = tempValue;
+		tempValue = outerRadius * cosEnd;
+		if (tempValue < minX) minX = tempValue;
+		if (tempValue > maxX) maxX = tempValue;
+		tempValue = outerRadius * sinEnd;
+		if (tempValue < minY) minY = tempValue;
+		if (tempValue > maxY) maxY = tempValue;
+
+		// Adjust bounding box for inner arc
+		outerRadius = radius - thickness;
 		tempValue = outerRadius * cosStart;
 		if (tempValue < minX) minX = tempValue;
 		if (tempValue > maxX) maxX = tempValue;
 		tempValue = outerRadius * sinStart;
 		if (tempValue < minY) minY = tempValue;
 		if (tempValue > maxY) maxY = tempValue;
-
 		tempValue = outerRadius * cosEnd;
 		if (tempValue < minX) minX = tempValue;
 		if (tempValue > maxX) maxX = tempValue;
 		tempValue = outerRadius * sinEnd;
 		if (tempValue < minY) minY = tempValue;
 		if (tempValue > maxY) maxY = tempValue;
-		// Adjust bounding box for inner arc
-		outerRadius = radius - thickness;
-		tempValue = outerRadius * cosStart;
-		if (tempValue < minX) minX = tempValue;
-		if (tempValue > maxX) maxX = tempValue;
-		tempValue  = outerRadius * sinStart;
-		if (tempValue < minY) minY = tempValue;
-		if (tempValue > maxY) maxY = tempValue;
 
-		tempValue = outerRadius * cosEnd;
-		if (tempValue < minX) minX = tempValue;
-		if (tempValue > maxX) maxX = tempValue;
-		tempValue = outerRadius * sinEnd;
-		if (tempValue < minY) minY = tempValue;
-		if (tempValue > maxY) maxY = tempValue;
 		// Special cases for quarter-circle boundary adjustments
 		if ((startAngle < 90) && (endAngle > 90)) maxY = radius;
 		if ((startAngle < 180) && (endAngle > 180)) minX = -radius;
 		if ((startAngle < 270) && (endAngle > 270)) minY = -radius;
 		// Calculate slopes for boundary conditions
-		startSlope = (float)cosStart / (float)sinStart;
-		endSlope = (float)cosEnd / (float)sinEnd;
+		float startSlope = (float)cosStart / (float)sinStart;
+		float endSlope = (float)cosEnd / (float)sinEnd;
 		if (endAngle == 360) endSlope = -1000000; // Force slope to an extreme value
-		innerRadiusSquared = (radius - thickness) * (radius - thickness);
-		outerRadiusSquared = radius * radius;
+		int16_t innerRadiusSquared = (radius - thickness) * (radius - thickness);
+		int16_t outerRadiusSquared = radius * radius;
+
 		// Scan through bounding box to determine which pixels to fill
-		for (x = minX; x <= maxX; x++) {
-			y1StartFound 	= false;
-			y2StartFound 	= false;
-			y1EndFound 		= false;
-			y2EndSearching 	= false;
-			y1Start = 0;
-			y2End = 0;
-			y2Start = 0;
-			for (y = minY; y <= maxY; y++) {
-				xSquared = x * x;
-				ySquared = y * y;
+		for (int16_t x = minX; x <= maxX; x++) {
+			int16_t xSquared = x * x; 
+			bool y1StartFound   = false;
+			bool y2StartFound   = false;
+			bool y1EndFound     = false;
+			bool y2EndSearching = false;
+			int16_t y1Start = 0;
+			int16_t y2End = 0;
+			int16_t y2Start = 0;
+
+			for (int16_t y = minY; y <= maxY; y++) {
+				int16_t ySquared = y * y;
 				// Check if pixel is within the arc boundaries
 				if (
 					(xSquared + ySquared < outerRadiusSquared && xSquared + ySquared >= innerRadiusSquared) && (

@@ -5,8 +5,6 @@ build/
 examples/Bin
 examples/Build
 display-cppcheck-build-dir/
-display.cppcheck
-geany_test_project
-display_RPI_geany.geany
+display_rpi.geany
 run.sh
 

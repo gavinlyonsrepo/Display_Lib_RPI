@@ -59,8 +59,6 @@ uint8_t SetupHWSPI(void)
 	int8_t RST_OLED  = 25; // GPIO reset pin
 	int8_t DC_OLED   = 24; // GPIO DC pin
 	int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
-	uint16_t OLED_WIDTH = 96;// Screen width in pixels
-	uint16_t OLED_HEIGHT = 64; // Screen height in pixels
 	int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
 	int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
 	int HWSPI_SPEED =  8000000; // The speed of serial communication in bits per second.

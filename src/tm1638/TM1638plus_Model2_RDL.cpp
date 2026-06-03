@@ -64,9 +64,9 @@ void TM1638plus_Model2::DisplayHexNum(uint16_t  numberUpper, uint16_t numberLowe
 	char valuesUpper[_TMDisplaySize + 1];
 	char valuesLower[_TMDisplaySize/2 + 1];
 	char TextDisplay[5] = "%";
-	char TextRight[3] = "4X";
-	char TextLeft[4] = "-4X";
-	char TextLeadZero[4] = "04X";
+	const char TextRight[3] = "4X";
+	const char TextLeft[4] = "-4X";
+	const char TextLeadZero[4] = "04X";
 
 	switch(TextAlignment)
 	{
@@ -93,9 +93,9 @@ void TM1638plus_Model2::DisplayDecNum(unsigned long number, uint8_t dots, AlignT
 {
 	char values[_TMDisplaySize + 1];
 	char TextDisplay[6] = "%";
-	char TextRight[4] = "8ld";
-	char TextLeft[3] = "ld";
-	char TextLeadZero[5] = "08ld";
+	const char TextRight[4] = "8ld";
+	const char TextLeft[3] = "ld";
+	const char TextLeadZero[5] = "08ld";
 
 	switch(TextAlignment)
 	{
@@ -122,9 +122,9 @@ void TM1638plus_Model2::DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numb
 	char valuesUpper[_TMDisplaySize + 1];
 	char valuesLower[_TMDisplaySize/2 + 1];
 	char TextDisplay[5] = "%";
-	char TextRight[3] = "4d";
-	char TextLeft[4] = "-4d";
-	char TextLeadZero[4] = "04d";
+	const char TextRight[3] = "4d";
+	const char TextLeft[4] = "-4d";
+	const char TextLeadZero[4] = "04d";
 
 	switch(TextAlignment)
 	{

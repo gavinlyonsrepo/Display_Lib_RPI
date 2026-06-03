@@ -36,7 +36,7 @@ static uint64_t counter( void );
 //  Section ::  MAIN loop
 int main(void)
 {
-	//rdlib_config::loadConfig(); // optional
+	// rdlib_config::loadConfig(); // optional
 	std::cout << "TFT Start Test " << std::endl;
 	std::cout << "Display_Lib_RPI library version : " << rdlib::LibraryVersion()<< std::endl;
 	std::cout <<"Lgpio library version :" << lguVersion() << std::endl;
@@ -192,6 +192,11 @@ void TestBitmap(void)
 	std::vector<uint8_t> bmpBuffer;
 	bmpBuffer.resize((MY_TFT_WIDTH*MY_TFT_HEIGHT) * 2);
 	pFile = fopen("bitmap/bitmap16images/16pic1.bmp", "r");
+	if (pFile == nullptr)  // Check file exists
+	{
+		std::cout << "Error: File does not exist" << std::endl;
+		return;
+	}
 	fseek(pFile, 132, 0); // 132 = bmp offset
 	fread(bmpBuffer.data(), 2, MY_TFT_WIDTH*MY_TFT_HEIGHT, pFile);
 	fclose(pFile);
@@ -202,6 +207,11 @@ void TestBitmap(void)
 	printf("Bitmap 24-bit\n");
 	bmpBuffer.resize((MY_TFT_WIDTH*MY_TFT_HEIGHT) * 3);
 	pFile = fopen("bitmap/bitmap24images/24pic2.bmp", "r");
+	if (pFile == nullptr)  // Check file exists
+	{
+		std::cout << "Error: File does not exist" << std::endl;
+		return;
+	}
 	fseek(pFile, 54, 0); // 54 = bmp offset
 	fread(bmpBuffer.data(), 3, MY_TFT_WIDTH*MY_TFT_HEIGHT, pFile);
 	fclose(pFile);
@@ -229,6 +239,11 @@ void TestBitmapFPS(void)
 	std::vector<uint8_t> bmpBuffer;
 	bmpBuffer.resize((MY_TFT_WIDTH*MY_TFT_HEIGHT) * 2);
 	pFile = fopen("bitmap/bitmap16images/16pic1.bmp", "r");
+	if (pFile == nullptr)  // Check file exists
+	{
+		std::cout << "Error File does not exist" << std::endl;
+		return;
+	}
 	fseek(pFile, 132, 0); // 132 = bmp offset
 	fread(bmpBuffer.data(), 2, MY_TFT_WIDTH*MY_TFT_HEIGHT, pFile);
 	fclose(pFile);

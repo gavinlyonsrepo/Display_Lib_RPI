@@ -79,11 +79,12 @@ public:
 	void SoftwareSPIShiftOut(uint8_t val);
 
 	// GPIO related 
-	int8_t _Display_CS;   /**< GPIO Chip select  line */
-	int8_t _Display_DC;   /**< GPIO Data or command line */
-	int8_t _Display_RST;  /**< GPIO Reset line */
-	int8_t _Display_SCLK; /**< GPIO Clock Line Software SPI only*/
-	int8_t _Display_SDATA;  /**< GPIO MOSI Line Software SPI only*/
+	int8_t _Display_CS    = 0; /**< GPIO Chip select  line */
+	int8_t _Display_DC    = 0; /**< GPIO Data or command line */
+	int8_t _Display_RST   = 0; /**< GPIO Reset line */
+	int8_t _Display_SCLK  = 0; /**< GPIO Clock Line Software SPI only*/
+	int8_t _Display_SDATA = 0; /**< GPIO MOSI Line Software SPI only*/
+
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 

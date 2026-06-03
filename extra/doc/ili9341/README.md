@@ -84,11 +84,10 @@ Hello world can be setup for software or hardware SPI by changing "HardwareSPI" 
 | # | example folder name | Description |
 | ------ | ------ | ------ |
 | 1 | hello_world | Basic use case |
-| 2 | text_graphic_functions | Tests text,graphics & function testing |
-| 3 | bitmap_Tests | bitmap + FPS testing |
-| 4 | demos | various demo functions |
-| 5 | touch_screen | Basic Touch screen  demo |
-| 6 | xpt_Test | Touch screen test without TFT |
+| 2 | tests | text,graphics. function, bitmap + FPS testing |
+| 3 | demos | various demo functions |
+| 4 | touch_screen | Basic Touch screen  demo |
+| 5 | xpt_Test | Touch screen test without TFT |
 
 ### Bitmap
 

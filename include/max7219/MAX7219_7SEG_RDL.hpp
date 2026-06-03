@@ -124,12 +124,12 @@ public:
 	void SetCurrentDisplayNumber(uint8_t);
 
 	void DisplayChar(uint8_t digit, uint8_t value, DecimalPoint_e decimalPoint);
-	rdlib::Return_Codes_e DisplayText(char *text, TextAlignment_e TextAlignment);
-	rdlib::Return_Codes_e DisplayText(char *text);
+	rdlib::Return_Codes_e DisplayText(const char *text, TextAlignment_e TextAlignment);
+	rdlib::Return_Codes_e DisplayText(const char *text);
 	void DisplayIntNum(unsigned long number, TextAlignment_e TextAlignment);
 	void DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numberLower, TextAlignment_e TextAlignment);
 	void DisplayBCDChar(uint8_t digit, CodeBFont_e value);
-	rdlib::Return_Codes_e DisplayBCDText(char *text);
+	rdlib::Return_Codes_e DisplayBCDText(const char *text);
 	void SetSegment(uint8_t digit, uint8_t segment);
 
 protected:
@@ -137,9 +137,9 @@ protected:
 
 private:
 
-	uint8_t _Display_CS;     /**<  GPIO connected to  CS on MAX7219,  SW SPI only */
-	uint8_t _Display_SDATA;  /**<  GPIO connected to DIO on MAX7219,  SW SPI only */
-	uint8_t _Display_SCLK;   /**<  GPIO connected to CLK on MAX7219,  SW SPI only */
+	uint8_t _Display_CS = 0;     /**<  GPIO connected to  CS on MAX7219,  SW SPI only */
+	uint8_t _Display_SDATA = 0;  /**<  GPIO connected to DIO on MAX7219,  SW SPI only */
+	uint8_t _Display_SCLK = 0;   /**<  GPIO connected to CLK on MAX7219,  SW SPI only */
 
 	uint16_t _CommDelay = 0; /**<  uS delay used in communications SW SPI, User adjust */
 	uint8_t _NoDigits   = 8; /**<  Number of digits in display */
@@ -153,7 +153,7 @@ private:
 	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode See MAX7219_SS_RPI constructor notes */ 
 	bool _HardwareSPI = false;  /**< Is the Hardware SPI on , true yes , false SW SPI*/
 
-	DecodeMode_e CurrentDecodeMode; /**< Enum to store current decode mode  */
+	DecodeMode_e CurrentDecodeMode = DecodeModeNone; /**< Enum to store current decode mode  */
 
 	uint8_t _CurrentDisplayNumber = 1; /**< Which display the user wishes to write to in a cascade of connected displays*/
 	uint8_t _NoDisplays = 1; /**< Number of displays in cascade, default is 1 */

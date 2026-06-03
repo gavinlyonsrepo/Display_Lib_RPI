@@ -323,6 +323,9 @@ rdlib::Return_Codes_e ST7735_TFT ::TFTST7735BInitialize() {
 	@details Sourced from buydisplay.com reference init (ST7735S_S5P_80160).
 	         MADCTL = 0xC8 (MY | MX | BGR). No software reset; starts at SLPOUT.
 	         Rotation uses BGR order, same as Red/Green tab.
+	@return a rdlib::Return_Codes_e  code
+		-# rdlib::Success
+		-# upstream error code from TFTSPIinit()
 */
 rdlib::Return_Codes_e ST7735_TFT ::TFTST7735S_80160Initialize(){
 	rdlib::Return_Codes_e DrawCharReturnCode;

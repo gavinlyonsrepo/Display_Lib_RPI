@@ -250,13 +250,12 @@ void Test7(void)
 void Test8(void)
 {
 	printf("Test 8: Buttons :: Press S16 to go to test 9 \r\n");
-	unsigned char buttons;
 	while(1)
 	{
 		// Test 8 , buttons readkey16() function, no debounce see notes at URL for example to debounce.
 		// returns 0-16 , 0 for nothing pressed.
 		// NOTE: pressing  S16 will move to test 9
-		buttons = tm.ReadKey16();
+		unsigned char buttons = tm.ReadKey16();
 		tm.DisplayDecNum(buttons, 0 , tm.TMAlignTextRight);
 		delaySecRDL( myTestDelay2);
 		if (buttons == 16)
@@ -272,7 +271,6 @@ void Test8(void)
 void Test9(void)
 {
 	printf("Test 9: Buttons :: Press S16 to quit\r\n");
-	uint16_t buttons=0;
 	tm.DisplayStr("buttons2", 0);
 	delaySecRDL( myTestDelay2);
 	tm.reset();
@@ -287,7 +285,7 @@ void Test9(void)
 		// eg S1 + S16 = 0x8001
 		// Can be used to detect multi key presses , see Notes section in readme.
 		// For issues related to display when pressing multi keys together.
-		buttons = tm.ReadKey16Two();
+		uint16_t buttons = tm.ReadKey16Two();
 		tm.DisplayHexNum(0x0000, buttons, 0x00, tm.TMAlignTextZeros);
 		delaySecRDL( myTestDelay2);
 		if (buttons == 0x8000)

@@ -38,7 +38,6 @@
 
 // Section ::  libraries
 #include <iostream>
-#include <ctime> // for test301
 #include "Bitmap_test_data.hpp" // Data for test 301-302
 
 #include "ST7735_TFT_LCD_RDL.hpp"
@@ -86,7 +85,6 @@ void Test301(void); // "clock demo" icons, small bi-color bitmaps
 void Test302(void); // 2 color bitmap
 void Test303(void); // 24 color bitmap
 void Test304(void); // 16 color bitmap
-std::string UTC_string(void); // clock demo test 301
 
 void Test500(void);  // Color RGB
 void Test501(void);  // scroll
@@ -118,7 +116,6 @@ void Test906(void);
 void Test907(void);
 void Test908(void);
 void Test909(void);
-
 
 //  Section ::  MAIN loop
 
@@ -196,7 +193,6 @@ int main(void)
 }
 // *** End OF MAIN **
 
-
 //  Section ::  Function Space
 
 uint8_t Setup(void)
@@ -252,7 +248,6 @@ void Test301(void)
 {
 	std::cout << "Test 301: clock demo , icons, small bitmap" << std::endl;
 	uint16_t count=CLOCK_DISPLAY_TIME;
-	if (count > 999) count = 999;
 	char teststr1[] = "G Lyons";
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 
@@ -280,7 +275,7 @@ void Test301(void)
 	// draw clock
 	while(count > 99)
 	{
-		std::string TimeString = UTC_string();
+		std::string TimeString = rdlib_time::UTC_string();
 		std::cout<< TimeString << "\r" << std::flush;
 		auto DateInfo = TimeString.substr(0, 10);
 		auto TimeInfo = TimeString.substr(11,8);
@@ -564,7 +559,7 @@ void Test503()
 	std::cout << "Test 503-6: Mode Sleep on" << std::endl;
 	delayMilliSecRDL(TEST_DELAY5);
 	myTFT.TFTchangeMode(myTFT.TFT_Normal_mode);
-	std::cout << "Test 503-7 Mode Normal" << std::endl;
+	std::cout << "Test 503-7: Mode Normal" << std::endl;
 	delayMilliSecRDL(TEST_DELAY2);
 }
 
@@ -1306,14 +1301,6 @@ void EndTests(void)
 	std::cout << "TFT End" << std::endl;
 }
 
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string()
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
 
 void displayMenu() {
 	std::cout << "Tests Menu:\n";

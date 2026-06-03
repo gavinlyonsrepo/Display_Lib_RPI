@@ -11,7 +11,6 @@
 */
 
 // Section ::  libraries
-#include <ctime>
 #include <random>    // gauge
 #include <iostream>  // cout cin
 #include <algorithm> // For std::clamp
@@ -36,7 +35,6 @@ std::atomic<bool> stopRequested{false}; // Stop signal , Ctrl + c etc
 
 //  Section ::  Function Headers
 uint8_t SetupHWSPI(void); // setup + user options for hardware SPI
-std::string UTC_string(void);
 void displayMenu(void);
 void EndTests(void);
 void handleSignal(int){
@@ -47,7 +45,7 @@ void handleSignal(int){
 void gaugeDemo(uint16_t  countLimit = 50);
 void drawPointerHelper(int16_t val, uint8_t x, uint8_t y, uint8_t r, uint16_t color);
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor);
-void drawPointer(int16_t &val, int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
+void drawPointer(const int16_t &val, const int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
 
 // === Demo 2 ===
 // Gauge properties
@@ -76,6 +74,12 @@ void drawMenu(
 	const std::array<std::string, 6>& items,
 	size_t selectedIndex,
 	size_t topIndex);
+void drawMenuItem(
+	const std::array<std::string, 6>& items,
+	size_t itemIdx,
+	size_t displayRow,
+	bool isSelected
+) ;
 void showSelection(const std::string& item);
 
 // === Demo 4 ===
@@ -109,7 +113,7 @@ uint16_t col[NDOTS];
 void runBlobDemo(uint16_t count);
 void matrix(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
 void rotate(int16_t xyz[3][NDOTS], uint16_t , uint16_t , uint16_t );
-void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
+void draw(const int16_t xyz[3][NDOTS], uint16_t col[NDOTS]);
 
 void animatedFade(uint16_t c1, uint16_t c2);
 
@@ -203,14 +207,6 @@ void displayMenu() {
 	std::cout << "Enter your choice: ";
 }
 
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string() 
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
 
 // === Demo 1 ===
 
@@ -259,11 +255,11 @@ void gaugeDemo(uint16_t countLimit)
 
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor) 
 {
-	float angleRad, innerX, innerY, outerX, outerY;
 	int angle;
 	// Loop through the specified angle range, drawing ticks every 30 degrees
 	for (angle = startAngle; angle <= endAngle; angle += 30) 
 	{
+		float angleRad, innerX, innerY, outerX, outerY;
 		// Convert degrees to radians
 		angleRad = angle * (std::numbers::pi / 180);
 		// inner marker position
@@ -279,7 +275,7 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 	}
 }
 
-void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour) 
+void drawPointer(const int16_t &currentValue, const int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour) 
 {
 	uint16_t i;
 	// If the current value is increasing
@@ -374,7 +370,6 @@ void drawGaugeDemoTwo(uint16_t countLimit)
 void drawGauge(int x, int y, float value, float prevVal, uint8_t gaugeNum) {
 	int fillHeight = static_cast<int>(GAUGE_HEIGHT * value);
 	int prevFillHeight = (prevVal < 0) ? 0 : static_cast<int>(GAUGE_HEIGHT * prevVal);
-	uint16_t color = 0;
 	if (fillHeight == prevFillHeight) return;  // nothing to update
 
 	// If shrinking, clear the difference 
@@ -391,6 +386,7 @@ void drawGauge(int x, int y, float value, float prevVal, uint8_t gaugeNum) {
 	if (fillHeight > prevFillHeight) {
 	int growHeight = fillHeight - prevFillHeight;
 	for (int i = 0; i < growHeight; i++) {
+		uint16_t color;
 		uint8_t val = rdlib_maths::mapValue(static_cast<int>(prevFillHeight + i), 0, GAUGE_HEIGHT - 1, 1, 127);
 		switch (gaugeNum)
 		{
@@ -458,7 +454,7 @@ void updateGauges(float phase) {
 // === Demo 3 ===
 void menuDemo(void)
 {
-const std::array<std::string, 6> menuItems = {
+	const std::array<std::string, 6> menuItems = {
 		"Start Measurement",
 		"Settings",
 		"View Logs",
@@ -466,35 +462,60 @@ const std::array<std::string, 6> menuItems = {
 		"Shutdown",
 		"Diagnostics"
 	};
-
 	size_t selectedIndex = 0;
 	size_t topIndex = 0;
-	drawMenu(menuItems, selectedIndex, topIndex);
+	drawMenu(menuItems, selectedIndex, topIndex);  // full draw on first load
 	std::cout << "Menu demo 3. W up, S Down, enter select, Q quit\n";
+
 	while (true) {
 		char key = getKeyPress();
+
 		if (key == 'w') {
 			if (selectedIndex > 0) {
+				size_t prevSelected = selectedIndex;
+				size_t prevTop = topIndex;
 				--selectedIndex;
+
 				if (selectedIndex < topIndex) {
 					--topIndex;
+					// View scrolled — must redraw all rows
+					drawMenu(menuItems, selectedIndex, topIndex);
+				} else {
+					// Same view — only update two rows
+					myTFT.setFont(font_retro);
+					myTFT.setTextWrap(false);
+					drawMenuItem(menuItems, prevSelected, prevSelected - prevTop, false);
+					drawMenuItem(menuItems, selectedIndex, selectedIndex - topIndex, true);
 				}
-				drawMenu(menuItems, selectedIndex, topIndex);
 			}
+
 		} else if (key == 's') {
 			if (selectedIndex + 1 < menuItems.size()) {
+				size_t prevSelected = selectedIndex;
+				size_t prevTop = topIndex;
 				++selectedIndex;
+
 				if (selectedIndex >= topIndex + VISIBLE_ITEMS) {
 					++topIndex;
+					// View scrolled — must redraw all rows
+					drawMenu(menuItems, selectedIndex, topIndex);
+				} else {
+					// Same view — only update two rows
+					myTFT.setFont(font_retro);
+					myTFT.setTextWrap(false);
+					drawMenuItem(menuItems, prevSelected, prevSelected - prevTop, false);
+					drawMenuItem(menuItems, selectedIndex, selectedIndex - topIndex, true);
 				}
-				drawMenu(menuItems, selectedIndex, topIndex);
 			}
+
 		} else if (key == '\n' || key == '\r') {
 			showSelection(menuItems[selectedIndex]);
-			drawMenu(menuItems, selectedIndex, topIndex);
-		} else if (key == 'q' || key == 'e'){
+			drawMenu(menuItems, selectedIndex, topIndex);  // full redraw after selection screen
+
+		} else if (key == 'q' || key == 'e') {
 			break;
 		}
+
 		usleep(200000); // debounce
 		if (stopRequested) return;
 	}
@@ -502,6 +523,7 @@ const std::array<std::string, 6> menuItems = {
 	std::cout << "Exiting menu demo 3.\n";
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
+
 //  (non-blocking, instant key capture)
 char getKeyPress() {
 	struct termios oldt{}, newt{};
@@ -517,6 +539,20 @@ char getKeyPress() {
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 	fcntl(STDIN_FILENO, F_SETFL, 0);
 	return ch;
+}
+
+// Helper to draw a single menu item row
+void drawMenuItem(
+	const std::array<std::string, 6>& items,
+	size_t itemIdx,
+	size_t displayRow,
+	bool isSelected
+) {
+	uint16_t y = (displayRow + 1) * FONT_HEIGHT;
+	uint16_t color = isSelected ? HIGHLIGHT_COLOR : TEXT_COLOR;
+	myTFT.setCursor(10, y);
+	myTFT.setTextColor(color, BG_COLOR);
+	myTFT.print((isSelected ? "> " : "  ") + items[itemIdx]);
 }
 
 void drawMenu(
@@ -738,11 +774,11 @@ void matrix(int16_t xyz[3][NDOTS], uint16_t col[NDOTS])
 		xyz[2][i] = (sine[(d + s) % SCALE] * sine[(timeAccumulator * 10) % SCALE]) / (SCALE * 2);
 		// Compute RGB color based on Z position (phase-shifted cosine functions)
 		uint8_t red =  (cosi[xyz[2][i] + SCALE / 2] % SCALE + SCALE) 
-		               * (RED_COLORS - 1) / SCALE / 2;
+					   * (RED_COLORS - 1) / SCALE / 2;
 		uint8_t grn =  (cosi[(xyz[2][i] + SCALE / 2 + 2 * SCALE / 3) % SCALE] + SCALE)
-		               * (GREEN_COLORS - 1) / SCALE / 2;
+					   * (GREEN_COLORS - 1) / SCALE / 2;
 		uint8_t blu =  (cosi[(xyz[2][i] + SCALE / 2 + SCALE / 3) % SCALE] + SCALE)
-		               * (BLUE_COLORS - 1) / SCALE / 2;
+					   * (BLUE_COLORS - 1) / SCALE / 2;
 		// Pack into 16-bit RGB565 format
 		col[i] = static_cast<uint16_t>((red << 11) | (grn << 5) | blu);
 		// Advance to next grid position
@@ -775,22 +811,20 @@ void rotate(int16_t xyz[3][NDOTS], uint16_t angleX, uint16_t angleY, uint16_t an
 	const int16_t cosy = cosi[angleY];
 	const int16_t sinz = sine[angleZ];
 	const int16_t cosz = cosi[angleZ];
-	// Temporary storage for intermediate values during rotation
-	int16_t tmpX, tmpY;
 	for (uint16_t i = 0; i < NDOTS; i++)
 	{
 		// X-axis 
-		tmpX      = (xyz[0][i] * cosx - xyz[2][i] * sinx) / SCALE;
-		xyz[2][i] = (xyz[0][i] * sinx + xyz[2][i] * cosx) / SCALE;
-		xyz[0][i] = tmpX;
+		const int16_t tmpX = (xyz[0][i] * cosx - xyz[2][i] * sinx) / SCALE;
+		xyz[2][i]          = (xyz[0][i] * sinx + xyz[2][i] * cosx) / SCALE;
+		xyz[0][i]          = tmpX;
 		// Y-axis 
-		tmpY      = (xyz[1][i] * cosy - xyz[2][i] * siny) / SCALE;
-		xyz[2][i] = (xyz[1][i] * siny + xyz[2][i] * cosy) / SCALE;
-		xyz[1][i] = tmpY;
+		const int16_t tmpY = (xyz[1][i] * cosy - xyz[2][i] * siny) / SCALE;
+		xyz[2][i]          = (xyz[1][i] * siny + xyz[2][i] * cosy) / SCALE;
+		xyz[1][i]          = tmpY;
 		// Z-axis 
-		tmpX      = (xyz[0][i] * cosz - xyz[1][i] * sinz) / SCALE;
-		xyz[1][i] = (xyz[0][i] * sinz + xyz[1][i] * cosz) / SCALE;
-		xyz[0][i] = tmpX;
+		const int16_t tmpZ = (xyz[0][i] * cosz - xyz[1][i] * sinz) / SCALE;
+		xyz[1][i]          = (xyz[0][i] * sinz + xyz[1][i] * cosz) / SCALE;
+		xyz[0][i]          = tmpZ;
 	}
 }
 
@@ -802,7 +836,7 @@ void rotate(int16_t xyz[3][NDOTS], uint16_t angleX, uint16_t angleY, uint16_t an
  * @param xyz  3D coordinates of all points (axis-major layout: xyz[3][NDOTS])
  * @param col  Per-dot color values (RGB565 or driver-specific format)
  */
-void draw(int16_t xyz[3][NDOTS], uint16_t col[NDOTS])
+void draw(const int16_t xyz[3][NDOTS], uint16_t col[NDOTS])
 {
 	// Screen dimensions for projection (should match your display area)
 	constexpr uint16_t WIDTH  = 140;

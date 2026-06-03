@@ -29,11 +29,10 @@ Example files list:
 
 | List No | Example file name  | Description | SPI type |
 | ------ | ------ |   ------ | ----- |
-| 1 | src/tests_swspi/main.cpp |  test sequence  | software |
-| 2 | src/tests_hwspi/main.cpp |test sequence | hardware|
-| 3 | src/bcdmode/main.cpp | Shows use of BCD built-in font  | hardware |
-| 4 | src/clock_demo/main.cpp |  Clock demo , Shows use of cascaded displays | hardware |
-| 5 | src/cascade_demo/main.cpp | simple Demo showing use of cascaded displays | hardware |
+| 1 | tests/main.cpp |  test sequence  | hardware or software, user option|
+| 2 | bcdmode/main.cpp | Shows use of BCD built-in font  | hardware |
+| 3 | clock_demo/main.cpp |  Clock demo , Shows use of cascaded displays | hardware |
+| 4 | cascade_demo/main.cpp | simple Demo showing use of cascaded displays | hardware |
 
 
 ## Hardware

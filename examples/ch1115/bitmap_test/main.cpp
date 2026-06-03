@@ -1,5 +1,5 @@
 /*!
-	@file examples/ch1115/bitmap/main.cpp
+	@file examples/ch1115/bitmap_test/main.cpp
 	@brief Example file for ER_OLEDM1_CH1115 display, showing how to display bitmaps. HW SPI.
 	@test
 		-# Test 301 OLEDBitmap method

@@ -289,14 +289,13 @@ int XPT_2046_RDL::XPTGetPoint() {
 	XPTReadXY(&_xp, &_yp);
 if(rdlib_config::isDebugEnabled())printf("touch : _xp=%5d  _min_xp=%5d _max_xp=%5d\n", _xp, _min_xp, _max_xp);
 if(rdlib_config::isDebugEnabled())printf("touch : _yp=%5d  _min_yp=%5d _max_yp=%5d\n", _yp, _min_yp, _max_yp);
-	if (_xp < _min_xp && _xp > _max_xp) return -1;
-	if (_yp < _min_yp && _yp > _max_yp) return -1;
+	if (_xp < _min_xp || _xp > _max_xp) return -1;
+	if (_yp < _min_yp || _yp > _max_yp) return -1;
 	uint32_t _xpos = ( (float)(_xp - _min_xp) / _xd * _xs ) + _min_xc;
 	uint32_t _ypos = ( (float)(_yp - _min_yp) / _yd * _ys ) + _min_yc;
 
 	// Disable double touch
 	gettimeofday(&myTime, NULL);
-	localtime(&myTime.tv_sec);
 	if (myTime.tv_sec == lsec) {
 		dt = myTime.tv_usec - lusec;
 		if (dt < DTMAX) return -1;
@@ -314,7 +313,6 @@ if(rdlib_config::isDebugEnabled())printf("touch : _yp=%5d  _min_yp=%5d _max_yp=%
 		if (_xpos > tps[i].x1 && _xpos < tps[i].x2) {
 			if (_ypos > tps[i].y1 && _ypos < tps[i].y2) {
 				gettimeofday(&myTime, NULL);
-				localtime(&myTime.tv_sec);
 				lsec = myTime.tv_sec;
 				lusec = myTime.tv_usec;
 				return tps[i].id;

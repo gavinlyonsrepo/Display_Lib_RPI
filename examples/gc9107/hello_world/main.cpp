@@ -73,16 +73,12 @@ uint8_t SetupHWSPI(void)
 	uint8_t Y_Offset = 0;      // Y offset
 	// GRAM memory base mapping resolution, see GC9107_LTSM::GM_memory_base_e enum
 	GC9107_TFT::GM_memory_base_e TFTmemoryBase = GC9107_TFT::GM_memory_base_e::MEMORY_BASE_GM_128x160;
-
 	// ** USER OPTION 0 GPIO **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT);
-
 	// *** USER OPTION 1 Screen Setup ***
 	myTFT.TFTInitScreen(TFT_WIDTH, TFT_HEIGHT, TFTmemoryBase, GC9107_TFT::MADCTL_FLAGS_t::RGB);
-
 	// *** USER OPTION 2 Screen offsets***
 	myTFT.TFTsetPanelOffset(X_Offset, Y_Offset);
-
 	// ** USER OPTION 3 SPI settings **
 	if (myTFT.TFTInitSPI(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{
@@ -111,16 +107,12 @@ uint8_t SetupSWSPI(void)
 	uint8_t Y_Offset = 0;      // Y offset
 	// GRAM memory base mapping resolution, see GC9107_LTSM::GM_memory_base_e enum
 	GC9107_TFT::GM_memory_base_e TFTmemoryBase = GC9107_TFT::GM_memory_base_e::MEMORY_BASE_GM_128x160;
-
 	// ** USER OPTION 0 GPIO **
 	myTFT.TFTSetupGPIO(RST_TFT, DC_TFT, CS_TFT, SCLK_TFT, SDIN_TFT);
-
 	// *** USER OPTION 1 Screen Setup ***
 	myTFT.TFTInitScreen(TFT_WIDTH, TFT_HEIGHT, TFTmemoryBase, GC9107_TFT::MADCTL_FLAGS_t::RGB);
-
 	// *** USER OPTION 2 Screen offset ***
 	myTFT.TFTsetPanelOffset(X_Offset, Y_Offset);
-
 	// ** USER OPTION 3 SPI settings **
 	if (myTFT.TFTInitSPI(SWSPI_CommDelay, GPIO_CHIP_DEVICE) != rdlib::Success)
 	{

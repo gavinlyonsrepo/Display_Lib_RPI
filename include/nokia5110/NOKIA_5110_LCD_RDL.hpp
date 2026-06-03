@@ -90,21 +90,22 @@ private:
 	int _spiFlags = 0; /**<The flags 2 LSB defines SPI mode */ 
 
 	// GPIO
-	int8_t _Display_DC;    /**< Data or command GPIO */
-	int8_t _Display_RST;   /**< Reset GPIO */
-	int8_t _Display_CS;    /**< Chip enable,  Software SPI only */
-	int8_t _Display_SCLK;  /**< Clock GPIO, Software SPI only*/
-	int8_t _Display_SDATA; /**< Data GPIO ,Software SPI only */
+	int8_t _Display_DC    = 0; /**< Data or command GPIO */
+	int8_t _Display_RST   = 0; /**< Reset GPIO */
+	int8_t _Display_CS    = 0; /**< Chip enable,  Software SPI only */
+	int8_t _Display_SCLK  = 0; /**< Clock GPIO, Software SPI only*/
+	int8_t _Display_SDATA = 0; /**< Data GPIO ,Software SPI only */
+	
 	int _DeviceNumGpioChip = 0; /**< The device number of a gpiochip ls /dev/gpio */
 	int _GpioHandle = 0; /**< This holds a handle to a gpiochip device opened by lgGpiochipOpen  */
 
 	// Display
-	uint8_t  _contrast;     /**< LCD contrast */
-	uint8_t  _bias;         /**< LCD bias*/
-	bool _inverse = false;  /**< LCD inverted , false for off*/
-	bool _sleep;            /**< LCD sleep mode*/
-	int16_t _LCD_HEIGHT = 48; /**< height of LCD in pixels*/
-	int16_t _LCD_WIDTH = 84; /**< width of LCD in pixels*/
+	uint8_t  _contrast = 0;     /**< LCD contrast */
+	uint8_t  _bias = 0;         /**< LCD bias*/
+	bool _inverse = false;      /**< LCD inverted , false for off*/
+	bool _sleep = false;        /**< LCD sleep mode*/
+	int16_t _LCD_HEIGHT = 48;   /**< height of LCD in pixels*/
+	int16_t _LCD_WIDTH = 84;    /**< width of LCD in pixels*/
 	uint16_t _LCD_Display_size = _LCD_WIDTH * (_LCD_HEIGHT/8);/**< size of display in pixels 504 (LCDWIDTH*(LCDHEIGHT / 8)*/
 	std::span<uint8_t> _LCDbuffer;  /**< Buffer to hold screen data */
 }; //end of class

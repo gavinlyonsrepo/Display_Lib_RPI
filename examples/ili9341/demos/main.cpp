@@ -8,11 +8,9 @@
 		-# test 403 analog clock demo
 		-# test 404 Unit circle demo
 		-# test 405 Control panel demo
-	@todo Improve test 402 Julia Set demo speed performance
 */
 
 // Section ::  libraries
-#include <ctime>
 #include <random> // gauge
 #include <algorithm> // For std::clamp
 #include <iostream> // cout cin
@@ -49,7 +47,6 @@ void drawJuliaSet(float r, float i, float zoom);
 void drawJuliaLoop(void);
 // Demo 3
 void ClockDemo(uint32_t seconds);
-std::string UTC_string(void);
 // Demo 4
 void unitCircleDemo(void);
 // Demo 5
@@ -60,7 +57,7 @@ void ControlPanel(uint16_t countLimit = 100);
 void gaugeDemo(uint16_t count = 0);
 void drawPointerHelper(int16_t val, uint8_t x, uint8_t y, uint8_t r, uint16_t color);
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor);
-void drawPointer(int16_t &val, int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
+void drawPointer(const int16_t &val, const int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
 // Demo 5-2
 void arcGauge(uint16_t count = 0);
 // Demo 5-3
@@ -197,14 +194,6 @@ void displayMenu() {
 	std::cout << "Enter your choice: ";
 }
 
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string()
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
 
 // Demo 1
 void drawMandelbrot(void)
@@ -227,7 +216,7 @@ void drawMandelbrot(void)
 	// Buffer to store pixel color values (16-bit per pixel)
 	uint8_t buffer[pixelWidth * pixelHeight*2];
 
-	int64_t n, a, b, a2, b2, posReal, posImag;
+	int64_t n, a, b, a2, b2, posImag;
 	int32_t startReal   = (int64_t)((centerReal - rangeReal * 0.5)   * (float)(1 << bits));
 	int32_t startImag   = (int64_t)((centerImag + rangeImag * 0.5)   * (float)(1 << bits));
 	int32_t incReal     = (int64_t)((rangeReal / (float)pixelWidth)  * (float)(1 << bits));
@@ -238,7 +227,7 @@ void drawMandelbrot(void)
 	posImag = startImag;
 	for (int y = 0; y < pixelHeight; y++)
 	{
-		posReal = startReal;
+		int64_t posReal = startReal;
 		for (int x = 0; x < pixelWidth; x++)
 		{
 			a = posReal;
@@ -273,47 +262,42 @@ void drawMandelbrot(void)
 
 // Demo 2
 void drawJuliaSet(float realConstant, float imaginaryConstant, float zoom) {
+	uint32_t startTime = MilliCount();
+	const uint16_t MAX_ITERATION = 100;
+	float newReal, newImaginary, oldReal, oldImaginary;
+	float xScale = 0.5f * zoom * SCREEN_WIDTH;
+	float yScale = 0.5f * zoom * SCREEN_HEIGHT;
+	float halfW  = SCREEN_WIDTH  / 2.0f;
+	float halfH  = SCREEN_HEIGHT / 2.0f;
 
-	uint32_t startTime,elapsedTime;
-	startTime = MilliCount(); // Start Timer Calculation
-	// Julia set
-	const uint16_t MAX_ITERATION = 300;
-	myTFT.setCursor(0, 0);
-	float newReal = 0.0, newImaginary = 0.0, oldReal = 0.0, oldImaginary = 0.0;
-
-	/* Loop through each pixel in X direction */
-	for (int16_t x = SCREEN_WIDTH / 2 - 1; x >= 0; x--) { // Rely on inverted symmetry
-		/* Loop through each pixel in Y direction */
+	for (int16_t x = SCREEN_WIDTH / 2 - 1; x >= 0; x--) {
+		float xScaled = 1.5f * (x - halfW) / xScale;
 		for (uint16_t y = 0; y < SCREEN_HEIGHT; y++) {
-			// Convert pixel coordinate to complex plane
-			oldReal = 1.5 * (x - SCREEN_WIDTH / 2) / (0.5 * zoom * SCREEN_WIDTH);
-			oldImaginary = (y - SCREEN_HEIGHT / 2) / (0.5 * zoom * SCREEN_HEIGHT);
+			oldReal      = xScaled;
+			oldImaginary = (y - halfH) / yScale;
 			uint16_t iteration = 0;
-			// Iterate until escape condition is met or maximum iterations are reached
-			while ((oldReal * oldReal + oldImaginary * oldImaginary) < 4.0 && iteration < MAX_ITERATION) {
-				newReal = oldReal * oldReal - oldImaginary * oldImaginary;
-				newImaginary = 2.0 * oldReal * oldImaginary;
-				oldReal = newReal + realConstant;
+			while ((oldReal * oldReal + oldImaginary * oldImaginary) < 4.0f 
+					&& iteration < MAX_ITERATION) {
+				newReal      = oldReal * oldReal - oldImaginary * oldImaginary;
+				newImaginary = 2.0f * oldReal * oldImaginary;
+				oldReal      = newReal + realConstant;
 				oldImaginary = newImaginary + imaginaryConstant;
 				iteration++;
 			}
-			/* Display the pixel with color based on iteration count */
-			if (iteration < 100) {
-				myTFT.drawPixel(x, y, myTFT.Color565(255, 255, rdlib_maths::mapValue(iteration, 0, 100, 255, 0)));
-				myTFT.drawPixel(SCREEN_WIDTH - x - 1, SCREEN_HEIGHT - y - 1, myTFT.Color565(255, 255, rdlib_maths::mapValue(iteration, 0, 100, 255, 0)));
+			uint16_t color;
+			if (iteration < 33) {
+				color = myTFT.Color565(255, 255, rdlib_maths::mapValue(iteration, 0, 33, 255, 0));
+			} else if (iteration < 66) {
+				color = myTFT.Color565(255, rdlib_maths::mapValue(iteration, 33, 66, 255, 0), 0);
+			} else {
+				color = myTFT.Color565(rdlib_maths::mapValue(iteration, 66, 100, 255, 0), 0, 0);
 			}
-			if (iteration < 200) {
-				myTFT.drawPixel(x, y, myTFT.Color565(255, rdlib_maths::mapValue(iteration, 100, 200, 255, 0), 0));
-				myTFT.drawPixel(SCREEN_WIDTH - x - 1, SCREEN_HEIGHT - y - 1, myTFT.Color565(255, rdlib_maths::mapValue(iteration, 100, 200, 255, 0), 0));
-			}
-			else {
-				myTFT.drawPixel(x, y, myTFT.Color565(rdlib_maths::mapValue(iteration, 200, 300, 255, 0), 0, 0));
-				myTFT.drawPixel(SCREEN_WIDTH - x - 1, SCREEN_HEIGHT - y - 1, myTFT.Color565(rdlib_maths::mapValue(iteration, 200, 300, 255, 0), 0, 0));
-			}
+			myTFT.drawPixel(x, y, color);
+			myTFT.drawPixel(SCREEN_WIDTH - x - 1, SCREEN_HEIGHT - y - 1, color);
 		}
-		if (stopRequested) break; // for Ctrl + C pressed?
+		if (stopRequested) break;
 	}
-	elapsedTime = MilliCount() -startTime; // End Timer Calculation
+	uint32_t elapsedTime = MilliCount() - startTime;
 	std::cout << "Time Taken :: " << elapsedTime << " ms" << std::endl;
 }
 
@@ -341,7 +325,6 @@ void drawJuliaLoop(void) {
 // Demo 3
 void ClockDemo(uint32_t secondsDisplay)
 {
-	char buffer[3];
 	// Determine the dimensions of the clock
 	int radius = 80;
 	int centerX = 120;
@@ -371,7 +354,7 @@ void ClockDemo(uint32_t secondsDisplay)
 	while(secondsDisplay > 1)
 	{
 		// Get UTC time as string
-		std::string utcTime = UTC_string();  // UTC_string() returns a string like "YYYY-MM-DD HH:MM:SS"
+		std::string utcTime = rdlib_time::UTC_string();  // UTC_string() returns a string like "YYYY-MM-DD HH:MM:SS"
 		// Parse the time string to extract hour, minute, and second
 		int hour = std::stoi(utcTime.substr(11, 2));
 		int minute = std::stoi(utcTime.substr(14, 2));
@@ -406,7 +389,7 @@ void ClockDemo(uint32_t secondsDisplay)
 		myTFT.setCursor(10,10);
 		myTFT.setFont(font_mint);
 		myTFT.setTextColor(myTFT.RDLC_DGREEN, myTFT.RDLC_DGREY);
-		sprintf(buffer, "%02d", secondsDisplay);
+		std::string buffer = std::to_string(secondsDisplay);
 		myTFT.print(buffer);
 		std::string timeStr = utcTime.substr(11, 8); // "HH:MM:SS"
 		myTFT.setCursor(centerX - 90, centerY + radius + 10);
@@ -569,11 +552,11 @@ void gaugeDemo(uint16_t count)
 // Demo 5-1 & Demo 5-2
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor)
 {
-	float angleRad, innerX, innerY, outerX, outerY;
 	int angle;
 	// Loop through the specified angle range, drawing ticks every 30 degrees
 	for (angle = startAngle; angle <= endAngle; angle += 30)
 	{
+		float angleRad, innerX, innerY, outerX, outerY;
 		// Convert degrees to radians
 		angleRad = angle * (std::numbers::pi / 180);
 		// inner marker position
@@ -590,7 +573,7 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 }
 
 // Demo 5-1 & Demo 5-2
-void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour)
+void drawPointer(const int16_t &currentValue, const int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour)
 {
 	uint16_t i;
 	// If the current value is increasing

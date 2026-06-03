@@ -244,8 +244,8 @@ void TestIntPos(void)
 {
 	std::cout << "Test positive integers" << std::endl;
 	// Array of numbers to test
-	int32_t testNumbers[] = {1, 34, 789};
-	HT16K33plus_Model1::TextAlignment_e alignments[] = {myHT.AlignRight, myHT.AlignLeft, myHT.AlignRightZeros};
+	const int32_t testNumbers[] = {1, 34, 789};
+	const HT16K33plus_Model1::TextAlignment_e alignments[] = {myHT.AlignRight, myHT.AlignLeft, myHT.AlignRightZeros};
 	// Loop through each number and alignment
 	for (int32_t  num : testNumbers)
 	{
@@ -263,8 +263,8 @@ void TestIntNeg(void)
 {
 	std::cout << "Test negative integers" << std::endl;
 	// Array of numbers to test
-	int32_t testNumbers[] = {-2, -67, -35};
-	HT16K33plus_Model1::TextAlignment_e alignments[] = {myHT.AlignRight, myHT.AlignLeft, myHT.AlignRightZeros};
+	const int32_t testNumbers[] = {-2, -67, -35};
+	const HT16K33plus_Model1::TextAlignment_e alignments[] = {myHT.AlignRight, myHT.AlignLeft, myHT.AlignRightZeros};
 	// Loop through each number and alignment
 	for (int32_t  num : testNumbers)
 	{
@@ -281,9 +281,9 @@ void TestFloat(void)
 {
 	std::cout << "Test floating point numbers " << std::endl;
 	// Array of numbers to test
-	float testNumbers[] = {0.5, 1.0, 12.3, -2.5, 1.39};
-	float testNumbers2[] = {1.0, 2.34, 3.148};
-	HT16K33plus_Model1::TextAlignment_e alignments[] = {myHT.AlignRight, myHT.AlignLeft};
+	const float testNumbers[] = {0.5, 1.0, 12.3, -2.5, 1.39};
+	const float testNumbers2[] = {1.0, 2.34, 3.148};
+	const HT16K33plus_Model1::TextAlignment_e alignments[] = {myHT.AlignRight, myHT.AlignLeft};
 	// Loop through each number and alignment
 	for (float  num : testNumbers)
 	{

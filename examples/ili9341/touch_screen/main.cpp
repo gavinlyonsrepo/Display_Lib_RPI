@@ -9,7 +9,9 @@
 
 // Section ::  libraries 
 #include <iostream> // cout
-#include <csignal> //catch user Ctrl+C
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
 #include "ILI9341_TFT_LCD_RDL.hpp" // TFT LCD
 #include "XPT2046_TS_TFT_LCD_RDL.hpp" // TouchScreen
 
@@ -31,6 +33,9 @@ int HWSPI_CHANNEL_LCD = 0; // A SPI channel, >= 0. Which Chip enable pin to use
 int HWSPI_SPEED =  8000000; // The speed of serial communication in bits per second.
 int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
 
+ // Stop signal , Ctrl + c etc
+std::atomic<bool> stopRequested{false};
+
 // Touchscreen device XPT 2046
 XPT_2046_RDL myXPT;
 // init XPT2046 touch screen 
@@ -44,16 +49,25 @@ uint8_t Setup(void); // setup + user options
 void DrawButttons(void);
 void TouchTest(void);
 void EndTests(void);
-void signal_callback_handler(int signum); // Exit on Ctrl +C
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 
 //  Section ::  MAIN loop
 
 int main() 
 {
-	signal(SIGINT, signal_callback_handler);
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
+
 	if(Setup() != 0) return -1; //Hardware TFT SPI
+
 	DrawButttons();
 	TouchTest();
+
+	if (stopRequested)
+		std::cout << "Exit Signal received" << std::endl;
+
 	EndTests();
 	return 0;
 }
@@ -113,12 +127,11 @@ void TouchTest(void)
 	std::cout << "Touch Test" << std::endl;
 	std::cout << "Press Ctrl + c to quit" << std::endl;
 	int TouchX, TouchY;
-	bool TouchPenIRQ = false;
 	// Test Touch Pad
 	for (;;) 
 	{
 		delayMilliSecRDL(10); /* Settle time when pen goes up */
-		TouchPenIRQ = myXPT.XPTIRQIsPressed();
+		bool TouchPenIRQ = myXPT.XPTIRQIsPressed();
 		if (TouchPenIRQ == true) { /*  PenIRQ is LOW : touch! pen is down */
 			myXPT.XPTReadXY(&TouchX, &TouchY);
 			printf("Touch : x=%5d y=%5d\n", TouchX, TouchY);
@@ -153,8 +166,8 @@ void TouchTest(void)
 		} else { 
 				// Pen is up.
 		}
+		if (stopRequested) break;
 	} // end for
-
 }
 
 void EndTests(void)
@@ -163,14 +176,6 @@ void EndTests(void)
 	myTFT.PowerDown(); // Power down TFT device
 	myXPT.XPTSPIend();
 	std::cout << "TFT End" << std::endl;
-}
-
-
-// Terminate program on ctrl + C 
-void signal_callback_handler(int signum)
-{
-	EndTests();
-	exit(signum);
 }
 
 // *************** EOF ****************

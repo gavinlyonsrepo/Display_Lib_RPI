@@ -70,21 +70,21 @@ private:
 	static constexpr uint8_t XPT_SER   = 0x04; /**< Single-Ended Select bit */
 	static constexpr uint8_t XPT_DEF   = 0x03; /**< Differential Reference Select bit */
 
-	uint16_t tpc; /**< Number of touch points stored */
-	uint16_t tpx; /**< Maximum number of touch points */
-	time_t lsec; /**< Last recorded second for touch event timestamp */
-	suseconds_t lusec; /**< Last recorded microsecond for touch event timestamp */
-	Touch_Point_t tps[MaxTouchPoints]; /**< Array of touch points */
-	bool _calibration; /**< Calibration flag */
+	uint16_t tpc = 0; /**< Number of touch points stored */
+	uint16_t tpx = 0; /**< Maximum number of touch points */
+	time_t lsec = 0; /**< Last recorded second for touch event timestamp */
+	suseconds_t lusec = 0; /**< Last recorded microsecond for touch event timestamp */
+	Touch_Point_t tps[MaxTouchPoints] {}; /**< Array of touch points */
+	bool _calibration = 0; /**< Calibration flag */
 
-	int16_t _min_xp; /**< Minimum xp calibration */
-	int16_t _min_yp; /**< Minimum yp calibration */
-	int16_t _max_xp; /**< Maximum xp calibration */
-	int16_t _max_yp; /**< Maximum yp calibration */
-	int16_t _min_xc; /**< Minimum x coordinate */
-	int16_t _min_yc; /**< Minimum y coordinate */
-	int16_t _max_xc; /**< Maximum x coordinate */
-	int16_t _max_yc; /**< Maximum y coordinate */
+	int16_t _min_xp = 0; /**< Minimum xp calibration */
+	int16_t _min_yp = 0; /**< Minimum yp calibration */
+	int16_t _max_xp = 0; /**< Maximum xp calibration */
+	int16_t _max_yp = 0; /**< Maximum yp calibration */
+	int16_t _min_xc = 0; /**< Minimum x coordinate */
+	int16_t _min_yc = 0; /**< Minimum y coordinate */
+	int16_t _max_xc = 0; /**< Maximum x coordinate */
+	int16_t _max_yc = 0; /**< Maximum y coordinate */
 
 
 	// SPI related 

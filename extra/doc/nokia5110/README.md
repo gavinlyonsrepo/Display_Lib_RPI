@@ -88,11 +88,8 @@ Example files
 
 | Filepath | File Function | SPI |
 | ---- | ---- | ---- |
-| helloworld | Basic use case | HW |
-| text_graphics_functions | Text & Graphics & Function testing | HW |
-| bitmap | Bitmaps tests | HW |
-| framerate_test | Frame rate per second test | HW |
-| framerate_test_swspi | Frame rate per second test| SW |
+| helloworld | Basic use case | Hardware or software , user option |
+| tests | Text & Graphics & Function & bitmap & Frame rate per second | Hardware |
 
 
 ## Output

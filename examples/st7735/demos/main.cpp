@@ -11,7 +11,6 @@
 */
 
 // Section ::  libraries
-#include <ctime>
 #include <random> // gauge
 #include <algorithm> // For std::clamp
 #include <iostream> // cout cin
@@ -41,7 +40,7 @@ void EndTests(void);
 void gaugeDemo(uint16_t  countLimit = 50);
 void drawPointerHelper(int16_t val, uint8_t x, uint8_t y, uint8_t r, uint16_t color);
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor);
-void drawPointer(int16_t &val, int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
+void drawPointer(const int16_t &val, const int16_t &oldVal , uint8_t x, uint8_t y, uint8_t r, uint16_t color, uint16_t bcolor);
 // Demo 2
 // Gauge properties
 const int GAUGE_WIDTH = 20;
@@ -222,11 +221,11 @@ void gaugeDemo(uint16_t countLimit)
 
 void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int startAngle, int endAngle, float scaleFactor) 
 {
-	float angleRad, innerX, innerY, outerX, outerY;
 	int angle;
 	// Loop through the specified angle range, drawing ticks every 30 degrees
 	for (angle = startAngle; angle <= endAngle; angle += 30) 
 	{
+		float angleRad, innerX, innerY, outerX, outerY;
 		// Convert degrees to radians
 		angleRad = angle * (std::numbers::pi / 180);
 		// inner marker position
@@ -242,7 +241,7 @@ void drawGaugeMarkers(uint8_t centerX, uint8_t centerY, uint8_t radius, int star
 	}
 }
 
-void drawPointer(int16_t &currentValue, int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour) 
+void drawPointer(const int16_t &currentValue, const int16_t &oldValue, uint8_t x, uint8_t y, uint8_t r, uint16_t colour, uint16_t bcolour) 
 {
 	uint16_t i;
 	// If the current value is increasing
@@ -412,7 +411,7 @@ void demoRadar(uint16_t sweeps)
 	myTFT.setFont(font_default);
 	myTFT.setTextColor(myTFT.RDLC_BLACK, myTFT.RDLC_TAN);
 	myTFT.fillScreen(myTFT.RDLC_TAN);
-	float radians = 0.0F;
+	float radians;
 	myTFT.fillCircle(64, 64, 50, myTFT.RDLC_BLACK);
 	myTFT.drawCircle(64, 64, 50, myTFT.RDLC_GREEN);
 	myTFT.drawCircle(64, 64, 49, myTFT.RDLC_GREEN);
@@ -493,18 +492,62 @@ void VUmeterGradient(uint16_t secondsDisplay){
 	std::cout << "VU meter Demo 5 start, ends in : " << secondsDisplay << std::endl;
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> dist(1, 254);
-	while (secondsDisplay-- > 1)
-		{
-		for (uint8_t i=0;i<_BARS;i++)
-		{
-			drawVerticalVU(_BARWIDTH*i+_BARSPACE*i,_BARS,_BARWIDTH, dist(gen),0);
+	// Small nudges each frame, not full random jumps
+	std::uniform_int_distribution<int> nudge(-30, 40);  // biased slightly upward
+	std::uniform_int_distribution<int> initDist(60, 180);
+	// Per-bar state
+	std::array<float, _BARS> current;   // current displayed value (smoothed)
+	std::array<float, _BARS> target;    // target we're moving toward
+	// Initialise bars at staggered mid-range values
+	for (uint8_t i = 0; i < _BARS; i++) {
+		current[i] = static_cast<float>(initDist(gen));
+		target[i]  = current[i];
+	}
+	// Timing
+	const int FRAME_MS = 80;           // ~12fps feels snappy but not chaotic
+	// How often to pick a new target (every N frames)
+	int retargetInterval = 6;          // ~every 480ms
+	int frameCount = 0;
+	while (secondsDisplay-- > 0) {
+		// Periodically pick new targets
+		if (frameCount % retargetInterval == 0) {
+			// Anchor bar (e.g. a "bass" bar) drives neighbours loosely
+			float anchor = target[_BARS / 2] + static_cast<float>(nudge(gen));
+			anchor = std::clamp(anchor, 20.0f, 240.0f);
+			target[_BARS / 2] = anchor;
+
+			for (uint8_t i = 0; i < _BARS; i++) {
+				if (i == _BARS / 2) continue;
+				// Neighbours influenced by anchor + their own nudge
+				float influence = anchor * 0.6f + current[i] * 0.4f;
+				float t = influence + static_cast<float>(nudge(gen)) * 0.8f;
+				target[i] = std::clamp(t, 10.0f, 250.0f);
+			}
 		}
-		delayMilliSecRDL(500);
-		std::cout<< secondsDisplay << "\r" << std::flush;
+		// Smooth current toward target
+		for (uint8_t i = 0; i < _BARS; i++) {
+			float diff = target[i] - current[i];
+			float rate = (diff > 0) ? 0.35f : 0.15f;  // rise faster than fall
+			current[i] += diff * rate;
+			current[i] = std::clamp(current[i], 1.0f, 254.0f);
+		}
+		// Draw
+		for (uint8_t i = 0; i < _BARS; i++) {
+			drawVerticalVU(
+				_BARWIDTH * i + _BARSPACE * i,
+				_BARS,
+				_BARWIDTH,
+				static_cast<uint8_t>(current[i]),
+				0
+			);
+		}
+		delayMilliSecRDL(FRAME_MS);
+		frameCount++;
+		std::cout << secondsDisplay << "\r" << std::flush;
 		if (stopRequested) return;
 	}
-	std::cout << "VU meter Demo 2 over : " << std::endl;
+
+	std::cout << "VU meter Demo 5 over." << std::endl;
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 }
 

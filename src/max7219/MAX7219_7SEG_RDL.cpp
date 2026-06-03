@@ -278,7 +278,7 @@ void MAX7219_SS_RPI::SetSegment(uint8_t digit, uint8_t segment)
 	@return error if string is null or if option AlignRightZeros entered , 0 for success
 	@note This method is overloaded, see also DisplayText(char *)
 */
-rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e TextAlignment){
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(const char *text, TextAlignment_e TextAlignment){
 
 	if (text == nullptr) 
 	{
@@ -330,7 +330,7 @@ rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(char *text, TextAlignment_e Te
 	@return error if string is null , 0 for success 
 	@note This method is overloaded, see also DisplayText(char *, TextAlignment_e )
 */
-rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(char *text){
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(const char *text){
 	if (text == nullptr) 
 	{
 		printf("Error: DisplayText 1: String is null.\n");
@@ -360,7 +360,7 @@ rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayText(char *text){
 	@return error if string is null , 0 for success 
 	@note sets BCD code B font (0-9, E, H, L,P, and -) Built-in font
 */
-rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayBCDText(char *text){
+rdlib::Return_Codes_e MAX7219_SS_RPI::DisplayBCDText(const char *text){
 	if (text == nullptr) 
 	{
 		printf("Error: DisplayText 1: String is null.\n");
@@ -479,9 +479,9 @@ void  MAX7219_SS_RPI::DisplayIntNum(unsigned long number, TextAlignment_e TextAl
 {
 	char values[_NoDigits+1];
 	char TextDisplay[6] = "%";
-	char TextRight[4] = "8ld";
-	char TextLeft[3] = "ld";
-	char TextLeadZero[5] = "08ld";
+	const char TextRight[4] = "8ld";
+	const char TextLeft[3] = "ld";
+	const char TextLeadZero[5] = "08ld";
 
 	switch(TextAlignment)
 	{
@@ -514,9 +514,9 @@ void MAX7219_SS_RPI::DisplayDecNumNibble(uint16_t  numberUpper, uint16_t numberL
 	char valuesUpper[_NoDigits+ 1];
 	char valuesLower[_NoDigits/2 + 1];
 	char TextDisplay[5] = "%";
-	char TextRight[3] = "4d";
-	char TextLeft[4] = "-4d";
-	char TextLeadZero[4] = "04d";
+	const char TextRight[3] = "4d";
+	const char TextLeft[4] = "-4d";
+	const char TextLeadZero[4] = "04d";
 
 	switch(TextAlignment)
 	{

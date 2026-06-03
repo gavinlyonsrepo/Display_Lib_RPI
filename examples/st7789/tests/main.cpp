@@ -33,7 +33,6 @@
 
 // Section ::  libraries
 #include <iostream> // cout
-#include <ctime> // for test301
 #include "Bitmap_test_data.hpp" // Data for bitmap tests
 #include "ST7789_TFT_LCD_RDL.hpp"
 
@@ -81,7 +80,7 @@ void Test302(void); // 2 color bitmap
 void Test303(void); // 24 color bitmap
 void Test304(void); // 16 color bitmap
 void Test305(void); // 16 color bitmap (from data)
-std::string UTC_string(void); // for clock demo
+
 // Functions tests
 void Test500(void);
 void Test502(void);
@@ -227,8 +226,7 @@ void Test300(void)
 void Test301(void)
 {
 	std::cout << "Test 301: clock demo , icons, small bitmap" << std::endl;
-	uint16_t count=CLOCK_DISPLAY_TIME;
-	if (count > 999) count = 999;
+	uint16_t count = CLOCK_DISPLAY_TIME;
 	char teststr1[] = "G Lyons";
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 	
@@ -263,7 +261,7 @@ void Test301(void)
 	// draw clock
 	while(count > 99)
 	{
-		std::string TimeString = UTC_string();
+		std::string TimeString = rdlib_time::UTC_string();
 		std::cout<< TimeString << "\r" << std::flush;
 		auto DateInfo = TimeString.substr(0, 10);
 		auto TimeInfo = TimeString.substr(11,8);
@@ -441,15 +439,6 @@ void Test304(void)
 	myTFT.fillScreen(myTFT.RDLC_BLACK);
 } // end of test 
 
-
-//Return UTC time as a std:.string with format "yyyy-mm-dd hh:mm:ss".
-std::string UTC_string() 
-{
-	std::time_t time = std::time({});
-	char timeString[std::size("yyyy-mm-dd hh:mm:ss UTC")];
-	std::strftime(std::data(timeString), std::size(timeString), "%F %T UTC", std::gmtime(&time));
-	return timeString;
-}
 
 // bitmap 16 colour , Data from array as opposed to file system, When creating data flip image upside down
 void Test305(void)

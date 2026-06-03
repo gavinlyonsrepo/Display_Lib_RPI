@@ -1,7 +1,5 @@
 # Display Library for Linux based Single Board Computers
 
-[![Website](https://img.shields.io/badge/Website-Link-blue.svg)](https://gavinlyonsrepo.github.io/)  [![Rss](https://img.shields.io/badge/Subscribe-RSS-yellow.svg)](https://gavinlyonsrepo.github.io//feed.xml)  [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
-
 [![logo image](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/logo.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/logo.png)
 
 ## Table of contents
@@ -34,6 +32,8 @@
 4. Dependency: [lgpio C Library](https://abyz.me.uk/lg/lgpio.html), Provides SPI,I2C, and GPIO control.
 5. Mutiple displays supported, see supported-devices, new components can be added.
 6. Tested and developed on Raspberry Pis see tool chain for more details.
+7. Cppcheck Status: [![Cppcheck](https://github.com/gavinlyonsrepo/Display_Lib_RPI/actions/workflows/cppcheck.yml/badge.svg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/actions/workflows/cppcheck.yml) 
+8. Donations welcome: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
 
 ## Installation
 
@@ -55,13 +55,13 @@ Open a Terminal in a folder where you want to download,build & test library
 Run following command to download latest release from github.
 
 ```sh
-curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.6.0.tar.gz | tar xz
+curl -sL https://github.com/gavinlyonsrepo/Display_Lib_RPI/archive/2.7.0.tar.gz | tar xz
 ```
 
 3. Install library : Run 'make' and 'sudo make install' to run the makefile to build and then install library. It will be installed to usr/local/lib and usr/local/include by default.
 
 ```sh
-cd Display_Lib_RPI-2.6.0
+cd Display_Lib_RPI-2.7.0
 make
 sudo make install
 ```

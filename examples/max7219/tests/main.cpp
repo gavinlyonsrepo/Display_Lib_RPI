@@ -1,9 +1,10 @@
 /*!
-	@file examples/max7219/tests_hwspi/main.cpp
+	@file   examples/max7219/tests/main.cpp
 	@author Gavin Lyons
-	@brief A demo file for Max7219 seven segment displays ,
-	Carries out series of tests to test the library. Hardware SPI
-	Project Name: Display_Lib_RPI
+	@brief  A demo file for Max7219 seven segment displays ,
+			Carries out series of tests to test the library. Hardware or Software SPI
+			pick hardware or software SPI by changing HardwareSPI macro
+			Project Name: Display_Lib_RPI
 	
 	@test
 		-# Test 1 Text strings display 
@@ -20,8 +21,10 @@
 
 // Libraries 
 #include <cstdio> // Used for printf
-#include <signal.h> //catch user Ctrl+C
-#include <cstdlib> //exit function
+#include <atomic>  // Ctrl + C exit
+#include <csignal> // Ctrl + C exit
+#include <thread>  // Ctrl + C exit
+#include <cstdlib> // exit function
 
 #include <MAX7219_7SEG_RDL.hpp> 
 
@@ -32,18 +35,36 @@
 #define TEST_DELAY2 2000
 #define TEST_DELAY1 1000
 
-// Hardware SPI setup
-int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
-int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
-int HWSPI_SPEED =  1000000; // The speed of serial communication in bits per second.
-int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
-uint8_t NumberOfDisplays = 1; // Number of displays connected
+// Stop signal , Ctrl + c etc
+std::atomic<bool> stopRequested{false};
 
-// Constructor object 
-MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, NumberOfDisplays);
+// Comment out for software SPI, comment in for hardware SPI
+#define HardwareSPI
+
+#ifdef  HardwareSPI 
+	// Hardware SPI setup
+	int HWSPI_DEVICE = 0; // A SPI device, >= 0. which SPI interface to use
+	int HWSPI_CHANNEL = 0; // A SPI channel, >= 0. Which Chip enable pin to use
+	int HWSPI_SPEED =  1000000; // The speed of serial communication in bits per second.
+	int HWSPI_FLAGS = 0; // last 2 LSB bits define SPI mode, see readme, mode 0 for this device
+	uint8_t NumberOfDisplays = 1; // Number of displays connected
+	// Constructor object 
+	MAX7219_SS_RPI myMAX(HWSPI_DEVICE, HWSPI_CHANNEL, HWSPI_SPEED, HWSPI_FLAGS, NumberOfDisplays);
+#else 
+	// GPIO I/O pins on the raspberry pi ,pick on any I/O you want.
+	uint8_t  CLK =16;  // clock GPIO, connected to clock line of module
+	uint8_t  CS =20;   // Chip Select GPIO, connected to CS line of module
+	uint8_t  DIN =21;  // data in GPIO, connected to DIN line of module
+	int  GPIO_CHIP_DEVICE = 0; // GPIO chip device number usually 0
+	uint8_t NumberOfDisplays = 1; // Number of displays connected 
+	// Constructor object 
+	MAX7219_SS_RPI myMAX(CLK, CS ,DIN, GPIO_CHIP_DEVICE, NumberOfDisplays );
+#endif
+
 
 // Function Prototypes
-bool Setup(void);
+bool SetupSWSPI(void);
+bool SetupHWSPI(void);
 void EndTest(void);
 void Test1(void);
 void Test2(void);
@@ -55,13 +76,22 @@ void Test7(void);
 void Test8(void);
 void Test9(void);
 void Test10(void);
-void signal_callback_handler(int signum);
+void Test11(void);
+void handleSignal(int){
+	stopRequested = true; // for CtrL +C
+}
 
 // Main loop
 int main() 
 {
-	signal(SIGINT, signal_callback_handler); // Ctrl + C
-	if (!Setup()) return -1;
+	std::signal(SIGINT, handleSignal); // for user press Ctrl+C
+	std::signal(SIGTERM, handleSignal);// for kill command
+
+#ifdef HardwareSPI
+		if (!SetupHWSPI()) return -1;
+#else
+		if (!SetupSWSPI()) return -1;
+#endif
 
 	Test1();
 	Test2();
@@ -76,16 +106,29 @@ int main()
 
 	EndTest();
 	return 0;
-}
+} 
 // End of main
-
 
 // Functions
 
 // Setup test
-bool Setup(void)
+bool SetupSWSPI(void)
 {
-	printf("Test Begin :: MAX7219_7SEG_RPI\r\n");
+	printf("Test Begin: MAX7219: SWSPI\r\n");
+	printf("lgpio library Version Number :: %i\r\n",lguVersion());
+	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
+	if (myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rdlib::Success)
+	{
+		return false;
+	}
+	myMAX.ClearDisplay();
+	return true;
+}
+
+// Setup test
+bool SetupHWSPI(void)
+{
+	printf("Test Begin: MAX7219: HWSPI\r\n");
 	printf("lgpio library Version Number :: %i\r\n", lguVersion());
 	printf("Display_LIB_RPI Library version number :: %u\r\n", rdlib::LibraryVersion()); 
 	if(myMAX.InitDisplay(myMAX.ScanEightDigit, myMAX.DecodeModeNone) != rdlib::Success)
@@ -100,6 +143,9 @@ bool Setup(void)
 // Clean up before exit
 void EndTest(void)
 {
+	if (stopRequested)
+		printf("Exit Signal received\n");
+	myMAX.ClearDisplay();
 	myMAX.DisplayEndOperations();
 	printf("Test End\r\n");
 }
@@ -107,6 +153,7 @@ void EndTest(void)
 
 void Test1(void)
 {
+	if (stopRequested) return;
 	printf("Test 1:: DisplayText \r\n");
 	// Hello world test on MAX7219
 	char teststr1[] = "Start";
@@ -126,7 +173,7 @@ void Test1(void)
 	myMAX.DisplayText(teststr1, myMAX.AlignRight);
 	delayMilliSecRDL(TEST_DELAY2);
 	myMAX.ClearDisplay();
-	
+	if (stopRequested) return;
 	myMAX.DisplayText(teststr2, myMAX.AlignRight);
 	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
@@ -134,7 +181,7 @@ void Test1(void)
 	myMAX.DisplayText(teststr3, myMAX.AlignLeft);
 	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
-	
+	if (stopRequested) return;
 	myMAX.DisplayText(teststr4, myMAX.AlignLeft);
 	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
@@ -150,6 +197,7 @@ void Test1(void)
 
 void Test2(void)
 {
+	if (stopRequested) return;
 	char teststr1[] = "Bright";
 	myMAX.DisplayText(teststr1, myMAX.AlignLeft);
 	printf("Test 2:: Brightness \r\n");
@@ -164,6 +212,7 @@ void Test2(void)
 
 void Test3(void) 
 {
+	if (stopRequested) return;
 	printf("Test 3:: Display Test Mode \r\n");
 	myMAX.DisplayTestMode(true);
 	delayMilliSecRDL(TEST_DELAY5);
@@ -172,6 +221,7 @@ void Test3(void)
 
 void Test4(void) 
 {
+	if (stopRequested) return;
 	printf("Test 4:: Shutdown Mode\r\n");
 	char teststr1[] = "shutdown";
 	myMAX.DisplayText(teststr1, myMAX.AlignLeft);
@@ -185,6 +235,7 @@ void Test4(void)
 
 void Test5(void)
 {
+	if (stopRequested) return;
 	printf("Test 5:: Display characters ab.cde1.23. \r\n");
 	myMAX.DisplayChar(7, 'a', myMAX.DecPointOff);  // Digit 7 is LHS of display
 	delayMilliSecRDL(TEST_DELAY1);
@@ -194,6 +245,7 @@ void Test5(void)
 	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(4, 'd', myMAX.DecPointOff);
 	delayMilliSecRDL(TEST_DELAY1);
+	if (stopRequested) return;
 	myMAX.DisplayChar(3, 'e', myMAX.DecPointOff);
 	delayMilliSecRDL(TEST_DELAY1);
 	myMAX.DisplayChar(2, '1', myMAX.DecPointOn);
@@ -207,17 +259,20 @@ void Test5(void)
 
 void Test6(void)
 {
+	if (stopRequested) return;
 	printf("Test 6:: Set digit to Segments, 76543210 = dpabcdefg. \r\n");
 	for (uint8_t digit = 0; digit <8 ; digit++)
 	{ 
 		myMAX.SetSegment(digit, 1<<digit);
 		delayMilliSecRDL(TEST_DELAY1);
+		if (stopRequested) return;
 	}
 	myMAX.ClearDisplay();
 }
 
 void Test7(void)
 {
+	if (stopRequested) return;
 	printf("Test 7:: Decimal number \r\n");
 	myMAX.DisplayIntNum(45, myMAX.AlignRight); // "        45"
 	delayMilliSecRDL(TEST_DELAY5);
@@ -237,7 +292,8 @@ void Test7(void)
 	myMAX.DisplayDecNumNibble(134, 78, myMAX.AlignRight); // " 134" 78"
 	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
-	
+
+	if (stopRequested) return;
 	// TEST 7e tm.DisplayDecNumNIbble left aligned
 	myMAX.DisplayDecNumNibble(123, 662, myMAX.AlignLeft); // "123 662 "
 	delayMilliSecRDL(TEST_DELAY5);
@@ -251,8 +307,9 @@ void Test7(void)
 
 void Test8(void)
 {
+	if (stopRequested) return;
 	//TEST 8 Multiple dots test
-	printf("Test 8: Multiple dots test \r\n");
+	printf("Test 8:: Multiple dots test \r\n");
 	char teststr1[] = "Hello...";
 	char teststr2[] = "...---...";
 	myMAX.DisplayText(teststr1);   
@@ -260,6 +317,7 @@ void Test8(void)
 	myMAX.ClearDisplay();
 	myMAX.DisplayText(teststr2);//SOS in morse
 	delayMilliSecRDL(TEST_DELAY5);
+	if (stopRequested) return;
 
 	//TEST8b user overflow
 	printf("Test 8B: overflow test \r\n");
@@ -271,11 +329,12 @@ void Test8(void)
 
 void Test9(void)
 {
+	if (stopRequested) return;
 	printf("Test 9:  Float \r\n");
 	float voltage = 12.45;
 	char workStr[11];
 	sprintf(workStr, "ADC=%.2f", voltage);
-	
+
 	myMAX.DisplayText(workStr); // ADC=12.45
 	delayMilliSecRDL(TEST_DELAY5);
 	myMAX.ClearDisplay();
@@ -283,6 +342,7 @@ void Test9(void)
 
 void Test10(void)
 {
+	if (stopRequested) return;
 	printf("Test 10: counter Demo \r\n");
 	char workStr[10];
 	for (float counter = 0; counter < 3.0; counter += 0.2) 
@@ -290,16 +350,9 @@ void Test10(void)
 		sprintf(workStr, "%.1f", counter);
 		myMAX.DisplayText(workStr, myMAX.AlignRight); 
 		delayMilliSecRDL(TEST_DELAY1);
+		if (stopRequested) return;
 	}
 	myMAX.ClearDisplay();
-}
-
-// Terminate program on ctrl + C
-void signal_callback_handler(int signum)
-{
-	myMAX.DisplayEndOperations();
-	printf("Test End, Ctrl C pressed\r\n");
-	exit(signum);
 }
 
 

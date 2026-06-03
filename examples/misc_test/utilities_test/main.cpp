@@ -107,9 +107,9 @@ void TestLoop()
 
 	// Print out all return code enums and comments.
 	std::cout << "All return codes list :"<<  std::endl;
-	for (auto& code : rdlib::ReturnCodesStrings )
+	for (const auto& entry : rdlib::ReturnCodesStrings )
 	{
-		std::cout << code << std::endl;
+		std::cout << entry << std::endl;
 	}
 	std::cout << std::endl;
 

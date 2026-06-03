@@ -91,10 +91,8 @@ private:
 
 private:
 	// Display
-	/**< Enum to hold current display power mode */
-	PowerState_e _currentPowerState = PowerState_e::NormalIdleOff;
-	/**< GRAM memory base mapping resolution, see GM_memory_base_e enum */
-	GM_memory_base_e _memoryBase = GM_memory_base_e::MEMORY_BASE_GM_128x160;
+	PowerState_e _currentPowerState = PowerState_e::NormalIdleOff; /**< Enum to hold current display power mode */
+	GM_memory_base_e _memoryBase = GM_memory_base_e::MEMORY_BASE_GM_128x160; /**< GRAM memory base mapping resolution, see GM_memory_base_e enum */
 	uint8_t _colorOrder = MADCTL_FLAGS_t::RGB; /**< stores RBG or BGR color order bit from MADCTL_FLAGS_t */
 	bool _displayOn = false;				   /**< Enum to hold display on/off status */
 	const uint16_t _sleepDelay = 120;		   /**< Sleep delay in mS, datasheet 6.2.9.*/

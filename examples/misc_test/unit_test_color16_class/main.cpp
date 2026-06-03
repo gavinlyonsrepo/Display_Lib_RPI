@@ -10,6 +10,7 @@
 */
 
 // Section ::  libraries
+#include <cassert>
 #include "Bitmap_test_data.hpp"
 #include "ST7735_TFT_LCD_RDL.hpp"
 
@@ -137,15 +138,15 @@ bool Test801(void)
 	delayMilliSecRDL(500);
 	//== SUMMARY SECTION===
 	printf("Unit testing Summary.\n");
-	// Check return values against expected errors
+	assert(returnValues.size() == expectedErrors.size());
+
 	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+		if (returnValues[i] != expectedErrors[i]) {
 			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n",
+				returnValues[i], i + 1, expectedErrors[i]);
 		}
 	}
-
 	// Print all expectedErrors for summary
 	for (uint8_t value : expectedErrors ) 
 	{
@@ -226,11 +227,13 @@ bool Test803(void)
 	//== SUMMARY SECTION===
 	printf("Unit testing Summary.\n");
 	// Check return values against expected errors
+	assert(returnValues.size() == expectedErrors.size());
+
 	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+		if (returnValues[i] != expectedErrors[i]) {
 			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n",
+				returnValues[i], i + 1, expectedErrors[i]);
 		}
 	}
 
@@ -317,11 +320,12 @@ bool Test802(void)
 	//== SUMMARY SECTION===
 	printf("\nUnit testing Summary.\n");
 	// Check return values against expected errors
+	assert(returnValues.size() == expectedErrors.size());
 	for (size_t i = 0; i < returnValues.size(); ++i) {
-		if (i >= expectedErrors.size() || returnValues[i] != expectedErrors[i]) {
+		if (returnValues[i] != expectedErrors[i]) {
 			errorFlag = true;
-			printf("Unexpected error code: %d at test case %zu (expected: %d)\n", 
-				returnValues[i], i + 1, (i < expectedErrors.size() ? expectedErrors[i] : -1));
+			printf("Unexpected error code: %d at test case %zu (expected: %d)\n",
+				returnValues[i], i + 1, expectedErrors[i]);
 		}
 	}
 		// Print all expectedErrors for summary
