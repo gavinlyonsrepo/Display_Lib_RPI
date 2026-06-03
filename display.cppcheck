@@ -20,6 +20,5 @@
         <suppression>missingInclude</suppression>
         <suppression>normalCheckLevelMaxBranches</suppression>
     </suppressions>
-    <check-level-normal/>
     <project-name>display</project-name>
 </project>
