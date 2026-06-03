@@ -24,4 +24,5 @@ jobs:
         run: cppcheck --version
 
       - name: Run cppcheck
-        run: cppcheck --project=display.cppcheck --error-exitcode=1
+        run: cppcheck --project=display.cppcheck --inline-suppr --error-exitcode=1
+
