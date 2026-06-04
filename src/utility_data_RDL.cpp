@@ -131,6 +131,7 @@ namespace rdlib_time
 		using std::format with the ISO 8601 date and time specifiers.
 		std::string time = UTC_string();
 		// Returns e.g. "2026-06-02 19:13:21 UTC"
+	@returns the current UTC time as a formatted string in the format "yyyy-mm-dd hh:mm:ss UTC".
 */
 std::string UTC_string()
 {
