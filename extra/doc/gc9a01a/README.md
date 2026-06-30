@@ -139,8 +139,9 @@ with by GPIO or GPIO-PWM from the host (e.g. a Raspberry Pi GPIO), independently
 GC9A01 driver. See the schematic and board photo below for the switch circuit on the
 tested module.
 
-* [Backlight switch circuit schematic](extra/images/gc9a01_sch.png)
-* [Back of board, component layout](extra/images/gc9a01_back.jpg)
+[![Back of board, component layout](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/gc9a01_back.jpg)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/gc9a01_back.jpg)
+
+[![Backlight switch circuit schematic](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/gc9a01_sch.png)](https://github.com/gavinlyonsrepo/Display_Lib_RPI/blob/main/extra/images/gc9a01_sch.png)
 
 ## Output
 
