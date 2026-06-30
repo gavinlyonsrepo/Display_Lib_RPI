@@ -110,7 +110,7 @@ Connections as setup in main.cpp test file.
 
 | TFT PinNum | Pindesc | RPI HW SPI | RPI SW SPI |
 | --- | --- | --- | --- |
-| 1 | BL | see notes | see notes |
+| 1 | LED | VCC | VCC |
 | 2 | CS | SPI_CE0 | GPI21 |
 | 3 | DC | GPIO24 | GPIO24 |
 | 4 | RESET | GPI025 | GPIO25 |
@@ -121,12 +121,11 @@ Connections as setup in main.cpp test file.
 
 1. This is a 3.3V logic device do NOT connect the I/O logic lines to 5V logic device.
 2. SW SPI pick any GPIO you like , HW SPI CEX, SCLK and SDA will be tied to SPI interface.
-3. Backlight on/off control is left to user. May vary by module. On tested module
-its on by default and off when backlight pin is set low.
+3. Backlight on/off control is left to user.
 
 ### Backlight
 
-The function `TFTsetBrightness()` writes the GC9A01 controller's own brightness registers (`0x51`/`0x53`)
+`TFTsetBrightness()` writes the GC9A01 controller's own brightness registers (`0x51`/`0x53`)
 and only has an effect if the module's backlight LED is wired through the controller's own
 brightness output. On most off-the-shelf round GC9A01 modules, including the one tested with
 this library, that is not the case: the backlight (LED/BLK) pin is switched instead by a
@@ -135,7 +134,7 @@ regardless of what is written to the controller. See [Issue #6](https://github.c
 for the full investigation.
 
 To control brightness on this type of module, the backlight pin must be driven directly
-with by GPIO or GPIO-PWM from the host (e.g. a Raspberry Pi GPIO), independently of this library and the
+with PWM from the host (e.g. a Raspberry Pi GPIO), independently of this library and the
 GC9A01 driver. See the schematic and board photo below for the switch circuit on the
 tested module.
 
